@@ -86,8 +86,43 @@ function patchPublicCss() {
   }
 }
 
+const BUNDLE_PREAMBLE = `/* Generated legacy ES module bundle. */
+
+/* ===== DOMContentLoaded compatibility shim =====
+ * When this bundle is injected dynamically (e.g. via Next.js useEffect),
+ * DOMContentLoaded has already fired. This shim captures any
+ * document.addEventListener('DOMContentLoaded', handler) calls made
+ * while the bundle executes and runs them immediately afterward.
+ */
+const __legacyDCLQueue = [];
+const __legacyOrigAddEventListener = document.addEventListener.bind(document);
+if (document.readyState !== 'loading') {
+  document.addEventListener = function legacyShimAddEventListener(type, handler, ...args) {
+    if (type === 'DOMContentLoaded') {
+      __legacyDCLQueue.push({ handler, args });
+    } else {
+      return __legacyOrigAddEventListener(type, handler, ...args);
+    }
+  };
+}
+`;
+
+const BUNDLE_POSTAMBLE = `
+/* ===== Run deferred DOMContentLoaded handlers ===== */
+if (document.readyState !== 'loading') {
+  document.addEventListener = __legacyOrigAddEventListener;
+  if (__legacyDCLQueue.length) {
+    console.log('[legacy-bundle] Document already loaded; running', __legacyDCLQueue.length, 'deferred DOMContentLoaded handlers.');
+    const __dclEvent = new Event('DOMContentLoaded');
+    for (const { handler: __handler } of __legacyDCLQueue) {
+      try { __handler(__dclEvent); } catch (__e) { console.error('[legacy-bundle] DOMContentLoaded handler error:', __e); }
+    }
+  }
+}
+`;
+
 function buildLegacyBundle() {
-  const pieces = ['/* Generated legacy ES module bundle. */', ''];
+  const pieces = [BUNDLE_PREAMBLE];
   for (const rel of orderedLegacyScripts) {
     const abs = path.join(root, rel);
     if (!fs.existsSync(abs)) {
@@ -98,6 +133,7 @@ function buildLegacyBundle() {
     pieces.push(content);
     pieces.push('\n');
   }
+  pieces.push(BUNDLE_POSTAMBLE);
   fs.mkdirSync(path.dirname(legacyBundlePath), { recursive: true });
   fs.writeFileSync(legacyBundlePath, pieces.join('\n'), 'utf8');
 }
