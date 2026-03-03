@@ -15,20 +15,24 @@ export default function LegacyAppShell({ html }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (window.__legacyBundleReady) return;
+
+    const SCRIPT_ID = 'legacy-app-bundle-script';
+    if (document.getElementById(SCRIPT_ID)) return;
 
     const script = document.createElement('script');
+    script.id = SCRIPT_ID;
     script.type = 'module';
     script.src = '/assets/js/legacy-app.bundle.mjs';
     script.onload = () => {
       window.__legacyBundleReady = true;
       console.log('Legacy bundle executed');
     };
+    script.onerror = (event) => {
+      console.error('Failed to load legacy bundle from /assets/js/legacy-app.bundle.mjs', event);
+    };
 
     document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
   }, []);
 
   useEffect(() => {
