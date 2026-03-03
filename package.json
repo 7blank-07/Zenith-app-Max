@@ -1,0 +1,25 @@
+{
+  "name": "zenith-app-max",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/prepare-legacy.mjs",
+    "dev": "next dev",
+    "prebuild": "node scripts/prepare-legacy.mjs",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.0",
+    "chart.js": "^4.5.1",
+    "html2canvas": "^1.4.1",
+    "next": "^14.2.25",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "5.9.3"
+  }
+}
