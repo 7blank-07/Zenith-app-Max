@@ -3,6 +3,9 @@
 import { useEffect } from 'react';
 import { ensureLegacyRuntimeGlobals } from './runtime-init';
 
+const SCRIPT_ID = 'legacy-app-bundle-script';
+const BUNDLE_SRC = '/assets/js/legacy-app.bundle.mjs';
+
 function shouldBlockInlineEvent(target) {
   if (!target || typeof target.closest !== 'function') return false;
   return Boolean(target.closest('[onclick], [onchange], [onsubmit]'));
@@ -14,25 +17,25 @@ export default function LegacyAppShell({ html }) {
   }
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (window.__legacyBundleReady) return;
-
-    const SCRIPT_ID = 'legacy-app-bundle-script';
-    if (document.getElementById(SCRIPT_ID)) return;
+    // Guard: skip if already loaded or script element already exists
+    if (window.__legacyBundleReady || document.getElementById(SCRIPT_ID)) return;
 
     const script = document.createElement('script');
     script.id = SCRIPT_ID;
     script.type = 'module';
-    script.src = '/assets/js/legacy-app.bundle.mjs';
+    script.src = BUNDLE_SRC;
     script.onload = () => {
       window.__legacyBundleReady = true;
-      console.log('Legacy bundle executed');
+      console.log('[LegacyAppShell] Legacy bundle loaded successfully.');
     };
     script.onerror = (event) => {
-      console.error('Failed to load legacy bundle from /assets/js/legacy-app.bundle.mjs', event);
+      console.error('[LegacyAppShell] Failed to load legacy bundle:', BUNDLE_SRC, event);
     };
 
     document.body.appendChild(script);
+    // Do NOT remove the script on cleanup – removing a module script that has
+    // already executed has no effect and can trigger NotFoundError if the node
+    // was moved by the browser or another reconciliation pass.
   }, []);
 
   useEffect(() => {

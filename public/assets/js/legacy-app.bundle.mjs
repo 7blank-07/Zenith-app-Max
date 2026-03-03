@@ -2939,9 +2939,11 @@ function renderPlayerPicker() {
             // Set the clone as drag image
             e.dataTransfer.setDragImage(clone, cardMini.offsetWidth / 2, cardMini.offsetHeight / 2);
             
-            // Remove clone after drag starts
+            // Remove clone after drag starts (guard against NotFoundError if node was already removed)
             setTimeout(() => {
-                document.body.removeChild(clone);
+                if (clone.parentNode === document.body) {
+                    document.body.removeChild(clone);
+                }
             }, 0);
         }
         
@@ -8365,8 +8367,10 @@ async function exportSquadWithInfo() {
             allowTaint: false
         });
         
-        // Remove overlay
-        squadField.removeChild(overlay);
+        // Remove overlay (guard against NotFoundError if already removed)
+        if (overlay && overlay.parentNode === squadField) {
+            squadField.removeChild(overlay);
+        }
         overlay = null;
         
         // Download
