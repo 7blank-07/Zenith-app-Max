@@ -1,0 +1,31 @@
+# dependencies
+node_modules
+
+# next build
+.next
+
+# environment
+.env*
+
+# logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# temp / backup
+*.backup
+*.backup.*
+*.temprary
+*.js.3
+*.previous
+
+# development tools
+tests/
+.github/
+.junie/
+
+# build output
+dist
+build
