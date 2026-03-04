@@ -8,7 +8,11 @@
     "prebuild": "node scripts/prepare-legacy.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "benchmark:phase1": "node scripts/benchmark-player-ssr.mjs --samples 50",
+    "generate:top-players": "node scripts/generate-top-players.mjs --limit 10000 --output src/data/top-players.json",
+    "revalidate:call": "node scripts/call-revalidate.mjs",
+    "rollout:status": "node scripts/rollout-status.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",

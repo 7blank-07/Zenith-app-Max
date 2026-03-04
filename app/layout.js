@@ -1,9 +1,23 @@
-﻿import './globals.css';
+import './globals.css';
 import Script from 'next/script';
+import WebVitalsReporter from './components/WebVitalsReporter.client';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Zenith - FC Mobile Database',
-  description: 'Zenith FC Mobile tools and database'
+  description: 'Zenith FC Mobile tools and database',
+  alternates: {
+    canonical: '/'
+  },
+  openGraph: {
+    title: 'Zenith - FC Mobile Database',
+    description: 'Zenith FC Mobile tools and database',
+    url: siteUrl,
+    siteName: 'Zenith',
+    type: 'website'
+  }
 };
 
 export default function RootLayout({ children }) {
@@ -23,6 +37,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <WebVitalsReporter />
         <Script
           id="simple-analytics"
           src="https://scripts.simpleanalyticscdn.com/latest.js"
