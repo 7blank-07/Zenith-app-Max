@@ -8,9 +8,9 @@
 console.log("LEGACY APP INIT");
 if (window.__legacyAppStarted) {
   console.warn("Legacy app already started");
-  return;
+} else {
+  window.__legacyAppStarted = true;
 }
-window.__legacyAppStarted = true;
 function getUserId() {
   let userId = localStorage.getItem('zenith_user_id');
   if (!userId) {

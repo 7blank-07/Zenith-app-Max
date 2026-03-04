@@ -12,21 +12,32 @@ function shouldBlockInlineEvent(target) {
 }
 
 export default function LegacyAppShell({ html }) {
-  console.log("LegacyAppShell mounted");
-
-  if (typeof window !== 'undefined') {
-    ensureLegacyRuntimeGlobals();
-  }
-
   useEffect(() => {
-    // Guard: skip only when bundle is already confirmed ready
+    ensureLegacyRuntimeGlobals();
+
     if (window.__legacyBundleReady) return;
+    window.__legacyBundleFailed = false;
+
+    const handleLegacyReady = () => {
+      window.__legacyBundleReady = true;
+      window.__legacyBundleFailed = false;
+      console.log('[LegacyAppShell] Legacy runtime ready.');
+    };
+
+    const handleLegacyError = (event) => {
+      window.__legacyBundleReady = false;
+      window.__legacyBundleFailed = true;
+      console.error('[LegacyAppShell] Legacy runtime failed to initialize.', event?.detail || event);
+    };
+
+    window.addEventListener('legacy:ready', handleLegacyReady);
+    window.addEventListener('legacy:error', handleLegacyError);
 
     const existingScript = document.getElementById(SCRIPT_ID);
-    if (existingScript) {
-      // Retry cleanly if we have a stale script tag but bundle never became ready.
-      existingScript.remove();
-    }
+    if (existingScript) return () => {
+      window.removeEventListener('legacy:ready', handleLegacyReady);
+      window.removeEventListener('legacy:error', handleLegacyError);
+    };
 
     const script = document.createElement('script');
     script.id = SCRIPT_ID;
@@ -35,10 +46,10 @@ export default function LegacyAppShell({ html }) {
     script.dataset.loaded = 'false';
     script.onload = () => {
       script.dataset.loaded = 'true';
-      window.__legacyBundleReady = true;
-      console.log('[LegacyAppShell] Legacy bundle loaded successfully.');
+      console.log('[LegacyAppShell] Legacy loader script loaded.');
     };
     script.onerror = (event) => {
+      window.__legacyBundleFailed = true;
       console.error('[LegacyAppShell] Failed to load legacy bundle:', BUNDLE_SRC, event);
     };
 
@@ -47,11 +58,15 @@ export default function LegacyAppShell({ html }) {
     // Do NOT remove the script on cleanup – removing a script that has
     // already executed has no effect and can trigger NotFoundError if the node
     // was moved by the browser or another reconciliation pass.
+    return () => {
+      window.removeEventListener('legacy:ready', handleLegacyReady);
+      window.removeEventListener('legacy:error', handleLegacyError);
+    };
   }, []);
 
   useEffect(() => {
     const guardInlineHandlersUntilReady = (event) => {
-      if (window.__legacyBundleReady) return;
+      if (window.__legacyBundleReady || window.__legacyBundleFailed) return;
       if (!shouldBlockInlineEvent(event.target)) return;
       event.preventDefault();
       event.stopPropagation();

@@ -87,56 +87,105 @@ function patchPublicCss() {
   }
 }
 
-const BUNDLE_PREAMBLE = `/* Generated legacy ES module bundle. */
-
-/* ===== DOMContentLoaded compatibility shim =====
- * When this bundle is injected dynamically (e.g. via Next.js useEffect),
- * DOMContentLoaded has already fired. This shim captures any
- * document.addEventListener('DOMContentLoaded', handler) calls made
- * while the bundle executes and runs them immediately afterward.
- */
-const __legacyDCLQueue = [];
-const __legacyOrigAddEventListener = document.addEventListener.bind(document);
-if (document.readyState !== 'loading') {
-  document.addEventListener = function legacyShimAddEventListener(type, handler, ...args) {
-    if (type === 'DOMContentLoaded') {
-      __legacyDCLQueue.push({ handler, args });
-    } else {
-      return __legacyOrigAddEventListener(type, handler, ...args);
-    }
-  };
+function toPublicScriptPath(relPath) {
+  return `/${relPath.replace(/\\/g, '/').replace(/^assets\//, 'assets/')}`;
 }
-`;
-
-const BUNDLE_POSTAMBLE = `
-/* ===== Run deferred DOMContentLoaded handlers ===== */
-if (document.readyState !== 'loading') {
-  document.addEventListener = __legacyOrigAddEventListener;
-  if (__legacyDCLQueue.length) {
-    console.log('[legacy-bundle] Document already loaded; running', __legacyDCLQueue.length, 'deferred DOMContentLoaded handlers.');
-    const __dclEvent = new Event('DOMContentLoaded');
-    for (const { handler: __handler } of __legacyDCLQueue) {
-      try { __handler(__dclEvent); } catch (__e) { console.error('[legacy-bundle] DOMContentLoaded handler error:', __e); }
-    }
-  }
-}
-`;
 
 function buildLegacyBundle() {
-  const pieces = [BUNDLE_PREAMBLE];
   for (const rel of orderedLegacyScripts) {
     const abs = path.join(root, rel);
     if (!fs.existsSync(abs)) {
       throw new Error(`Missing legacy script: ${rel}`);
     }
-    const content = fs.readFileSync(abs, 'utf8');
-    pieces.push(`\n/* ===== ${rel} ===== */\n`);
-    pieces.push(content);
-    pieces.push('\n');
   }
-  pieces.push(BUNDLE_POSTAMBLE);
+
+  const scriptSources = orderedLegacyScripts.map(toPublicScriptPath);
+  const loaderSource = `/* Generated legacy runtime loader. */
+const LEGACY_SCRIPT_SOURCES = ${JSON.stringify(scriptSources, null, 2)};
+
+if (!window.__legacyLoaderStarted) {
+  window.__legacyLoaderStarted = true;
+
+  const dispatchLegacyEvent = (name, detail) => {
+    window.dispatchEvent(new CustomEvent(name, detail ? { detail } : undefined));
+  };
+
+  const installDOMContentLoadedShim = () => {
+    if (document.readyState === 'loading') {
+      return { enabled: false, queuedHandlers: [], originalAddEventListener: null };
+    }
+
+    const queuedHandlers = [];
+    const originalAddEventListener = document.addEventListener.bind(document);
+    document.addEventListener = function legacyShimAddEventListener(type, handler, ...args) {
+      if (type === 'DOMContentLoaded') {
+        queuedHandlers.push({ handler });
+        return;
+      }
+      return originalAddEventListener(type, handler, ...args);
+    };
+
+    return { enabled: true, queuedHandlers, originalAddEventListener };
+  };
+
+  const restoreDOMContentLoadedShim = (shimState) => {
+    if (!shimState.enabled) return;
+
+    document.addEventListener = shimState.originalAddEventListener;
+    if (!shimState.queuedHandlers.length) return;
+
+    console.log('[legacy-loader] running deferred DOMContentLoaded handlers:', shimState.queuedHandlers.length);
+    const domContentLoadedEvent = new Event('DOMContentLoaded');
+    for (const { handler } of shimState.queuedHandlers) {
+      try {
+        if (typeof handler === 'function') {
+          handler(domContentLoadedEvent);
+        } else if (handler && typeof handler.handleEvent === 'function') {
+          handler.handleEvent(domContentLoadedEvent);
+        }
+      } catch (error) {
+        console.error('[legacy-loader] DOMContentLoaded handler failed:', error);
+      }
+    }
+  };
+
+  const loadClassicScript = (src) => new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.onload = () => resolve(src);
+    script.onerror = () => reject(new Error('Failed to load script: ' + src));
+    document.head.appendChild(script);
+  });
+
+  (async () => {
+    const domContentLoadedShim = installDOMContentLoadedShim();
+    try {
+      for (const src of LEGACY_SCRIPT_SOURCES) {
+        console.log('[legacy-loader] loading', src);
+        await loadClassicScript(src);
+      }
+
+      restoreDOMContentLoadedShim(domContentLoadedShim);
+      window.__legacyBundleFailed = false;
+      window.__legacyBundleReady = true;
+      console.log('[legacy-loader] legacy runtime ready');
+      dispatchLegacyEvent('legacy:ready');
+    } catch (error) {
+      restoreDOMContentLoadedShim(domContentLoadedShim);
+      window.__legacyBundleReady = false;
+      window.__legacyBundleFailed = true;
+      console.error('[legacy-loader] legacy runtime bootstrap failed:', error);
+      dispatchLegacyEvent('legacy:error', { message: error?.message || String(error) });
+    }
+  })();
+} else if (window.__legacyBundleReady) {
+  window.dispatchEvent(new CustomEvent('legacy:ready'));
+}
+`;
+
   fs.mkdirSync(path.dirname(legacyBundlePath), { recursive: true });
-  fs.writeFileSync(legacyBundlePath, pieces.join('\n'), 'utf8');
+  fs.writeFileSync(legacyBundlePath, loaderSource, 'utf8');
 }
 
 function main() {
