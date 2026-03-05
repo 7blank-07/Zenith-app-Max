@@ -9183,32 +9183,55 @@ watchlist-view .view-content {
 
 /* Watchlist-specific Search */
 #watchlist-search-input {
-  flex: 1;
+  width: 100%;
   min-width: 200px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 10px;
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   padding: 12px 44px 12px 52px;
   background: var(--color-graphite-800);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  color: var(--color-text-primary);
+  transition: all 150ms ease;
 }
 
 #watchlist-search-input:focus {
   outline: none;
   border-color: var(--color-teal-500);
-  box-shadow: 0 0 0 2px rgba(0, 194, 168, 0.18);
+  border-width: 2px;
+  padding: 11px 43px 11px 51px;
+  box-shadow: 0 0 0 2px rgba(var(--color-teal-rgb), 0.15);
 }
 
 #watchlist-search-input::placeholder {
   color: var(--color-text-muted);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
-.database-toolbar .search-container {
+#watchlist-view .database-toolbar .search-container {
+  flex: 1;
   position: relative;
 }
 
-.database-toolbar .search-container .search-icon {
+#watchlist-view .database-toolbar .search-container .search-icon {
   left: 16px;
+  color: var(--color-text-muted);
+}
+
+#watchlist-view .mobile-search-container {
+  margin-bottom: 20px;
+}
+
+#watchlist-mobile-search {
+  background: var(--color-graphite-800);
+  border: 2px solid var(--color-border);
+  box-shadow: none;
+  transition: all 0.2s;
+}
+
+#watchlist-mobile-search:focus {
+  outline: none;
+  border-color: var(--color-teal-500);
+  box-shadow: 0 0 0 4px rgba(var(--color-teal-rgb), 0.15);
 }
 
 /* Animation Keyframes */

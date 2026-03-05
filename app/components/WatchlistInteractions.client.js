@@ -16,6 +16,60 @@ function toLowerText(value) {
   return normalizeSearchText(value);
 }
 
+function toFileName(value) {
+  const text = toText(value);
+  if (!text) return '';
+  const segments = text.split('/');
+  return toText(segments[segments.length - 1]);
+}
+
+function normalizeEventCode(value) {
+  return toText(value)
+    .replace(/\.(png|webp|jpg|jpeg)$/i, '')
+    .replace(/_NAME\d+$/i, '')
+    .replace(/_STATIC$/i, '')
+    .replace(/_LIVEHIGH$/i, '_LIVE')
+    .replace(/_BASELIVE$/i, '_LIVE')
+    .replace(/^\d+_[A-Z]_/, '');
+}
+
+function extractEventCodeFromPlayerImage(imageUrl) {
+  const fileName = toFileName(imageUrl);
+  if (!fileName) return '';
+  const segments = fileName.split('_');
+  if (segments[0]?.toLowerCase() !== 'player' || segments.length < 5) return '';
+  return normalizeEventCode(segments.slice(3, -1).join('_'));
+}
+
+function extractEventCodeFromCardBackground(cardBackgroundUrl) {
+  const fileName = toFileName(cardBackgroundUrl);
+  if (!fileName) return '';
+  const match = fileName.match(/^bg_\d+_[A-Z]_(.+)$/i);
+  return match ? normalizeEventCode(match[1]) : '';
+}
+
+function formatEventLabel(eventCode) {
+  return toText(eventCode).replaceAll('_', ' ').replace(/\s+/g, ' ').trim();
+}
+
+function resolveWatchlistEvent(player) {
+  const explicit = toText(
+    player?.event ||
+      player?.event_name ||
+      player?.eventName ||
+      player?.eventname ||
+      player?.program ||
+      player?.programName ||
+      player?.program_name
+  );
+  if (explicit) return explicit;
+  const imageCode = extractEventCodeFromPlayerImage(player?.player_image || player?.playerimage || player?.playerImage || player?.image);
+  if (imageCode) return formatEventLabel(imageCode);
+  const cardBackgroundCode = extractEventCodeFromCardBackground(player?.card_background || player?.cardbackground || player?.cardBackground);
+  if (cardBackgroundCode) return formatEventLabel(cardBackgroundCode);
+  return '';
+}
+
 function normalizeBoolean(value) {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'number') return value !== 0;
@@ -106,7 +160,7 @@ function normalizeWatchlistPlayer(player) {
     team: toText(parsedPlayer.team || parsedPlayer.club),
     league: toText(parsedPlayer.league),
     nation: toText(parsedPlayer.nation || parsedPlayer.nation_region),
-    event: toText(parsedPlayer.event),
+    event: resolveWatchlistEvent(parsedPlayer),
     ovr: toNumber(parsedPlayer.ovr || parsedPlayer.overallrating || parsedPlayer.rating, 0),
     overallrating: toNumber(parsedPlayer.ovr || parsedPlayer.overallrating || parsedPlayer.rating, 0),
     rank: toNumber(parsedPlayer.rank ?? parsedUnique.rank, 0),
@@ -508,10 +562,10 @@ export default function WatchlistInteractions() {
         return true;
       });
 
-      const sortBy = toText(sortSelect?.value || 'Name');
+      const sortBy = toLowerText(sortSelect?.value || 'name');
       filteredPlayers.sort((left, right) => {
-        if (sortBy === 'rating') return toNumber(right.ovr, 0) - toNumber(left.ovr, 0);
-        if (sortBy === 'price') return Number(right.price || 0) - Number(left.price || 0);
+        if (sortBy === 'ovr' || sortBy === 'rating') return toNumber(right.ovr, 0) - toNumber(left.ovr, 0);
+        if (sortBy === 'price') return toNumber(right.price, 0) - toNumber(left.price, 0);
         return toLowerText(left.name).localeCompare(toLowerText(right.name));
       });
 
@@ -534,7 +588,7 @@ export default function WatchlistInteractions() {
 
       if (searchInput) searchInput.value = '';
       if (mobileSearchInput) mobileSearchInput.value = '';
-      if (sortSelect) sortSelect.value = 'Name';
+      if (sortSelect) sortSelect.value = 'name';
       if (ratingMinInput) ratingMinInput.value = '40';
       if (ratingMaxInput) ratingMaxInput.value = '150';
       if (mobileRatingMinInput) mobileRatingMinInput.value = '40';

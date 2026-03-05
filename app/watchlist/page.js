@@ -117,10 +117,10 @@ export default function WatchlistPage() {
                 <input type="text" id="watchlist-search-input" className="search-input" placeholder="Search watchlist..." />
               </div>
 
-              <select id="watchlist-sort-select" className="sort-select" defaultValue="Name">
-                <option value="Name">Sort by Name</option>
-                <option value="Rating">Sort by OVR</option>
-                <option value="Price">Sort by Price</option>
+              <select id="watchlist-sort-select" className="sort-select" defaultValue="name">
+                <option value="name">Sort by Name</option>
+                <option value="ovr">Sort by OVR</option>
+                <option value="price">Sort by Price</option>
               </select>
             </div>
 

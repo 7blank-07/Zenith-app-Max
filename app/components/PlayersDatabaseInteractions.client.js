@@ -88,6 +88,60 @@ function uniqueSorted(values) {
   return [...new Set(values.map((value) => toText(value)).filter(Boolean))].sort((left, right) => left.localeCompare(right));
 }
 
+function toFileName(value) {
+  const text = toText(value);
+  if (!text) return '';
+  const segments = text.split('/');
+  return toText(segments[segments.length - 1]);
+}
+
+function normalizeEventCode(value) {
+  return toText(value)
+    .replace(/\.(png|webp|jpg|jpeg)$/i, '')
+    .replace(/_NAME\d+$/i, '')
+    .replace(/_STATIC$/i, '')
+    .replace(/_LIVEHIGH$/i, '_LIVE')
+    .replace(/_BASELIVE$/i, '_LIVE')
+    .replace(/^\d+_[A-Z]_/, '');
+}
+
+function extractEventCodeFromPlayerImage(imageUrl) {
+  const fileName = toFileName(imageUrl);
+  if (!fileName) return '';
+  const segments = fileName.split('_');
+  if (segments[0]?.toLowerCase() !== 'player' || segments.length < 5) return '';
+  return normalizeEventCode(segments.slice(3, -1).join('_'));
+}
+
+function extractEventCodeFromCardBackground(cardBackgroundUrl) {
+  const fileName = toFileName(cardBackgroundUrl);
+  if (!fileName) return '';
+  const match = fileName.match(/^bg_\d+_[A-Z]_(.+)$/i);
+  return match ? normalizeEventCode(match[1]) : '';
+}
+
+function formatEventLabel(eventCode) {
+  return toText(eventCode).replaceAll('_', ' ').replace(/\s+/g, ' ').trim();
+}
+
+function resolvePlayerEvent(player) {
+  const explicit = toText(
+    player?.event ||
+      player?.eventName ||
+      player?.event_name ||
+      player?.eventname ||
+      player?.program ||
+      player?.programName ||
+      player?.program_name
+  );
+  if (explicit) return explicit;
+  const imageCode = extractEventCodeFromPlayerImage(player?.playerImage || player?.image);
+  if (imageCode) return formatEventLabel(imageCode);
+  const cardBackgroundCode = extractEventCodeFromCardBackground(player?.cardBackground);
+  if (cardBackgroundCode) return formatEventLabel(cardBackgroundCode);
+  return '';
+}
+
 function formatPrice(value) {
   const safe = Number(value);
   if (!Number.isFinite(safe) || safe <= 0) return 'No data';
@@ -167,7 +221,7 @@ function normalizePlayer(player) {
     league: toText(player?.league),
     club: toText(player?.club),
     nation: toText(player?.nation),
-    event: toText(player?.event || player?.eventName),
+    event: resolvePlayerEvent(player),
     skillMoves: toNumber(player?.skillMoves, 0),
     weakFoot: toNumber(player?.weakFoot, 0),
     heightCm: toNumber(player?.heightCm, 0),
@@ -218,6 +272,9 @@ function buildWatchlistSnapshot(player, resolvedPrice) {
     nation_region: player.nation,
     nation: player.nation,
     event: player.event,
+    event_name: player.event,
+    eventName: player.event,
+    eventname: player.event,
     ovr: player.ovr,
     overallrating: player.ovr,
     rating: player.ovr,
@@ -525,6 +582,12 @@ export default function PlayersDatabaseInteractions({
     setMobileFilters({ ...DEFAULT_FILTERS });
   };
 
+  const persistWatchlistState = useCallback((nextWatchlist, nextWatchlistPlayers) => {
+    writeArrayStorage('watchlist', nextWatchlist);
+    writeArrayStorage('watchlistPlayers', nextWatchlistPlayers);
+    window.dispatchEvent(new Event('watchlist-updated'));
+  }, []);
+
   const toggleWatchlist = (event, player) => {
     event.preventDefault();
     event.stopPropagation();
@@ -532,17 +595,22 @@ export default function PlayersDatabaseInteractions({
     const resolvedPrice = getResolvedPrice(player);
 
     if (watchedIds.has(uniqueId)) {
-      setWatchlist((current) => current.filter((entry) => entry !== uniqueId));
-      setWatchlistPlayers((current) => current.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId));
+      const nextWatchlist = watchlist.filter((entry) => entry !== uniqueId);
+      const nextWatchlistPlayers = watchlistPlayers.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId);
+      setWatchlist(nextWatchlist);
+      setWatchlistPlayers(nextWatchlistPlayers);
+      persistWatchlistState(nextWatchlist, nextWatchlistPlayers);
       return;
     }
 
-    setWatchlist((current) => [...current, uniqueId]);
-    setWatchlistPlayers((current) => {
-      const next = current.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId);
-      next.push(buildWatchlistSnapshot(player, resolvedPrice));
-      return next;
-    });
+    const nextWatchlist = [...new Set([...watchlist, uniqueId])];
+    const nextWatchlistPlayers = [
+      ...watchlistPlayers.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId),
+      buildWatchlistSnapshot(player, resolvedPrice)
+    ];
+    setWatchlist(nextWatchlist);
+    setWatchlistPlayers(nextWatchlistPlayers);
+    persistWatchlistState(nextWatchlist, nextWatchlistPlayers);
   };
 
   const openMobileFilters = () => {
