@@ -5975,6 +5975,171 @@ watchlist-view .view-content {
   flex-wrap: wrap;
 }
 
+/* ============================================
+   PLAYERS STATS MODAL POLISH (PRODUCTION UI)
+   ============================================ */
+#custom-stats-modal .stats-modal-container {
+  width: min(1080px, 92vw);
+  max-height: 88vh;
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgba(0, 194, 168, 0.08) 0%, rgba(0, 194, 168, 0) 45%),
+    linear-gradient(180deg, rgba(15, 23, 31, 0.98) 0%, rgba(10, 16, 22, 0.98) 100%);
+  border: 1px solid rgba(111, 141, 157, 0.25);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+#custom-stats-modal .stats-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 18px 22px;
+  background: linear-gradient(180deg, rgba(30, 46, 58, 0.94) 0%, rgba(23, 36, 45, 0.94) 100%);
+  border-bottom: 1px solid rgba(111, 141, 157, 0.2);
+}
+
+#custom-stats-modal .stats-modal-title {
+  font-size: 22px;
+  letter-spacing: 0.1px;
+}
+
+#custom-stats-modal .stats-modal-close {
+  border-radius: 12px;
+}
+
+#custom-stats-modal .stats-modal-close:hover {
+  transform: none;
+}
+
+#custom-stats-modal .stats-modal-content {
+  padding: 4px 0 10px;
+}
+
+#custom-stats-modal .stats-section {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(111, 141, 157, 0.16);
+}
+
+#custom-stats-modal .stats-section:last-of-type {
+  border-bottom: 0;
+}
+
+#custom-stats-modal .section-header {
+  margin-bottom: 10px;
+}
+
+#custom-stats-modal .section-title {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-teal-500);
+}
+
+#custom-stats-modal #selected-stats-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 194, 168, 0.35);
+  background: rgba(0, 194, 168, 0.12);
+  color: #9ff6eb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#custom-stats-modal .search-container {
+  position: relative;
+}
+
+#custom-stats-modal .search-container .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+#custom-stats-modal #stats-search-input.search-input {
+  width: 100%;
+  padding-left: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(111, 141, 157, 0.24);
+  background: rgba(20, 31, 40, 0.82);
+}
+
+#custom-stats-modal #stats-search-input.search-input:focus {
+  border-color: rgba(0, 194, 168, 0.7);
+  box-shadow: 0 0 0 3px rgba(0, 194, 168, 0.16);
+}
+
+#custom-stats-modal #select-all-stats {
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+#custom-stats-modal .price-tiers-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 9px;
+}
+
+#custom-stats-modal .price-tier-btn {
+  justify-content: flex-start;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(111, 141, 157, 0.22);
+  border-radius: 12px;
+  background: rgba(24, 38, 49, 0.78);
+  color: #c8d7df;
+}
+
+#custom-stats-modal .price-tier-btn input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-teal-500);
+}
+
+#custom-stats-modal .price-tier-btn span {
+  line-height: 1.2;
+  font-size: 13px;
+  color: inherit;
+}
+
+#custom-stats-modal .price-tier-btn:hover {
+  border-color: rgba(0, 194, 168, 0.5);
+  background: rgba(28, 45, 58, 0.88);
+}
+
+#custom-stats-modal .price-tier-btn:has(input:checked) {
+  border-color: rgba(0, 194, 168, 0.85);
+  background: rgba(0, 194, 168, 0.16);
+  color: #ecfffb;
+  box-shadow: inset 0 0 0 1px rgba(0, 194, 168, 0.2);
+}
+
+#custom-stats-modal .stats-modal-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(111, 141, 157, 0.24);
+  background: linear-gradient(180deg, rgba(17, 28, 36, 0.96) 0%, rgba(14, 24, 31, 0.96) 100%);
+}
+
+#custom-stats-modal .footer-actions {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+#custom-stats-modal #reset-stats-filters,
+#custom-stats-modal #apply-stats-filters {
+  min-width: 104px;
+  min-height: 38px;
+}
+
 .btn-secondary,
 .btn-primary {
   display: flex;
@@ -6047,6 +6212,19 @@ watchlist-view .view-content {
 
   .stats-modal-footer {
     padding: 16px 20px;
+  }
+
+  #custom-stats-modal .price-tiers-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #custom-stats-modal .footer-actions {
+    justify-content: stretch;
+  }
+
+  #custom-stats-modal #reset-stats-filters,
+  #custom-stats-modal #apply-stats-filters {
+    flex: 1;
   }
 }
 
