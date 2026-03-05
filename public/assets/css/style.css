@@ -9011,6 +9011,59 @@ watchlist-view .view-content {
   gap: 24px;
 }
 
+/* Watchlist row layout polish */
+#watchlist-players-grid .player-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+#watchlist-players-grid .player-row-info {
+  flex: 0 1 240px;
+  min-width: 180px;
+}
+
+#watchlist-players-grid .player-row-stats {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 0;
+}
+
+#watchlist-players-grid .watchlist-row-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+#watchlist-players-grid .watchlist-player-price {
+  min-width: 92px;
+  text-align: right;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+#watchlist-players-grid .watchlist-player-price .price-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+#watchlist-players-grid .watchlist-price-empty {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#watchlist-players-grid .player-row-watchlist {
+  position: static;
+  top: auto;
+  right: auto;
+}
+
 .watchlist-count-badge {
   display: inline-block;
   background: rgba(0, 194, 168, 0.15);
@@ -9191,6 +9244,26 @@ watchlist-view .view-content {
 
 /* Responsive: Mobile */
 @media (max-width: 768px) {
+  #watchlist-players-grid .player-row {
+    flex-wrap: wrap;
+  }
+
+  #watchlist-players-grid .player-row-info {
+    flex: 1 1 calc(100% - 112px);
+    min-width: 0;
+  }
+
+  #watchlist-players-grid .player-row-stats {
+    order: 3;
+    flex: 1 1 100%;
+    margin-top: 10px;
+  }
+
+  #watchlist-players-grid .watchlist-row-actions {
+    order: 2;
+    margin-left: auto;
+  }
+
   .watchlist-layout {
     grid-template-columns: 1fr;
     gap: 16px;

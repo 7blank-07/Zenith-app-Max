@@ -80,7 +80,7 @@ function getInitials(name) {
 
 function formatPrice(price) {
   const value = Number(price);
-  if (!Number.isFinite(value) || value <= 0) return 'NA';
+  if (!Number.isFinite(value) || value <= 0) return '—';
   if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`;
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
@@ -149,6 +149,9 @@ function uniqueSorted(values) {
 function renderPlayerRow(player) {
   const uniqueId = getPlayerUniqueId(player);
   const playerType = getPlayerType(player);
+  const metaParts = [toText(player.team), toText(player.league)].filter(Boolean);
+  const metaText = metaParts.length ? metaParts.join(' • ') : toText(player.position || 'Unknown');
+  const formattedPrice = formatPrice(player.price);
   const alternatePositions = toText(player.alternate_position)
     .split(',')
     .map((entry) => toText(entry).toUpperCase())
@@ -216,7 +219,7 @@ function renderPlayerRow(player) {
 
       <div class="player-row-info">
         <div class="player-info-name">${escapeHtml(player.name)}</div>
-        <div class="player-info-meta">${escapeHtml(player.team || 'NA')} • ${escapeHtml(player.league || 'NA')}</div>
+        <div class="player-info-meta">${escapeHtml(metaText)}</div>
         ${
           alternatePositions.length
             ? `<div class="player-info-secondary">${alternatePositions
@@ -235,15 +238,23 @@ function renderPlayerRow(player) {
         <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.physical)}</div><div class="stat-pill-label">PHY</div></div>
       </div>
 
-      <div class="player-price" style="min-width: 68px; text-align: right; color: #fbbf24; font-weight: 700;">
-        ${escapeHtml(formatPrice(player.price))}
-      </div>
+      <div class="watchlist-row-actions">
+        <div class="player-price watchlist-player-price">
+          ${
+            formattedPrice === '—'
+              ? '<span class="watchlist-price-empty">No price</span>'
+              : `<span class="price-inline"><img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon"><span class="price-text">${escapeHtml(
+                  formattedPrice
+                )}</span></span>`
+          }
+        </div>
 
-      <button class="player-row-watchlist active" data-unique-id="${escapeHtml(uniqueId)}" type="button" aria-label="Remove from watchlist">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </svg>
-      </button>
+        <button class="player-row-watchlist active" data-unique-id="${escapeHtml(uniqueId)}" type="button" aria-label="Remove from watchlist">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+      </div>
     </div>
   `;
 }
