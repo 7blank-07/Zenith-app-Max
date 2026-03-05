@@ -26,150 +26,489 @@ const SHARD_COSTS = Object.freeze({
 });
 
 const SHARD_OVRS = Object.freeze([105, 106, 107, 108, 109, 110, 111, 112, 113]);
+const SQUAD_SAVE_KEY = 'savedSquad_main';
 
 const SQUAD_FORMATIONS = Object.freeze({
-  '4-3-3': [
-    { id: 'GK', label: 'GK', x: 50, y: 88 },
-    { id: 'LB', label: 'LB', x: 16, y: 70 },
-    { id: 'LCB', label: 'CB', x: 36, y: 74 },
-    { id: 'RCB', label: 'CB', x: 64, y: 74 },
-    { id: 'RB', label: 'RB', x: 84, y: 70 },
-    { id: 'LCM', label: 'CM', x: 34, y: 52 },
-    { id: 'CM', label: 'CM', x: 50, y: 48 },
-    { id: 'RCM', label: 'CM', x: 66, y: 52 },
-    { id: 'LW', label: 'LW', x: 22, y: 28 },
-    { id: 'ST', label: 'ST', x: 50, y: 20 },
-    { id: 'RW', label: 'RW', x: 78, y: 28 }
+  '3-4-1-2': [
+      { id: 'GK', label: 'GK', x: 55, y: 83 },
+      { id: 'LCB', label: 'CB', x: 28, y: 65 },
+      { id: 'CB', label: 'CB', x: 55, y: 65 },
+      { id: 'RCB', label: 'CB', x: 82, y: 65 },
+      { id: 'LM', label: 'LM', x: 20, y: 36 },
+      { id: 'LCM', label: 'CM', x: 40, y: 46 },
+      { id: 'RCM', label: 'CM', x: 70, y: 46 },
+      { id: 'RM', label: 'RM', x: 90, y: 36 },
+      { id: 'CAM', label: 'CAM', x: 55, y: 31 },
+      { id: 'LS', label: 'ST', x: 43, y: 16 },
+      { id: 'RS', label: 'ST', x: 67, y: 16 }
   ],
-  '4-4-2': [
-    { id: 'GK', label: 'GK', x: 50, y: 88 },
-    { id: 'LB', label: 'LB', x: 16, y: 70 },
-    { id: 'LCB', label: 'CB', x: 36, y: 74 },
-    { id: 'RCB', label: 'CB', x: 64, y: 74 },
-    { id: 'RB', label: 'RB', x: 84, y: 70 },
-    { id: 'LM', label: 'LM', x: 18, y: 48 },
-    { id: 'LCM', label: 'CM', x: 40, y: 52 },
-    { id: 'RCM', label: 'CM', x: 60, y: 52 },
-    { id: 'RM', label: 'RM', x: 82, y: 48 },
-    { id: 'LST', label: 'ST', x: 42, y: 24 },
-    { id: 'RST', label: 'ST', x: 58, y: 24 }
+  '3-4-2-1': [
+      { id: 'GK', label: 'GK', x: 53, y: 86 },
+      { id: 'LCB', label: 'LCB', x: 31, y: 69 },
+      { id: 'CB', label: 'CB', x: 53, y: 61 },
+      { id: 'RCB', label: 'RCB', x: 72, y: 69 },
+      { id: 'LM', label: 'LM', x: 19, y: 39 },
+      { id: 'LCM', label: 'LCM', x: 36, y: 49 },
+      { id: 'RCM', label: 'RCM', x: 68, y: 49 },
+      { id: 'RM', label: 'RM', x: 85, y: 39 },
+      { id: 'LAM', label: 'CAM', x: 36, y: 26 },
+      { id: 'RAM', label: 'CAM', x: 68, y: 26 },
+      { id: 'ST', label: 'ST', x: 53, y: 14 }
+  ],
+  '3-4-3-DIAMOND': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LCB', label: 'LCB', x: 30, y: 66 },
+      { id: 'CB', label: 'CB', x: 53, y: 66 },
+      { id: 'RCB', label: 'RCB', x: 77, y: 66 },
+      { id: 'LM', label: 'LM', x: 25, y: 40 },
+      { id: 'CDM', label: 'CDM', x: 43, y: 47 },
+      { id: 'CAM', label: 'CAM', x: 63, y: 42 },
+      { id: 'RM', label: 'RM', x: 83, y: 40 },
+      { id: 'LW', label: 'LW', x: 35, y: 22 },
+      { id: 'ST', label: 'ST', x: 53, y: 17 },
+      { id: 'RW', label: 'RW', x: 72, y: 22 }
+  ],
+  '3-4-3-FLAT': [
+      { id: 'GK', label: 'GK', x: 53, y: 84 },
+      { id: 'LCB', label: 'LCB', x: 29, y: 67 },
+      { id: 'CB', label: 'CB', x: 53, y: 67 },
+      { id: 'RCB', label: 'RCB', x: 76, y: 67 },
+      { id: 'LM', label: 'LM', x: 20, y: 43 },
+      { id: 'LCM', label: 'CM', x: 42, y: 43 },
+      { id: 'RCM', label: 'CM', x: 64, y: 43 },
+      { id: 'RM', label: 'RM', x: 86, y: 43 },
+      { id: 'LW', label: 'LW', x: 32, y: 16 },
+      { id: 'ST', label: 'ST', x: 53, y: 15 },
+      { id: 'RW', label: 'RW', x: 74, y: 16 }
+  ],
+  '3-5-1-1': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LCB', label: 'LCB', x: 25, y: 61 },
+      { id: 'CB', label: 'CB', x: 53, y: 61 },
+      { id: 'RCB', label: 'RCB', x: 78, y: 61 },
+      { id: 'LM', label: 'LM', x: 21, y: 32 },
+      { id: 'LDM', label: 'CDM', x: 43, y: 47 },
+      { id: 'CM', label: 'CM', x: 53, y: 33 },
+      { id: 'RDM', label: 'CDM', x: 65, y: 47 },
+      { id: 'RM', label: 'RM', x: 85, y: 32 },
+      { id: 'LST', label: 'ST', x: 42, y: 17 },
+      { id: 'RST', label: 'ST', x: 66, y: 17 }
   ],
   '3-5-2': [
-    { id: 'GK', label: 'GK', x: 50, y: 88 },
-    { id: 'LCB', label: 'CB', x: 30, y: 72 },
-    { id: 'CB', label: 'CB', x: 50, y: 76 },
-    { id: 'RCB', label: 'CB', x: 70, y: 72 },
-    { id: 'LM', label: 'LM', x: 14, y: 52 },
-    { id: 'LCM', label: 'CM', x: 36, y: 56 },
-    { id: 'CAM', label: 'CAM', x: 50, y: 46 },
-    { id: 'RCM', label: 'CM', x: 64, y: 56 },
-    { id: 'RM', label: 'RM', x: 86, y: 52 },
-    { id: 'LST', label: 'ST', x: 42, y: 24 },
-    { id: 'RST', label: 'ST', x: 58, y: 24 }
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LCB', label: 'LCB', x: 27, y: 63 },
+      { id: 'CB', label: 'CB', x: 53, y: 63 },
+      { id: 'RCB', label: 'RCB', x: 78, y: 63 },
+      { id: 'LM', label: 'LM', x: 20, y: 39 },
+      { id: 'LDM', label: 'CDM', x: 41, y: 47 },
+      { id: 'CAM', label: 'CAM', x: 53, y: 33 },
+      { id: 'RDM', label: 'CDM', x: 64, y: 47 },
+      { id: 'RM', label: 'RM', x: 85, y: 39 },
+      { id: 'LS', label: 'ST', x: 41, y: 16 },
+      { id: 'RS', label: 'ST', x: 67, y: 16 }
   ],
-  '4-2-3-1': [
-    { id: 'GK', label: 'GK', x: 50, y: 88 },
-    { id: 'LB', label: 'LB', x: 16, y: 70 },
-    { id: 'LCB', label: 'CB', x: 36, y: 74 },
-    { id: 'RCB', label: 'CB', x: 64, y: 74 },
-    { id: 'RB', label: 'RB', x: 84, y: 70 },
-    { id: 'LCDM', label: 'CDM', x: 42, y: 58 },
-    { id: 'RCDM', label: 'CDM', x: 58, y: 58 },
-    { id: 'LAM', label: 'CAM', x: 25, y: 40 },
-    { id: 'CAM', label: 'CAM', x: 50, y: 36 },
-    { id: 'RAM', label: 'CAM', x: 75, y: 40 },
-    { id: 'ST', label: 'ST', x: 50, y: 20 }
+  '4-1-2-1-2-NARROW': [
+      { id: 'GK', label: 'GK', x: 54, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 66 },
+      { id: 'LCB', label: 'CB', x: 38, y: 70 },
+      { id: 'RCB', label: 'CB', x: 69, y: 70 },
+      { id: 'RB', label: 'RB', x: 88, y: 66 },
+      { id: 'CDM', label: 'CDM', x: 54, y: 54 },
+      { id: 'LCM', label: 'CM', x: 37, y: 42 },
+      { id: 'RCM', label: 'CM', x: 72, y: 42 },
+      { id: 'CAM', label: 'CAM', x: 54, y: 28 },
+      { id: 'LS', label: 'ST', x: 43, y: 12 },
+      { id: 'RS', label: 'ST', x: 66, y: 12 }
+  ],
+  '4-1-2-1-2-WIDE': [
+      { id: 'GK', label: 'GK', x: 54, y: 83 },
+      { id: 'LB', label: 'LB', x: 17, y: 69 },
+      { id: 'LCB', label: 'CB', x: 38, y: 70 },
+      { id: 'RCB', label: 'CB', x: 72, y: 70 },
+      { id: 'RB', label: 'RB', x: 90, y: 69 },
+      { id: 'CDM', label: 'CDM', x: 54, y: 54 },
+      { id: 'LM', label: 'LM', x: 25, y: 39 },
+      { id: 'RM', label: 'RM', x: 78, y: 39 },
+      { id: 'CAM', label: 'CAM', x: 54, y: 28 },
+      { id: 'LS', label: 'ST', x: 42, y: 17 },
+      { id: 'RS', label: 'ST', x: 66, y: 17 }
+  ],
+  '4-1-3-2': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 18, y: 66 },
+      { id: 'LCB', label: 'CB', x: 37, y: 68 },
+      { id: 'RCB', label: 'CB', x: 73, y: 68 },
+      { id: 'RB', label: 'RB', x: 91, y: 66 },
+      { id: 'CDM', label: 'CDM', x: 53, y: 54 },
+      { id: 'LM', label: 'LM', x: 24, y: 34 },
+      { id: 'CM', label: 'CM', x: 53, y: 34 },
+      { id: 'RM', label: 'RM', x: 80, y: 34 },
+      { id: 'LS', label: 'ST', x: 42, y: 17 },
+      { id: 'RS', label: 'ST', x: 66, y: 17 }
+  ],
+  '4-1-4-1': [
+      { id: 'GK', label: 'GK', x: 52, y: 83 },
+      { id: 'LB', label: 'LB', x: 19, y: 68 },
+      { id: 'LCB', label: 'CB', x: 38, y: 68 },
+      { id: 'RCB', label: 'CB', x: 66, y: 68 },
+      { id: 'RB', label: 'RB', x: 85, y: 68 },
+      { id: 'CDM', label: 'CDM', x: 52, y: 53 },
+      { id: 'LM', label: 'LM', x: 22, y: 37 },
+      { id: 'LCM', label: 'CM', x: 42, y: 37 },
+      { id: 'RCM', label: 'CM', x: 62, y: 37 },
+      { id: 'RM', label: 'RM', x: 82, y: 37 },
+      { id: 'ST', label: 'ST', x: 52, y: 18 }
+  ],
+  '4-2-1-3': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 18, y: 66 },
+      { id: 'LCB', label: 'CB', x: 36, y: 68 },
+      { id: 'RCB', label: 'CB', x: 70, y: 68 },
+      { id: 'RB', label: 'RB', x: 88, y: 66 },
+      { id: 'LDM', label: 'CDM', x: 37, y: 47 },
+      { id: 'RDM', label: 'CDM', x: 68, y: 47 },
+      { id: 'CAM', label: 'CAM', x: 53, y: 37 },
+      { id: 'LW', label: 'LW', x: 32, y: 19 },
+      { id: 'ST', label: 'ST', x: 53, y: 17 },
+      { id: 'RW', label: 'RW', x: 73, y: 19 }
+  ],
+  '4-2-1-3-WIDE': [
+      { id: 'GK', label: 'GK', x: 54, y: 86 },
+      { id: 'LB', label: 'LB', x: 17, y: 66 },
+      { id: 'LCB', label: 'CB', x: 40, y: 70 },
+      { id: 'RCB', label: 'CB', x: 68, y: 70 },
+      { id: 'RB', label: 'RB', x: 87, y: 66 },
+      { id: 'LDM', label: 'CDM', x: 44, y: 54 },
+      { id: 'RDM', label: 'CDM', x: 64, y: 54 },
+      { id: 'CAM', label: 'CAM', x: 54, y: 34 },
+      { id: 'LW', label: 'LW', x: 27, y: 22 },
+      { id: 'ST', label: 'ST', x: 54, y: 15 },
+      { id: 'RW', label: 'RW', x: 80, y: 22 }
+  ],
+  '4-2-2-2': [
+      { id: 'GK', label: 'GK', x: 52, y: 83 },
+      { id: 'LB', label: 'LB', x: 18, y: 70 },
+      { id: 'LCB', label: 'CB', x: 38, y: 70 },
+      { id: 'RCB', label: 'CB', x: 71, y: 70 },
+      { id: 'RB', label: 'RB', x: 88, y: 70 },
+      { id: 'LDM', label: 'CDM', x: 46, y: 50 },
+      { id: 'RDM', label: 'CDM', x: 64, y: 50 },
+      { id: 'LAM', label: 'CAM', x: 33, y: 33 },
+      { id: 'RAM', label: 'CAM', x: 76, y: 33 },
+      { id: 'LS', label: 'ST', x: 44, y: 17 },
+      { id: 'RS', label: 'ST', x: 64, y: 17 }
+  ],
+  '4-2-3-1-NARROW': [
+      { id: 'GK', label: 'GK', x: 52, y: 82 },
+      { id: 'LB', label: 'LB', x: 18, y: 64 },
+      { id: 'LCB', label: 'CB', x: 38, y: 68 },
+      { id: 'RCB', label: 'CB', x: 66, y: 68 },
+      { id: 'RB', label: 'RB', x: 85, y: 64 },
+      { id: 'LDM', label: 'CDM', x: 30, y: 46 },
+      { id: 'RDM', label: 'CDM', x: 73, y: 46 },
+      { id: 'LAM', label: 'CAM', x: 38, y: 29 },
+      { id: 'CAM', label: 'CAM', x: 52, y: 39 },
+      { id: 'RAM', label: 'CAM', x: 66, y: 29 },
+      { id: 'ST', label: 'ST', x: 52, y: 12 }
+  ],
+  '3-1-4-2': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LCB', label: 'CB', x: 35, y: 68 },
+      { id: 'CB', label: 'CB', x: 53, y: 58 },
+      { id: 'RCB', label: 'CB', x: 72, y: 68 },
+      { id: 'CDM', label: 'CDM', x: 53, y: 37 },
+      { id: 'LCM', label: 'CM', x:37, y: 37 },
+      { id: 'RCM', label: 'CM', x: 70, y: 37 },
+      { id: 'LM', label: 'LM', x: 22, y: 40 },
+      { id: 'RM', label: 'RM', x: 86, y: 40 },
+      { id: 'LST', label: 'ST', x: 43, y: 17 },
+      { id: 'RST', label: 'ST', x: 66, y: 17 }
+  ],
+  '4-2-3-1-WIDE': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 17, y: 68 },
+      { id: 'LCB', label: 'CB', x: 36, y: 70 },
+      { id: 'RCB', label: 'CB', x: 68, y: 70 },
+      { id: 'RB', label: 'RB', x: 85, y: 68 },
+      { id: 'LDM', label: 'CDM', x: 38, y: 46 },
+      { id: 'RDM', label: 'CDM', x: 65, y: 46 },
+      { id: 'LM', label: 'LM', x: 22, y: 37 },
+      { id: 'CAM', label: 'CAM', x: 53, y: 33 },
+      { id: 'RM', label: 'RM', x: 80, y: 37 },
+      { id: 'ST', label: 'ST', x: 53, y: 16 }
+  ],
+  '4-2-4': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 17, y: 65 },
+      { id: 'LCB', label: 'CB', x: 35, y: 67 },
+      { id: 'RCB', label: 'CB', x: 72, y: 67 },
+      { id: 'RB', label: 'RB', x: 90, y: 65 },
+      { id: 'LDM', label: 'CDM', x: 40, y: 42 },
+      { id: 'RDM', label: 'CDM', x: 68, y: 42 },
+      { id: 'LW', label: 'LW', x: 28, y: 24 },
+      { id: 'LS', label: 'ST', x: 44, y: 17 },
+      { id: 'RS', label: 'ST', x: 65, y: 17 },
+      { id: 'RW', label: 'RW', x: 80, y: 24 }
+  ],
+  '4-3-1-2': [
+      { id: 'GK', label: 'GK', x: 54, y: 83 },
+      { id: 'LB', label: 'LB', x: 18, y: 68 },
+      { id: 'LCB', label: 'CB', x: 37, y: 70 },
+      { id: 'RCB', label: 'CB', x: 70, y: 70 },
+      { id: 'RB', label: 'RB', x: 88, y: 68 },
+      { id: 'LCM', label: 'CM', x: 33, y: 42 },
+      { id: 'CM', label: 'CM', x: 54, y: 51 },
+      { id: 'RCM', label: 'CM', x: 76, y: 42 },
+      { id: 'CAM', label: 'CAM', x: 54, y: 31 },
+      { id: 'LS', label: 'ST', x: 42, y: 16 },
+      { id: 'RS', label: 'ST', x: 66, y: 16 }
+  ],
+  '4-3-2-1': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 19, y: 66 },
+      { id: 'LCB', label: 'CB', x: 39, y: 68 },
+      { id: 'RCB', label: 'CB', x: 67, y: 68 },
+      { id: 'RB', label: 'RB', x: 88, y: 66 },
+      { id: 'LCM', label: 'CM', x: 32, y: 48 },
+      { id: 'CM', label: 'CM', x: 53, y: 48 },
+      { id: 'RCM', label: 'CM', x: 77, y: 48 },
+      { id: 'LAM', label: 'CAM', x: 38, y: 26 },
+      { id: 'RAM', label: 'CAM', x: 68, y: 26 },
+      { id: 'ST', label: 'ST', x: 53, y: 16 }
+  ],
+  '4-3-3': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 68 },
+      { id: 'LCB', label: 'CB', x: 36, y: 70 },
+      { id: 'RCB', label: 'CB', x: 66, y: 70 },
+      { id: 'RB', label: 'RB', x: 85, y: 68 },
+      { id: 'LCM', label: 'CM', x: 34, y: 49 },
+      { id: 'CM', label: 'CM', x: 53, y: 44 },
+      { id: 'RCM', label: 'CM', x: 73, y: 49 },
+      { id: 'LW', label: 'LW', x: 34, y: 21 },
+      { id: 'ST', label: 'ST', x: 53, y: 18 },
+      { id: 'RW', label: 'RW', x: 71, y: 21 }
+  ],
+  '4-3-3-ATTACK': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 66 },
+      { id: 'LCB', label: 'CB', x: 36, y: 68 },
+      { id: 'RCB', label: 'CB', x: 68, y: 68 },
+      { id: 'RB', label: 'RB', x: 87, y: 66 },
+      { id: 'LCM', label: 'CM', x: 32, y: 43 },
+      { id: 'CAM', label: 'CAM', x: 53, y: 40 },
+      { id: 'RCM', label: 'CM', x: 76, y: 43 },
+      { id: 'LW', label: 'LW', x: 32, y: 19 },
+      { id: 'ST', label: 'ST', x: 53, y: 17 },
+      { id: 'RW', label: 'RW', x: 76, y: 19 }
+  ],
+  '4-3-3-DEFEND': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 17, y: 67 },
+      { id: 'LCB', label: 'CB', x: 37, y: 68 },
+      { id: 'RCB', label: 'CB', x: 67, y: 68 },
+      { id: 'RB', label: 'RB', x: 87, y: 67 },
+      { id: 'LDM', label: 'CDM', x: 29, y: 46 },
+      { id: 'CM', label: 'CM', x: 53, y: 44 },
+      { id: 'RDM', label: 'CDM', x: 78, y: 46 },
+      { id: 'LW', label: 'LW', x: 31, y: 23 },
+      { id: 'ST', label: 'ST', x: 53, y: 17 },
+      { id: 'RW', label: 'RW', x: 76, y: 23 }
+  ],
+  '4-3-3-FALSE9': [
+      { id: 'GK', label: 'GK', x: 54, y: 83 },
+      { id: 'LB', label: 'LB', x: 19, y: 66 },
+      { id: 'LCB', label: 'CB', x: 38, y: 70 },
+      { id: 'RCB', label: 'CB', x: 69, y: 70 },
+      { id: 'RB', label: 'RB', x: 88, y: 66 },
+      { id: 'LCM', label: 'CM', x: 35, y: 44 },
+      { id: 'CM', label: 'CM', x: 54, y: 49 },
+      { id: 'RCM', label: 'CM', x: 75, y: 44 },
+      { id: 'LW', label: 'LW', x: 37, y: 19 },
+      { id: 'CF', label: 'CF', x: 54, y: 24 },
+      { id: 'RW', label: 'RW', x: 72, y: 19 }
+  ],
+  '4-3-3-HOLDING': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 18, y: 68 },
+      { id: 'LCB', label: 'CB', x: 36, y: 70 },
+      { id: 'RCB', label: 'CB', x: 67, y: 70 },
+      { id: 'RB', label: 'RB', x: 85, y: 68 },
+      { id: 'CDM', label: 'CDM', x: 53, y: 47 },
+      { id: 'LCM', label: 'CM', x: 33, y: 44 },
+      { id: 'RCM', label: 'CM', x: 72, y: 44 },
+      { id: 'LW', label: 'LW', x: 36, y: 19 },
+      { id: 'ST', label: 'ST', x: 53, y: 17 },
+      { id: 'RW', label: 'RW', x: 69, y: 19 }
+  ],
+  '4-4-1-1': [
+      { id: 'GK', label: 'GK', x: 53, y: 86 },
+      { id: 'LB', label: 'LB', x: 18, y: 66 },
+      { id: 'LCB', label: 'CB', x: 39, y: 70 },
+      { id: 'RCB', label: 'CB', x: 67, y: 70 },
+      { id: 'RB', label: 'RB', x: 88, y: 66 },
+      { id: 'LM', label: 'LM', x: 25, y: 44 },
+      { id: 'LCM', label: 'CM', x: 43, y: 46 },
+      { id: 'RCM', label: 'CM', x: 63, y: 46 },
+      { id: 'RM', label: 'RM', x: 81, y: 44 },
+      { id: 'CAM', label: 'CAM', x: 53, y: 28 },
+      { id: 'ST', label: 'ST', x: 53, y: 13 }
+  ],
+  '4-4-1-1-ATTACK': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 66 },
+      { id: 'LCB', label: 'CB', x: 36, y: 68 },
+      { id: 'RCB', label: 'CB', x: 71, y: 68 },
+      { id: 'RB', label: 'RB', x: 89, y: 66 },
+      { id: 'LM', label: 'LM', x: 20, y: 42 },
+      { id: 'LCM', label: 'CM', x: 38, y: 41 },
+      { id: 'RCM', label: 'CM', x: 69, y: 41 },
+      { id: 'RM', label: 'RM', x: 87, y: 42 },
+      { id: 'CAM', label: 'CAM', x: 53, y: 34 },
+      { id: 'ST', label: 'ST', x: 53, y: 16 }
+  ],
+  '4-4-2-FLAT': [
+      { id: 'GK', label: 'GK', x: 55, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 64 },
+      { id: 'LCB', label: 'CB', x: 41, y: 66 },
+      { id: 'RCB', label: 'CB', x: 66, y: 66 },
+      { id: 'RB', label: 'RB', x: 90, y: 64 },
+      { id: 'LM', label: 'LM', x: 15, y: 40 },
+      { id: 'LCM', label: 'CM', x: 41, y: 42 },
+      { id: 'RCM', label: 'CM', x: 66, y: 42 },
+      { id: 'RM', label: 'RM', x: 90, y: 40 },
+      { id: 'LS', label: 'ST', x: 40, y: 16 },
+      { id: 'RS', label: 'ST', x: 67, y: 16 }
+  ],
+  '4-4-2-HOLDING': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 19, y: 65 },
+      { id: 'LCB', label: 'CB', x: 43, y: 67 },
+      { id: 'RCB', label: 'CB', x: 64, y: 67 },
+      { id: 'RB', label: 'RB', x: 85, y: 65 },
+      { id: 'LM', label: 'LM', x: 22, y: 38 },
+      { id: 'LDM', label: 'CDM', x: 43, y: 43 },
+      { id: 'RDM', label: 'CDM', x: 64, y: 43 },
+      { id: 'RM', label: 'RM', x: 82, y: 38 },
+      { id: 'LS', label: 'ST', x: 43, y: 16 },
+      { id: 'RS', label: 'ST', x: 64, y: 16 }
   ],
   '4-5-1': [
-    { id: 'GK', label: 'GK', x: 52, y: 86 },
-    { id: 'LB', label: 'LB', x: 14, y: 69 },
-    { id: 'LCB', label: 'CB', x: 36, y: 73 },
-    { id: 'RCB', label: 'CB', x: 68, y: 73 },
-    { id: 'RB', label: 'RB', x: 90, y: 69 },
-    { id: 'LM', label: 'LM', x: 17, y: 49 },
-    { id: 'LAM', label: 'CAM', x: 34, y: 39 },
-    { id: 'CM', label: 'CM', x: 52, y: 53 },
-    { id: 'RAM', label: 'CAM', x: 70, y: 39 },
-    { id: 'RM', label: 'RM', x: 87, y: 49 },
-    { id: 'ST', label: 'ST', x: 52, y: 39 }
+      { id: 'GK', label: 'GK', x: 52, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 66 },
+      { id: 'LCB', label: 'CB', x: 36, y: 70 },
+      { id: 'RCB', label: 'CB', x: 68, y: 70 },
+      { id: 'RB', label: 'RB', x: 85, y: 66 },
+      { id: 'LM', label: 'LM', x: 18, y: 42 },
+      { id: 'LAM', label: 'CAM', x: 35, y: 33 },
+      { id: 'CM', label: 'CM', x: 52, y: 46 },
+      { id: 'RAM', label: 'CAM', x: 67, y: 33 },
+      { id: 'RM', label: 'RM', x: 85, y: 42 },
+      { id: 'ST', label: 'ST', x: 52, y: 14 }
   ],
   '4-5-1-FLAT': [
-    { id: 'GK', label: 'GK', x: 51, y: 85 },
-    { id: 'LB', label: 'LB', x: 13, y: 69 },
-    { id: 'LCB', label: 'CB', x: 33, y: 71 },
-    { id: 'RCB', label: 'CB', x: 69, y: 71 },
-    { id: 'RB', label: 'RB', x: 89, y: 69 },
-    { id: 'LM', label: 'LM', x: 16, y: 47 },
-    { id: 'LCM', label: 'CM', x: 35, y: 49 },
-    { id: 'CM', label: 'CM', x: 51, y: 51 },
-    { id: 'RCM', label: 'CM', x: 67, y: 49 },
-    { id: 'RM', label: 'RM', x: 86, y: 47 },
-    { id: 'ST', label: 'ST', x: 51, y: 23 }
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 15, y: 68 },
+      { id: 'LCB', label: 'CB', x: 34, y: 70 },
+      { id: 'RCB', label: 'CB', x: 72, y: 70 },
+      { id: 'RB', label: 'RB', x: 88, y: 68 },
+      { id: 'LM', label: 'LM', x: 20, y: 42 },
+      { id: 'LCM', label: 'CM', x: 37, y: 44 },
+      { id: 'CM', label: 'CM', x: 53, y: 46 },
+      { id: 'RCM', label: 'CM', x: 69, y: 44 },
+      { id: 'RM', label: 'RM', x: 84, y: 42 },
+      { id: 'ST', label: 'ST', x: 53, y: 17 }
   ],
   '5-2-1-2': [
-    { id: 'GK', label: 'GK', x: 52, y: 86 },
-    { id: 'LWB', label: 'LWB', x: 16, y: 69 },
-    { id: 'LCB', label: 'CB', x: 36, y: 73 },
-    { id: 'CB', label: 'CB', x: 52, y: 73 },
-    { id: 'RCB', label: 'CB', x: 68, y: 73 },
-    { id: 'RWB', label: 'RWB', x: 88, y: 69 },
-    { id: 'LCM', label: 'CM', x: 34, y: 51 },
-    { id: 'RCM', label: 'CM', x: 70, y: 51 },
-    { id: 'CAM', label: 'CAM', x: 52, y: 35 },
-    { id: 'LS', label: 'ST', x: 42, y: 19 },
-    { id: 'RS', label: 'ST', x: 62, y: 19 }
+      { id: 'GK', label: 'GK', x: 54, y: 83 },
+      { id: 'LWB', label: 'LWB', x: 18, y: 61 },
+      { id: 'LCB', label: 'CB', x: 37, y: 63},
+      { id: 'CB', label: 'CB', x: 54, y: 63},
+      { id: 'RCB', label: 'CB', x: 70, y: 63 },
+      { id: 'RWB', label: 'RWB', x: 88, y: 61 },
+      { id: 'LCM', label: 'CM', x: 34, y: 42 },
+      { id: 'RCM', label: 'CM', x: 72, y: 42 },
+      { id: 'CAM', label: 'CAM', x: 54, y: 30 },
+      { id: 'LS', label: 'ST', x: 42, y: 16 },
+      { id: 'RS', label: 'ST', x: 66, y: 16 }
   ],
   '5-2-2-1': [
-    { id: 'GK', label: 'GK', x: 52, y: 85 },
-    { id: 'LWB', label: 'LWB', x: 13, y: 65 },
-    { id: 'LCB', label: 'CB', x: 32, y: 71 },
-    { id: 'CB', label: 'CB', x: 52, y: 71 },
-    { id: 'RCB', label: 'CB', x: 72, y: 71 },
-    { id: 'RWB', label: 'RWB', x: 92, y: 65 },
-    { id: 'LCM', label: 'CM', x: 40, y: 49 },
-    { id: 'RCM', label: 'CM', x: 64, y: 49 },
-    { id: 'LW', label: 'LW', x: 32, y: 29 },
-    { id: 'RW', label: 'RW', x: 72, y: 29 },
-    { id: 'ST', label: 'ST', x: 52, y: 19 }
+      { id: 'GK', label: 'GK', x: 52, y: 83 },
+      { id: 'LWB', label: 'LWB', x: 12, y: 56 },
+      { id: 'LCB', label: 'CB', x: 33, y: 59 },
+      { id: 'CB', label: 'CB', x: 52, y: 59 },
+      { id: 'RCB', label: 'CB', x: 70, y: 59 },
+      { id: 'RWB', label: 'RWB', x: 89, y: 56 },
+      { id: 'LCM', label: 'CM', x: 42, y: 38 },
+      { id: 'RCM', label: 'CM', x: 61, y: 38 },
+      { id: 'LW', label: 'LW', x: 33, y: 20 },
+      { id: 'RW', label: 'RW', x: 71, y: 20 },
+      { id: 'ST', label: 'ST', x: 52, y: 16 }
   ],
   '5-3-2': [
-    { id: 'GK', label: 'GK', x: 52, y: 87 },
-    { id: 'LWB', label: 'LWB', x: 14, y: 65 },
-    { id: 'LCB', label: 'CB', x: 36, y: 69 },
-    { id: 'CB', label: 'CB', x: 52, y: 69 },
-    { id: 'RCB', label: 'CB', x: 68, y: 69 },
-    { id: 'RWB', label: 'RWB', x: 90, y: 65 },
-    { id: 'LCM', label: 'CM', x: 26, y: 45 },
-    { id: 'CM', label: 'CM', x: 52, y: 45 },
-    { id: 'RCM', label: 'CM', x: 78, y: 45 },
-    { id: 'LS', label: 'ST', x: 40, y: 21 },
-    { id: 'RS', label: 'ST', x: 64, y: 21 }
+      { id: 'GK', label: 'GK', x: 54, y: 83 },
+      { id: 'LWB', label: 'LWB', x: 17, y: 61 },
+      { id: 'LCB', label: 'CB', x: 36, y: 63 },
+      { id: 'CB', label: 'CB', x: 54, y: 63 },
+      { id: 'RCB', label: 'CB', x: 71, y: 63 },
+      { id: 'RWB', label: 'RWB', x: 88, y: 61 },
+      { id: 'LCM', label: 'CM', x: 29, y: 37 },
+      { id: 'CM', label: 'CM', x: 54, y: 37 },
+      { id: 'RCM', label: 'CM', x: 77, y: 37 },
+      { id: 'LS', label: 'ST', x: 41, y: 17 },
+      { id: 'RS', label: 'ST', x: 67, y: 17 }
   ],
   '5-4-1': [
-    { id: 'GK', label: 'GK', x: 52, y: 86 },
-    { id: 'LWB', label: 'LWB', x: 12, y: 64 },
-    { id: 'LCB', label: 'CB', x: 30, y: 70 },
-    { id: 'CB', label: 'CB', x: 52, y: 72 },
-    { id: 'RCB', label: 'CB', x: 74, y: 70 },
-    { id: 'RWB', label: 'RWB', x: 92, y: 64 },
-    { id: 'LM', label: 'LM', x: 22, y: 43 },
-    { id: 'LCM', label: 'CM', x: 40, y: 50 },
-    { id: 'RCM', label: 'CM', x: 64, y: 50 },
-    { id: 'RM', label: 'RM', x: 82, y: 43 },
-    { id: 'ST', label: 'ST', x: 52, y: 21 }
+      { id: 'GK', label: 'GK', x: 53, y: 86 },
+      { id: 'LWB', label: 'LWB', x: 15, y: 57 },
+      { id: 'LCB', label: 'CB', x: 33, y: 63 },
+      { id: 'CB', label: 'CB', x: 53, y: 67 },
+      { id: 'RCB', label: 'CB', x: 73, y: 63 },
+      { id: 'RWB', label: 'RWB', x: 91, y: 57 },
+      { id: 'LM', label: 'LM', x: 28, y: 36 },
+      { id: 'LCM', label: 'CM', x: 45, y: 39 },
+      { id: 'RCM', label: 'CM', x: 61, y: 39 },
+      { id: 'RM', label: 'RM', x: 78, y: 35 },
+      { id: 'ST', label: 'ST', x: 53, y: 14 }
+  ],
+  '5-4-1-HOLDING': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LWB', label: 'LWB', x: 14, y: 61 },
+      { id: 'LCB', label: 'CB', x: 33, y: 64 },
+      { id: 'CB', label: 'CB', x: 53, y: 64 },
+      { id: 'RCB', label: 'CB', x: 72, y: 64 },
+      { id: 'RWB', label: 'RWB', x: 89, y: 61 },
+      { id: 'LM', label: 'LM', x: 29, y: 31 },
+      { id: 'CDM', label: 'CDM', x: 44, y: 38 },
+      { id: 'CAM', label: 'CAM', x: 66, y: 25 },
+      { id: 'RM', label: 'RM', x: 78, y: 33 },
+      { id: 'ST', label: 'ST', x: 53, y: 17  }
+  ],
+  '5-4-1-DEFEND': [
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 16, y: 67 },
+      { id: 'LCB', label: 'CB', x: 33, y: 60 },
+      { id: 'CB', label: 'CB', x: 53, y: 57 },
+      { id: 'RCB', label: 'CB', x: 72, y: 60 },
+      { id: 'RB', label: 'RB', x: 89, y: 67 },
+      { id: 'LM', label: 'LM', x: 23, y: 36 },
+      { id: 'LCM', label: 'CM', x: 41, y: 33 },
+      { id: 'RCM', label: 'CM', x: 68, y: 33 },
+      { id: 'RM', label: 'RM', x: 84, y: 36 },
+      { id: 'ST', label: 'ST', x: 53, y: 17  }
   ],
   '4-4-1-1-FLAT': [
-    { id: 'GK', label: 'GK', x: 52, y: 85 },
-    { id: 'LB', label: 'LB', x: 16, y: 67 },
-    { id: 'LCB', label: 'CB', x: 37, y: 71 },
-    { id: 'RCB', label: 'CB', x: 67, y: 71 },
-    { id: 'RB', label: 'RB', x: 88, y: 67 },
-    { id: 'LM', label: 'LM', x: 22, y: 39 },
-    { id: 'LCM', label: 'CM', x: 40, y: 51 },
-    { id: 'RCM', label: 'CM', x: 62, y: 49 },
-    { id: 'RM', label: 'RM', x: 82, y: 39 },
-    { id: 'CF', label: 'CF', x: 52, y: 39 },
-    { id: 'ST', label: 'ST', x: 52, y: 23 }
+      { id: 'GK', label: 'GK', x: 53, y: 83 },
+      { id: 'LB', label: 'LB', x: 18, y: 61 },
+      { id: 'LCB', label: 'CB', x: 38, y: 64 },
+      { id: 'RCB', label: 'CB', x: 69, y: 64 },
+      { id: 'RB', label: 'RB', x: 88, y: 64 },
+      { id: 'RCM', label: 'CM', x: 66, y: 41 },
+      { id: 'LM', label: 'LM', x: 25, y: 34 },
+      { id: 'LCM', label: 'CM', x: 40, y: 41 },
+      { id: 'CF', label: 'CF', x: 53, y: 34 },
+      { id: 'RM', label: 'RM', x: 82, y: 34 },
+      { id: 'ST', label: 'ST', x: 53, y: 17  }
   ]
 });
 
@@ -596,6 +935,14 @@ function getPositionAdjustedOvr(player, slotLabel) {
   return Math.max(0, baseOvr + penalty);
 }
 
+function normalizeBadges(value) {
+  return {
+    badge1: !!value?.badge1,
+    badge2: !!value?.badge2,
+    badge3: !!value?.badge3
+  };
+}
+
 export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer), [players]);
   const playersById = useMemo(() => {
@@ -634,6 +981,8 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [fieldThemeId, setFieldThemeId] = useState('camp-nou');
   const [fieldThemeDraft, setFieldThemeDraft] = useState('camp-nou');
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
+  const [badges, setBadges] = useState(() => normalizeBadges({}));
+  const [badgesModalOpen, setBadgesModalOpen] = useState(false);
   const [starters, setStarters] = useState({});
   const [bench, setBench] = useState(Array.from({ length: 7 }, () => ''));
 
@@ -664,6 +1013,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [shardRequired, setShardRequired] = useState(0);
   const [shardPlayerOvr, setShardPlayerOvr] = useState(105);
   const dragPayloadRef = useRef(null);
+  const dragPreviewNodeRef = useRef(null);
   const [draggingKey, setDraggingKey] = useState('');
   const [dragOverSlotId, setDragOverSlotId] = useState('');
   const [dragOverBenchIndex, setDragOverBenchIndex] = useState(-1);
@@ -680,6 +1030,9 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         if (parsed?.starters && typeof parsed.starters === 'object') setStarters(parsed.starters);
         if (Array.isArray(parsed?.bench)) {
           setBench(parsed.bench.slice(0, 7).concat(Array.from({ length: Math.max(0, 7 - parsed.bench.length) }, () => '')));
+        }
+        if (parsed?.badges && typeof parsed.badges === 'object') {
+          setBadges(normalizeBadges(parsed.badges));
         }
       }
     } catch (error) {
@@ -727,13 +1080,14 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
           squadName,
           formationId,
           starters,
-          bench
+          bench,
+          badges
         })
       );
     } catch (error) {
       console.error('[tools] Failed to persist squad state:', error);
     }
-  }, [squadName, formationId, starters, bench]);
+  }, [badges, squadName, formationId, starters, bench]);
 
   useEffect(() => {
     try {
@@ -768,6 +1122,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     if (activeTool !== 'squadbuilder') {
       setSquadFilterOpen(false);
       setThemeSelectorOpen(false);
+      setBadgesModalOpen(false);
     }
   }, [activeTool]);
 
@@ -807,6 +1162,10 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         setCompareConfigPlayerId(null);
         return;
       }
+      if (badgesModalOpen) {
+        setBadgesModalOpen(false);
+        return;
+      }
       if (themeSelectorOpen) {
         setThemeSelectorOpen(false);
         return;
@@ -825,7 +1184,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeTool, compareConfigPlayerId, compareSearchOpen, squadFilterOpen, themeSelectorOpen]);
+  }, [activeTool, badgesModalOpen, compareConfigPlayerId, compareSearchOpen, squadFilterOpen, themeSelectorOpen]);
 
   useEffect(() => {
     const availableSlots = new Set((SQUAD_FORMATIONS[formationId] || []).map((slot) => slot.id));
@@ -879,6 +1238,8 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     return adjustedBySlot;
   }, [formationSlots, playersById, starters]);
 
+  const activeBadgesCount = useMemo(() => Object.values(badges).filter(Boolean).length, [badges]);
+
   const squadOvr = useMemo(() => {
     const starterTotal = formationSlots.reduce((sum, slot) => {
       const adjustedOvr = toNumber(starterAdjustedOvrBySlot[slot.id], 0);
@@ -890,8 +1251,9 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     const benchTotal = benchPlayers.reduce((sum, player) => sum + toNumber(player.ovr, 0), 0);
     const denominator = formationSlots.length + benchPlayers.length;
     if (!denominator || starterTotal + benchTotal <= 0) return 0;
-    return Math.ceil((starterTotal + benchTotal) / denominator);
-  }, [bench, formationSlots, playersById, starterAdjustedOvrBySlot]);
+    const baseOvr = Math.ceil((starterTotal + benchTotal) / denominator);
+    return baseOvr + activeBadgesCount;
+  }, [activeBadgesCount, bench, formationSlots, playersById, starterAdjustedOvrBySlot]);
 
   const squadValue = useMemo(() => {
     if (!squadPlayers.length) return 0;
@@ -1029,7 +1391,16 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     setSelectedSlotId((SQUAD_FORMATIONS[formationId] || [])[0]?.id || 'GK');
   };
 
+  const clearDragPreviewNode = () => {
+    const previewNode = dragPreviewNodeRef.current;
+    if (previewNode && previewNode.parentNode) {
+      previewNode.parentNode.removeChild(previewNode);
+    }
+    dragPreviewNodeRef.current = null;
+  };
+
   const clearDragState = () => {
+    clearDragPreviewNode();
     dragPayloadRef.current = null;
     setDraggingKey('');
     setDragOverSlotId('');
@@ -1094,10 +1465,35 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     setBench(nextBench);
   };
 
-  const handleDragStart = (event, payload, sourceKey) => {
+  const handleDragStart = (event, payload, sourceKey, dragPreviewElement = null) => {
     if (event?.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', payload?.playerId || '');
+      clearDragPreviewNode();
+      if (
+        payload?.source === 'picker' &&
+        typeof HTMLElement !== 'undefined' &&
+        dragPreviewElement instanceof HTMLElement
+      ) {
+        const rect = dragPreviewElement.getBoundingClientRect();
+        const previewClone = dragPreviewElement.cloneNode(true);
+        previewClone.style.position = 'fixed';
+        previewClone.style.top = '-1000px';
+        previewClone.style.left = '-1000px';
+        previewClone.style.pointerEvents = 'none';
+        previewClone.style.margin = '0';
+        previewClone.style.transform = 'none';
+        previewClone.style.width = `${rect.width || dragPreviewElement.offsetWidth}px`;
+        previewClone.style.height = `${rect.height || dragPreviewElement.offsetHeight}px`;
+        previewClone.style.zIndex = '99999';
+        document.body.appendChild(previewClone);
+        dragPreviewNodeRef.current = previewClone;
+        event.dataTransfer.setDragImage(
+          previewClone,
+          (rect.width || dragPreviewElement.offsetWidth || 40) / 2,
+          (rect.height || dragPreviewElement.offsetHeight || 50) / 2
+        );
+      }
     }
     dragPayloadRef.current = payload;
     setDraggingKey(sourceKey || '');
@@ -1200,6 +1596,83 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       setFieldThemeId(fieldThemeDraft);
     }
     setThemeSelectorOpen(false);
+  };
+
+  const toggleBadge = (badgeNumber) => {
+    const badgeKey = `badge${badgeNumber}`;
+    setBadges((current) => ({
+      ...current,
+      [badgeKey]: !current[badgeKey]
+    }));
+  };
+
+  const buildSquadSnapshot = () => ({
+    version: '1.0',
+    timestamp: new Date().toISOString(),
+    name: String(squadName || 'My Squad').trim() || 'My Squad',
+    formationId,
+    starters: { ...starters },
+    bench: [...bench],
+    badges: normalizeBadges(badges),
+    fieldTheme: fieldThemeId,
+    teamOvr: squadOvr,
+    teamValue: squadValue
+  });
+
+  const saveSquad = () => {
+    try {
+      window.localStorage.setItem(SQUAD_SAVE_KEY, JSON.stringify(buildSquadSnapshot()));
+    } catch (error) {
+      console.error('[tools] Failed to save squad snapshot:', error);
+    }
+  };
+
+  const loadSquad = () => {
+    try {
+      const raw = window.localStorage.getItem(SQUAD_SAVE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      const nextFormation = String(parsed?.formationId || '');
+      if (SQUAD_FORMATIONS[nextFormation]) {
+        setFormationId(nextFormation);
+      }
+      setSquadName(String(parsed?.name || 'My Squad'));
+      setStarters(parsed?.starters && typeof parsed.starters === 'object' ? parsed.starters : {});
+      if (Array.isArray(parsed?.bench)) {
+        setBench(parsed.bench.slice(0, 7).concat(Array.from({ length: Math.max(0, 7 - parsed.bench.length) }, () => '')));
+      } else {
+        setBench(Array.from({ length: 7 }, () => ''));
+      }
+      setBadges(normalizeBadges(parsed?.badges));
+      const nextThemeId = String(parsed?.fieldTheme || '');
+      if (FIELD_THEMES[nextThemeId]) {
+        setFieldThemeId(nextThemeId);
+        setFieldThemeDraft(nextThemeId);
+      }
+      setSelectedSlotId((SQUAD_FORMATIONS[nextFormation] || SQUAD_FORMATIONS[formationId] || [])[0]?.id || 'GK');
+    } catch (error) {
+      console.error('[tools] Failed to load squad snapshot:', error);
+    }
+  };
+
+  const exportSquad = () => {
+    try {
+      const snapshot = buildSquadSnapshot();
+      const content = JSON.stringify(snapshot, null, 2);
+      const blob = new Blob([content], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeName = (snapshot.name || 'My Squad').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+      const timestamp = snapshot.timestamp.replace(/[:.]/g, '-');
+      link.href = url;
+      link.download = `${safeName || 'My_Squad'}_${timestamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('[tools] Failed to export squad snapshot:', error);
+    }
   };
 
   const openCompareSearch = () => {
@@ -1550,6 +2023,15 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
             </div>
 
             <div className="squad-header-center">
+              <button className="squad-action-btn export-btn" onClick={exportSquad} type="button">
+                📸 Export
+              </button>
+              <button className="badges-btn" onClick={() => setBadgesModalOpen(true)} title="Manage Team Badges" type="button">
+                <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M10 2L11.5 6.5L16 6.5L12.5 9.5L14 14L10 11.5L6 14L7.5 9.5L4 6.5L8.5 6.5L10 2Z" fill="currentColor" />
+                </svg>
+                Badges
+              </button>
               <div className="squad-stat">
                 <span className="squad-stat-label">OVR</span>
                 <span id="squad-ovr" className="squad-stat-value">
@@ -1577,6 +2059,12 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                   </option>
                 ))}
               </select>
+              <button className="squad-action-btn save-btn" onClick={saveSquad} type="button">
+                💾 Save Squad
+              </button>
+              <button className="squad-action-btn load-btn" onClick={loadSquad} type="button">
+                📥 Load Squad
+              </button>
               <button className="squad-btn" onClick={clearSquad} type="button">
                 Reset
               </button>
@@ -1907,7 +2395,9 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                       key={player.playerId}
                       className={`picker-row ${draggingKey === dragKey ? 'dragging' : ''}`}
                       draggable
-                      onDragStart={(event) => handleDragStart(event, { source: 'picker', playerId: player.playerId }, dragKey)}
+                      onDragStart={(event) =>
+                        handleDragStart(event, { source: 'picker', playerId: player.playerId }, dragKey, event.currentTarget.firstElementChild)
+                      }
                       onDragEnd={handleDragEnd}
                       onClick={() => assignPlayerToSelectedSlot(player.playerId)}
                     >
@@ -1961,6 +2451,63 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                 {!squadPickerPlayers.length && <p style={{ color: '#98A0A6', textAlign: 'center' }}>No available players match the current search.</p>}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="badges-modal" className="modal" style={{ display: badgesModalOpen ? 'flex' : 'none' }}>
+        <div className="modal-backdrop" onClick={() => setBadgesModalOpen(false)} />
+        <div className="badges-modal-content" onClick={(event) => event.stopPropagation()}>
+          <div className="badges-modal-header">
+            <h2>Select Team Badges</h2>
+            <button className="modal-close-btn" onClick={() => setBadgesModalOpen(false)} type="button">
+              ×
+            </button>
+          </div>
+
+          <div className="badges-grid">
+            {[1, 2, 3].map((badgeNumber) => {
+              const badgeKey = `badge${badgeNumber}`;
+              const isActive = !!badges[badgeKey];
+              return (
+                <div
+                  key={badgeKey}
+                  className={`badge-card ${isActive ? 'active' : ''}`}
+                  id={`badge-card-${badgeNumber}`}
+                  onClick={() => toggleBadge(badgeNumber)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      toggleBadge(badgeNumber);
+                    }
+                  }}
+                >
+                  <div className="badge-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+                      <path
+                        d="M30 5L35 20L50 20L38 30L43 45L30 37L17 45L22 30L10 20L25 20L30 5Z"
+                        fill="currentColor"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  </div>
+                  <h3>Badge {badgeNumber}</h3>
+                  <div className="badge-boost">+1 OVR</div>
+                  <div className="badge-checkbox">
+                    <span className="checkmark">✓</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="badges-modal-footer">
+            <button className="btn-primary" onClick={() => setBadgesModalOpen(false)} type="button">
+              Done
+            </button>
           </div>
         </div>
       </div>
