@@ -1,4 +1,5 @@
 import HomeDashboardInteractions from './components/HomeDashboardInteractions.client';
+import MarketNavLink from './components/MarketNavLink.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
@@ -157,9 +158,9 @@ export default async function HomePage() {
             <a href="/players" data-link="" data-nav-link="" className="nav-link">
               Players
             </a>
-            <a href="/market" data-link="" data-nav-link="" className="nav-link">
+            <MarketNavLink href="/market" data-link="" data-nav-link="" className="nav-link">
               Market
-            </a>
+            </MarketNavLink>
             <a href="/watchlist" data-link="" data-nav-link="" className="nav-link">
               Watchlist
             </a>
@@ -327,9 +328,9 @@ export default async function HomePage() {
             <a href="/players" data-link="" data-nav-link="">
               Database
             </a>
-            <a href="/market" data-link="" data-nav-link="">
+            <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
-            </a>
+            </MarketNavLink>
             <a href="/watchlist" data-link="" data-nav-link="">
               Watchlist
             </a>

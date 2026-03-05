@@ -239,6 +239,264 @@ const FIELD_THEMES = Object.freeze({
   }
 });
 
+const POSITION_PENALTIES = Object.freeze({
+  GK: Object.freeze({
+    gk: 0,
+    lb: -18,
+    cb: -18,
+    rb: -18,
+    lwb: -18,
+    rwb: -18,
+    cdm: -18,
+    cm: -18,
+    cam: -18,
+    lm: -18,
+    rm: -18,
+    lw: -18,
+    rw: -18,
+    cf: -18,
+    st: -18
+  }),
+  ST: Object.freeze({
+    st: 0,
+    rw: -6,
+    lw: -6,
+    cf: 0,
+    cm: -18,
+    rm: -18,
+    lm: -18,
+    cdm: -18,
+    cb: -18,
+    lb: -18,
+    rb: -18,
+    lwb: -18,
+    rwb: -18,
+    cam: -9,
+    gk: -18
+  }),
+  LW: Object.freeze({
+    lw: 0,
+    st: -6,
+    cf: -6,
+    lwb: -6,
+    rw: -4,
+    lm: -4,
+    rm: -18,
+    cm: -18,
+    cdm: -18,
+    cb: -18,
+    rb: -18,
+    rwb: -18,
+    cam: -18,
+    lb: -9,
+    gk: -18
+  }),
+  RW: Object.freeze({
+    rw: 0,
+    lw: -4,
+    rm: -4,
+    st: -6,
+    cf: -6,
+    rwb: -6,
+    lm: -18,
+    cm: -18,
+    cdm: -18,
+    lb: -18,
+    cb: -18,
+    lwb: -18,
+    cam: -18,
+    rb: -9,
+    gk: -18
+  }),
+  CAM: Object.freeze({
+    cam: 0,
+    cf: 0,
+    cm: -4,
+    lm: -6,
+    rm: -6,
+    st: -9,
+    cdm: -9,
+    lw: -18,
+    rw: -18,
+    lb: -18,
+    cb: -18,
+    rb: -18,
+    lwb: -18,
+    rwb: -18,
+    gk: -18
+  }),
+  CM: Object.freeze({
+    cm: 0,
+    cdm: -4,
+    cam: -4,
+    lm: -4,
+    rm: -4,
+    cf: -9,
+    lb: -9,
+    cb: -9,
+    rb: -9,
+    lwb: -9,
+    rwb: -9,
+    lw: -18,
+    st: -18,
+    rw: -18,
+    gk: -18
+  }),
+  CDM: Object.freeze({
+    cdm: 0,
+    cm: -4,
+    cb: -4,
+    lm: -6,
+    rm: -6,
+    lb: -6,
+    rb: -6,
+    lwb: -6,
+    rwb: -6,
+    cam: -9,
+    lw: -18,
+    st: -18,
+    rw: -18,
+    cf: -18,
+    gk: -18
+  }),
+  LM: Object.freeze({
+    lm: 0,
+    rm: -4,
+    lw: -4,
+    lwb: -4,
+    cdm: -6,
+    lb: -6,
+    cam: -6,
+    cm: -6,
+    cb: -9,
+    rb: -9,
+    rwb: -9,
+    st: -18,
+    rw: -18,
+    cf: -18,
+    gk: -18
+  }),
+  RM: Object.freeze({
+    rm: 0,
+    rw: -4,
+    rwb: -4,
+    cam: -5,
+    cm: -5,
+    cdm: -5,
+    rb: -5,
+    lb: -7,
+    cb: -7,
+    lwb: -8,
+    cf: -8,
+    st: -17,
+    lw: -18,
+    lm: -17,
+    gk: -18
+  }),
+  LB: Object.freeze({
+    lb: 0,
+    lwb: 0,
+    cb: -4,
+    rb: -4,
+    rwb: -4,
+    cdm: -6,
+    lm: -6,
+    lw: -9,
+    cm: -9,
+    cam: -9,
+    rm: -9,
+    st: -18,
+    rw: -18,
+    cf: -18,
+    gk: -18
+  }),
+  CB: Object.freeze({
+    cb: 0,
+    lb: -4,
+    rb: -4,
+    cdm: -4,
+    cm: -9,
+    lm: -9,
+    rm: -9,
+    lwb: -9,
+    rwb: -9,
+    lw: -18,
+    st: -18,
+    rw: -18,
+    cam: -18,
+    cf: -18,
+    gk: -18
+  }),
+  RB: Object.freeze({
+    rb: 0,
+    rwb: 0,
+    lb: -4,
+    cb: -4,
+    lwb: -4,
+    cdm: -6,
+    rm: -6,
+    rw: -9,
+    cm: -9,
+    lm: -9,
+    lw: -18,
+    st: -18,
+    cf: -18,
+    cam: -18,
+    gk: -18
+  }),
+  LWB: Object.freeze({
+    lwb: 0,
+    lb: 0,
+    rb: -3,
+    rwb: -3,
+    lm: -3,
+    lw: -5,
+    cdm: -5,
+    cm: -7,
+    cb: -7,
+    rm: -7,
+    st: -15,
+    cf: -15,
+    cam: -15,
+    rw: -15,
+    gk: -18
+  }),
+  RWB: Object.freeze({
+    rwb: 0,
+    rb: 0,
+    lb: -3,
+    lwb: -3,
+    rm: -5,
+    cdm: -5,
+    rw: -5,
+    lm: -7,
+    cm: -7,
+    cb: -7,
+    lw: -15,
+    st: -15,
+    cf: -15,
+    cam: -15,
+    gk: -18
+  }),
+  CF: Object.freeze({
+    cf: 0,
+    cam: -4,
+    st: -4,
+    cm: -4,
+    lm: -4,
+    rm: -4,
+    lw: -6,
+    rw: -6,
+    cdm: -15,
+    lb: -15,
+    cb: -15,
+    rb: -15,
+    lwb: -15,
+    rwb: -15,
+    gk: -18
+  })
+});
+
 const RANK_SPRITES = Object.freeze({
   1: '/assets/images/ranks/green_rank_enhanced_main.webp',
   2: '/assets/images/ranks/blue_rank_enhanced_main.webp',
@@ -298,6 +556,7 @@ function normalizePlayer(player, index) {
     name: String(player?.name || 'Unknown'),
     ovr: toNumber(player?.ovr, 0),
     position: String(player?.position || ''),
+    alternatePosition: String(player?.alternatePosition || player?.alternate_position || ''),
     nation: String(player?.nation || ''),
     club: String(player?.club || ''),
     league: String(player?.league || ''),
@@ -313,6 +572,28 @@ function normalizePlayer(player, index) {
     isUntradable: !!player?.isUntradable,
     attributes: player?.attributes && typeof player.attributes === 'object' ? player.attributes : {}
   };
+}
+
+function parseAlternatePositions(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => String(entry || '').toUpperCase().trim()).filter(Boolean);
+  }
+  return String(value || '')
+    .split(/[|,/]/)
+    .map((entry) => entry.toUpperCase().trim())
+    .filter(Boolean);
+}
+
+function getPositionAdjustedOvr(player, slotLabel) {
+  const baseOvr = toNumber(player?.ovr, 0);
+  const playerPos = String(player?.position || '').toUpperCase().trim();
+  const slotPosLabel = String(slotLabel || '').toUpperCase().trim();
+  const slotPosKey = slotPosLabel.toLowerCase();
+  if (!playerPos || !slotPosKey) return baseOvr;
+  const alternatePositions = parseAlternatePositions(player?.alternatePosition);
+  if (alternatePositions.includes(slotPosLabel)) return baseOvr;
+  const penalty = POSITION_PENALTIES[playerPos]?.[slotPosKey] ?? -18;
+  return Math.max(0, baseOvr + penalty);
 }
 
 export default function ToolsInteractions({ players = [], initialTool = '' }) {
@@ -383,6 +664,9 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [shardRequired, setShardRequired] = useState(0);
   const [shardPlayerOvr, setShardPlayerOvr] = useState(105);
   const dragPayloadRef = useRef(null);
+  const [draggingKey, setDraggingKey] = useState('');
+  const [dragOverSlotId, setDragOverSlotId] = useState('');
+  const [dragOverBenchIndex, setDragOverBenchIndex] = useState(-1);
 
   const formationSlots = SQUAD_FORMATIONS[formationId] || SQUAD_FORMATIONS['4-3-3'];
 
@@ -583,11 +867,31 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     [bench, playersById, starters]
   );
 
+  const starterAdjustedOvrBySlot = useMemo(() => {
+    const adjustedBySlot = {};
+    formationSlots.forEach((slot) => {
+      const playerId = starters[slot.id];
+      if (!playerId) return;
+      const player = playersById.get(playerId);
+      if (!player) return;
+      adjustedBySlot[slot.id] = getPositionAdjustedOvr(player, slot.label);
+    });
+    return adjustedBySlot;
+  }, [formationSlots, playersById, starters]);
+
   const squadOvr = useMemo(() => {
-    if (!squadPlayers.length) return 0;
-    const total = squadPlayers.reduce((sum, player) => sum + toNumber(player.ovr, 0), 0);
-    return Math.round(total / squadPlayers.length);
-  }, [squadPlayers]);
+    const starterTotal = formationSlots.reduce((sum, slot) => {
+      const adjustedOvr = toNumber(starterAdjustedOvrBySlot[slot.id], 0);
+      return sum + adjustedOvr;
+    }, 0);
+    const benchPlayers = bench
+      .map((playerId) => playersById.get(playerId))
+      .filter(Boolean);
+    const benchTotal = benchPlayers.reduce((sum, player) => sum + toNumber(player.ovr, 0), 0);
+    const denominator = formationSlots.length + benchPlayers.length;
+    if (!denominator || starterTotal + benchTotal <= 0) return 0;
+    return Math.ceil((starterTotal + benchTotal) / denominator);
+  }, [bench, formationSlots, playersById, starterAdjustedOvrBySlot]);
 
   const squadValue = useMemo(() => {
     if (!squadPlayers.length) return 0;
@@ -703,17 +1007,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     }));
   };
 
-  const assignPlayerToBench = (playerId) => {
-    if (!playerId || assignedPlayerIds.has(playerId)) return;
-    setBench((current) => {
-      const next = [...current];
-      const emptyIndex = next.findIndex((entry) => !entry);
-      if (emptyIndex === -1) return current;
-      next[emptyIndex] = playerId;
-      return next;
-    });
-  };
-
   const removeStarter = (slotId) => {
     setStarters((current) => {
       const next = { ...current };
@@ -734,6 +1027,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     setStarters({});
     setBench(Array.from({ length: 7 }, () => ''));
     setSelectedSlotId((SQUAD_FORMATIONS[formationId] || [])[0]?.id || 'GK');
+  };
+
+  const clearDragState = () => {
+    dragPayloadRef.current = null;
+    setDraggingKey('');
+    setDragOverSlotId('');
+    setDragOverBenchIndex(-1);
   };
 
   const movePlayer = (payload, destination) => {
@@ -794,22 +1094,67 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     setBench(nextBench);
   };
 
-  const handleDragStart = (payload) => {
+  const handleDragStart = (event, payload, sourceKey) => {
+    if (event?.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', payload?.playerId || '');
+    }
     dragPayloadRef.current = payload;
+    setDraggingKey(sourceKey || '');
   };
 
-  const handleDropOnSlot = (slotId) => {
+  const handleDragEnd = () => {
+    clearDragState();
+  };
+
+  const handleSlotDragOver = (event, slotId) => {
+    if (!dragPayloadRef.current || !slotId) return;
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    setDragOverSlotId(slotId);
+    setDragOverBenchIndex(-1);
+  };
+
+  const handleBenchDragOver = (event, benchIndex) => {
+    if (!dragPayloadRef.current || !Number.isInteger(benchIndex)) return;
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    setDragOverBenchIndex(benchIndex);
+    setDragOverSlotId('');
+  };
+
+  const handleSlotDragLeave = (slotId) => {
+    setDragOverSlotId((current) => (current === slotId ? '' : current));
+  };
+
+  const handleBenchDragLeave = (benchIndex) => {
+    setDragOverBenchIndex((current) => (current === benchIndex ? -1 : current));
+  };
+
+  const handleDropOnSlot = (event, slotId) => {
+    event.preventDefault();
     const payload = dragPayloadRef.current;
-    dragPayloadRef.current = null;
-    if (!slotId || !payload) return;
+    if (!slotId || !payload) {
+      clearDragState();
+      return;
+    }
     movePlayer(payload, { type: 'slot', slotId });
+    clearDragState();
   };
 
-  const handleDropOnBench = (benchIndex) => {
+  const handleDropOnBench = (event, benchIndex) => {
+    event.preventDefault();
     const payload = dragPayloadRef.current;
-    dragPayloadRef.current = null;
-    if (!Number.isInteger(benchIndex) || !payload) return;
+    if (!Number.isInteger(benchIndex) || !payload) {
+      clearDragState();
+      return;
+    }
     movePlayer(payload, { type: 'bench', benchIndex });
+    clearDragState();
   };
 
   const openSquadFilterPanel = () => {
@@ -974,7 +1319,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const compareConfigPlayer = compareConfigPlayerId ? playersById.get(compareConfigPlayerId) : null;
   const compareConfigPoints = Math.max(0, toNumber(compareConfigDraft.rank, 0));
   const activeFieldTheme = FIELD_THEMES[fieldThemeId] || FIELD_THEMES['camp-nou'];
-  const fieldThemeClassName = activeFieldTheme.className || '';
+  const fieldThemeClassName = `theme-${activeFieldTheme.id}`;
 
   return (
     <>
@@ -1378,28 +1723,39 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                 {formationSlots.map((slot) => {
                   const playerId = starters[slot.id] || '';
                   const player = playerId ? playersById.get(playerId) : null;
-                  const variant = getPlayerType(player);
+                  const variant = player ? getPlayerType(player) : 'hero';
+                  const adjustedOvr = player ? toNumber(starterAdjustedOvrBySlot[slot.id], 0) : 0;
+                  const dragKey = player ? `slot-${slot.id}` : '';
                   return (
                     <div
                       key={`${formationId}-${slot.id}`}
-                      className="squad-slot"
+                      className={`squad-slot ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
                       style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
                       data-slot-id={slot.id}
                       onClick={() => setSelectedSlotId(slot.id)}
+                      onDragOver={(event) => handleSlotDragOver(event, slot.id)}
+                      onDragLeave={() => handleSlotDragLeave(slot.id)}
+                      onDrop={(event) => handleDropOnSlot(event, slot.id)}
                     >
                       <div className="position-dot">
                         <span className="position-label">{slot.label}</span>
                       </div>
 
                       {!!player && (
-                        <div className="player-preview-card" data-player-id={player.playerId}>
+                        <div
+                          className={`player-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
+                          data-player-id={player.playerId}
+                          draggable
+                          onDragStart={(event) => handleDragStart(event, { source: 'slot', playerId: player.playerId, slotId: slot.id }, dragKey)}
+                          onDragEnd={handleDragEnd}
+                        >
                           <div className="preview-card-inner">
                             <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="preview-card-bg" />
                             {!!player.playerImage && (
                               <img src={player.playerImage} alt={player.name} className="preview-card-player-img" />
                             )}
                             <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                              {player.ovr > 0 ? player.ovr : 'NA'}
+                              {adjustedOvr > 0 ? adjustedOvr : 'NA'}
                             </div>
                             <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
                               {player.position || 'NA'}
@@ -1450,14 +1806,28 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
               <div id="squad-bench" className="squad-bench">
                 {bench.map((playerId, index) => {
                   const player = playerId ? playersById.get(playerId) : null;
-                  const variant = getPlayerType(player);
+                  const variant = player ? getPlayerType(player) : 'hero';
+                  const dragKey = player ? `bench-${index}` : '';
                   return (
-                    <div key={`bench-${index}`} className={`bench-cell ${player ? 'filled' : ''}`} data-bench-index={index}>
+                    <div
+                      key={`bench-${index}`}
+                      className={`bench-cell ${player ? 'filled' : ''} ${dragOverBenchIndex === index ? 'drag-over' : ''}`}
+                      data-bench-index={index}
+                      onDragOver={(event) => handleBenchDragOver(event, index)}
+                      onDragLeave={() => handleBenchDragLeave(index)}
+                      onDrop={(event) => handleDropOnBench(event, index)}
+                    >
                       <div className="bench-empty-slot">
                         <span className="bench-slot-label">BENCH {index + 1}</span>
                       </div>
                       {!!player && (
-                        <div className="bench-preview-card" data-player-id={player.playerId}>
+                        <div
+                          className={`bench-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
+                          data-player-id={player.playerId}
+                          draggable
+                          onDragStart={(event) => handleDragStart(event, { source: 'bench', playerId: player.playerId, benchIndex: index }, dragKey)}
+                          onDragEnd={handleDragEnd}
+                        >
                           <div className="bench-card-inner">
                             <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="bench-card-bg" />
                             {!!player.playerImage && (
@@ -1529,42 +1899,115 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
               </div>
 
               <div className="squad-player-list">
-                {squadPickerPlayers.map((player) => (
-                  <div key={player.playerId} className="picker-row">
-                    <div className="picker-card-mini">
-                      <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
-                      {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
-                      <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                        {player.ovr > 0 ? player.ovr : 'NA'}
+                {squadPickerPlayers.map((player) => {
+                  const variant = getPlayerType(player);
+                  const dragKey = `picker-${player.playerId}`;
+                  return (
+                    <div
+                      key={player.playerId}
+                      className={`picker-row ${draggingKey === dragKey ? 'dragging' : ''}`}
+                      draggable
+                      onDragStart={(event) => handleDragStart(event, { source: 'picker', playerId: player.playerId }, dragKey)}
+                      onDragEnd={handleDragEnd}
+                      onClick={() => assignPlayerToSelectedSlot(player.playerId)}
+                    >
+                      <div className="picker-card-mini">
+                        <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
+                        {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
+                        <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
+                          {player.ovr > 0 ? player.ovr : 'N/A'}
+                        </div>
+                        <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+                          {player.position || 'N/A'}
+                        </div>
+                        <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+                          {player.name}
+                        </div>
+                        {!!player.nationFlag && (
+                          <img
+                            src={player.nationFlag}
+                            alt="Nation"
+                            className={`picker-squad-card-flag-nation ${variant === 'normal' ? 'normal-squad-nation-flag' : 'hero-icon-squad-nation-flag'}`}
+                          />
+                        )}
+                        {!!player.clubFlag && (
+                          <img
+                            src={player.clubFlag}
+                            alt="Club"
+                            className={`picker-squad-card-flag-club ${variant === 'normal' ? 'normal-squad-club-flag' : 'hero-icon-squad-club-flag'}`}
+                          />
+                        )}
+                        {variant === 'normal' && !!player.leagueImage && (
+                          <img src={player.leagueImage} alt="League" className="picker-squad-card-flag-league normal-squad-league-flag" />
+                        )}
+                        {player.isUntradable && (
+                          <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
+                            <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                          </div>
+                        )}
                       </div>
-                      <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                        {player.position || 'NA'}
-                      </div>
-                      <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                        {player.name}
-                      </div>
-                    </div>
 
-                    <div>
-                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{player.name}</div>
-                      <div style={{ color: '#98A0A6', fontSize: '12px' }}>
-                        {player.position || 'NA'} • {player.club || 'Unknown'} • {player.nation || 'Unknown'}
+                      <div className="picker-main">
+                        <div className="picker-name">{player.name}</div>
+                        <div className="picker-meta">
+                          {player.position || 'N/A'} • {player.club || 'Unknown'}
+                        </div>
                       </div>
-                    </div>
 
-                    <div style={{ display: 'grid', gap: '6px' }}>
-                      <button className="squad-btn" onClick={() => assignPlayerToSelectedSlot(player.playerId)} type="button">
-                        {selectedSlotId ? `+ ${selectedSlotId}` : 'Add'}
-                      </button>
-                      <button className="squad-btn" onClick={() => assignPlayerToBench(player.playerId)} type="button">
-                        Bench
-                      </button>
+                      <div className="picker-ovr-right">{player.ovr > 0 ? player.ovr : 'N/A'}</div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {!squadPickerPlayers.length && <p style={{ color: '#98A0A6', textAlign: 'center' }}>No available players match the current search.</p>}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="theme-selector-overlay"
+        className="theme-selector-overlay"
+        style={{ display: themeSelectorOpen ? 'flex' : 'none' }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setThemeSelectorOpen(false);
+          }
+        }}
+      >
+        <div className="theme-selector-content" onClick={(event) => event.stopPropagation()}>
+          <div className="theme-selector-header">
+            <h3>Select Field Theme</h3>
+            <button id="close-theme-selector" className="theme-close-btn" onClick={() => setThemeSelectorOpen(false)} type="button">
+              ✕
+            </button>
+          </div>
+          <div id="theme-gallery" className="theme-gallery">
+            {Object.values(FIELD_THEMES).map((theme) => (
+              <div
+                key={theme.id}
+                className={`theme-option ${fieldThemeDraft === theme.id ? 'active' : ''}`}
+                data-theme-id={theme.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setFieldThemeDraft(theme.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setFieldThemeDraft(theme.id);
+                  }
+                }}
+              >
+                <div className="theme-option-preview" style={{ background: theme.background, backgroundAttachment: 'fixed' }}>
+                  <div className="theme-option-name">{theme.name}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="theme-selector-footer">
+            <button id="apply-theme-btn" className="apply-theme-btn" onClick={applyThemeSelection} type="button">
+              Apply Theme
+            </button>
           </div>
         </div>
       </div>

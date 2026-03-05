@@ -1,4 +1,5 @@
 import SiteChromeInteractions from './SiteChromeInteractions.client';
+import MarketNavLink from './MarketNavLink.client';
 
 function getNavClass(activeView, view) {
   return activeView === view ? 'nav-link active' : 'nav-link';
@@ -23,9 +24,9 @@ export default function SiteChrome({ activeView = '', showSlider = true, childre
             <a href="/players" data-link="" data-nav-link="" className={getNavClass(activeView, 'players')}>
               Players
             </a>
-            <a href="/market" data-link="" data-nav-link="" className={getNavClass(activeView, 'market')}>
+            <MarketNavLink href="/market" data-link="" data-nav-link="" className={getNavClass(activeView, 'market')}>
               Market
-            </a>
+            </MarketNavLink>
             <a href="/watchlist" data-link="" data-nav-link="" className={getNavClass(activeView, 'watchlist')}>
               Watchlist
             </a>
@@ -78,9 +79,9 @@ export default function SiteChrome({ activeView = '', showSlider = true, childre
             <a href="/players" data-link="" data-nav-link="">
               Database
             </a>
-            <a href="/market" data-link="" data-nav-link="">
+            <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
-            </a>
+            </MarketNavLink>
             <a href="/watchlist" data-link="" data-nav-link="">
               Watchlist
             </a>
