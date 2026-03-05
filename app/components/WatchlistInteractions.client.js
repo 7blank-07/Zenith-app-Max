@@ -152,6 +152,7 @@ function renderPlayerRow(player) {
   const metaParts = [toText(player.team), toText(player.league)].filter(Boolean);
   const metaText = metaParts.length ? metaParts.join(' • ') : toText(player.position || 'Unknown');
   const formattedPrice = formatPrice(player.price);
+  const shouldShowPrice = !player.is_untradable;
   const alternatePositions = toText(player.alternate_position)
     .split(',')
     .map((entry) => toText(entry).toUpperCase())
@@ -241,11 +242,13 @@ function renderPlayerRow(player) {
       <div class="watchlist-row-actions">
         <div class="player-price watchlist-player-price">
           ${
-            formattedPrice === '—'
-              ? '<span class="watchlist-price-empty">No price</span>'
-              : `<span class="price-inline"><img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon"><span class="price-text">${escapeHtml(
-                  formattedPrice
-                )}</span></span>`
+            shouldShowPrice
+              ? formattedPrice === '—'
+                ? '<span class="watchlist-price-empty">Loading...</span>'
+                : `<span class="price-inline"><img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon"><span class="price-text">${escapeHtml(
+                    formattedPrice
+                  )}</span></span>`
+              : ''
           }
         </div>
 
@@ -302,9 +305,6 @@ export default function WatchlistInteractions() {
     const mobileRatingMaxInput = document.getElementById('mobile-rating-max');
     const mobileRatingValue = document.getElementById('mobile-watchlist-rating-value');
 
-    const previewPopup = document.getElementById('watchlist-preview-popup');
-    const previewContent = document.getElementById('watchlist-preview-content');
-
     const cleanup = [];
     const filters = {
       position: '',
@@ -321,6 +321,7 @@ export default function WatchlistInteractions() {
     let watchlistIds = readArrayStorage('watchlist').map((entry) => toText(entry)).filter(Boolean);
     let watchlistPlayers = readArrayStorage('watchlistPlayers').map(normalizeWatchlistPlayer);
     let filteredPlayers = [];
+    let priceHydrationRun = 0;
 
     const getActiveFilterCount = () => {
       let count = 0;
@@ -402,6 +403,59 @@ export default function WatchlistInteractions() {
       renderOptions(mobileNationSelect, 'Nations', nations, filters.nation);
       renderOptions(mobileEventSelect, 'Events', events, filters.event);
       renderOptions(mobileSkillSelect, 'Skills', skills, filters.skill);
+    };
+
+    const hydrateTradablePrices = async () => {
+      const runId = ++priceHydrationRun;
+      const tradablePlayers = watchlistPlayers.filter((player) => !player.is_untradable && getPlayerId(player));
+      if (!tradablePlayers.length) return;
+
+      const priceByUniqueId = {};
+      const batchSize = 20;
+
+      for (let index = 0; index < tradablePlayers.length; index += batchSize) {
+        const batch = tradablePlayers.slice(index, index + batchSize);
+        const batchResults = await Promise.all(
+          batch.map(async (player) => {
+            const playerId = getPlayerId(player);
+            const rank = toNumber(player.rank, 0);
+            const uniqueId = getPlayerUniqueId(player);
+            try {
+              const response = await fetch(
+                `/api/player-price?id=${encodeURIComponent(playerId)}&rank=${encodeURIComponent(rank)}`,
+                { cache: 'no-store' }
+              );
+              if (!response.ok) return [uniqueId, 0];
+              const payload = await response.json();
+              return [uniqueId, toNumber(payload?.price, 0)];
+            } catch {
+              return [uniqueId, 0];
+            }
+          })
+        );
+
+        if (runId !== priceHydrationRun) return;
+        batchResults.forEach(([uniqueId, price]) => {
+          if (price > 0) priceByUniqueId[uniqueId] = price;
+        });
+      }
+
+      if (runId !== priceHydrationRun || !Object.keys(priceByUniqueId).length) return;
+
+      let changed = false;
+      watchlistPlayers = watchlistPlayers.map((player) => {
+        if (player.is_untradable) return player;
+        const uniqueId = getPlayerUniqueId(player);
+        const nextPrice = toNumber(priceByUniqueId[uniqueId], 0);
+        if (!nextPrice || toNumber(player.price, 0) === nextPrice) return player;
+        changed = true;
+        return { ...player, price: nextPrice };
+      });
+
+      if (changed) {
+        writeArrayStorage('watchlistPlayers', watchlistPlayers);
+        applyFilters();
+      }
     };
 
     const renderActiveChips = () => {
@@ -521,6 +575,7 @@ export default function WatchlistInteractions() {
       syncSources();
       updateFilterOptions();
       applyFilters();
+      hydrateTradablePrices();
     };
 
     const handleGridClick = (event) => {
@@ -539,28 +594,6 @@ export default function WatchlistInteractions() {
       const playerId = toText(row.getAttribute('data-player-id'));
       if (!playerId) return;
       window.location.assign(`/player/${encodeURIComponent(playerId)}`);
-    };
-
-    const handleGridPreview = (event) => {
-      if (!previewPopup || !previewContent) return;
-      const row = event.target.closest('.player-row');
-      if (!row) {
-        previewPopup.style.display = 'none';
-        return;
-      }
-      const card = row.querySelector('.player-row-card');
-      if (!card) {
-        previewPopup.style.display = 'none';
-        return;
-      }
-      previewContent.innerHTML = card.outerHTML;
-      previewPopup.style.display = 'block';
-      previewPopup.style.left = `${event.clientX + 16}px`;
-      previewPopup.style.top = `${event.clientY + 16}px`;
-    };
-
-    const hideGridPreview = () => {
-      if (previewPopup) previewPopup.style.display = 'none';
     };
 
     const bind = (element, eventName, handler) => {
@@ -673,8 +706,6 @@ export default function WatchlistInteractions() {
     });
 
     bind(grid, 'click', handleGridClick);
-    bind(grid, 'mousemove', handleGridPreview);
-    bind(grid, 'mouseleave', hideGridPreview);
     bind(window, 'watchlist-updated', refreshFromStorage);
     bind(window, 'storage', (event) => {
       if (!event.key || (event.key !== 'watchlist' && event.key !== 'watchlistPlayers')) return;
@@ -684,6 +715,7 @@ export default function WatchlistInteractions() {
     refreshFromStorage();
 
     return () => {
+      priceHydrationRun += 1;
       cleanup.forEach((dispose) => dispose());
     };
   }, []);

@@ -226,19 +226,6 @@ export default function WatchlistPage() {
         </div>
       </div>
 
-      <div
-        id="watchlist-preview-popup"
-        style={{
-          position: 'fixed',
-          zIndex: 1200,
-          display: 'none',
-          pointerEvents: 'none',
-          width: '120px'
-        }}
-      >
-        <div id="watchlist-preview-content" />
-      </div>
-
         <WatchlistInteractions />
       </main>
     </SiteChrome>
