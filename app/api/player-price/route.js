@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
+const FALLBACK_SUPABASE_URL = 'https://ugszalubwvartwalsejx.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnc3phbHVid3ZhcnR3YWxzZWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NTg4MzksImV4cCI6MjA3NDIzNDgzOX0.wHH6DctC6mtNcqZ4VeCdlPHk_Tg9xbfrY90EAUKvI8k';
+
 function parseRank(rankValue) {
   const parsed = Number.parseInt(String(rankValue ?? '0'), 10);
   if (!Number.isFinite(parsed)) return 0;
@@ -10,8 +14,8 @@ function parseRank(rankValue) {
 }
 
 function getSupabaseConfig() {
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
   return { url, key };
 }
 
@@ -35,7 +39,7 @@ export async function GET(request) {
     .from('price_snapshots')
     .select(`asset_id, captured_at, ${priceColumn}`)
     .eq('asset_id', playerId)
-    .order('captured_at', { ascending: false })
+    .not(priceColumn, 'is', null)
     .limit(1)
     .maybeSingle();
 

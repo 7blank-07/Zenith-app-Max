@@ -66,10 +66,13 @@ REVALIDATE_SECRET=dev-secret npm run start
 ```
 
 Open:
+- `http://localhost:3000/`
 - `http://localhost:3000/players`
 - `http://localhost:3000/market`
 - `http://localhost:3000/player/<id-from-src/data/top-players.json>`
 - `http://localhost:3000/sitemap.xml`
+- Next-native routes: `/watchlist`, `/tools`
+- Compatibility deep links still available: `/squad-builder`, `/compare`, `/shard-calculator` (redirect to `/tools`)
 
 ---
 
@@ -121,7 +124,44 @@ npm run revalidate:call -- --endpoint http://localhost:3000/api/revalidate --sec
 
 1. `npm run generate:top-players`
 2. `TOP_PLAYERS_PRERENDER_LIMIT=20 npm run build` (or PowerShell equivalent)
-3. `REVALIDATE_SECRET=dev-secret npm run start` (or PowerShell equivalent)
-4. Open `/players`, `/market`, `/player/<id>`, `/sitemap.xml`
-5. Run `npm run rollout:status`
-6. Run `npm run revalidate:call ...` and confirm success response
+3. `npm run build` (full 10k pre-render validation)
+4. `REVALIDATE_SECRET=dev-secret npm run start` (or PowerShell equivalent)
+5. Open `/`, `/players`, `/market`, `/player/<id>`, `/sitemap.xml`
+6. Check tools routing (`/tools`, plus deep links `/squad-builder`, `/compare`, `/shard-calculator`)
+7. Run `npm run rollout:status`
+8. Run `npm run revalidate:call ...` and confirm success response
+
+---
+
+## 10) No-JS SEO/source validation (important)
+
+For SEO validation, check page source (not hydrated DOM):
+
+1. Start server:
+   - PowerShell:
+   ```powershell
+   $env:REVALIDATE_SECRET='dev-secret'
+   npm run start
+   ```
+2. In browser, open:
+   - `view-source:http://localhost:3000/`
+   - `view-source:http://localhost:3000/player/<id>`
+3. Confirm source HTML already includes:
+   - Home (`/`): `Top Players`, player card links, `OVR`, `Filter by Position`
+   - Player (`/player/[id]`): `Profile Overview`, `Skill Moves`, `Weak Foot`, `Related Players`, attribute table content
+4. Disable JavaScript in browser DevTools and reload:
+   - Layout should remain mostly complete
+   - Server profile/content should remain visible
+   - Only live widgets (price/refresh/simulator) lose interactivity
+
+---
+
+## 11) Rollout safety notes
+
+- Recommended rollout path:
+  1. `TOP_PLAYERS_PRERENDER_LIMIT=20` (fast local validation)
+  2. `PRERENDER_TIER=1k` (initial deployment)
+  3. `PRERENDER_TIER=5k`
+  4. `PRERENDER_TIER=10k`
+- Use `npm run rollout:status` before deploy to confirm effective tier/limit.
+- Keep `REVALIDATE_SECRET` set in runtime and use `/api/revalidate` for targeted refreshes instead of full rebuilds.
