@@ -1,300 +1,169 @@
-Goal
+Context
 
-Rewrite the entire Zenith legacy SPA into a full Next.js App Router application while keeping the interface visually identical to the original SPA.
+The Zenith SPA → Next.js migration has already been completed through Phase 8.
 
-CRITICAL REQUIREMENT
+Home page and core routing now work correctly.
 
-The final UI must look EXACTLY the same as the original SPA.
+We are now repairing the **Players Database page** so it behaves exactly like the original SPA implementation.
 
-Visual parity with the SPA is mandatory:
+Target route:
 
-* same layout
-* same sections
-* same DOM hierarchy
-* same CSS classes
-* same visual styling
-* same component placement
-* same interactions
+/players
 
-Do NOT redesign anything.
-Do NOT simplify the layout.
-Do NOT rename CSS classes.
+Important Architecture Rules
 
-Recreate the exact markup structure used in the SPA so the existing CSS renders the interface identically.
+Do NOT execute or import legacy SPA scripts.
 
----
+Legacy files may be used **only as reference to understand behavior**, but all functionality must be implemented using **React state, hooks, and Next.js components**.
 
-Legacy SPA Analysis Requirement
+Do not attach manual DOM listeners.
 
-Before implementing anything, analyze the legacy SPA implementation to understand the exact DOM structure and UI behavior.
+Do not rewrite the entire page.
+Repair the existing Next.js implementation.
 
-Specifically inspect these files:
+Files to inspect
+
+app/players/page.js
+app/components/PlayersDatabaseInteractions.client.js
+app/components/PlayerPriceWidget.client.js
+
+Legacy behavior reference files
 
 assets/js/app.js
 assets/js/router.js
 assets/js/data/api-client.js
 assets/js/data/supabase-provider.js
 
-Identify how the SPA renders:
-
-* dashboard player cards
-* player database rows
-* player detail layout
-* watchlist table
-* tools page components
-* header and footer
-
-Extract the DOM structure and class names used by the SPA.
-
-The Next.js implementation must reproduce the same DOM structure so the existing CSS applies correctly.
-
-If a UI element existed in the SPA, it must exist in the Next.js version with the same layout and styling.
-
----
-
-Legacy Rendering Functions Reference
-
-The SPA already contains functions responsible for generating UI markup.
-
-Before implementing React components, inspect how these functions generate DOM markup:
-
-createDashboardPlayerCard
-renderPlayerDetail
-renderPlayerRow
-renderWatchlistTable
-renderToolsPage
-
-These functions define the correct DOM structure and CSS class usage.
-
-The Next.js implementation should reproduce the same markup structure inside React components so the UI appears identical to the SPA.
-
----
-
-Implementation Process
-
-Before writing any code:
-
-1. Analyze the legacy SPA implementation.
-2. Identify all UI sections rendered by the SPA.
-3. Map those sections to React components.
-4. Only after this analysis begin implementing the Next.js components.
-
-Do not start coding until the SPA structure has been fully understood.
-
----
-
-Existing CSS That Must Be Reused
-
-/assets/css/style.css
-/assets/css/tool-style.css
-/assets/css/watchlist-styles.css
-
-These styles already contain all UI styling.
-
-The implementation must reuse the same CSS selectors.
-
-Do NOT create new CSS unless absolutely required.
-
----
-
-CSS Preservation Rule
-
-Existing CSS must remain untouched.
-
-Do NOT rename, modify, or remove CSS classes used by the SPA.
-
-The Next.js implementation must use the same selectors so styling from the existing CSS files continues to apply.
-
-If a CSS selector existed in the SPA markup, the same selector must exist in the Next.js markup.
-
----
-
-Allowed Copilot Skills (use when helpful)
-
-vercel-react-best-practices
-vercel-composition-patterns
-web-design-guidelines
-
-Use these skills if they improve component structure, performance, or accessibility.
-
----
-
-Architecture Constraints
-
-Keep the current Next.js architecture.
-
-Do NOT remove or change:
+Do NOT modify
 
 generateStaticParams
 revalidate
-server SEO metadata
-
-The following route must remain ISR:
-
-/player/[id]
-
-The server data layer inside:
-
 src/lib/server/*
 
-must remain unchanged.
+Do NOT modify generated files
 
----
+src/lib/legacy-body.html
+public/assets/js/legacy-app.bundle.mjs
 
-Pages That Must Be Rebuilt With Full SPA Parity
+Phase 1 — Diagnose the Players Page
 
-HOME PAGE (/)
+Analyze the current implementation of the /players page and determine why the following SPA behaviors are missing or broken:
 
-Must include:
+Auction Status toggle filter
+Player prices not loading in rows
+Stats button (open-stats-modal) not opening the stats modal
+Sorting not working (Name, Rating, Price)
+Pagination missing (should load only 70 players initially)
 
-Header navigation
-Global search bar
-Banner section
-Latest players section
-Trending players section
-Recent events section
-Player cards grid
-Footer
+Trace how these features worked in the legacy SPA and identify where the Next.js implementation lost these behaviors.
 
-Player cards must reuse the existing dashboard-player-card markup.
+Do not modify files yet.
 
----
+Phase 2 — Repair the Next.js Implementation
 
-PLAYERS DATABASE PAGE (/players)
+Repair the /players page using React hooks and component logic.
 
-This must replicate the SPA player database view exactly.
+Restore the following behaviors exactly as they worked in the SPA.
 
-Required features:
+Auction Status Toggle
 
-Search bar
-Filters (position, nation, league, etc)
-Sorting controls
-Player rows table
-Watchlist heart button
-Player card preview popup
-open-stats-modal (stats) for filtering by stats
+Add the Auction Status toggle to the filter panel.
 
-Each player row must include these columns:
+Behavior:
 
-Position
-Sub position
-Player name
-OVR
-PAC
-SHO
-PAS
-DRI
-DEF
-PHY
+OFF → show all players
+ON → show only auctionable players
 
-Use the same row layout and CSS classes used in the SPA.
+Filtering must update the players dataset using React state.
 
----
+Player Prices
 
-PLAYER DETAIL PAGE (/player/[id])
+Currently player rows show "No data".
 
-Restore all sections that existed in the SPA:
+Fix the player rows so that each row loads the correct market price using the existing player price API or PlayerPriceWidget.
 
-Player card
-Rank selector
-Training level
-Stats
-Skills & abilities
-League
-Work rates
-Strong foot
-Weak foot
-Body information
-Add to watchlist button
-Market data
+Prices must render correctly inside the table rows.
 
-Reuse the same DOM structure used in the SPA player detail layout.
+Stats Modal
 
-Do NOT simplify the player page.
+Each player row contains a Stats button.
 
----
+Currently clicking it does nothing.
 
-WATCHLIST PAGE (/watchlist)
+Reconnect the interaction so clicking the button opens the player stats modal exactly like the SPA version.
 
-Must include:
+Sorting
 
-Search bar
-Filters
-Player rows
-Basic stat columns
-Card preview popup
-Watchlist management actions
+Restore sorting functionality for:
 
-Use the same table layout used by the SPA watchlist.
+Sort by Name
+Sort by Rating
+Sort by Price
 
----
+Sorting must be implemented using React state and memoized sorting logic.
 
-TOOLS PAGE (/tools)
+Pagination
 
-Must include these tools rebuilt as client components:
+The players page must initially load **70 players only**.
 
-Squad Builder
-Compare Players
-Profit Calculator
+A **Load More button** must appear at the bottom of the table.
 
-The tools page layout must visually match the SPA tools page.
+Each click should load the next 70 players.
 
----
+Example:
 
-Component Architecture
+Initial load → 70 players
+Load More → 140 players
+Load More → 210 players
 
-Use React Server Components for:
+Search Behavior
 
-Home page sections
-Player database table
-Player detail layout
+Searching players must behave like the SPA.
 
-Use Client Components for:
+Typing in the search field filters the players list instantly.
 
-Filters
-Watchlist interactions
-Tools
-Interactive UI widgets
+When clicking a player:
 
-Reuse existing DOM class names from the SPA to maintain styling.
+If the player page was already prerendered → it loads instantly.
 
-Do NOT create new CSS.
+If the player page was not prerendered → Next.js generates it using ISR.
 
----
+Do not modify ISR configuration.
 
-Implementation Rules
+Modal Interactions
 
-Preserve the exact DOM structure used in the SPA wherever possible.
+Ensure the following interactions work correctly:
 
-Existing class names such as:
+Stats modal
+Player preview card
+Row interaction behavior
 
-dashboard-player-card
-player-row-card
-player-top-section
-stats-grid-container
+UI Parity
 
-must remain unchanged.
+The /players page must look visually identical to the SPA version.
 
----
+Do not change CSS classes or DOM structure unless required to repair interactions.
+
+Phase 3 — Verification
+
+Verify that the following behaviors work:
+
+/players route loads successfully
+Auction toggle filters players correctly
+Player prices appear in rows
+Stats modal opens correctly
+Sorting works (Name, Rating, Price)
+Pagination loads 70 players at a time
+Search filters players correctly
+
+Ensure the page behaves exactly like the SPA version while using the Next.js architecture.
 
 Execution Protocol
 
-Work in phases.
+Repair the Players Database page and restore full SPA parity using Next.js and React logic.
 
-Implement only ONE phase per request.
+Do not execute legacy SPA scripts.
 
-After finishing a phase respond exactly:
+When the repair is complete respond exactly:
 
-Phase <N> complete.
-
-Then wait for the next instruction.
-
----
-
-Primary Objective
-
-Deliver a full Next.js rewrite that looks visually identical to the original SPA while preserving:
-
-ISR player pages
-SEO server rendering
-modern React architecture
+Players database parity restored.

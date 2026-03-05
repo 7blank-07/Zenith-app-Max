@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeSearchText } from './search-normalization';
 
 const STAT_KEYS = ['pac', 'sho', 'pas', 'dri', 'def', 'phy'];
 const FALLBACK_SUPABASE_URL = 'https://ugszalubwvartwalsejx.supabase.co';
@@ -16,7 +17,7 @@ function toNumber(value, fallback = 0) {
 }
 
 function toText(value) {
-  return String(value ?? '').trim().toLowerCase();
+  return normalizeSearchText(value);
 }
 
 function formatPrice(value) {

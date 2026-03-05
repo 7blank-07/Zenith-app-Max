@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ROUTE_MAP = Object.freeze({
   compare: '/tools?tool=compare',
@@ -29,7 +30,7 @@ function readCardText(card) {
     card?.dataset?.playerNation
   ];
   return textParts
-    .map((value) => String(value || '').toLowerCase().trim())
+    .map((value) => normalizeSearchText(value))
     .filter(Boolean)
     .join(' ');
 }
@@ -239,18 +240,19 @@ export default function HomeDashboardInteractions() {
       };
 
       const applySearch = () => {
-        const query = String(homeSearchInput.value || '').toLowerCase().trim();
-        if (query.length < 2) {
+        const rawQuery = String(homeSearchInput.value || '').trim();
+        const normalizedQuery = normalizeSearchText(rawQuery);
+        if (normalizedQuery.length < 2) {
           searchResultsDropdown.innerHTML = '';
           closeDropdown();
           activeResults = [];
           return;
         }
 
-        activeResults = homePlayers.filter((player) => player.searchableText.includes(query)).slice(0, 20);
+        activeResults = homePlayers.filter((player) => player.searchableText.includes(normalizedQuery)).slice(0, 20);
         selectedDropdownIndex = -1;
         if (!activeResults.length) {
-          renderNoResults(query);
+          renderNoResults(rawQuery);
         } else {
           renderDropdownResults(activeResults);
         }
@@ -280,7 +282,7 @@ export default function HomeDashboardInteractions() {
       };
 
       const onSearchFocus = () => {
-        if (String(homeSearchInput.value || '').trim().length >= 2) {
+        if (normalizeSearchText(homeSearchInput.value).length >= 2) {
           applySearch();
         }
       };

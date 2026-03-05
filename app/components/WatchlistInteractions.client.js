@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { normalizeSearchText } from './search-normalization';
 
 function toNumber(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
@@ -12,7 +13,7 @@ function toText(value) {
 }
 
 function toLowerText(value) {
-  return toText(value).toLowerCase();
+  return normalizeSearchText(value);
 }
 
 function normalizeBoolean(value) {
@@ -425,8 +426,10 @@ export default function WatchlistInteractions() {
     const applyFilters = () => {
       filteredPlayers = watchlistPlayers.filter((player) => {
         if (filters.searchQuery) {
-          const searchSource = `${player.name} ${player.position} ${player.team} ${player.league} ${player.nation}`.toLowerCase();
-          if (!searchSource.includes(filters.searchQuery.toLowerCase())) return false;
+          const searchSource = normalizeSearchText(
+            `${player.name} ${player.position} ${player.team} ${player.league} ${player.nation}`
+          );
+          if (!searchSource.includes(filters.searchQuery)) return false;
         }
         if (filters.position && toLowerText(player.position) !== toLowerText(filters.position)) return false;
         if (filters.league && toLowerText(player.league) !== toLowerText(filters.league)) return false;
@@ -556,13 +559,13 @@ export default function WatchlistInteractions() {
     };
 
     bind(searchInput, 'input', () => {
-      filters.searchQuery = toText(searchInput.value);
+      filters.searchQuery = normalizeSearchText(searchInput.value);
       if (mobileSearchInput) mobileSearchInput.value = searchInput.value;
       applyFilters();
     });
 
     bind(mobileSearchInput, 'input', () => {
-      filters.searchQuery = toText(mobileSearchInput.value);
+      filters.searchQuery = normalizeSearchText(mobileSearchInput.value);
       if (searchInput) searchInput.value = mobileSearchInput.value;
       applyFilters();
     });

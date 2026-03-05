@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ALIASES = Object.freeze({
   squadbuilder: 'squadbuilder',
@@ -257,7 +258,7 @@ function toNumber(value, fallback = 0) {
 }
 
 function toText(value) {
-  return String(value || '').toLowerCase().trim();
+  return normalizeSearchText(value);
 }
 
 function getPlayerId(player) {
