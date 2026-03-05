@@ -1,20 +1,63 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { normalizeSearchText } from './search-normalization';
 
 const PAGE_SIZE = 70;
-const STAT_KEYS = ['pac', 'sho', 'pas', 'dri', 'def', 'phy'];
-const DEFAULT_STAT_FILTERS = Object.freeze({
-  pac: 0,
-  sho: 0,
-  pas: 0,
-  dri: 0,
-  def: 0,
-  phy: 0
-});
+const BASE_ROW_STATS = Object.freeze([
+  { key: 'pac', label: 'PAC' },
+  { key: 'sho', label: 'SHO' },
+  { key: 'pas', label: 'PAS' },
+  { key: 'dri', label: 'DRI' },
+  { key: 'def', label: 'DEF' },
+  { key: 'phy', label: 'PHY' }
+]);
+const STAT_CATEGORY_ORDER = Object.freeze(['Offense', 'Defense', 'Physical', 'Goalkeeper', 'Other']);
+const CUSTOM_STATS = Object.freeze([
+  { id: 'acceleration', label: 'Acceleration', pillLabel: 'ACC', category: 'Offense', attributeKeys: ['acceleration'] },
+  { id: 'agility', label: 'Agility', pillLabel: 'AGI', category: 'Offense', attributeKeys: ['agility'] },
+  { id: 'ballControl', label: 'Ball Control', pillLabel: 'BLC', category: 'Offense', attributeKeys: ['ballControl', 'ball_control'] },
+  { id: 'crossing', label: 'Crossing', pillLabel: 'CRS', category: 'Offense', attributeKeys: ['crossing'] },
+  { id: 'curve', label: 'Curve', pillLabel: 'CRV', category: 'Offense', attributeKeys: ['curve'] },
+  { id: 'dribbling', label: 'Dribbling', pillLabel: 'DRI', category: 'Offense', attributeKeys: ['dribbling'] },
+  { id: 'finishing', label: 'Finishing', pillLabel: 'FIN', category: 'Offense', attributeKeys: ['finishing'] },
+  { id: 'freeKick', label: 'Free Kick', pillLabel: 'FK', category: 'Offense', attributeKeys: ['freeKick', 'free_kick'] },
+  { id: 'longPassing', label: 'Long Passing', pillLabel: 'LPA', category: 'Offense', attributeKeys: ['longPassing', 'long_passing'] },
+  { id: 'longShot', label: 'Long Shot', pillLabel: 'LSH', category: 'Offense', attributeKeys: ['longShot', 'long_shot'] },
+  { id: 'penalties', label: 'Penalties', pillLabel: 'PEN', category: 'Offense', attributeKeys: ['penalties'] },
+  { id: 'shortPassing', label: 'Short Passing', pillLabel: 'SPA', category: 'Offense', attributeKeys: ['shortPassing', 'short_passing'] },
+  { id: 'shotPower', label: 'Shot Power', pillLabel: 'SPO', category: 'Offense', attributeKeys: ['shotPower', 'shot_power'] },
+  { id: 'sprintSpeed', label: 'Sprint Speed', pillLabel: 'SPR', category: 'Offense', attributeKeys: ['sprintSpeed', 'sprint_speed'] },
+  { id: 'vision', label: 'Vision', pillLabel: 'VIS', category: 'Offense', attributeKeys: ['vision'] },
+  { id: 'volley', label: 'Volley', pillLabel: 'VOL', category: 'Offense', attributeKeys: ['volley'] },
+  { id: 'aggression', label: 'Aggression', pillLabel: 'AGR', category: 'Defense', attributeKeys: ['aggression'] },
+  { id: 'awareness', label: 'Awareness', pillLabel: 'AWR', category: 'Defense', attributeKeys: ['awareness'] },
+  { id: 'heading', label: 'Heading', pillLabel: 'HEA', category: 'Defense', attributeKeys: ['heading'] },
+  { id: 'marking', label: 'Marking', pillLabel: 'MRK', category: 'Defense', attributeKeys: ['marking'] },
+  { id: 'positioning', label: 'Positioning', pillLabel: 'POS', category: 'Defense', attributeKeys: ['positioning'] },
+  { id: 'reactions', label: 'Reactions', pillLabel: 'REA', category: 'Defense', attributeKeys: ['reactions'] },
+  { id: 'slidingTackle', label: 'Sliding Tackle', pillLabel: 'SLT', category: 'Defense', attributeKeys: ['slidingTackle', 'sliding_tackle'] },
+  { id: 'standingTackle', label: 'Standing Tackle', pillLabel: 'STT', category: 'Defense', attributeKeys: ['standingTackle', 'standing_tackle'] },
+  { id: 'balance', label: 'Balance', pillLabel: 'BAL', category: 'Physical', attributeKeys: ['balance'] },
+  { id: 'jumping', label: 'Jumping', pillLabel: 'JMP', category: 'Physical', attributeKeys: ['jumping'] },
+  { id: 'stamina', label: 'Stamina', pillLabel: 'STA', category: 'Physical', attributeKeys: ['stamina', 'stamina_stat'] },
+  { id: 'strength', label: 'Strength', pillLabel: 'STR', category: 'Physical', attributeKeys: ['strength'] },
+  { id: 'gkDiving', label: 'GK Diving', pillLabel: 'GKD', category: 'Goalkeeper', attributeKeys: ['gkDiving', 'gk_diving', 'goalkeeperDiving'] },
+  { id: 'gkHandling', label: 'GK Handling', pillLabel: 'GKH', category: 'Goalkeeper', attributeKeys: ['gkHandling', 'gk_handling', 'goalkeeperHandling'] },
+  { id: 'gkKicking', label: 'GK Kicking', pillLabel: 'GKK', category: 'Goalkeeper', attributeKeys: ['gkKicking', 'gk_kicking', 'goalkeeperKicking'] },
+  { id: 'gkPositioning', label: 'GK Positioning', pillLabel: 'GKP', category: 'Goalkeeper', attributeKeys: ['gkPositioning', 'gk_positioning', 'goalkeeperPositioning'] },
+  { id: 'gkReflexes', label: 'GK Reflexes', pillLabel: 'GKR', category: 'Goalkeeper', attributeKeys: ['gkReflexes', 'gk_reflexes', 'goalkeeperReflexes'] },
+  { id: 'dateAdded', label: 'Date Added', pillLabel: 'DATE', category: 'Other', valueType: 'dateAdded' },
+  { id: 'overall', label: 'Overall', pillLabel: 'OVR', category: 'Other', valueType: 'overall' },
+  { id: 'skillMoves', label: 'Skill Moves', pillLabel: 'SKL', category: 'Other', valueType: 'skillMoves' },
+  { id: 'weakFoot', label: 'Weak Foot', pillLabel: 'WF', category: 'Other', valueType: 'weakFoot' },
+  { id: 'height', label: 'Height', pillLabel: 'HGT', category: 'Other', valueType: 'height' },
+  { id: 'weight', label: 'Weight', pillLabel: 'WGT', category: 'Other', valueType: 'weight' },
+  { id: 'totalStats', label: 'Total Stats', pillLabel: 'TOT', category: 'Other', valueType: 'totalStats' }
+]);
+const CUSTOM_STATS_BY_ID = new Map(CUSTOM_STATS.map((entry) => [entry.id, entry]));
 const DEFAULT_FILTERS = Object.freeze({
   position: '',
   league: '',
@@ -54,6 +97,20 @@ function formatPrice(value) {
   return String(Math.round(safe));
 }
 
+function formatStatValue(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return '-';
+  return numeric > 0 ? Math.round(numeric) : '-';
+}
+
+function formatDate(value) {
+  const text = toText(value);
+  if (!text) return '-';
+  const parsed = Date.parse(text);
+  if (!Number.isFinite(parsed)) return text;
+  return new Date(parsed).toLocaleDateString();
+}
+
 function getInitials(name) {
   const words = toText(name)
     .split(/\s+/)
@@ -87,14 +144,14 @@ function parseAlternatePositions(value) {
     .filter((entry) => entry && entry !== '0');
 }
 
+function normalizeAttributes(attributes) {
+  if (!attributes || typeof attributes !== 'object') return {};
+  return attributes;
+}
+
 function normalizePlayer(player) {
   const playerId = toText(player?.playerId);
-  const pace = toNumber(player?.attributes?.pace, 0);
-  const shooting = toNumber(player?.attributes?.shooting, 0);
-  const passing = toNumber(player?.attributes?.passing, 0);
-  const dribbling = toNumber(player?.attributes?.dribbling, 0);
-  const defending = toNumber(player?.attributes?.defending, 0);
-  const physical = toNumber(player?.attributes?.physical, 0);
+  const attributes = normalizeAttributes(player?.attributes);
   const isUntradable = !!player?.isUntradable;
   const uniqueId = getPlayerUniqueId({
     playerId,
@@ -112,6 +169,10 @@ function normalizePlayer(player) {
     nation: toText(player?.nation),
     event: toText(player?.event || player?.eventName),
     skillMoves: toNumber(player?.skillMoves, 0),
+    weakFoot: toNumber(player?.weakFoot, 0),
+    heightCm: toNumber(player?.heightCm, 0),
+    weightKg: toNumber(player?.weightKg, 0),
+    dateAdded: toText(player?.dateAdded || player?.date_added || player?.createdAt || player?.created_at),
     isUntradable,
     price: toNumber(player?.price, 0),
     cardBackground: toText(player?.cardBackground),
@@ -123,12 +184,13 @@ function normalizePlayer(player) {
     colorRating: toText(player?.colorRating, '#FFB86B') || '#FFB86B',
     colorPosition: toText(player?.colorPosition, '#FFFFFF') || '#FFFFFF',
     alternatePositions: parseAlternatePositions(player?.alternatePosition),
-    pac: pace,
-    sho: shooting,
-    pas: passing,
-    dri: dribbling,
-    def: defending,
-    phy: physical,
+    pac: toNumber(attributes?.pace, 0),
+    sho: toNumber(attributes?.shooting, 0),
+    pas: toNumber(attributes?.passing, 0),
+    dri: toNumber(attributes?.dribbling, 0),
+    def: toNumber(attributes?.defending, 0),
+    phy: toNumber(attributes?.physical, 0),
+    attributes,
     searchText: normalizeSearchText(`${player?.name || ''} ${player?.position || ''} ${player?.club || ''} ${player?.league || ''} ${player?.nation || ''}`)
   };
 }
@@ -164,6 +226,7 @@ function buildWatchlistSnapshot(player, resolvedPrice) {
     isuntradable: player.isUntradable ? 1 : 0,
     skill_moves: player.skillMoves,
     skillmoves: player.skillMoves,
+    weak_foot_stars: player.weakFoot,
     pace: player.pac,
     shooting: player.sho,
     passing: player.pas,
@@ -189,6 +252,45 @@ function buildWatchlistSnapshot(player, resolvedPrice) {
     alternate_position: player.alternatePositions.join(','),
     alternateposition: player.alternatePositions.join(',')
   };
+}
+
+function readAttributeValue(player, keys) {
+  const source = player?.attributes || {};
+  for (const key of keys || []) {
+    const value = Number(source?.[key]);
+    if (Number.isFinite(value)) return value;
+  }
+  return Number.NaN;
+}
+
+function getCustomStatValue(player, statDefinition) {
+  if (!statDefinition) return '-';
+  if (statDefinition.attributeKeys) {
+    return formatStatValue(readAttributeValue(player, statDefinition.attributeKeys));
+  }
+  switch (statDefinition.valueType) {
+    case 'dateAdded':
+      return formatDate(player.dateAdded);
+    case 'overall':
+      return formatStatValue(player.ovr);
+    case 'skillMoves':
+      return formatStatValue(player.skillMoves);
+    case 'weakFoot':
+      return formatStatValue(player.weakFoot);
+    case 'height':
+      return player.heightCm > 0 ? `${Math.round(player.heightCm)}cm` : '-';
+    case 'weight':
+      return player.weightKg > 0 ? `${Math.round(player.weightKg)}kg` : '-';
+    case 'totalStats': {
+      const total = Object.values(player.attributes || {}).reduce((sum, value) => {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? sum + numeric : sum;
+      }, 0);
+      return total > 0 ? Math.round(total) : '-';
+    }
+    default:
+      return '-';
+  }
 }
 
 function renderPlayerCard(player) {
@@ -234,8 +336,24 @@ function renderPlayerCard(player) {
   );
 }
 
-function statDisplay(value) {
-  return value > 0 ? value : '-';
+function PlayerCardPreview({ player, x, y }) {
+  const isVisible = !!player;
+  return (
+    <div
+      id="player-preview-popup"
+      style={{
+        position: 'fixed',
+        zIndex: 1200,
+        pointerEvents: 'none',
+        width: '120px',
+        left: `${x}px`,
+        top: `${y}px`,
+        display: isVisible ? 'block' : 'none'
+      }}
+    >
+      <div id="player-preview-content">{player ? renderPlayerCard(player) : null}</div>
+    </div>
+  );
 }
 
 export default function PlayersDatabaseInteractions({
@@ -251,13 +369,14 @@ export default function PlayersDatabaseInteractions({
   const playerByUniqueId = useMemo(() => new Map(normalizedPlayers.map((player) => [player.uniqueId, player])), [normalizedPlayers]);
 
   const eventOptions = useMemo(() => uniqueSorted(normalizedPlayers.map((player) => player.event)), [normalizedPlayers]);
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [mobileFilters, setMobileFilters] = useState(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
+  const [mobileFilters, setMobileFilters] = useState({ ...DEFAULT_FILTERS });
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [statsModalOpen, setStatsModalOpen] = useState(false);
-  const [statFilters, setStatFilters] = useState(DEFAULT_STAT_FILTERS);
-  const [statDraft, setStatDraft] = useState(DEFAULT_STAT_FILTERS);
+  const [selectedStats, setSelectedStats] = useState([]);
+  const [statsDraftSelected, setStatsDraftSelected] = useState([]);
+  const [statsSearchQuery, setStatsSearchQuery] = useState('');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [preview, setPreview] = useState({ player: null, x: 0, y: 0 });
@@ -285,12 +404,15 @@ export default function PlayersDatabaseInteractions({
 
   const watchedIds = useMemo(() => new Set(watchlist), [watchlist]);
 
-  const getResolvedPrice = (player) => {
-    const livePrice = toNumber(livePrices[player.playerId], 0);
-    if (livePrice > 0) return livePrice;
-    const fallbackPrice = toNumber(player.price, 0);
-    return fallbackPrice > 0 ? fallbackPrice : 0;
-  };
+  const getResolvedPrice = useCallback(
+    (player) => {
+      const livePrice = toNumber(livePrices[player.playerId], 0);
+      if (livePrice > 0) return livePrice;
+      const fallbackPrice = toNumber(player.price, 0);
+      return fallbackPrice > 0 ? fallbackPrice : 0;
+    },
+    [livePrices]
+  );
 
   useEffect(() => {
     const tradableIds = normalizedPlayers.filter((player) => !player.isUntradable).map((player) => player.playerId);
@@ -351,7 +473,7 @@ export default function PlayersDatabaseInteractions({
         });
       return changed || next.length !== current.length ? next : current;
     });
-  }, [livePrices, playerByUniqueId, watchlistPlayers.length, watchedIds]);
+  }, [getResolvedPrice, playerByUniqueId, watchlistPlayers.length, watchedIds]);
 
   const normalizedSearchQuery = useMemo(() => normalizeSearchText(searchQuery), [searchQuery]);
 
@@ -365,12 +487,7 @@ export default function PlayersDatabaseInteractions({
       if (filters.nation && normalizeSearchText(player.nation) !== normalizeSearchText(filters.nation)) return false;
       if (filters.event && normalizeSearchText(player.event) !== normalizeSearchText(filters.event)) return false;
       if (filters.skill && String(player.skillMoves) !== String(filters.skill)) return false;
-      if (player.ovr < filters.ratingMin || player.ovr > filters.ratingMax) return false;
-      return STAT_KEYS.every((key) => {
-        const threshold = toNumber(statFilters[key], 0);
-        if (threshold <= 0) return true;
-        return toNumber(player[key], 0) >= threshold;
-      });
+      return !(player.ovr < filters.ratingMin || player.ovr > filters.ratingMax);
     });
 
     next.sort((left, right) => {
@@ -380,14 +497,14 @@ export default function PlayersDatabaseInteractions({
     });
 
     return next;
-  }, [filters, getResolvedPrice, normalizedPlayers, normalizedSearchQuery, sortBy, statFilters]);
+  }, [filters, getResolvedPrice, normalizedPlayers, normalizedSearchQuery, sortBy]);
 
   const visiblePlayers = useMemo(() => filteredPlayers.slice(0, visibleCount), [filteredPlayers, visibleCount]);
   const hasMorePlayers = visibleCount < filteredPlayers.length;
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [filters, normalizedSearchQuery, sortBy, statFilters]);
+  }, [filters, normalizedSearchQuery, sortBy]);
 
   const activeFilterChips = useMemo(() => {
     const chips = [];
@@ -399,19 +516,34 @@ export default function PlayersDatabaseInteractions({
     if (filters.skill) chips.push({ label: 'Skill', value: `${filters.skill}★` });
     if (filters.auctionable) chips.push({ label: 'Auction', value: 'Only With Prices' });
     if (filters.ratingMin !== 40 || filters.ratingMax !== 150) chips.push({ label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
-    STAT_KEYS.forEach((key) => {
-      if (toNumber(statFilters[key], 0) > 0) chips.push({ label: key.toUpperCase(), value: `>=${statFilters[key]}` });
-    });
+    if (selectedStats.length) chips.push({ label: 'Stats', value: `${selectedStats.length} selected` });
     return chips;
-  }, [filters, statFilters]);
+  }, [filters, selectedStats.length]);
+
+  const selectedStatDefinitions = useMemo(
+    () => selectedStats.map((statId) => CUSTOM_STATS_BY_ID.get(statId)).filter(Boolean),
+    [selectedStats]
+  );
+  const allCustomStatIds = useMemo(() => CUSTOM_STATS.map((stat) => stat.id), []);
+  const allStatsSelected = statsDraftSelected.length === allCustomStatIds.length && allCustomStatIds.length > 0;
+  const filteredModalStats = useMemo(() => {
+    const query = normalizeSearchText(statsSearchQuery);
+    if (!query) return CUSTOM_STATS;
+    return CUSTOM_STATS.filter((stat) => normalizeSearchText(`${stat.label} ${stat.category}`).includes(query));
+  }, [statsSearchQuery]);
+  const modalStatsByCategory = useMemo(() => {
+    const grouped = new Map(STAT_CATEGORY_ORDER.map((category) => [category, []]));
+    filteredModalStats.forEach((stat) => {
+      grouped.get(stat.category)?.push(stat);
+    });
+    return grouped;
+  }, [filteredModalStats]);
 
   const resetAllFilters = () => {
     setSearchQuery('');
     setSortBy('name');
-    setFilters(DEFAULT_FILTERS);
-    setMobileFilters(DEFAULT_FILTERS);
-    setStatFilters(DEFAULT_STAT_FILTERS);
-    setStatDraft(DEFAULT_STAT_FILTERS);
+    setFilters({ ...DEFAULT_FILTERS });
+    setMobileFilters({ ...DEFAULT_FILTERS });
   };
 
   const toggleWatchlist = (event, player) => {
@@ -448,7 +580,23 @@ export default function PlayersDatabaseInteractions({
     setMobileFilterOpen(false);
   };
 
-  const updatePreviewPosition = (event, player) => {
+  const openStatsModal = () => {
+    setStatsDraftSelected(selectedStats);
+    setStatsSearchQuery('');
+    setStatsModalOpen(true);
+  };
+
+  const toggleDraftStat = (statId) => {
+    setStatsDraftSelected((current) =>
+      current.includes(statId) ? current.filter((entry) => entry !== statId) : [...current, statId]
+    );
+  };
+
+  const toggleSelectAllStats = () => {
+    setStatsDraftSelected((current) => (current.length === allCustomStatIds.length ? [] : allCustomStatIds));
+  };
+
+  const handlePreviewEnter = (event, player) => {
     setPreview({
       player,
       x: event.clientX + 16,
@@ -456,7 +604,15 @@ export default function PlayersDatabaseInteractions({
     });
   };
 
-  const hidePreview = () => {
+  const handlePreviewMove = (event, player) => {
+    setPreview((current) => ({
+      player,
+      x: event.clientX + 16,
+      y: event.clientY + 16
+    }));
+  };
+
+  const handlePreviewLeave = () => {
     setPreview((current) => (current.player ? { player: null, x: 0, y: 0 } : current));
   };
 
@@ -685,7 +841,7 @@ export default function PlayersDatabaseInteractions({
               </div>
 
               <div className="toolbar-actions">
-                <button id="open-stats-modal" className="stats-btn" type="button" onClick={() => setStatsModalOpen(true)}>
+                <button id="open-stats-modal" className="stats-btn" type="button" onClick={openStatsModal}>
                   <span className="stats-icon" />
                   Stats
                 </button>
@@ -712,7 +868,7 @@ export default function PlayersDatabaseInteractions({
               {resultsCountText}
             </div>
 
-            <div className="players-grid" id="players-grid" style={{ background: 'transparent', minHeight: '60vh' }} onMouseLeave={hidePreview}>
+            <div className="players-grid" id="players-grid" style={{ background: 'transparent', minHeight: '60vh' }}>
               {visiblePlayers.map((player) => {
                 const resolvedPrice = getResolvedPrice(player);
                 const hasPrice = resolvedPrice > 0;
@@ -739,7 +895,9 @@ export default function PlayersDatabaseInteractions({
                     data-phy={player.phy}
                     data-price={resolvedPrice}
                     onClick={() => router.push(`/player/${encodeURIComponent(player.playerId)}`)}
-                    onMouseMove={(event) => updatePreviewPosition(event, player)}
+                    onMouseEnter={(event) => handlePreviewEnter(event, player)}
+                    onMouseMove={(event) => handlePreviewMove(event, player)}
+                    onMouseLeave={handlePreviewLeave}
                   >
                     <div className="player-card-scale">{renderPlayerCard(player)}</div>
 
@@ -778,30 +936,18 @@ export default function PlayersDatabaseInteractions({
                     </div>
 
                     <div className="player-row-stats player-card-stats-row">
-                      <div className="stat-pill">
-                        <div className="stat-pill-value">{statDisplay(player.pac)}</div>
-                        <div className="stat-pill-label">PAC</div>
-                      </div>
-                      <div className="stat-pill">
-                        <div className="stat-pill-value">{statDisplay(player.sho)}</div>
-                        <div className="stat-pill-label">SHO</div>
-                      </div>
-                      <div className="stat-pill">
-                        <div className="stat-pill-value">{statDisplay(player.pas)}</div>
-                        <div className="stat-pill-label">PAS</div>
-                      </div>
-                      <div className="stat-pill">
-                        <div className="stat-pill-value">{statDisplay(player.dri)}</div>
-                        <div className="stat-pill-label">DRI</div>
-                      </div>
-                      <div className="stat-pill">
-                        <div className="stat-pill-value">{statDisplay(player.def)}</div>
-                        <div className="stat-pill-label">DEF</div>
-                      </div>
-                      <div className="stat-pill">
-                        <div className="stat-pill-value">{statDisplay(player.phy)}</div>
-                        <div className="stat-pill-label">PHY</div>
-                      </div>
+                      {BASE_ROW_STATS.map((stat) => (
+                        <div key={`${player.uniqueId}-${stat.key}`} className="stat-pill">
+                          <div className="stat-pill-value">{formatStatValue(player[stat.key])}</div>
+                          <div className="stat-pill-label">{stat.label}</div>
+                        </div>
+                      ))}
+                      {selectedStatDefinitions.map((statDefinition) => (
+                        <div key={`${player.uniqueId}-${statDefinition.id}`} className="stat-pill">
+                          <div className="stat-pill-value">{getCustomStatValue(player, statDefinition)}</div>
+                          <div className="stat-pill-label">{statDefinition.pillLabel || statDefinition.label}</div>
+                        </div>
+                      ))}
                     </div>
 
                     <button
@@ -852,29 +998,53 @@ export default function PlayersDatabaseInteractions({
 
           <div className="stats-modal-content">
             <div className="stats-section">
-              <div className="section-header">
-                <h3 className="section-title">Minimum Stat Thresholds</h3>
+              <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 className="section-title">Select table stats</h3>
+                <span id="selected-stats-count">{statsDraftSelected.length} selected</span>
               </div>
-              <div className="price-tiers-grid">
-                {STAT_KEYS.map((key) => (
-                  <label key={key} className="price-tier-btn">
-                    {key.toUpperCase()}
-                    <input
-                      id={`stats-filter-${key}`}
-                      type="number"
-                      min="0"
-                      max="200"
-                      value={statDraft[key]}
-                      onChange={(event) =>
-                        setStatDraft((current) => ({
-                          ...current,
-                          [key]: clamp(toNumber(event.target.value, 0), 0, 200)
-                        }))
-                      }
-                    />
-                  </label>
-                ))}
+              <div className="search-container" style={{ marginBottom: '12px' }}>
+                <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  id="stats-search-input"
+                  type="text"
+                  className="search-input"
+                  placeholder="Search stats..."
+                  value={statsSearchQuery}
+                  onChange={(event) => setStatsSearchQuery(event.target.value)}
+                />
               </div>
+              <div style={{ marginBottom: '12px' }}>
+                <button className="btn-secondary" id="select-all-stats" type="button" onClick={toggleSelectAllStats}>
+                  {allStatsSelected ? 'Clear All' : 'Select All'}
+                </button>
+              </div>
+              {STAT_CATEGORY_ORDER.map((category) => {
+                const entries = modalStatsByCategory.get(category) || [];
+                if (!entries.length) return null;
+                return (
+                  <div key={category} className="stats-section" style={{ marginBottom: '12px' }}>
+                    <div className="section-header">
+                      <h3 className="section-title">{category}</h3>
+                    </div>
+                    <div className="price-tiers-grid">
+                      {entries.map((stat) => (
+                        <label key={stat.id} className="price-tier-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            id={`stats-filter-${stat.id}`}
+                            type="checkbox"
+                            checked={statsDraftSelected.includes(stat.id)}
+                            onChange={() => toggleDraftStat(stat.id)}
+                          />
+                          <span>{stat.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -885,9 +1055,8 @@ export default function PlayersDatabaseInteractions({
                 id="reset-stats-filters"
                 type="button"
                 onClick={() => {
-                  setStatDraft(DEFAULT_STAT_FILTERS);
-                  setStatFilters(DEFAULT_STAT_FILTERS);
-                  setStatsModalOpen(false);
+                  setStatsDraftSelected([]);
+                  setSelectedStats([]);
                 }}
               >
                 Reset
@@ -897,7 +1066,7 @@ export default function PlayersDatabaseInteractions({
                 id="apply-stats-filters"
                 type="button"
                 onClick={() => {
-                  setStatFilters(statDraft);
+                  setSelectedStats(statsDraftSelected);
                   setStatsModalOpen(false);
                 }}
               >
@@ -1094,20 +1263,7 @@ export default function PlayersDatabaseInteractions({
         </div>
       </div>
 
-      <div
-        id="player-preview-popup"
-        style={{
-          position: 'fixed',
-          zIndex: 1200,
-          display: preview.player ? 'block' : 'none',
-          pointerEvents: 'none',
-          width: '120px',
-          left: `${preview.x}px`,
-          top: `${preview.y}px`
-        }}
-      >
-        <div id="player-preview-content">{preview.player ? renderPlayerCard(preview.player) : null}</div>
-      </div>
+      <PlayerCardPreview player={preview.player} x={preview.x} y={preview.y} />
     </>
   );
 }

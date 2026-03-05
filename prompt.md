@@ -1,169 +1,152 @@
-Context
+Repair the remaining `/players` feature regressions.
 
-The Zenith SPA → Next.js migration has already been completed through Phase 8.
+Important rules:
 
-Home page and core routing now work correctly.
+• Do NOT use legacy SPA scripts
+• Do NOT import anything from `assets/js/*`
+• Do NOT use manual DOM listeners or querySelector logic
+• Implement everything using React state/hooks
 
-We are now repairing the **Players Database page** so it behaves exactly like the original SPA implementation.
+The `/players` page was migrated from SPA to Next.js and most functionality now works.
 
-Target route:
+Working features:
 
-/players
+* auctionable toggle
+* 70-player initial pagination
+* load more pagination
+* sorting
+* search filtering
+
+However two SPA parity features are still missing.
+
+---
+
+1️⃣ PLAYER HOVER CARD PREVIEW
 
-Important Architecture Rules
+Legacy behavior:
+
+When hovering a player row:
 
-Do NOT execute or import legacy SPA scripts.
+• A player card preview appears next to the mouse cursor
+• The preview updates instantly when hovering another player
+• The preview disappears when leaving the row
+• The preview follows the mouse position
+
+Implementation requirements:
 
-Legacy files may be used **only as reference to understand behavior**, but all functionality must be implemented using **React state, hooks, and Next.js components**.
+* Implement using React state in `PlayersDatabaseInteractions.client.js`
+* Track hovered player and mouse coordinates
+* Add row events:
 
-Do not attach manual DOM listeners.
+  * onMouseEnter
+  * onMouseMove
+  * onMouseLeave
 
-Do not rewrite the entire page.
-Repair the existing Next.js implementation.
+Render a floating `PlayerCardPreview` component that:
 
-Files to inspect
+• uses `position: fixed`
+• follows the cursor
+• updates when hovering different players
 
-app/players/page.js
-app/components/PlayersDatabaseInteractions.client.js
-app/components/PlayerPriceWidget.client.js
+Do NOT attach global DOM listeners.
 
-Legacy behavior reference files
+---
 
-assets/js/app.js
-assets/js/router.js
-assets/js/data/api-client.js
-assets/js/data/supabase-provider.js
+2️⃣ CUSTOM STATS MODAL (FULL SPA PARITY)
 
-Do NOT modify
+The stats modal currently only shows base stats:
 
-generateStaticParams
-revalidate
-src/lib/server/*
+PAC
+SHO
+PAS
+DRI
+DEF
+PHY
 
-Do NOT modify generated files
+But the SPA supported **30+ attribute stats**.
 
-src/lib/legacy-body.html
-public/assets/js/legacy-app.bundle.mjs
+Restore the full stat selector list.
 
-Phase 1 — Diagnose the Players Page
+Stats must include:
 
-Analyze the current implementation of the /players page and determine why the following SPA behaviors are missing or broken:
+Offense
+Acceleration
+Agility
+Ball Control
+Crossing
+Curve
+Dribbling
+Finishing
+Free Kick
+Long Passing
+Long Shot
+Penalties
+Short Passing
+Shot Power
+Sprint Speed
+Vision
+Volley
 
-Auction Status toggle filter
-Player prices not loading in rows
-Stats button (open-stats-modal) not opening the stats modal
-Sorting not working (Name, Rating, Price)
-Pagination missing (should load only 70 players initially)
+Defense
+Aggression
+Awareness
+Heading
+Marking
+Positioning
+Reactions
+Sliding Tackle
+Standing Tackle
 
-Trace how these features worked in the legacy SPA and identify where the Next.js implementation lost these behaviors.
+Physical
+Balance
+Jumping
+Stamina
+Strength
 
-Do not modify files yet.
+Goalkeeper
+GK Diving
+GK Handling
+GK Kicking
+GK Positioning
+GK Reflexes
 
-Phase 2 — Repair the Next.js Implementation
+Other
+Date Added
+Overall
+Skill Moves
+Weak Foot
+Height
+Weight
+Total Stats
 
-Repair the /players page using React hooks and component logic.
+Modal behavior must support:
 
-Restore the following behaviors exactly as they worked in the SPA.
+• selecting multiple stats
+• select all
+• stat search
+• selected counter
 
-Auction Status Toggle
+When clicking **Apply**:
 
-Add the Auction Status toggle to the filter panel.
+• selected stats become new columns in the players table
+• columns render inside `.player-row-stats`
+• values are taken from player attribute data
 
-Behavior:
+Example access:
 
-OFF → show all players
-ON → show only auctionable players
+player.attributes[statName]
 
-Filtering must update the players dataset using React state.
+Columns must update using React state so table rerenders.
 
-Player Prices
+---
 
-Currently player rows show "No data".
+Important:
 
-Fix the player rows so that each row loads the correct market price using the existing player price API or PlayerPriceWidget.
+Do not break existing functionality:
 
-Prices must render correctly inside the table rows.
+• sorting
+• filtering
+• pagination
+• load more
 
-Stats Modal
-
-Each player row contains a Stats button.
-
-Currently clicking it does nothing.
-
-Reconnect the interaction so clicking the button opens the player stats modal exactly like the SPA version.
-
-Sorting
-
-Restore sorting functionality for:
-
-Sort by Name
-Sort by Rating
-Sort by Price
-
-Sorting must be implemented using React state and memoized sorting logic.
-
-Pagination
-
-The players page must initially load **70 players only**.
-
-A **Load More button** must appear at the bottom of the table.
-
-Each click should load the next 70 players.
-
-Example:
-
-Initial load → 70 players
-Load More → 140 players
-Load More → 210 players
-
-Search Behavior
-
-Searching players must behave like the SPA.
-
-Typing in the search field filters the players list instantly.
-
-When clicking a player:
-
-If the player page was already prerendered → it loads instantly.
-
-If the player page was not prerendered → Next.js generates it using ISR.
-
-Do not modify ISR configuration.
-
-Modal Interactions
-
-Ensure the following interactions work correctly:
-
-Stats modal
-Player preview card
-Row interaction behavior
-
-UI Parity
-
-The /players page must look visually identical to the SPA version.
-
-Do not change CSS classes or DOM structure unless required to repair interactions.
-
-Phase 3 — Verification
-
-Verify that the following behaviors work:
-
-/players route loads successfully
-Auction toggle filters players correctly
-Player prices appear in rows
-Stats modal opens correctly
-Sorting works (Name, Rating, Price)
-Pagination loads 70 players at a time
-Search filters players correctly
-
-Ensure the page behaves exactly like the SPA version while using the Next.js architecture.
-
-Execution Protocol
-
-Repair the Players Database page and restore full SPA parity using Next.js and React logic.
-
-Do not execute legacy SPA scripts.
-
-When the repair is complete respond exactly:
-
-Players database parity restored.
+Goal: restore full SPA behavior using React/Next.js architecture.
