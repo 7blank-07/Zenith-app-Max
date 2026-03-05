@@ -336,26 +336,6 @@ function renderPlayerCard(player) {
   );
 }
 
-function PlayerCardPreview({ player, x, y }) {
-  const isVisible = !!player;
-  return (
-    <div
-      id="player-preview-popup"
-      style={{
-        position: 'fixed',
-        zIndex: 1200,
-        pointerEvents: 'none',
-        width: '120px',
-        left: `${x}px`,
-        top: `${y}px`,
-        display: isVisible ? 'block' : 'none'
-      }}
-    >
-      <div id="player-preview-content">{player ? renderPlayerCard(player) : null}</div>
-    </div>
-  );
-}
-
 export default function PlayersDatabaseInteractions({
   players = [],
   positions = [],
@@ -379,7 +359,6 @@ export default function PlayersDatabaseInteractions({
   const [statsSearchQuery, setStatsSearchQuery] = useState('');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [preview, setPreview] = useState({ player: null, x: 0, y: 0 });
   const [watchlist, setWatchlist] = useState([]);
   const [watchlistPlayers, setWatchlistPlayers] = useState([]);
   const [storageHydrated, setStorageHydrated] = useState(false);
@@ -594,26 +573,6 @@ export default function PlayersDatabaseInteractions({
 
   const toggleSelectAllStats = () => {
     setStatsDraftSelected((current) => (current.length === allCustomStatIds.length ? [] : allCustomStatIds));
-  };
-
-  const handlePreviewEnter = (event, player) => {
-    setPreview({
-      player,
-      x: event.clientX + 16,
-      y: event.clientY + 16
-    });
-  };
-
-  const handlePreviewMove = (event, player) => {
-    setPreview((current) => ({
-      player,
-      x: event.clientX + 16,
-      y: event.clientY + 16
-    }));
-  };
-
-  const handlePreviewLeave = () => {
-    setPreview((current) => (current.player ? { player: null, x: 0, y: 0 } : current));
   };
 
   const resultsCountText = `${visiblePlayers.length} players shown`;
@@ -895,9 +854,6 @@ export default function PlayersDatabaseInteractions({
                     data-phy={player.phy}
                     data-price={resolvedPrice}
                     onClick={() => router.push(`/player/${encodeURIComponent(player.playerId)}`)}
-                    onMouseEnter={(event) => handlePreviewEnter(event, player)}
-                    onMouseMove={(event) => handlePreviewMove(event, player)}
-                    onMouseLeave={handlePreviewLeave}
                   >
                     <div className="player-card-scale">{renderPlayerCard(player)}</div>
 
@@ -1263,7 +1219,6 @@ export default function PlayersDatabaseInteractions({
         </div>
       </div>
 
-      <PlayerCardPreview player={preview.player} x={preview.x} y={preview.y} />
     </>
   );
 }
