@@ -4192,12 +4192,17 @@ async function loadDashboard() {
 
 // ========== CREATE DASHBOARD PLAYER CARD (Vertical Style) ==========
 // ========== DASHBOARD CARD CREATOR ==========
+function resolvePlayerId(player) {
+    if (!player || typeof player !== 'object') return null;
+    return player.player_id ?? player.playerid ?? player.id ?? null;
+}
+
 function createDashboardPlayerCard(player) {
     const card = document.createElement('div');
     card.className = 'dashboard-player-card';
 
     card.addEventListener('click', () => {
-        const pid = player.playerid || player.player_id;
+        const pid = resolvePlayerId(player);
         if (!pid) {
             console.error('[Zenith] Dashboard card click: missing player_id', player);
             return;
@@ -5229,7 +5234,14 @@ function createPlayerCard(player) {
 
         if (window.squadState && window.squadState.pendingDatabaseAssign && window.squadState.activeSlot) {
             const slotId = window.squadState.activeSlot;
-            const playerId = player.player_id || player.id;
+            const playerId = resolvePlayerId(player);
+            if (!playerId) {
+                console.error('[SQUAD ASSIGN] Missing player ID for database row click', { slotId, player });
+                if (typeof showToast === 'function') {
+                    showToast('Unable to add player: missing player ID', 'error');
+                }
+                return;
+            }
             const overall = player.ovr || player.overall || 0;
 
             if (typeof ensurePlayerInGlobalList === 'function') {
@@ -5250,10 +5262,6 @@ function createPlayerCard(player) {
             if (slotId.startsWith('BENCH')) {
                 const index = parseInt(slotId.replace('BENCH', ''), 10);
                 if (!Number.isNaN(index)) {
-                    if (typeof isPlayerAlreadyInSquad === 'function' && isPlayerAlreadyInSquad(playerId, null)) {
-                        return;
-                    }
-                    if (typeof removeIfAssigned === 'function') removeIfAssigned(playerId);
                     window.squadState.bench[index] = playerId;
                     if (typeof renderSquadBuilder === 'function') renderSquadBuilder();
                 }
@@ -5261,10 +5269,6 @@ function createPlayerCard(player) {
                 if (typeof validateAssignment === 'function' && !validateAssignment(player, slotId)) {
                     return;
                 }
-                if (typeof isPlayerAlreadyInSquad === 'function' && isPlayerAlreadyInSquad(playerId, slotId)) {
-                    return;
-                }
-                if (typeof removeIfAssigned === 'function') removeIfAssigned(playerId);
                 window.squadState.starters[slotId] = playerId;
                 if (typeof renderSquadBuilder === 'function') renderSquadBuilder();
             }
@@ -5281,7 +5285,7 @@ function createPlayerCard(player) {
             return;
         }
 
-        const pid = player.playerid || player.player_id;
+        const pid = resolvePlayerId(player);
         if (!pid) { console.warn('[Zenith] No player ID found', player); return; }
         if (window.ZRouter) {
             ZRouter.navigate(`/player/${pid}`);
@@ -5592,9 +5596,14 @@ async function loadDatabase() {
         }
 
         // 3. Cache globally for watchlist
+        // Use all available ID fields for the dedup key so players with only
+        // `playerid` (no underscore) don't all collapse onto "undefined_0_0".
         state.allPlayers = [
           ...new Map(
-            [...state.allPlayers, ...players].map(p => [`${p.player_id}_${p.rank || 0}_${p.is_untradable ? 1 : 0}`, p])
+            [...state.allPlayers, ...players].map(p => [
+              `${p.player_id || p.playerid || p.id}_${p.rank || 0}_${p.is_untradable ? 1 : 0}`,
+              p
+            ])
           ).values()
         ];
 
@@ -6997,15 +7006,19 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     row.addEventListener('click', () => {
       console.log('[SEARCH] Selected player:', player.name);
+      const selectedPlayerId = resolvePlayerId(player);
+      if (!selectedPlayerId) {
+        console.error('[SEARCH] Missing player ID', player);
+        return;
+      }
       // Store in search results for detail view
-      if (!state.searchResults.some(p => p.player_id === player.player_id)) {
+      if (!state.searchResults.some(p => resolvePlayerId(p) === selectedPlayerId)) {
           state.searchResults.push(player);
       }
       if (searchDropdown) searchDropdown.classList.remove('active');
       if (homeSearch) homeSearch.value = '';
       // Navigate to player detail
-      const pid = player.playerid || player.player_id;
-      if (!pid) { console.error('[SEARCH] Missing player ID', player); return; }
+      const pid = selectedPlayerId;
       if (window.ZRouter) {
           ZRouter.navigate(`/player/${pid}`);
       } else if (typeof viewPlayerDetail === 'function') {

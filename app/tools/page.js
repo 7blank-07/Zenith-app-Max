@@ -5,7 +5,7 @@ import { fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-pl
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
-const TOOLS_PLAYER_POOL_LIMIT = 300;
+const TOOLS_PLAYER_POOL_LIMIT = 350;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
@@ -44,6 +44,7 @@ function serializeToolPlayer(player) {
     colorRating: player.colorRating || '#FFB86B',
     colorPosition: player.colorPosition || '#FFFFFF',
     colorName: player.colorName || '#FFFFFF',
+    skillMoves: Number(player.skillMoves || player.skill_moves || player.skillmoves || 0) || 0,
     isUntradable: !!player.isUntradable,
     attributes: player.attributes || {}
   };

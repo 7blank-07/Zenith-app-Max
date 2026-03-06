@@ -28,6 +28,14 @@ function uniqueSorted(values) {
   );
 }
 
+function readSearchParam(searchParams, key, fallback = '') {
+  const rawValue = searchParams?.[key];
+  if (Array.isArray(rawValue)) {
+    return String(rawValue[0] ?? fallback).trim();
+  }
+  return String(rawValue ?? fallback).trim();
+}
+
 function buildPlayersJsonLd(players) {
   return {
     '@context': 'https://schema.org',
@@ -41,7 +49,7 @@ function buildPlayersJsonLd(players) {
   };
 }
 
-export default async function PlayersPage() {
+export default async function PlayersPage({ searchParams = {} }) {
   const startedAt = Date.now();
   const rollout = getPrerenderRolloutState();
   const topIds = await readTopPlayerIds(LISTING_LIMIT);
@@ -53,6 +61,13 @@ export default async function PlayersPage() {
   const clubs = uniqueSorted(players.map((player) => player.club));
   const nations = uniqueSorted(players.map((player) => player.nation));
   const skillMoves = uniqueSorted(players.map((player) => player.skillMoves).filter((value) => Number(value) > 0)).sort((a, b) => Number(b) - Number(a));
+  const initialSquadPickContext = {
+    enabled: readSearchParam(searchParams, 'squadPick') === '1',
+    slotId: readSearchParam(searchParams, 'slotId'),
+    position: readSearchParam(searchParams, 'position').toUpperCase(),
+    formationId: readSearchParam(searchParams, 'formationId'),
+    returnTo: readSearchParam(searchParams, 'returnTo', '/tools?tool=squadbuilder')
+  };
 
   console.info('[metrics] /players render', {
     elapsedMs: Date.now() - startedAt,
@@ -71,6 +86,7 @@ export default async function PlayersPage() {
           clubs={clubs}
           nations={nations}
           skillMoves={skillMoves}
+          initialSquadPickContext={initialSquadPickContext}
         />
       </main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />

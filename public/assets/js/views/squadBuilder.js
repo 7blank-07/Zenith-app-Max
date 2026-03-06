@@ -536,7 +536,7 @@ function renderPlayerPicker() {
     row.setAttribute('draggable', 'true');
     
     // Normalize Data
-    const pid = p.player_id || p.id;
+    const pid = p.player_id || p.playerid || p.id;
     const overall = p.ovr || p.overall || 0;
     const position = p.position || 'N/A';
     const price = p.price || 0;
@@ -641,20 +641,12 @@ function renderPlayerPicker() {
 
       if (squadState.activeSlot.startsWith('BENCH_')) {
         const index = parseInt(squadState.activeSlot.split('_')[1], 10);
-        if (isPlayerAlreadyInSquad(pid, null)) {
-          return;
-        }
-        removeIfAssigned(pid);
         squadState.bench[index] = pid;
         renderSquadBuilder();
       } else {
         if (!validateAssignment(p, squadState.activeSlot)) {
           return;
         }
-        if (isPlayerAlreadyInSquad(pid, squadState.activeSlot)) {
-          return;
-        }
-        removeIfAssigned(pid);
         squadState.starters[squadState.activeSlot] = pid;
         renderSquadBuilder();
       }
@@ -709,7 +701,7 @@ function resolveSquadPlayerPrice(player) {
 function ensurePlayerInGlobalList(p, pid, overall) {
   console.log('📦 Ensuring player in list:', p.name, pid);
   
-  const resolvedId = p.player_id || pid || p.id;
+  const resolvedId = p.player_id ?? p.playerid ?? pid ?? p.id;
   const pickMediaValue = (...values) => {
     for (const value of values) {
       if (value === undefined || value === null) continue;
@@ -786,10 +778,12 @@ function ensurePlayerInGlobalList(p, pid, overall) {
   
   // Also add to global state if available
   if (window.state && window.state.allPlayers) {
-    const exists = window.state.allPlayers.find(existing => 
-      existing.id === normalizedPlayer.id || 
-      existing.player_id === normalizedPlayer.id
-    );
+    const resolvedIdStr = resolvedId !== null && resolvedId !== undefined ? String(resolvedId) : null;
+    const exists = resolvedIdStr ? window.state.allPlayers.find(existing =>
+      (existing.id !== null && existing.id !== undefined && String(existing.id) === resolvedIdStr) ||
+      (existing.player_id !== null && existing.player_id !== undefined && String(existing.player_id) === resolvedIdStr) ||
+      (existing.playerid !== null && existing.playerid !== undefined && String(existing.playerid) === resolvedIdStr)
+    ) : null;
     if (!exists) {
       window.state.allPlayers.push(normalizedPlayer);
       console.log('✅ Added to global state');
@@ -2891,18 +2885,8 @@ function handleSlotDrop(e, targetSlotId) {
             return;
         }
 
-        // Check if player already exists somewhere in squad
-        if (isPlayerAlreadyInSquad(draggedId, targetSlotId)) {
-            console.log('⚠️ Player already in squad');
-            clearDragState();
-            return;
-        }
-
         console.log('✅ Assigning player to slot:', targetSlotId);
-        
-        // Remove from any existing position
-        removeIfAssigned(draggedId);
-        
+
         // Assign to target slot
         squadState.starters[targetSlotId] = draggedId;
     }
@@ -3026,15 +3010,6 @@ function handleBenchDrop(e, targetBenchIndex) {
     // ========================================
     if (source.type === 'picker') {
         console.log('🔵 Drag from PICKER to BENCH');
-
-        // Check if player already in squad
-        if (isPlayerAlreadyInSquad(draggedId, null)) {
-            clearDragState();
-            return;
-        }
-
-        // Remove from any existing position
-        removeIfAssigned(draggedId);
 
         // Assign to bench
         squadState.bench[targetBenchIndex] = draggedId;
@@ -3289,7 +3264,12 @@ function renderSlot(slot) {
     container.dataset.slotId = slot.id;
 
     const assignedId = squadState.starters[slot.id] || null;
-    const player = assignedId ? getPlayers().find(p => p.id === assignedId || p.playerid === assignedId || p.player_id === assignedId) : null;
+    const assignedIdStr = assignedId !== null ? String(assignedId) : null;
+    const player = assignedIdStr ? getPlayers().find(p =>
+        String(p.id) === assignedIdStr ||
+        String(p.playerid) === assignedIdStr ||
+        String(p.player_id) === assignedIdStr
+    ) : null;
 
     // ALWAYS CREATE THE POSITION DOT/CIRCLE (never remove it)
     const positionDot = document.createElement('div');
@@ -3373,7 +3353,10 @@ function renderSlot(slot) {
             }
             const filterDropdown = document.getElementById('filter-position');
             if(filterDropdown) filterDropdown.value = slot.label;
-            
+
+            // Reset pagination so the new position filter always loads page 1.
+            if(state) state.currentOffset = 0;
+
             closeSquadBuilderModal();
             if(typeof switchView === 'function') switchView('database');
             if(typeof loadDatabase === 'function') loadDatabase();
@@ -3394,7 +3377,12 @@ function renderBench() {
 
     for (let i = 0; i < 7; i++) {
         const pid = squadState.bench[i] || null;
-        const player = pid ? getPlayers().find(p => p.id === pid || p.playerid === pid || p.player_id === pid) : null;
+        const pidStr = pid !== null ? String(pid) : null;
+        const player = pidStr ? getPlayers().find(p =>
+            String(p.id) === pidStr ||
+            String(p.playerid) === pidStr ||
+            String(p.player_id) === pidStr
+        ) : null;
 
         const cell = document.createElement('div');
         cell.className = 'bench-cell' + (player ? ' filled' : '');
@@ -3534,15 +3522,17 @@ function validateAssignment(player, slotId) {
 
 function isPlayerAlreadyInSquad(playerId, targetSlot) {
   console.log('🔍 Checking if player already in squad:', playerId);
-  
+  const playerIdStr = playerId !== null && playerId !== undefined ? String(playerId) : null;
+  if (!playerIdStr) return false;
+
   for (const [slotId, pid] of Object.entries(squadState.starters)) {
-    if (slotId !== targetSlot && pid === playerId) {
+    if (slotId !== targetSlot && pid !== null && pid !== undefined && String(pid) === playerIdStr) {
       console.log('❌ Found in starters:', slotId);
       return true;
     }
   }
   
-  if (squadState.bench.includes(playerId)) {
+  if (squadState.bench.some(p => p !== null && p !== undefined && String(p) === playerIdStr)) {
     console.log('❌ Found in bench');
     return true;
   }
@@ -3552,10 +3542,13 @@ function isPlayerAlreadyInSquad(playerId, targetSlot) {
 }
 
 function removeIfAssigned(playerId) {
+  const playerIdStr = playerId !== null && playerId !== undefined ? String(playerId) : null;
+  if (!playerIdStr) return;
   Object.keys(squadState.starters).forEach(k => {
-    if (squadState.starters[k] === playerId) delete squadState.starters[k];
+    const v = squadState.starters[k];
+    if (v !== null && v !== undefined && String(v) === playerIdStr) delete squadState.starters[k];
   });
-  const idx = squadState.bench.indexOf(playerId);
+  const idx = squadState.bench.findIndex(p => p !== null && p !== undefined && String(p) === playerIdStr);
   if (idx !== -1) squadState.bench.splice(idx, 1);
 }
 

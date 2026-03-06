@@ -69,6 +69,27 @@ const DEFAULT_FILTERS = Object.freeze({
   ratingMax: 150,
   auctionable: false
 });
+const SQUAD_BUILDER_PENDING_PICK_KEY = 'squad_builder_pending_pick';
+const DEFAULT_SQUAD_PICK_CONTEXT = Object.freeze({
+  enabled: false,
+  slotId: '',
+  position: '',
+  formationId: '',
+  returnTo: '/tools?tool=squadbuilder'
+});
+
+function normalizeSquadPickContext(context) {
+  if (!context || typeof context !== 'object') {
+    return { ...DEFAULT_SQUAD_PICK_CONTEXT };
+  }
+  return {
+    enabled: context.enabled === true,
+    slotId: toText(context.slotId),
+    position: toText(context.position).toUpperCase(),
+    formationId: toText(context.formationId),
+    returnTo: toText(context.returnTo, DEFAULT_SQUAD_PICK_CONTEXT.returnTo)
+  };
+}
 
 function toText(value, fallback = '') {
   if (value === undefined || value === null) return fallback;
@@ -399,7 +420,8 @@ export default function PlayersDatabaseInteractions({
   leagues = [],
   clubs = [],
   nations = [],
-  skillMoves = []
+  skillMoves = [],
+  initialSquadPickContext = DEFAULT_SQUAD_PICK_CONTEXT
 }) {
   const router = useRouter();
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer).filter((player) => !!player.playerId), [players]);
@@ -420,6 +442,50 @@ export default function PlayersDatabaseInteractions({
   const [watchlistPlayers, setWatchlistPlayers] = useState([]);
   const [storageHydrated, setStorageHydrated] = useState(false);
   const [livePrices, setLivePrices] = useState({});
+  const normalizedInitialSquadPickContext = useMemo(
+    () => normalizeSquadPickContext(initialSquadPickContext),
+    [
+      initialSquadPickContext?.enabled,
+      initialSquadPickContext?.slotId,
+      initialSquadPickContext?.position,
+      initialSquadPickContext?.formationId,
+      initialSquadPickContext?.returnTo
+    ]
+  );
+  const [squadPickContext, setSquadPickContext] = useState(() => normalizedInitialSquadPickContext);
+
+  useEffect(() => {
+    setSquadPickContext((current) => {
+      if (
+        current.enabled === normalizedInitialSquadPickContext.enabled &&
+        current.slotId === normalizedInitialSquadPickContext.slotId &&
+        current.position === normalizedInitialSquadPickContext.position &&
+        current.formationId === normalizedInitialSquadPickContext.formationId &&
+        current.returnTo === normalizedInitialSquadPickContext.returnTo
+      ) {
+        return current;
+      }
+      return normalizedInitialSquadPickContext;
+    });
+
+    if (!normalizedInitialSquadPickContext.enabled || !normalizedInitialSquadPickContext.position) return;
+    setFilters((current) =>
+      current.position === normalizedInitialSquadPickContext.position
+        ? current
+        : { ...current, position: normalizedInitialSquadPickContext.position }
+    );
+    setMobileFilters((current) =>
+      current.position === normalizedInitialSquadPickContext.position
+        ? current
+        : { ...current, position: normalizedInitialSquadPickContext.position }
+    );
+  }, [
+    normalizedInitialSquadPickContext.enabled,
+    normalizedInitialSquadPickContext.slotId,
+    normalizedInitialSquadPickContext.position,
+    normalizedInitialSquadPickContext.formationId,
+    normalizedInitialSquadPickContext.returnTo
+  ]);
 
   useEffect(() => {
     setWatchlist(readArrayStorage('watchlist').map((entry) => toText(entry)).filter(Boolean));
@@ -621,6 +687,50 @@ export default function PlayersDatabaseInteractions({
   const applyMobileFilters = () => {
     setFilters(mobileFilters);
     setMobileFilterOpen(false);
+  };
+
+  const handlePlayerRowClick = (player) => {
+    if (!player?.playerId) return;
+    if (squadPickContext.enabled) {
+      try {
+        window.sessionStorage.setItem(
+          SQUAD_BUILDER_PENDING_PICK_KEY,
+          JSON.stringify({
+            playerId: player.playerId,
+            slotId: squadPickContext.slotId,
+            position: squadPickContext.position,
+            formationId: squadPickContext.formationId,
+            player: {
+              playerId: player.playerId,
+              name: player.name,
+              ovr: player.ovr,
+              position: player.position,
+              alternatePosition: player.alternatePositions.join(','),
+              nation: player.nation,
+              club: player.club,
+              league: player.league,
+              cardBackground: player.cardBackground,
+              playerImage: player.playerImage,
+              nationFlag: player.nationFlag,
+              clubFlag: player.clubFlag,
+              leagueImage: player.leagueImage,
+              colorRating: player.colorRating,
+              colorPosition: player.colorPosition,
+              colorName: player.colorName,
+              skillMoves: player.skillMoves,
+              isUntradable: player.isUntradable,
+              attributes: player.attributes,
+              price: player.price
+            }
+          })
+        );
+      } catch (error) {
+        console.error('[players] Failed to persist squad picker selection:', error);
+      }
+      router.push(squadPickContext.returnTo || '/tools?tool=squadbuilder');
+      return;
+    }
+    router.push(`/player/${encodeURIComponent(player.playerId)}`);
   };
 
   const closeMobileFilters = () => {
@@ -921,7 +1031,7 @@ export default function PlayersDatabaseInteractions({
                     data-def={player.def}
                     data-phy={player.phy}
                     data-price={resolvedPrice}
-                    onClick={() => router.push(`/player/${encodeURIComponent(player.playerId)}`)}
+                    onClick={() => handlePlayerRowClick(player)}
                   >
                     <div className="player-card-scale">{renderPlayerCard(player)}</div>
 

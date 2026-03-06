@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ALIASES = Object.freeze({
@@ -27,6 +28,19 @@ const SHARD_COSTS = Object.freeze({
 
 const SHARD_OVRS = Object.freeze([105, 106, 107, 108, 109, 110, 111, 112, 113]);
 const SQUAD_SAVE_KEY = 'savedSquad_main';
+const SQUAD_BUILDER_PENDING_PICK_KEY = 'squad_builder_pending_pick';
+const SQUAD_BUILDER_ROUNDTRIP_STATE_KEY = 'squad_builder_roundtrip_state';
+const TOOLS_SUPPLEMENTAL_PLAYERS_KEY = 'toolsSupplementalPlayers';
+const DEFAULT_SQUAD_FILTERS = Object.freeze({
+  position: '',
+  league: '',
+  club: '',
+  nation: '',
+  skill: '',
+  ratingMin: 40,
+  ratingMax: 150,
+  auctionable: false
+});
 
 const SQUAD_FORMATIONS = Object.freeze({
   '3-4-1-2': [
@@ -854,6 +868,10 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function toText(value) {
   return normalizeSearchText(value);
 }
@@ -907,10 +925,38 @@ function normalizePlayer(player, index) {
     colorRating: String(player?.colorRating || '#FFB86B'),
     colorPosition: String(player?.colorPosition || '#FFFFFF'),
     colorName: String(player?.colorName || '#FFFFFF'),
+    skillMoves: toNumber(
+      player?.skillMoves ??
+      player?.skill_moves ??
+      player?.skillmoves ??
+      player?.attributes?.skillMoves ??
+      player?.attributes?.skill_moves ??
+      player?.attributes?.skillmoves,
+      0
+    ),
     price: Math.max(0, toNumber(player?.price, 0)),
     isUntradable: !!player?.isUntradable,
     attributes: player?.attributes && typeof player.attributes === 'object' ? player.attributes : {}
   };
+}
+
+function normalizeSupplementalPlayers(value) {
+  if (!value || typeof value !== 'object') return {};
+  const normalized = {};
+  Object.values(value).forEach((player) => {
+    const playerId = getPlayerId(player);
+    if (!playerId) return;
+    const normalizedPlayer = normalizePlayer({ ...player, playerId });
+    if (normalizedPlayer?.playerId) {
+      normalized[playerId] = normalizedPlayer;
+    }
+  });
+  return normalized;
+}
+
+function normalizeBench(value) {
+  if (!Array.isArray(value)) return Array.from({ length: 7 }, () => '');
+  return value.slice(0, 7).concat(Array.from({ length: Math.max(0, 7 - value.length) }, () => ''));
 }
 
 function parseAlternatePositions(value) {
@@ -944,40 +990,33 @@ function normalizeBadges(value) {
 }
 
 export default function ToolsInteractions({ players = [], initialTool = '' }) {
+  const router = useRouter();
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer), [players]);
+  const [supplementalPlayers, setSupplementalPlayers] = useState({});
   const playersById = useMemo(() => {
     const map = new Map();
     normalizedPlayers.forEach((player) => {
       map.set(player.playerId, player);
     });
+    Object.values(supplementalPlayers).forEach((player) => {
+      if (player?.playerId) {
+        map.set(player.playerId, player);
+      }
+    });
     return map;
-  }, [normalizedPlayers]);
+  }, [normalizedPlayers, supplementalPlayers]);
 
   const [activeTool, setActiveTool] = useState(() => normalizeTool(initialTool));
 
   const [squadName, setSquadName] = useState('My Squad');
   const [formationId, setFormationId] = useState('4-3-3');
   const [selectedSlotId, setSelectedSlotId] = useState('ST');
+  const [squadStateHydrated, setSquadStateHydrated] = useState(false);
   const [squadSearchQuery, setSquadSearchQuery] = useState('');
   const [squadFilterOpen, setSquadFilterOpen] = useState(false);
-  const [squadFilters, setSquadFilters] = useState({
-    position: '',
-    league: '',
-    club: '',
-    nation: '',
-    minOvr: 0,
-    maxOvr: 150,
-    auctionableOnly: false
-  });
-  const [squadFilterDraft, setSquadFilterDraft] = useState({
-    position: '',
-    league: '',
-    club: '',
-    nation: '',
-    minOvr: 0,
-    maxOvr: 150,
-    auctionableOnly: false
-  });
+  const [squadFilters, setSquadFilters] = useState(() => ({ ...DEFAULT_SQUAD_FILTERS }));
+  const [squadFilterDraft, setSquadFilterDraft] = useState(() => ({ ...DEFAULT_SQUAD_FILTERS }));
+  const [squadFilterPanelPosition, setSquadFilterPanelPosition] = useState({ top: 100, left: 16 });
   const [fieldThemeId, setFieldThemeId] = useState('camp-nou');
   const [fieldThemeDraft, setFieldThemeDraft] = useState('camp-nou');
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
@@ -1014,6 +1053,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [shardPlayerOvr, setShardPlayerOvr] = useState(105);
   const dragPayloadRef = useRef(null);
   const dragPreviewNodeRef = useRef(null);
+  const squadFilterTriggerRef = useRef(null);
   const [draggingKey, setDraggingKey] = useState('');
   const [dragOverSlotId, setDragOverSlotId] = useState('');
   const [dragOverBenchIndex, setDragOverBenchIndex] = useState(-1);
@@ -1021,22 +1061,59 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const formationSlots = SQUAD_FORMATIONS[formationId] || SQUAD_FORMATIONS['4-3-3'];
 
   useEffect(() => {
+    let restoredFromRoundtrip = false;
+    let roundtripSupplementalPlayers = {};
     try {
-      const savedSquad = window.localStorage.getItem('toolsSquadState');
-      if (savedSquad) {
-        const parsed = JSON.parse(savedSquad);
-        if (parsed?.squadName) setSquadName(String(parsed.squadName));
-        if (parsed?.formationId && SQUAD_FORMATIONS[parsed.formationId]) setFormationId(parsed.formationId);
-        if (parsed?.starters && typeof parsed.starters === 'object') setStarters(parsed.starters);
-        if (Array.isArray(parsed?.bench)) {
-          setBench(parsed.bench.slice(0, 7).concat(Array.from({ length: Math.max(0, 7 - parsed.bench.length) }, () => '')));
+      const rawRoundtripState = window.sessionStorage.getItem(SQUAD_BUILDER_ROUNDTRIP_STATE_KEY);
+      if (rawRoundtripState) {
+        const parsedRoundtrip = JSON.parse(rawRoundtripState);
+        if (parsedRoundtrip?.squadName) setSquadName(String(parsedRoundtrip.squadName));
+        if (parsedRoundtrip?.formationId && SQUAD_FORMATIONS[parsedRoundtrip.formationId]) {
+          setFormationId(parsedRoundtrip.formationId);
         }
-        if (parsed?.badges && typeof parsed.badges === 'object') {
-          setBadges(normalizeBadges(parsed.badges));
+        if (parsedRoundtrip?.selectedSlotId) {
+          setSelectedSlotId(String(parsedRoundtrip.selectedSlotId));
         }
+        if (parsedRoundtrip?.starters && typeof parsedRoundtrip.starters === 'object') {
+          setStarters(parsedRoundtrip.starters);
+        }
+        setBench(normalizeBench(parsedRoundtrip?.bench));
+        if (parsedRoundtrip?.badges && typeof parsedRoundtrip.badges === 'object') {
+          setBadges(normalizeBadges(parsedRoundtrip.badges));
+        }
+        const nextThemeId = String(parsedRoundtrip?.fieldThemeId || '');
+        if (FIELD_THEMES[nextThemeId]) {
+          setFieldThemeId(nextThemeId);
+          setFieldThemeDraft(nextThemeId);
+        }
+        roundtripSupplementalPlayers = normalizeSupplementalPlayers(parsedRoundtrip?.supplementalPlayers);
+        restoredFromRoundtrip = true;
+        console.info('[tools] Restored squad roundtrip state', {
+          starterSlots: Object.keys(parsedRoundtrip?.starters || {}).length
+        });
       }
     } catch (error) {
-      console.error('[tools] Failed to load saved squad state:', error);
+      console.error('[tools] Failed to load squad roundtrip state:', error);
+    } finally {
+      window.sessionStorage.removeItem(SQUAD_BUILDER_ROUNDTRIP_STATE_KEY);
+    }
+
+    if (!restoredFromRoundtrip) {
+      try {
+        const savedSquad = window.localStorage.getItem('toolsSquadState');
+        if (savedSquad) {
+          const parsed = JSON.parse(savedSquad);
+          if (parsed?.squadName) setSquadName(String(parsed.squadName));
+          if (parsed?.formationId && SQUAD_FORMATIONS[parsed.formationId]) setFormationId(parsed.formationId);
+          if (parsed?.starters && typeof parsed.starters === 'object') setStarters(parsed.starters);
+          setBench(normalizeBench(parsed?.bench));
+          if (parsed?.badges && typeof parsed.badges === 'object') {
+            setBadges(normalizeBadges(parsed.badges));
+          }
+        }
+      } catch (error) {
+        console.error('[tools] Failed to load saved squad state:', error);
+      }
     }
 
     try {
@@ -1070,6 +1147,24 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     } catch (error) {
       console.error('[tools] Failed to load saved field theme:', error);
     }
+
+    try {
+      const rawSupplementalPlayers = window.localStorage.getItem(TOOLS_SUPPLEMENTAL_PLAYERS_KEY);
+      const storedSupplementalPlayers = rawSupplementalPlayers
+        ? normalizeSupplementalPlayers(JSON.parse(rawSupplementalPlayers))
+        : {};
+      setSupplementalPlayers({
+        ...storedSupplementalPlayers,
+        ...roundtripSupplementalPlayers
+      });
+    } catch (error) {
+      console.error('[tools] Failed to load supplemental player cache:', error);
+      if (Object.keys(roundtripSupplementalPlayers).length) {
+        setSupplementalPlayers(roundtripSupplementalPlayers);
+      }
+    }
+
+    setSquadStateHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -1088,6 +1183,15 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       console.error('[tools] Failed to persist squad state:', error);
     }
   }, [badges, squadName, formationId, starters, bench]);
+
+  useEffect(() => {
+    if (!squadStateHydrated) return;
+    try {
+      window.localStorage.setItem(TOOLS_SUPPLEMENTAL_PLAYERS_KEY, JSON.stringify(supplementalPlayers));
+    } catch (error) {
+      console.error('[tools] Failed to persist supplemental player cache:', error);
+    }
+  }, [squadStateHydrated, supplementalPlayers]);
 
   useEffect(() => {
     try {
@@ -1217,6 +1321,76 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     return set;
   }, [starters, bench]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || !squadStateHydrated) return;
+    const rawPendingPick = window.sessionStorage.getItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+    if (!rawPendingPick) return;
+    let pendingPick = null;
+    try {
+      pendingPick = JSON.parse(rawPendingPick);
+    } catch (error) {
+      console.error('[tools] Failed to parse pending squad player pick:', error);
+      window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+      return;
+    }
+    try {
+      const playerId = String(pendingPick?.playerId || '').trim();
+      const preferredSlotId = String(pendingPick?.slotId || '').trim();
+      const preferredPosition = String(pendingPick?.position || '').toUpperCase().trim();
+      const preferredFormationId = String(pendingPick?.formationId || '').trim();
+      if (!playerId) {
+        window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+        return;
+      }
+      if (preferredFormationId && preferredFormationId !== formationId && SQUAD_FORMATIONS[preferredFormationId]) {
+        setFormationId(preferredFormationId);
+        return;
+      }
+      if (assignedPlayerIds.has(playerId)) {
+        window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+        return;
+      }
+      const rawPendingPlayer = pendingPick?.player && typeof pendingPick.player === 'object' ? pendingPick.player : null;
+      if (rawPendingPlayer) {
+        const normalizedPendingPlayer = normalizePlayer(rawPendingPlayer);
+        if (normalizedPendingPlayer?.playerId === playerId) {
+          setSupplementalPlayers((current) => ({
+            ...current,
+            [playerId]: normalizedPendingPlayer
+          }));
+        }
+      }
+      if (!playersById.has(playerId) && !rawPendingPlayer) {
+        return;
+      }
+      const availableSlots = SQUAD_FORMATIONS[formationId] || [];
+      const fallbackSlotId = selectedSlotId || availableSlots[0]?.id || '';
+      const targetSlotById = availableSlots.find((slot) => slot.id === preferredSlotId);
+      const targetSlotByPosition = preferredPosition
+        ? availableSlots.find(
+            (slot) => slot.id === preferredPosition || String(slot.label || '').toUpperCase().trim() === preferredPosition
+          )
+        : null;
+      const targetSlotId = targetSlotById?.id || targetSlotByPosition?.id || fallbackSlotId;
+      if (!targetSlotId) return;
+      console.info('[tools] Applying pending squad pick', {
+        playerId,
+        preferredSlotId,
+        targetSlotId,
+        formationId
+      });
+      setSelectedSlotId(targetSlotId);
+      setActiveTool('squadbuilder');
+      setStarters((current) => ({
+        ...current,
+        [targetSlotId]: playerId
+      }));
+      window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+    } catch (error) {
+      console.error('[tools] Failed to apply pending squad player pick:', error);
+    }
+  }, [assignedPlayerIds, formationId, playersById, selectedSlotId, squadStateHydrated]);
+
   const squadPlayers = useMemo(
     () =>
       [...Object.values(starters), ...bench]
@@ -1266,11 +1440,14 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
   const squadFilterOptions = useMemo(() => {
     const uniqueSorted = (values) => [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const skillMoveOptions = [...new Set(normalizedPlayers.map((player) => toNumber(player.skillMoves, 0)).filter((value) => value > 0))]
+      .sort((a, b) => b - a);
     return {
       positions: uniqueSorted(normalizedPlayers.map((player) => player.position)),
       leagues: uniqueSorted(normalizedPlayers.map((player) => player.league)),
       clubs: uniqueSorted(normalizedPlayers.map((player) => player.club)),
-      nations: uniqueSorted(normalizedPlayers.map((player) => player.nation))
+      nations: uniqueSorted(normalizedPlayers.map((player) => player.nation)),
+      skillMoves: skillMoveOptions
     };
   }, [normalizedPlayers]);
 
@@ -1283,9 +1460,10 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         if (squadFilters.league && toText(player.league) !== toText(squadFilters.league)) return false;
         if (squadFilters.club && toText(player.club) !== toText(squadFilters.club)) return false;
         if (squadFilters.nation && toText(player.nation) !== toText(squadFilters.nation)) return false;
+        if (squadFilters.skill && String(player.skillMoves) !== String(squadFilters.skill)) return false;
+        if (squadFilters.auctionable && player.isUntradable) return false;
         const playerOvr = toNumber(player.ovr, 0);
-        if (playerOvr < toNumber(squadFilters.minOvr, 0) || playerOvr > toNumber(squadFilters.maxOvr, 150)) return false;
-        if (squadFilters.auctionableOnly && (!Number.isFinite(toNumber(player.price, Number.NaN)) || toNumber(player.price, 0) <= 0)) return false;
+        if (playerOvr < toNumber(squadFilters.ratingMin, 40) || playerOvr > toNumber(squadFilters.ratingMax, 150)) return false;
         if (!query) return true;
         const searchable = toText(`${player.name} ${player.position} ${player.club} ${player.league} ${player.nation}`);
         return searchable.includes(query);
@@ -1367,6 +1545,56 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       ...current,
       [slotId]: playerId
     }));
+  };
+
+  const persistRoundtripSquadState = (nextSelectedSlotId = selectedSlotId) => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(
+        SQUAD_BUILDER_ROUNDTRIP_STATE_KEY,
+        JSON.stringify({
+          squadName,
+          formationId,
+          selectedSlotId: nextSelectedSlotId,
+          starters,
+          bench,
+          badges,
+          fieldThemeId,
+          supplementalPlayers
+        })
+      );
+      window.localStorage.setItem(
+        'toolsSquadState',
+        JSON.stringify({
+          squadName,
+          formationId,
+          starters,
+          bench,
+          badges
+        })
+      );
+      window.localStorage.setItem(TOOLS_SUPPLEMENTAL_PLAYERS_KEY, JSON.stringify(supplementalPlayers));
+    } catch (error) {
+      console.error('[tools] Failed to persist squad roundtrip state:', error);
+    }
+  };
+
+  const handleSquadSlotSelect = (slot, hasPlayer = false) => {
+    const slotId = String(slot?.id || '').trim();
+    const slotPosition = String(slot?.label || '').trim();
+    if (!slotId) return;
+    setSelectedSlotId(slotId);
+    if (hasPlayer) return;
+    persistRoundtripSquadState(slotId);
+    const searchParams = new URLSearchParams();
+    searchParams.set('squadPick', '1');
+    searchParams.set('slotId', slotId);
+    if (slotPosition) {
+      searchParams.set('position', slotPosition);
+    }
+    searchParams.set('formationId', formationId);
+    searchParams.set('returnTo', '/tools?tool=squadbuilder');
+    router.push(`/players?${searchParams.toString()}`);
   };
 
   const removeStarter = (slotId) => {
@@ -1553,34 +1781,58 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     clearDragState();
   };
 
+  const normalizeSquadFilterDraftRatings = (draft) => {
+    const normalizedDraft = {
+      ...draft,
+      ratingMin: clamp(toNumber(draft.ratingMin, 40), 40, 150),
+      ratingMax: clamp(toNumber(draft.ratingMax, 150), 40, 150)
+    };
+    if (normalizedDraft.ratingMin > normalizedDraft.ratingMax) {
+      normalizedDraft.ratingMax = normalizedDraft.ratingMin;
+    }
+    return normalizedDraft;
+  };
+
+  const updateSquadFilterDraftRating = (field, rawValue) => {
+    const digitsOnly = String(rawValue ?? '')
+      .replace(/[^0-9]/g, '')
+      .slice(0, 3);
+    setSquadFilterDraft((prev) => ({
+      ...prev,
+      [field]: digitsOnly
+    }));
+  };
+
+  const commitSquadFilterDraftRatings = () => {
+    setSquadFilterDraft((prev) => normalizeSquadFilterDraftRatings(prev));
+  };
+
   const openSquadFilterPanel = () => {
     setSquadFilterDraft(squadFilters);
+    const triggerRect = squadFilterTriggerRef.current?.getBoundingClientRect?.();
+    if (triggerRect && typeof window !== 'undefined') {
+      const viewportPadding = 12;
+      const panelWidth = 320;
+      const estimatedPanelHeight = 560;
+      let left = clamp(triggerRect.left, viewportPadding, Math.max(viewportPadding, window.innerWidth - panelWidth - viewportPadding));
+      let top = triggerRect.bottom + 8;
+      if (top + estimatedPanelHeight > window.innerHeight - viewportPadding) {
+        top = Math.max(viewportPadding, triggerRect.top - estimatedPanelHeight - 8);
+      }
+      setSquadFilterPanelPosition({ top, left });
+    }
     setSquadFilterOpen(true);
   };
 
   const applySquadFilterPanel = () => {
-    const normalizedDraft = {
-      ...squadFilterDraft,
-      minOvr: Math.max(0, toNumber(squadFilterDraft.minOvr, 0)),
-      maxOvr: Math.max(0, toNumber(squadFilterDraft.maxOvr, 150))
-    };
-    if (normalizedDraft.minOvr > normalizedDraft.maxOvr) {
-      normalizedDraft.maxOvr = normalizedDraft.minOvr;
-    }
+    const normalizedDraft = normalizeSquadFilterDraftRatings(squadFilterDraft);
     setSquadFilters(normalizedDraft);
+    setSquadFilterDraft(normalizedDraft);
     setSquadFilterOpen(false);
   };
 
   const resetSquadFilterPanel = () => {
-    const resetFilters = {
-      position: '',
-      league: '',
-      club: '',
-      nation: '',
-      minOvr: 0,
-      maxOvr: 150,
-      auctionableOnly: false
-    };
+    const resetFilters = { ...DEFAULT_SQUAD_FILTERS };
     setSquadFilterDraft(resetFilters);
     setSquadFilters(resetFilters);
     setSquadFilterOpen(false);
@@ -2087,120 +2339,164 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
             <div
               id="squad-filter-panel"
               className={`squad-filter-panel ${squadFilterOpen ? 'active' : ''}`}
-              style={{ display: squadFilterOpen ? 'block' : 'none' }}
+              style={{
+                display: squadFilterOpen ? 'block' : 'none',
+                position: 'fixed',
+                top: `${squadFilterPanelPosition.top}px`,
+                left: `${squadFilterPanelPosition.left}px`
+              }}
             >
-              <div className="squad-filter-header">
-                <h3>Filter Players</h3>
-                <button id="close-filter-panel" className="close-filter-btn" onClick={() => setSquadFilterOpen(false)} type="button">
-                  ✕
-                </button>
-              </div>
-              <div className="filter-grid">
-                <div className="filter-item">
-                  <label htmlFor="filter-position">Position</label>
-                  <select
-                    id="filter-position"
-                    className="filter-select"
-                    value={squadFilterDraft.position}
-                    onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, position: event.target.value }))}
-                  >
-                    <option value="">All Positions</option>
-                    {squadFilterOptions.positions.map((position) => (
-                      <option key={position} value={position}>
-                        {position}
-                      </option>
-                    ))}
-                  </select>
+              <div className="squad-filter-panel-content">
+                <div className="squad-filter-panel-header">
+                  <h4>Filter Players</h4>
                 </div>
-                <div className="filter-item">
-                  <label htmlFor="filter-league">League</label>
-                  <select
-                    id="filter-league"
-                    className="filter-select"
-                    value={squadFilterDraft.league}
-                    onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, league: event.target.value }))}
-                  >
-                    <option value="">All Leagues</option>
-                    {squadFilterOptions.leagues.map((league) => (
-                      <option key={league} value={league}>
-                        {league}
-                      </option>
-                    ))}
-                  </select>
+                <div className="squad-filter-panel-body">
+                  <div className="filter-group">
+                    <label className="filter-label" htmlFor="squad-auctionable-toggle">Auction Status</label>
+                    <div className="range-inputs">
+                      <label className="toggle-switch">
+                        <input
+                          type="checkbox"
+                          id="squad-auctionable-toggle"
+                          checked={!!squadFilterDraft.auctionable}
+                          onChange={(event) =>
+                            setSquadFilterDraft((prev) => ({ ...prev, auctionable: event.target.checked }))
+                          }
+                        />
+                        <span className="toggle-slider" />
+                      </label>
+                      <span id="squad-auction-status-text">{squadFilterDraft.auctionable ? 'Auctionable Only' : 'All Players'}</span>
+                    </div>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label" htmlFor="squad-filter-position">Position</label>
+                    <select
+                      id="squad-filter-position"
+                      className="filter-select"
+                      value={squadFilterDraft.position}
+                      onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, position: event.target.value }))}
+                    >
+                      <option value="">All Positions</option>
+                      {squadFilterOptions.positions.map((position) => (
+                        <option key={position} value={position}>
+                          {position}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label">
+                      Overall Rating{' '}
+                      <span id="squad-rating-value">
+                        {`${clamp(toNumber(squadFilterDraft.ratingMin, 40), 40, 150)}-${clamp(
+                          toNumber(squadFilterDraft.ratingMax, 150),
+                          40,
+                          150
+                        )}`}
+                      </span>
+                    </label>
+                    <div className="range-inputs">
+                      <input
+                        id="squad-rating-min"
+                        className="range-input"
+                        type="number"
+                        min="40"
+                        max="150"
+                        value={squadFilterDraft.ratingMin}
+                        onChange={(event) => updateSquadFilterDraftRating('ratingMin', event.target.value)}
+                        onBlur={commitSquadFilterDraftRatings}
+                      />
+                      <span>-</span>
+                      <input
+                        id="squad-rating-max"
+                        className="range-input"
+                        type="number"
+                        min="40"
+                        max="150"
+                        value={squadFilterDraft.ratingMax}
+                        onChange={(event) => updateSquadFilterDraftRating('ratingMax', event.target.value)}
+                        onBlur={commitSquadFilterDraftRatings}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label" htmlFor="squad-filter-league">League</label>
+                    <select
+                      id="squad-filter-league"
+                      className="filter-select"
+                      value={squadFilterDraft.league}
+                      onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, league: event.target.value }))}
+                    >
+                      <option value="">All Leagues</option>
+                      {squadFilterOptions.leagues.map((league) => (
+                        <option key={league} value={league}>
+                          {league}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label" htmlFor="squad-filter-club">Club</label>
+                    <select
+                      id="squad-filter-club"
+                      className="filter-select"
+                      value={squadFilterDraft.club}
+                      onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, club: event.target.value }))}
+                    >
+                      <option value="">All Clubs</option>
+                      {squadFilterOptions.clubs.map((club) => (
+                        <option key={club} value={club}>
+                          {club}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label" htmlFor="squad-filter-nation">Nation</label>
+                    <select
+                      id="squad-filter-nation"
+                      className="filter-select"
+                      value={squadFilterDraft.nation}
+                      onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, nation: event.target.value }))}
+                    >
+                      <option value="">All Nations</option>
+                      {squadFilterOptions.nations.map((nation) => (
+                        <option key={nation} value={nation}>
+                          {nation}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label" htmlFor="squad-filter-skill">Skill Moves</label>
+                    <select
+                      id="squad-filter-skill"
+                      className="filter-select"
+                      value={squadFilterDraft.skill}
+                      onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, skill: event.target.value }))}
+                    >
+                      <option value="">Any</option>
+                      {squadFilterOptions.skillMoves.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="filter-item">
-                  <label htmlFor="filter-nationality">Nationality</label>
-                  <select
-                    id="filter-nationality"
-                    className="filter-select"
-                    value={squadFilterDraft.nation}
-                    onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, nation: event.target.value }))}
-                  >
-                    <option value="">All Nationalities</option>
-                    {squadFilterOptions.nations.map((nation) => (
-                      <option key={nation} value={nation}>
-                        {nation}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="filter-item">
-                  <label htmlFor="filter-club">Club</label>
-                  <select
-                    id="filter-club"
-                    className="filter-select"
-                    value={squadFilterDraft.club}
-                    onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, club: event.target.value }))}
-                  >
-                    <option value="">All Clubs</option>
-                    {squadFilterOptions.clubs.map((club) => (
-                      <option key={club} value={club}>
-                        {club}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="filter-item">
-                  <label htmlFor="filter-min-ovr">Min OVR</label>
-                  <input
-                    id="filter-min-ovr"
-                    className="filter-select"
-                    type="number"
-                    min="0"
-                    max="150"
-                    value={squadFilterDraft.minOvr}
-                    onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, minOvr: toNumber(event.target.value, 0) }))}
-                  />
-                </div>
-                <div className="filter-item">
-                  <label htmlFor="filter-max-ovr">Max OVR</label>
-                  <input
-                    id="filter-max-ovr"
-                    className="filter-select"
-                    type="number"
-                    min="0"
-                    max="150"
-                    value={squadFilterDraft.maxOvr}
-                    onChange={(event) => setSquadFilterDraft((prev) => ({ ...prev, maxOvr: toNumber(event.target.value, 150) }))}
-                  />
-                </div>
-                <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <input
-                    id="filter-auctionable-only"
-                    type="checkbox"
-                    checked={!!squadFilterDraft.auctionableOnly}
-                    onChange={(event) =>
-                      setSquadFilterDraft((prev) => ({ ...prev, auctionableOnly: event.target.checked }))
-                    }
-                  />
-                  <label htmlFor="filter-auctionable-only">Auctionable only</label>
-                </div>
-                <div className="filter-actions">
-                  <button className="apply-filter-btn" onClick={applySquadFilterPanel} type="button">
-                    Apply Filters
-                  </button>
-                  <button className="clear-filter-btn" onClick={resetSquadFilterPanel} type="button">
+
+                <div className="squad-filter-panel-footer">
+                  <button className="btn-secondary" onClick={resetSquadFilterPanel} type="button">
                     Clear All
+                  </button>
+                  <button className="btn-primary" onClick={applySquadFilterPanel} type="button">
+                    Apply
                   </button>
                 </div>
               </div>
@@ -2220,7 +2516,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                       className={`squad-slot ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
                       style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
                       data-slot-id={slot.id}
-                      onClick={() => setSelectedSlotId(slot.id)}
+                      onClick={() => handleSquadSlotSelect(slot, !!player)}
                       onDragOver={(event) => handleSlotDragOver(event, slot.id)}
                       onDragLeave={() => handleSlotDragLeave(slot.id)}
                       onDrop={(event) => handleDropOnSlot(event, slot.id)}
@@ -2363,7 +2659,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
             <div className="squad-picker">
               <div className="squad-picker-toolbar">
-                <button className="squad-filter-btn" onClick={openSquadFilterPanel} type="button">
+                <button
+                  id="squad-filter-trigger"
+                  ref={squadFilterTriggerRef}
+                  className="squad-filter-btn"
+                  onClick={openSquadFilterPanel}
+                  type="button"
+                >
                   Filters
                 </button>
                 <input
@@ -2380,10 +2682,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
-              </div>
-
-              <div className="squad-hint">
-                {selectedSlotId ? `Selected slot: ${selectedSlotId}` : 'Select a slot to assign players'}
               </div>
 
               <div className="squad-player-list">
