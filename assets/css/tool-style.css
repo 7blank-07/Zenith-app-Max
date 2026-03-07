@@ -9378,6 +9378,10 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   --squad-control-height: 40px;
   --squad-control-gap: 12px;
   --squad-group-gap: 24px;
+  --squad-blue-rgb: 15, 23, 64;
+  --squad-blue-soft-rgb: 37, 99, 235;
+  --squad-border-rgb: 255, 255, 255;
+  --squad-focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.38);
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -9385,9 +9389,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   gap: 16px var(--squad-group-gap);
   padding: 16px 24px;
   border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: linear-gradient(140deg, rgba(15, 23, 42, 0.88) 0%, rgba(23, 37, 84, 0.76) 100%);
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.38);
+  border: 1px solid rgba(var(--squad-border-rgb), 0.2);
+  background: linear-gradient(180deg, rgba(7, 22, 56, 0.96) 0%, rgba(7, 22, 56, 0.93) 100%);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.38), inset 0 1px 0 rgba(var(--squad-border-rgb), 0.14);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left,
@@ -9411,7 +9415,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-
   font-size: 20px;
   font-weight: 760;
   letter-spacing: 0.01em;
-  color: #F8FAFC;
+  color: var(--color-text, #E6EEF2);
   white-space: nowrap;
 }
 
@@ -9422,9 +9426,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input {
   max-width: 220px;
   flex: 0 1 220px;
   padding: 0 12px;
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+  border: 1px solid rgba(var(--squad-border-rgb), 0.22);
   border-radius: var(--radius-md, 10px);
-  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  background: linear-gradient(135deg, rgba(var(--squad-blue-rgb), 0.26), rgba(var(--squad-blue-rgb), 0.14));
   color: var(--color-text, #E6EEF2);
   font-size: 12px;
   font-weight: 550;
@@ -9435,9 +9439,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input::
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input:focus {
-  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.62);
-  box-shadow: var(--focus-ring, 0 0 0 3px rgba(0, 194, 168, 0.35));
-  background: var(--color-secondary-hover, rgba(255, 255, 255, 0.08));
+  border-color: rgba(var(--squad-border-rgb), 0.42);
+  box-shadow: var(--squad-focus-ring);
+  background: linear-gradient(135deg, rgba(var(--squad-blue-rgb), 0.34), rgba(var(--squad-blue-rgb), 0.2));
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center {
@@ -9462,9 +9466,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-stat {
   min-height: var(--squad-control-height);
   padding: 5px 12px 6px;
   border-radius: var(--radius-md, 10px);
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
-  background: rgba(15, 23, 42, 0.62);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 4px rgba(2, 6, 23, 0.28);
+  border: 1px solid rgba(var(--squad-border-rgb), 0.22);
+  background: linear-gradient(135deg, rgba(var(--squad-blue-rgb), 0.28), rgba(var(--squad-blue-rgb), 0.14));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(2, 6, 23, 0.24);
   display: grid;
   justify-items: start;
   align-content: center;
@@ -9523,36 +9527,37 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   padding: 0 12px;
   margin: 0;
   border-radius: var(--radius-md, 10px);
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
-  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(var(--squad-border-rgb), 0.22);
+  background: linear-gradient(135deg, rgba(var(--squad-blue-rgb), 0.22), rgba(var(--squad-blue-rgb), 0.12));
   color: var(--color-text, #E6EEF2);
   font-size: 12px;
   font-weight: 600;
-  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.3));
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.22);
   transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn {
-  background: linear-gradient(135deg, var(--color-primary, #00C2A8), var(--color-primary-hover, #00AA96));
-  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.66);
-  color: var(--color-btn-primary-text, #0E1114);
-  box-shadow: 0 2px 8px rgba(var(--color-teal-rgb, 0, 194, 168), 0.35);
+  background: linear-gradient(135deg, #1D4ED8, #172554);
+  border-color: rgba(var(--squad-border-rgb), 0.34);
+  color: #F8FAFC;
+  box-shadow: 0 2px 9px rgba(29, 78, 216, 0.42);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .load-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .export-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn {
-  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
-  border-color: var(--color-border, rgba(255, 255, 255, 0.12));
+  background: linear-gradient(135deg, rgba(var(--squad-blue-rgb), 0.32), rgba(var(--squad-blue-rgb), 0.18));
+  border-color: rgba(var(--squad-border-rgb), 0.24);
   color: var(--color-text, #E6EEF2);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
-  background: transparent;
-  color: var(--color-text-secondary, #98A0A6);
+  background: rgba(var(--squad-blue-rgb), 0.18);
+  border-color: rgba(var(--squad-border-rgb), 0.2);
+  color: #CFE3FF;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn {
@@ -9567,8 +9572,8 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-select {
   min-width: 132px;
   padding: 0 30px 0 12px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background-color: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(var(--squad-border-rgb), 0.24);
+  background-color: rgba(var(--squad-blue-rgb), 0.26);
   background-image: var(--select-caret-light);
   background-repeat: no-repeat;
   background-position: calc(100% - 10px) 50%;
@@ -9584,6 +9589,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
   width: var(--squad-control-height);
@@ -9599,9 +9605,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle.active {
-  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.62);
-  background: var(--color-secondary-active, rgba(255, 255, 255, 0.12));
-  color: var(--color-text, #E6EEF2);
+  border-color: rgba(var(--squad-border-rgb), 0.34);
+  background: linear-gradient(135deg, #2563EB, #1E3A8A);
+  color: #F8FAFC;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-btn:focus-visible,
@@ -9612,7 +9618,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle:focus-visible,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring, 0 0 0 3px rgba(0, 194, 168, 0.35));
+  box-shadow: var(--squad-focus-ring);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-btn:hover,
@@ -9621,27 +9627,27 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close:hover {
-  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.52);
+  border-color: rgba(var(--squad-border-rgb), 0.38);
   transform: translateY(-1px);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn:hover {
-  background: linear-gradient(135deg, var(--color-primary-hover, #00AA96), var(--color-primary-active, #009182));
-  color: var(--color-btn-primary-text, #0E1114);
+  background: linear-gradient(135deg, #2563EB, #1E3A8A);
+  color: #F8FAFC;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .load-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .export-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn:hover {
-  background: var(--color-secondary-hover, rgba(255, 255, 255, 0.08));
+  background: linear-gradient(135deg, rgba(var(--squad-blue-rgb), 0.48), rgba(var(--squad-blue-rgb), 0.3));
   color: var(--color-text, #E6EEF2);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close:hover {
-  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  background: rgba(var(--squad-blue-rgb), 0.3);
   color: var(--color-text, #E6EEF2);
 }
 

@@ -2391,8 +2391,8 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                 <button className="squad-action-btn load-btn" onClick={loadSquad} type="button">
                   📥 Load Squad
                 </button>
-                <button className="squad-btn" onClick={clearSquad} type="button">
-                  Reset
+                <button className="squad-btn" onClick={clearSquad} type="button" title="Reset Squad" aria-label="Reset Squad">
+                  ↻
                 </button>
               </div>
               <div className="squad-header-utilities">
