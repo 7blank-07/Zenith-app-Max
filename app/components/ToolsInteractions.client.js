@@ -2683,8 +2683,12 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                     className="squad-filter-btn"
                     onClick={openSquadFilterPanel}
                     type="button"
+                    aria-label="Open filters"
+                    title="Open filters"
                   >
-                    Filters
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path d="M3 5h18l-7 8v5l-4 2v-7L3 5Z" />
+                    </svg>
                   </button>
                   <input
                     type="text"
