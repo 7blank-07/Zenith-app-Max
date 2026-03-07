@@ -9588,6 +9588,14 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   display: inline-flex !important;
 }
 
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-label--desktop {
+  display: inline;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-label--mobile {
+  display: none;
+}
+
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
@@ -9816,10 +9824,10 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-row:ho
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot.selected .position-dot {
-  border-color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.28) 0%, rgba(30, 58, 138, 0.34) 100%);
-  transform: translate(-50%, -50%) scale(1.06);
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.36);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(45, 45, 68, 0.8) 100%);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot.selected .position-label {
@@ -10157,7 +10165,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 }
 
 /* Restored compact squad-header responsive layout (desktop >1020px unchanged) */
-@media (max-width: 1020px) {
+@media (max-width: 1024px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
     display: grid;
     grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.35fr) 30px minmax(0, 1fr) minmax(0, 1fr);
@@ -10187,9 +10195,19 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     display: none !important;
   }
 
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    --squad-sidebar-width: 0px;
+    --squad-main-gap: 0px;
+  }
+
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: auto !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    width: 100% !important;
+    margin-right: 0;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input {
@@ -10306,7 +10324,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 @media (max-width: 768px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.05fr) 36px;
     align-items: center;
     gap: 8px;
     row-gap: 8px;
@@ -10315,13 +10333,13 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input {
-    grid-column: 1 / 2;
+    grid-column: 1 / 3;
     grid-row: 1;
     flex: 1 1 auto;
-    width: 100%;
+    width: min(100%, 168px);
     min-width: 0;
-    max-width: 190px;
-    justify-self: stretch;
+    max-width: 168px;
+    justify-self: start;
     margin-right: 0;
     box-sizing: border-box;
     overflow: hidden;
@@ -10331,12 +10349,12 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-formation {
-    grid-column: 2 / 4;
+    grid-column: 3 / 4;
     grid-row: 1;
     flex: 0 0 auto;
     width: 100%;
     min-width: 0;
-    max-width: 140px;
+    max-width: none;
     margin-left: 0;
     justify-self: stretch;
     overflow: hidden;
@@ -10346,7 +10364,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     flex: 0 0 auto;
     width: 100%;
     min-width: 0;
-    max-width: 140px;
+    max-width: none;
     box-sizing: border-box;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -10436,7 +10454,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 @media (max-width: 480px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.05fr) 36px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input,
