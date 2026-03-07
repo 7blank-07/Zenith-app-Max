@@ -1,152 +1,190 @@
-Repair the remaining `/players` feature regressions.
+Start Phase 3 header refinement.
 
-Important rules:
+Act as a senior frontend engineer and product UI/UX architect.
 
-• Do NOT use legacy SPA scripts
-• Do NOT import anything from `assets/js/*`
-• Do NOT use manual DOM listeners or querySelector logic
-• Implement everything using React state/hooks
+The Squad Builder header currently looks unprofessional and has multiple issues.
 
-The `/players` page was migrated from SPA to Next.js and most functionality now works.
+Fix the header layout and styling to match production-quality SaaS tools.
 
-Working features:
+IMPORTANT:
+Do NOT modify any logic related to:
+- formations
+- drag and drop
+- squad calculations
+- save/load/export behavior
+- state management
 
-* auctionable toggle
-* 70-player initial pagination
-* load more pagination
-* sorting
-* search filtering
+Only improve layout, structure, and styling.
 
-However two SPA parity features are still missing.
+------------------------------------------------
 
----
+1. REMOVE DUPLICATE THEME BUTTON
 
-1️⃣ PLAYER HOVER CARD PREVIEW
+There are currently two "change field theme" buttons.
 
-Legacy behavior:
+Find where the theme toggle button is rendered and ensure it appears ONLY once in the header.
 
-When hovering a player row:
+If it is rendered twice in JSX, remove the duplicate.
 
-• A player card preview appears next to the mouse cursor
-• The preview updates instantly when hovering another player
-• The preview disappears when leaving the row
-• The preview follows the mouse position
+------------------------------------------------
 
-Implementation requirements:
+2. FIX HEADER LAYOUT (SINGLE ROW)
 
-* Implement using React state in `PlayersDatabaseInteractions.client.js`
-* Track hovered player and mouse coordinates
-* Add row events:
+The squad header must fit in a single row on desktop.
 
-  * onMouseEnter
-  * onMouseMove
-  * onMouseLeave
+Reorganize header structure into logical groups:
 
-Render a floating `PlayerCardPreview` component that:
+LEFT GROUP
+- "Squad Builder" title
+- squad name input
+- theme toggle button
 
-• uses `position: fixed`
-• follows the cursor
-• updates when hovering different players
+CENTER GROUP
+- Export
+- Badges
+- OVR indicator
+- VALUE indicator
 
-Do NOT attach global DOM listeners.
+RIGHT GROUP
+- Formation selector
+- Save Squad
+- Load Squad
+- Reset
+- Fullscreen toggle
+- Close button
 
----
+These groups must be aligned horizontally using flex layout.
 
-2️⃣ CUSTOM STATS MODAL (FULL SPA PARITY)
+------------------------------------------------
 
-The stats modal currently only shows base stats:
+3. FIX INPUT WIDTH
 
-PAC
-SHO
-PAS
-DRI
-DEF
-PHY
+The squad name input is currently too wide.
 
-But the SPA supported **30+ attribute stats**.
+Limit it so other controls fit in the same row.
 
-Restore the full stat selector list.
+Use something like:
 
-Stats must include:
+max-width: 220px
 
-Offense
-Acceleration
-Agility
-Ball Control
-Crossing
-Curve
-Dribbling
-Finishing
-Free Kick
-Long Passing
-Long Shot
-Penalties
-Short Passing
-Shot Power
-Sprint Speed
-Vision
-Volley
+Do not allow it to stretch across the header.
 
-Defense
-Aggression
-Awareness
-Heading
-Marking
-Positioning
-Reactions
-Sliding Tackle
-Standing Tackle
+------------------------------------------------
 
-Physical
-Balance
-Jumping
-Stamina
-Strength
+4. FIX BUTTON ALIGNMENT
 
-Goalkeeper
-GK Diving
-GK Handling
-GK Kicking
-GK Positioning
-GK Reflexes
+All buttons and controls must have identical height.
 
-Other
-Date Added
-Overall
-Skill Moves
-Weak Foot
-Height
-Weight
-Total Stats
+Use a consistent height for all controls.
 
-Modal behavior must support:
+Example:
 
-• selecting multiple stats
-• select all
-• stat search
-• selected counter
+height: 40px
 
-When clicking **Apply**:
+Ensure the following align perfectly on the same baseline:
+- squad name input
+- export button
+- badges button
+- formation selector
+- save/load/reset buttons
+- fullscreen button
+- close button
 
-• selected stats become new columns in the players table
-• columns render inside `.player-row-stats`
-• values are taken from player attribute data
+------------------------------------------------
 
-Example access:
+5. UNIFY BUTTON COLORS
 
-player.attributes[statName]
+Currently Save Squad and Load Squad are blue but other buttons are different.
 
-Columns must update using React state so table rerenders.
+Standardize button styles.
 
----
+Use three button types:
 
-Important:
+Primary
+- Save Squad
 
-Do not break existing functionality:
+Secondary
+- Load Squad
+- Export
+- Badges
 
-• sorting
-• filtering
-• pagination
-• load more
+Ghost
+- Reset
+- Close
+- Fullscreen
 
-Goal: restore full SPA behavior using React/Next.js architecture.
+Use the existing Zenith app theme variables.
+
+Do not introduce random colors.
+
+------------------------------------------------
+
+6. IMPLEMENT REAL FULLSCREEN MODE
+
+The fullscreen button currently just enlarges the builder.
+
+Instead implement a real fullscreen experience using the browser Fullscreen API.
+
+When clicking the fullscreen button:
+
+call requestFullscreen() on the squad builder container.
+
+When exiting fullscreen:
+
+call document.exitFullscreen().
+
+Target the main squad builder wrapper.
+
+This should behave similar to F11 fullscreen.
+
+------------------------------------------------
+
+7. IMPROVE SPACING SYSTEM
+
+Apply consistent spacing across the header.
+
+Use spacing rhythm:
+
+8px
+16px
+24px
+
+Use:
+
+gap: 12px between controls
+gap: 24px between control groups
+
+------------------------------------------------
+
+8. RESPONSIVE SAFETY
+
+On smaller screens the header may wrap into two rows.
+
+But on standard desktop widths (1366px and above) it must remain a single row.
+
+------------------------------------------------
+
+9. KEEP CURRENT HANDLERS
+
+Do not rewrite event handlers.
+
+Keep existing functions for:
+- saveSquad
+- loadSquad
+- export
+- reset
+- formation change
+
+Only adjust layout and styling.
+
+------------------------------------------------
+
+END GOAL
+
+The Squad Builder header should look like a professional dashboard toolbar similar to tools like Figma, Linear, or Vercel dashboards.
+
+Clean alignment.
+Consistent button styles.
+Proper control grouping.
+Single-row professional layout.
+Working fullscreen toggle.

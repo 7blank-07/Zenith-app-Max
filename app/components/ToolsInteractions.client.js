@@ -1024,6 +1024,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [badgesModalOpen, setBadgesModalOpen] = useState(false);
   const [starters, setStarters] = useState({});
   const [bench, setBench] = useState(Array.from({ length: 7 }, () => ''));
+  const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
 
   const [comparePlayers, setComparePlayers] = useState([]);
   const [compareView, setCompareView] = useState('basic');
@@ -1054,6 +1055,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const dragPayloadRef = useRef(null);
   const dragPreviewNodeRef = useRef(null);
   const squadFilterTriggerRef = useRef(null);
+  const squadBuilderContainerRef = useRef(null);
   const [draggingKey, setDraggingKey] = useState('');
   const [dragOverSlotId, setDragOverSlotId] = useState('');
   const [dragOverBenchIndex, setDragOverBenchIndex] = useState(-1);
@@ -1218,6 +1220,16 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, [fieldThemeId]);
 
   useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsSquadFullscreen(document.fullscreenElement === squadBuilderContainerRef.current);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
     if (activeTool !== 'compare') {
       setCompareSearchOpen(false);
       setCompareSearchQuery('');
@@ -1227,6 +1239,12 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       setSquadFilterOpen(false);
       setThemeSelectorOpen(false);
       setBadgesModalOpen(false);
+      if (document.fullscreenElement === squadBuilderContainerRef.current) {
+        document.exitFullscreen().catch((error) => {
+          console.error('[tools] Failed to exit squad fullscreen:', error);
+        });
+      }
+      setIsSquadFullscreen(false);
     }
   }, [activeTool]);
 
@@ -1241,6 +1259,29 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       document.body.style.overflow = '';
     };
   }, [activeTool, compareSearchOpen]);
+
+  useEffect(() => {
+    const mainContent = document.querySelector('main.main-content');
+    if (!mainContent) return;
+    const syncSquadViewportHeight = () => {
+      const topOffset = mainContent.getBoundingClientRect().top;
+      const viewportHeight = Math.max(0, window.innerHeight - topOffset);
+      mainContent.style.setProperty('--squadbuilder-viewport-height', `${viewportHeight}px`);
+    };
+    if (activeTool === 'squadbuilder') {
+      mainContent.classList.add('main-content--squadbuilder');
+      syncSquadViewportHeight();
+      window.addEventListener('resize', syncSquadViewportHeight);
+    } else {
+      mainContent.classList.remove('main-content--squadbuilder');
+      mainContent.style.removeProperty('--squadbuilder-viewport-height');
+    }
+    return () => {
+      mainContent.classList.remove('main-content--squadbuilder');
+      mainContent.style.removeProperty('--squadbuilder-viewport-height');
+      window.removeEventListener('resize', syncSquadViewportHeight);
+    };
+  }, [activeTool]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1262,6 +1303,12 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key !== 'Escape') return;
+      if (document.fullscreenElement === squadBuilderContainerRef.current) {
+        document.exitFullscreen().catch((error) => {
+          console.error('[tools] Failed to exit squad fullscreen:', error);
+        });
+        return;
+      }
       if (compareConfigPlayerId) {
         setCompareConfigPlayerId(null);
         return;
@@ -2033,6 +2080,19 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
   const openTool = (toolName) => setActiveTool(normalizeTool(toolName));
   const closeOpenTool = () => setActiveTool('none');
+  const toggleSquadFullscreen = () => {
+    const squadContainer = squadBuilderContainerRef.current;
+    if (!squadContainer) return;
+    if (document.fullscreenElement === squadContainer) {
+      document.exitFullscreen().catch((error) => {
+        console.error('[tools] Failed to exit squad fullscreen:', error);
+      });
+      return;
+    }
+    squadContainer.requestFullscreen().catch((error) => {
+      console.error('[tools] Failed to enter squad fullscreen:', error);
+    });
+  };
 
   const compareSubtitle =
     comparePlayers.length === 0
@@ -2045,10 +2105,11 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const compareConfigPoints = Math.max(0, toNumber(compareConfigDraft.rank, 0));
   const activeFieldTheme = FIELD_THEMES[fieldThemeId] || FIELD_THEMES['camp-nou'];
   const fieldThemeClassName = `theme-${activeFieldTheme.id}`;
+  const isSquadBuilderActive = activeTool === 'squadbuilder';
 
   return (
     <>
-      <div id="tools-view" className="view active">
+      <div id="tools-view" className={`view ${isSquadBuilderActive ? '' : 'active'}`}>
         <div className="tools-modal-content" style={{ width: 'min(1200px, 96vw)', margin: '18px auto', maxHeight: 'none' }}>
           <div className="tools-modal-header">
             <h2>Tools & Features</h2>
@@ -2103,7 +2164,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
           </div>
         </div>
 
-        <div id="shard-calculator-view" className="view active" style={{ display: activeTool === 'shardcalculator' ? 'block' : 'none' }}>
+        <div id="shard-calculator-view" className={`view ${activeTool === 'shardcalculator' ? 'active' : ''}`}>
           <div className="shard-tabs-container">
             <button
               className={`shard-tab-btn ${shardMode === 'counter' ? 'active' : ''}`}
@@ -2257,9 +2318,15 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         </div>
       </div>
 
-      <div id="squad-builder-modal" className="squad-modal-overlay" style={{ display: activeTool === 'squadbuilder' ? 'flex' : 'none' }}>
-        <div className="squad-modal">
-          <div className="squad-header">
+      <div
+        id="squad-builder-modal"
+        ref={squadBuilderContainerRef}
+        className={`squad-page-view${isSquadFullscreen ? ' squad-fullscreen' : ''}`}
+        style={{ display: isSquadBuilderActive ? 'block' : 'none' }}
+      >
+        <div className="squad-page-shell">
+          {/* Squad Builder region: top bar controls */}
+          <div className="squad-header" data-squad-section="top-bar">
             <div className="squad-header-left">
               <h2>Squad Builder</h2>
               <input
@@ -2275,70 +2342,83 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
             </div>
 
             <div className="squad-header-center">
-              <button className="squad-action-btn export-btn" onClick={exportSquad} type="button">
-                📸 Export
-              </button>
-              <button className="badges-btn" onClick={() => setBadgesModalOpen(true)} title="Manage Team Badges" type="button">
-                <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="M10 2L11.5 6.5L16 6.5L12.5 9.5L14 14L10 11.5L6 14L7.5 9.5L4 6.5L8.5 6.5L10 2Z" fill="currentColor" />
-                </svg>
-                Badges
-              </button>
-              <div className="squad-stat">
-                <span className="squad-stat-label">OVR</span>
-                <span id="squad-ovr" className="squad-stat-value">
-                  {squadOvr}
-                </span>
+              <div className="squad-header-actions">
+                <button className="squad-action-btn export-btn" onClick={exportSquad} type="button">
+                  📸 Export
+                </button>
+                <button className="badges-btn" onClick={() => setBadgesModalOpen(true)} title="Manage Team Badges" type="button">
+                  <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M10 2L11.5 6.5L16 6.5L12.5 9.5L14 14L10 11.5L6 14L7.5 9.5L4 6.5L8.5 6.5L10 2Z" fill="currentColor" />
+                  </svg>
+                  Badges
+                </button>
               </div>
-              <div className="squad-stat">
-                <span className="squad-stat-label">VALUE</span>
-                <span id="squad-value" className="squad-stat-value">
-                  {formatCoins(squadValue)}
-                </span>
+              <div className="squad-header-status">
+                <div className="squad-stat">
+                  <span className="squad-stat-label">OVR</span>
+                  <span id="squad-ovr" className="squad-stat-value">
+                    {squadOvr}
+                  </span>
+                </div>
+                <div className="squad-stat">
+                  <span className="squad-stat-label">VALUE</span>
+                  <span id="squad-value" className="squad-stat-value">
+                    {formatCoins(squadValue)}
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className="squad-header-right">
-              <select
-                id="formation-select"
-                className="squad-select"
-                value={formationId}
-                onChange={(event) => setFormationId(event.target.value)}
-              >
-                {Object.keys(SQUAD_FORMATIONS).map((formation) => (
-                  <option key={formation} value={formation}>
-                    {formation}
-                  </option>
-                ))}
-              </select>
-              <button className="squad-action-btn save-btn" onClick={saveSquad} type="button">
-                💾 Save Squad
-              </button>
-              <button className="squad-action-btn load-btn" onClick={loadSquad} type="button">
-                📥 Load Squad
-              </button>
-              <button className="squad-btn" onClick={clearSquad} type="button">
-                Reset
-              </button>
-              <button
-                id="squad-theme-btn-mobile-tablet"
-                className="squad-theme-btn squad-theme-btn-mobile-tablet"
-                title="Change Field Theme"
-                onClick={openThemeSelector}
-                type="button"
-              >
-                🎨
-              </button>
-              <button className="squad-close" onClick={closeOpenTool} type="button" aria-label="Close Squad Builder">
-                ✕
-              </button>
+              <div className="squad-header-formation">
+                <select
+                  id="formation-select"
+                  className="squad-select"
+                  value={formationId}
+                  onChange={(event) => setFormationId(event.target.value)}
+                >
+                  {Object.keys(SQUAD_FORMATIONS).map((formation) => (
+                    <option key={formation} value={formation}>
+                      {formation}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="squad-header-persistence">
+                <button className="squad-action-btn save-btn" onClick={saveSquad} type="button">
+                  💾 Save Squad
+                </button>
+                <button className="squad-action-btn load-btn" onClick={loadSquad} type="button">
+                  📥 Load Squad
+                </button>
+                <button className="squad-btn" onClick={clearSquad} type="button">
+                  Reset
+                </button>
+              </div>
+              <div className="squad-header-utilities">
+                <button
+                  className={`squad-fullscreen-toggle${isSquadFullscreen ? ' active' : ''}`}
+                  title={isSquadFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                  aria-label={isSquadFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                  aria-pressed={isSquadFullscreen}
+                  onClick={toggleSquadFullscreen}
+                  type="button"
+                >
+                  ⛶
+                </button>
+                <button className="squad-close" onClick={closeOpenTool} type="button" aria-label="Close Squad Builder">
+                  ✕
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="squad-body">
+          {/* Squad Builder region: main content shell */}
+          <div className="squad-body" data-squad-section="main-content">
             <div
               id="squad-filter-panel"
               className={`squad-filter-panel ${squadFilterOpen ? 'active' : ''}`}
+              data-squad-section="filter-panel"
               style={{
                 display: squadFilterOpen ? 'block' : 'none',
                 position: 'fixed',
@@ -2502,252 +2582,261 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
               </div>
             </div>
 
-            <div className={`squad-field-container ${fieldThemeClassName}`} style={{ background: activeFieldTheme.background }}>
-              <div id="squad-field" className="squad-field">
-                {formationSlots.map((slot) => {
-                  const playerId = starters[slot.id] || '';
-                  const player = playerId ? playersById.get(playerId) : null;
-                  const variant = player ? getPlayerType(player) : 'hero';
-                  const adjustedOvr = player ? toNumber(starterAdjustedOvrBySlot[slot.id], 0) : 0;
-                  const dragKey = player ? `slot-${slot.id}` : '';
-                  return (
-                    <div
-                      key={`${formationId}-${slot.id}`}
-                      className={`squad-slot ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
-                      style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
-                      data-slot-id={slot.id}
-                      onClick={() => handleSquadSlotSelect(slot, !!player)}
-                      onDragOver={(event) => handleSlotDragOver(event, slot.id)}
-                      onDragLeave={() => handleSlotDragLeave(slot.id)}
-                      onDrop={(event) => handleDropOnSlot(event, slot.id)}
-                    >
-                      <div className="position-dot">
-                        <span className="position-label">{slot.label}</span>
-                      </div>
-
-                      {!!player && (
-                        <div
-                          className={`player-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
-                          data-player-id={player.playerId}
-                          draggable
-                          onDragStart={(event) => handleDragStart(event, { source: 'slot', playerId: player.playerId, slotId: slot.id }, dragKey)}
-                          onDragEnd={handleDragEnd}
-                        >
-                          <div className="preview-card-inner">
-                            <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="preview-card-bg" />
-                            {!!player.playerImage && (
-                              <img src={player.playerImage} alt={player.name} className="preview-card-player-img" />
-                            )}
-                            <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                              {adjustedOvr > 0 ? adjustedOvr : 'NA'}
-                            </div>
-                            <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                              {player.position || 'NA'}
-                            </div>
-                            <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                              {player.name}
-                            </div>
-                            {!!player.nationFlag && (
-                              <img
-                                src={player.nationFlag}
-                                alt="Nation"
-                                className={`card-nation-flag ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
-                              />
-                            )}
-                            {!!player.clubFlag && (
-                              <img
-                                src={player.clubFlag}
-                                alt="Club"
-                                className={`card-club-flag ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
-                              />
-                            )}
-                            {variant === 'normal' && !!player.leagueImage && (
-                              <img src={player.leagueImage} alt="League" className="card-league-flag normal-league-flag" />
-                            )}
-                            {player.isUntradable && (
-                              <div className="card-untradable-badge with-remove">
-                                <img src="/assets/images/untradable_img.png" alt="Untradable" />
-                              </div>
-                            )}
-                            <button
-                              className="preview-card-remove"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                removeStarter(slot.id);
-                              }}
-                              type="button"
-                            >
-                              ×
-                            </button>
-                          </div>
+            <div className="squad-main-grid" data-squad-section="main-grid">
+              {/* Squad Builder region: pitch canvas */}
+              <div
+                className={`squad-field-container ${fieldThemeClassName}`}
+                data-squad-section="pitch-region"
+                style={{ background: activeFieldTheme.background }}
+              >
+                <div id="squad-field" className="squad-field">
+                  {formationSlots.map((slot) => {
+                    const playerId = starters[slot.id] || '';
+                    const player = playerId ? playersById.get(playerId) : null;
+                    const variant = player ? getPlayerType(player) : 'hero';
+                    const adjustedOvr = player ? toNumber(starterAdjustedOvrBySlot[slot.id], 0) : 0;
+                    const dragKey = player ? `slot-${slot.id}` : '';
+                    return (
+                      <div
+                        key={`${formationId}-${slot.id}`}
+                        className={`squad-slot ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
+                        style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
+                        data-slot-id={slot.id}
+                        onClick={() => handleSquadSlotSelect(slot, !!player)}
+                        onDragOver={(event) => handleSlotDragOver(event, slot.id)}
+                        onDragLeave={() => handleSlotDragLeave(slot.id)}
+                        onDrop={(event) => handleDropOnSlot(event, slot.id)}
+                      >
+                        <div className="position-dot">
+                          <span className="position-label">{slot.label}</span>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+
+                        {!!player && (
+                          <div
+                            className={`player-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
+                            data-player-id={player.playerId}
+                            draggable
+                            onDragStart={(event) => handleDragStart(event, { source: 'slot', playerId: player.playerId, slotId: slot.id }, dragKey)}
+                            onDragEnd={handleDragEnd}
+                          >
+                            <div className="preview-card-inner">
+                              <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="preview-card-bg" />
+                              {!!player.playerImage && (
+                                <img src={player.playerImage} alt={player.name} className="preview-card-player-img" />
+                              )}
+                              <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
+                                {adjustedOvr > 0 ? adjustedOvr : 'NA'}
+                              </div>
+                              <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+                                {player.position || 'NA'}
+                              </div>
+                              <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+                                {player.name}
+                              </div>
+                              {!!player.nationFlag && (
+                                <img
+                                  src={player.nationFlag}
+                                  alt="Nation"
+                                  className={`card-nation-flag ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
+                                />
+                              )}
+                              {!!player.clubFlag && (
+                                <img
+                                  src={player.clubFlag}
+                                  alt="Club"
+                                  className={`card-club-flag ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
+                                />
+                              )}
+                              {variant === 'normal' && !!player.leagueImage && (
+                                <img src={player.leagueImage} alt="League" className="card-league-flag normal-league-flag" />
+                              )}
+                              {player.isUntradable && (
+                                <div className="card-untradable-badge with-remove">
+                                  <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                                </div>
+                              )}
+                              <button
+                                className="preview-card-remove"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  removeStarter(slot.id);
+                                }}
+                                type="button"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div id="squad-bench" className="squad-bench">
-                {bench.map((playerId, index) => {
-                  const player = playerId ? playersById.get(playerId) : null;
-                  const variant = player ? getPlayerType(player) : 'hero';
-                  const dragKey = player ? `bench-${index}` : '';
-                  return (
-                    <div
-                      key={`bench-${index}`}
-                      className={`bench-cell ${player ? 'filled' : ''} ${dragOverBenchIndex === index ? 'drag-over' : ''}`}
-                      data-bench-index={index}
-                      onDragOver={(event) => handleBenchDragOver(event, index)}
-                      onDragLeave={() => handleBenchDragLeave(index)}
-                      onDrop={(event) => handleDropOnBench(event, index)}
-                    >
-                      <div className="bench-empty-slot">
-                        <span className="bench-slot-label">BENCH {index + 1}</span>
-                      </div>
-                      {!!player && (
-                        <div
-                          className={`bench-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
-                          data-player-id={player.playerId}
-                          draggable
-                          onDragStart={(event) => handleDragStart(event, { source: 'bench', playerId: player.playerId, benchIndex: index }, dragKey)}
-                          onDragEnd={handleDragEnd}
-                        >
-                          <div className="bench-card-inner">
-                            <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="bench-card-bg" />
-                            {!!player.playerImage && (
-                              <img src={player.playerImage} alt={player.name} className="bench-card-player-img" />
-                            )}
-                            <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                              {player.ovr > 0 ? player.ovr : 'NA'}
+              {/* Squad Builder region: right-side player browser */}
+              <div className="squad-picker" data-squad-section="right-panel">
+                <div className="squad-picker-toolbar" data-squad-section="right-panel-toolbar">
+                  <button
+                    id="squad-filter-trigger"
+                    ref={squadFilterTriggerRef}
+                    className="squad-filter-btn"
+                    onClick={openSquadFilterPanel}
+                    type="button"
+                  >
+                    Filters
+                  </button>
+                  <input
+                    type="text"
+                    id="squad-picker-search"
+                    className="squad-picker-search"
+                    value={squadSearchQuery}
+                    onChange={(event) => setSquadSearchQuery(event.target.value)}
+                    placeholder="Search players..."
+                  />
+                  <button className="icon-btn" onClick={() => setSquadSearchQuery('')} type="button" aria-label="Clear search">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="squad-player-list" data-squad-section="right-panel-player-list">
+                  {squadPickerPlayers.map((player) => {
+                    const variant = getPlayerType(player);
+                    const dragKey = `picker-${player.playerId}`;
+                    return (
+                      <div
+                        key={player.playerId}
+                        className={`picker-row ${draggingKey === dragKey ? 'dragging' : ''}`}
+                        draggable
+                        onDragStart={(event) =>
+                          handleDragStart(event, { source: 'picker', playerId: player.playerId }, dragKey, event.currentTarget.firstElementChild)
+                        }
+                        onDragEnd={handleDragEnd}
+                        onClick={() => assignPlayerToSelectedSlot(player.playerId)}
+                      >
+                        <div className="picker-card-mini">
+                          <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
+                          {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
+                          <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
+                            {player.ovr > 0 ? player.ovr : 'N/A'}
+                          </div>
+                          <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+                            {player.position || 'N/A'}
+                          </div>
+                          <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+                            {player.name}
+                          </div>
+                          {!!player.nationFlag && (
+                            <img
+                              src={player.nationFlag}
+                              alt="Nation"
+                              className={`picker-squad-card-flag-nation ${variant === 'normal' ? 'normal-squad-nation-flag' : 'hero-icon-squad-nation-flag'}`}
+                            />
+                          )}
+                          {!!player.clubFlag && (
+                            <img
+                              src={player.clubFlag}
+                              alt="Club"
+                              className={`picker-squad-card-flag-club ${variant === 'normal' ? 'normal-squad-club-flag' : 'hero-icon-squad-club-flag'}`}
+                            />
+                          )}
+                          {variant === 'normal' && !!player.leagueImage && (
+                            <img src={player.leagueImage} alt="League" className="picker-squad-card-flag-league normal-squad-league-flag" />
+                          )}
+                          {player.isUntradable && (
+                            <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
+                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
                             </div>
-                            <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                              {player.position || 'NA'}
-                            </div>
-                            <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                              {player.name}
-                            </div>
-                            {!!player.nationFlag && (
-                              <img
-                                src={player.nationFlag}
-                                alt="Nation"
-                                className={`bench-card-flag-nation ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
-                              />
-                            )}
-                            {!!player.clubFlag && (
-                              <img
-                                src={player.clubFlag}
-                                alt="Club"
-                                className={`bench-card-flag-club ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
-                              />
-                            )}
-                            {player.isUntradable && (
-                              <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
-                                <img src="/assets/images/untradable_img.png" alt="Untradable" />
-                              </div>
-                            )}
-                            <button className="bench-card-remove" onClick={() => removeBenchPlayer(index)} type="button">
-                              ×
-                            </button>
+                          )}
+                        </div>
+
+                        <div className="picker-main">
+                          <div className="picker-name">{player.name}</div>
+                          <div className="picker-meta">
+                            {player.position || 'N/A'} • {player.club || 'Unknown'}
                           </div>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+
+                        <div className="picker-ovr-right">{player.ovr > 0 ? player.ovr : 'N/A'}</div>
+                      </div>
+                    );
+                  })}
+                  {!squadPickerPlayers.length && <p style={{ color: '#98A0A6', textAlign: 'center' }}>No available players match the current search.</p>}
+                </div>
               </div>
             </div>
 
-            <div className="squad-picker">
-              <div className="squad-picker-toolbar">
-                <button
-                  id="squad-filter-trigger"
-                  ref={squadFilterTriggerRef}
-                  className="squad-filter-btn"
-                  onClick={openSquadFilterPanel}
-                  type="button"
-                >
-                  Filters
-                </button>
-                <input
-                  type="text"
-                  id="squad-picker-search"
-                  className="squad-picker-search"
-                  value={squadSearchQuery}
-                  onChange={(event) => setSquadSearchQuery(event.target.value)}
-                  placeholder="Search players..."
-                />
-                <button className="icon-btn" onClick={() => setSquadSearchQuery('')} type="button" aria-label="Clear search">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="squad-player-list">
-                {squadPickerPlayers.map((player) => {
-                  const variant = getPlayerType(player);
-                  const dragKey = `picker-${player.playerId}`;
-                  return (
-                    <div
-                      key={player.playerId}
-                      className={`picker-row ${draggingKey === dragKey ? 'dragging' : ''}`}
-                      draggable
-                      onDragStart={(event) =>
-                        handleDragStart(event, { source: 'picker', playerId: player.playerId }, dragKey, event.currentTarget.firstElementChild)
-                      }
-                      onDragEnd={handleDragEnd}
-                      onClick={() => assignPlayerToSelectedSlot(player.playerId)}
-                    >
-                      <div className="picker-card-mini">
-                        <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
-                        {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
-                        <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                          {player.ovr > 0 ? player.ovr : 'N/A'}
-                        </div>
-                        <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                          {player.position || 'N/A'}
-                        </div>
-                        <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                          {player.name}
-                        </div>
-                        {!!player.nationFlag && (
-                          <img
-                            src={player.nationFlag}
-                            alt="Nation"
-                            className={`picker-squad-card-flag-nation ${variant === 'normal' ? 'normal-squad-nation-flag' : 'hero-icon-squad-nation-flag'}`}
-                          />
-                        )}
-                        {!!player.clubFlag && (
-                          <img
-                            src={player.clubFlag}
-                            alt="Club"
-                            className={`picker-squad-card-flag-club ${variant === 'normal' ? 'normal-squad-club-flag' : 'hero-icon-squad-club-flag'}`}
-                          />
-                        )}
-                        {variant === 'normal' && !!player.leagueImage && (
-                          <img src={player.leagueImage} alt="League" className="picker-squad-card-flag-league normal-squad-league-flag" />
-                        )}
-                        {player.isUntradable && (
-                          <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
-                            <img src="/assets/images/untradable_img.png" alt="Untradable" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="picker-main">
-                        <div className="picker-name">{player.name}</div>
-                        <div className="picker-meta">
-                          {player.position || 'N/A'} • {player.club || 'Unknown'}
-                        </div>
-                      </div>
-
-                      <div className="picker-ovr-right">{player.ovr > 0 ? player.ovr : 'N/A'}</div>
+            {/* Squad Builder region: bench strip */}
+            <div id="squad-bench" className="squad-bench" data-squad-section="bench-region">
+              {bench.map((playerId, index) => {
+                const player = playerId ? playersById.get(playerId) : null;
+                const variant = player ? getPlayerType(player) : 'hero';
+                const dragKey = player ? `bench-${index}` : '';
+                return (
+                  <div
+                    key={`bench-${index}`}
+                    className={`bench-cell ${player ? 'filled' : ''} ${dragOverBenchIndex === index ? 'drag-over' : ''}`}
+                    data-bench-index={index}
+                    onDragOver={(event) => handleBenchDragOver(event, index)}
+                    onDragLeave={() => handleBenchDragLeave(index)}
+                    onDrop={(event) => handleDropOnBench(event, index)}
+                  >
+                    <div className="bench-empty-slot">
+                      <span className="bench-slot-label">BENCH {index + 1}</span>
                     </div>
-                  );
-                })}
-                {!squadPickerPlayers.length && <p style={{ color: '#98A0A6', textAlign: 'center' }}>No available players match the current search.</p>}
-              </div>
+                    {!!player && (
+                      <div
+                        className={`bench-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
+                        data-player-id={player.playerId}
+                        draggable
+                        onDragStart={(event) => handleDragStart(event, { source: 'bench', playerId: player.playerId, benchIndex: index }, dragKey)}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <div className="bench-card-inner">
+                          <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="bench-card-bg" />
+                          {!!player.playerImage && (
+                            <img src={player.playerImage} alt={player.name} className="bench-card-player-img" />
+                          )}
+                          <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
+                            {player.ovr > 0 ? player.ovr : 'NA'}
+                          </div>
+                          <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+                            {player.position || 'NA'}
+                          </div>
+                          <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+                            {player.name}
+                          </div>
+                          {!!player.nationFlag && (
+                            <img
+                              src={player.nationFlag}
+                              alt="Nation"
+                              className={`bench-card-flag-nation ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
+                            />
+                          )}
+                          {!!player.clubFlag && (
+                            <img
+                              src={player.clubFlag}
+                              alt="Club"
+                              className={`bench-card-flag-club ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
+                            />
+                          )}
+                          {player.isUntradable && (
+                            <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
+                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                            </div>
+                          )}
+                          <button className="bench-card-remove" onClick={() => removeBenchPlayer(index)} type="button">
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

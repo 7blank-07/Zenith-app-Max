@@ -1,41 +1,63 @@
 /* =========================================
-   Squad Builder Modal (Blue/Purple theme)
+   Squad Builder Full-Page Shell (Blue/Purple theme)
    OPTIMIZED: Smaller Header + Bigger Field
 ========================================= */
 
-.squad-modal-overlay {
-  position: fixed;
-  inset: 0;
+main.main-content.main-content--squadbuilder {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible;
+}
+
+.squad-page-view#squad-builder-modal {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.squad-page-view {
   display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 10000;
-  backdrop-filter: blur(10px);
-  margin-top: -50px;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
 }
 
-.squad-modal {
-  width: min(1200px, 95vw);
-  height: min(95vh, 950px);
+.squad-page-shell {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
   background: linear-gradient(135deg, #0F172A 0%, #1A2847 50%, #0F172A 100%);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  margin-top: 10px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: visible;
+  position: relative;
 }
 
-/* Mobile: Full screen modal */
 @media (max-width: 768px) {
-  .squad-modal {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-    margin-top: 0 !important;
+  .squad-page-view {
+    height: auto;
+    min-height: 0;
+  }
+
+  .squad-page-shell {
+    height: auto;
+    min-height: 0;
+    border-radius: 0;
   }
 }
 
@@ -45,14 +67,10 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 10px;
-  padding: 10px 12px;
-  /* ← Reduced from 16px */
+  padding: 8px 12px;
   border-bottom: 1px solid rgba(59, 130, 246, 0.15);
   align-items: center;
-  flex-shrink: 0;
-  margin-top: 5px !important;  /* ✅ REDUCED from 55px */
-  padding: 8px 12px !important;
-  /* ← Prevent shrinking */
+  margin-top: 0 !important;
 }
 
 .squad-header h2 {
@@ -195,12 +213,32 @@
 /* ===== BODY - BIGGER FIELD ===== */
 .squad-body {
   display: grid;
-  grid-template-columns: 1.5fr 0.5fr;
-  /* ← 75% field, 25% picker */
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 12px;
   padding: 12px;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
+}
+
+.squad-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.squad-main-grid .squad-picker {
+  height: 100%;
+}
+
+.squad-main-grid .squad-player-list {
+  max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 
@@ -209,6 +247,11 @@
     padding: 6px !important;  /* ✅ Reduced from 12px */
     gap: 6px !important;
   }
+
+  .squad-main-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
 }
 
 
@@ -216,12 +259,15 @@
 /* ===== FIELD CONTAINER ===== */
 .squad-field-container {
   position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   border-radius: 12px;
   border: 1px solid rgba(59, 130, 246, 0.15);
   background: radial-gradient(110% 60% at 50% 50%, #58a376, #3f7852);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: block;
 }
 
 /* Pitch background */
@@ -381,27 +427,29 @@
 /* BENCH CONTAINER */
 /* BENCH CONTAINER - Match field grid exactly */
 .squad-bench {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -8px;
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  padding: 7px 6px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 10px 14px;
+  z-index: 2;
 }
 
 .squad-bench:hover {
-  position: absolute;
-  left: 0;
-  bottom: 9px;
-  right: 0;
+  position: relative;
+  left: auto;
+  bottom: auto;
+  right: auto;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  padding: 6px 8px;
-  transform: scale(1.1);
-  z-index: 10;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 10px 14px;
+  transform: none;
+  z-index: 2;
 }
 
 .squad-bench:hover .squad-player {
@@ -419,6 +467,7 @@
   background: rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -735,7 +784,7 @@
 }
 
 /* Prevent text selection while dragging */
-.squad-modal.dragging-active * {
+.squad-page-shell.dragging-active * {
   user-select: none !important;
   -webkit-user-select: none !important;
 }
@@ -1892,9 +1941,9 @@
 }
 
 #squad-builder-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9000;
+  position: relative;
+  inset: auto;
+  z-index: 1;
 }
 
 #filter-sidebar {
@@ -1999,9 +2048,9 @@
 
 /* Make sure squad builder sits below modal */
 #squad-builder-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9000;
+  position: relative;
+  inset: auto;
+  z-index: 1;
 }
 
 /* If your app adds a blur class to the app when any modal opens, neutralize it for stats */
@@ -9266,4 +9315,754 @@ body.stats-open #squad-builder-modal {
     object-fit: contain;
     z-index: 3;
     border-radius: 2px;
+}
+
+/* =========================================
+   Squad Builder Premium Layout Refinement
+   ========================================= */
+main.main-content.main-content--squadbuilder {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59, 130, 246, 0.24), transparent 42%),
+    radial-gradient(circle at 82% 100%, rgba(14, 165, 233, 0.18), transparent 48%),
+    linear-gradient(180deg, #071124 0%, #0a1429 100%);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal.squad-page-view {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal.squad-page-view.squad-fullscreen,
+#squad-builder-modal.squad-page-view:fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(59, 130, 246, 0.22), transparent 42%),
+    radial-gradient(circle at 85% 100%, rgba(14, 165, 233, 0.18), transparent 46%),
+    linear-gradient(180deg, #071124 0%, #0a1429 100%);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal.squad-page-view.squad-fullscreen .squad-page-shell,
+#squad-builder-modal.squad-page-view:fullscreen .squad-page-shell {
+  width: 100%;
+  max-width: none;
+  min-height: 100%;
+  margin: 0;
+  padding: 24px 40px 28px;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-shell {
+  width: min(100%, 1700px);
+  max-width: 1700px;
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 24px 56px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: 24px;
+  background: transparent;
+  overflow: visible;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
+  --squad-control-height: 40px;
+  --squad-control-gap: 12px;
+  --squad-group-gap: 24px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px var(--squad-group-gap);
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(140deg, rgba(15, 23, 42, 0.88) 0%, rgba(23, 37, 84, 0.76) 100%);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.38);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: var(--squad-group-gap);
+  min-width: 0;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left {
+  flex: 1 1 360px;
+  gap: var(--squad-control-gap);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 760;
+  letter-spacing: 0.01em;
+  color: #F8FAFC;
+  white-space: nowrap;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input {
+  height: var(--squad-control-height);
+  width: 100%;
+  min-width: 160px;
+  max-width: 220px;
+  flex: 0 1 220px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  color: var(--color-text, #E6EEF2);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input::placeholder {
+  color: var(--color-text-secondary, #98A0A6);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input:focus {
+  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.62);
+  box-shadow: var(--focus-ring, 0 0 0 3px rgba(0, 194, 168, 0.35));
+  background: var(--color-secondary-hover, rgba(255, 255, 255, 0.08));
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center {
+  flex: 0 1 auto;
+  justify-content: center;
+  gap: var(--squad-group-gap);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-actions,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-status,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-formation,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-persistence,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-utilities {
+  display: flex;
+  align-items: center;
+  gap: var(--squad-control-gap);
+  flex-wrap: wrap;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-stat {
+  min-width: 98px;
+  min-height: var(--squad-control-height);
+  padding: 5px 12px 6px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+  background: rgba(15, 23, 42, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 4px rgba(2, 6, 23, 0.28);
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 2px;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-stat-label {
+  font-size: 9px;
+  line-height: 1.1;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #98A0A6);
+  font-weight: 600;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-stat-value {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--color-text, #E6EEF2);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right {
+  flex: 1 1 560px;
+  justify-content: flex-end;
+  gap: var(--squad-group-gap);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-formation .squad-select {
+  min-width: 136px;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-persistence {
+  justify-content: flex-start;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-utilities {
+  flex-wrap: nowrap;
+  margin-left: auto;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-select,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--squad-control-height);
+  padding: 0 12px;
+  margin: 0;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  color: var(--color-text, #E6EEF2);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.3));
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn {
+  background: linear-gradient(135deg, var(--color-primary, #00C2A8), var(--color-primary-hover, #00AA96));
+  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.66);
+  color: var(--color-btn-primary-text, #0E1114);
+  box-shadow: 0 2px 8px rgba(var(--color-teal-rgb, 0, 194, 168), 0.35);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .load-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .export-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn {
+  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  border-color: var(--color-border, rgba(255, 255, 255, 0.12));
+  color: var(--color-text, #E6EEF2);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
+  background: transparent;
+  color: var(--color-text-secondary, #98A0A6);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn {
+  margin-right: 0;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-select {
+  min-width: 132px;
+  padding: 0 30px 0 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background-color: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  background-image: var(--select-caret-light);
+  background-repeat: no-repeat;
+  background-position: calc(100% - 10px) 50%;
+  background-size: 14px 14px;
+  color: var(--color-text, #E6EEF2);
+  font-size: 12px;
+  font-weight: 600;
+  appearance: none;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn {
+  display: inline-flex !important;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
+  width: var(--squad-control-height);
+  min-width: var(--squad-control-height);
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle.active {
+  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.62);
+  background: var(--color-secondary-active, rgba(255, 255, 255, 0.12));
+  color: var(--color-text, #E6EEF2);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-btn:focus-visible,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn:focus-visible,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn:focus-visible,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-select:focus-visible,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn:focus-visible,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle:focus-visible,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring, 0 0 0 3px rgba(0, 194, 168, 0.35));
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close:hover {
+  border-color: rgba(var(--color-teal-rgb, 0, 194, 168), 0.52);
+  transform: translateY(-1px);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn:hover {
+  background: linear-gradient(135deg, var(--color-primary-hover, #00AA96), var(--color-primary-active, #009182));
+  color: var(--color-btn-primary-text, #0E1114);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .load-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .export-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn:hover {
+  background: var(--color-secondary-hover, rgba(255, 255, 255, 0.08));
+  color: var(--color-text, #E6EEF2);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle:hover,
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close:hover {
+  background: var(--color-secondary, rgba(255, 255, 255, 0.05));
+  color: var(--color-text, #E6EEF2);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+  --squad-sidebar-width: 380px;
+  --squad-main-gap: 40px;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0;
+  overflow: visible;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+  height: auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--squad-sidebar-width);
+  gap: var(--squad-main-gap);
+  align-items: start;
+  overflow: visible;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+  width: 100%;
+  min-width: 0;
+  min-height: min(520px, 100%);
+  height: min(100%, 620px);
+  max-height: 620px;
+  align-self: start;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.38), 0 2px 12px rgba(30, 64, 175, 0.22);
+  overflow: hidden;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+  width: 380px;
+  max-width: 100%;
+  min-height: min(520px, 100%);
+  height: min(100%, 620px);
+  max-height: 620px;
+  justify-self: end;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.75) 100%);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.34);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker-toolbar {
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker-search {
+  min-height: 38px;
+  margin-left: 0;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 12px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .picker-row {
+  margin: 0;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(30, 41, 59, 0.78) 100%);
+  box-shadow: 0 3px 10px rgba(2, 6, 23, 0.24);
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .picker-row:hover {
+  transform: translateY(-2px);
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.28);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.94) 0%, rgba(51, 65, 85, 0.84) 100%);
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+  width: calc(100% - (var(--squad-sidebar-width) + var(--squad-main-gap)));
+  max-width: 100%;
+  margin-top: 40px;
+  margin-right: auto;
+  padding: 12px 14px;
+  gap: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.86) 0%, rgba(15, 23, 42, 0.72) 100%);
+  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.3);
+  align-items: center;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {
+  min-height: 110px;
+}
+
+main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-slot {
+  transform: translate(-50%, -50%);
+}
+
+@media (min-width: 1366px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
+    flex-wrap: nowrap;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-actions,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-status,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-formation,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-persistence,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-utilities {
+    flex-wrap: nowrap;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center {
+    margin-inline: auto;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 1365px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
+    row-gap: 16px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-utilities {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1400px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-shell {
+    padding-inline: 56px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    --squad-sidebar-width: 360px;
+    --squad-main-gap: 32px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    width: 360px;
+  }
+}
+
+@media (max-width: 1280px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
+    gap: 16px 20px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left h2 {
+    font-size: 18px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input {
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 1200px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    --squad-sidebar-width: 340px;
+    --squad-main-gap: 24px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    width: 340px;
+  }
+}
+
+@media (max-width: 1024px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    --squad-sidebar-width: 320px;
+    --squad-main-gap: 20px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+    min-height: min(480px, 100%);
+    height: min(100%, 580px);
+    max-height: 580px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    min-height: min(480px, 100%);
+    height: min(100%, 580px);
+    max-height: 580px;
+    width: 320px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    margin-top: 24px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-actions,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-status,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-formation,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-persistence {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-utilities {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  main.main-content.main-content--squadbuilder {
+    overflow: visible;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal.squad-page-view {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal.squad-page-view.squad-fullscreen,
+  #squad-builder-modal.squad-page-view:fullscreen {
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-shell {
+    height: auto;
+    min-height: 100%;
+    padding: 20px 20px 24px;
+    row-gap: 20px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    --squad-sidebar-width: 0px;
+    --squad-main-gap: 0px;
+    height: auto;
+    overflow: visible;
+    gap: 20px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 20px;
+    height: auto;
+    overflow: visible;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+    min-height: 420px;
+    height: min(66vh, 580px);
+    max-height: 580px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    width: 100%;
+    justify-self: stretch;
+    height: min(46vh, 460px);
+    max-height: 460px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    width: 100%;
+    grid-template-columns: repeat(7, minmax(84px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-top: 24px;
+    padding-bottom: 18px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {
+    min-height: 118px;
+  }
+}
+
+@media (max-width: 768px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-shell {
+    padding: 16px 20px 20px;
+    row-gap: 16px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
+    margin-top: 0 !important;
+    padding: 14px 16px !important;
+    gap: 12px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-center,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-right,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-actions,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-status,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-formation,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-persistence {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-action-btn,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-btn,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-select {
+    height: 40px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-theme-btn,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-fullscreen-toggle,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .squad-close {
+    width: 40px;
+    height: 40px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-utilities {
+    width: auto;
+    margin-left: 0;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    padding: 0 !important;
+    gap: 16px !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+    gap: 16px;
+    grid-template-rows: auto minmax(240px, 38vh);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+    width: 100% !important;
+    max-width: none !important;
+    height: min(60vh, 500px) !important;
+    min-height: 340px !important;
+    max-height: 500px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    display: grid !important;
+    visibility: visible !important;
+    width: 100% !important;
+    height: min(38vh, 340px) !important;
+    max-height: 38vh !important;
+    min-height: 220px !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-player-list {
+    display: flex !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px 12px 16px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
+    padding: 12px !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left {
+    gap: 12px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header-left .squad-input {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex-basis: 100%;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+    grid-template-rows: auto minmax(220px, 36vh);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+    height: min(56vh, 480px) !important;
+    max-height: 480px !important;
+    min-height: 300px !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {
+    min-height: 108px;
+  }
 }

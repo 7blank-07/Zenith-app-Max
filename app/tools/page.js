@@ -56,6 +56,7 @@ export default async function ToolsPage({ searchParams }) {
   const players = await fetchPlayersByIds(topIds, { rank: 0 });
   const initialTool = normalizeToolParam(searchParams?.tool);
   const toolPlayers = players.map(serializeToolPlayer);
+  const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}`;
 
   console.info('[metrics] /tools render', {
     elapsedMs: Date.now() - startedAt,
@@ -65,7 +66,7 @@ export default async function ToolsPage({ searchParams }) {
 
   return (
     <SiteChrome activeView="tools">
-      <main className="main-content">
+      <main className={mainContentClassName}>
         <ToolsInteractions players={toolPlayers} initialTool={initialTool} />
       </main>
     </SiteChrome>
