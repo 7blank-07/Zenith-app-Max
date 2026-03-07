@@ -1,190 +1,204 @@
-Start Phase 3 header refinement.
+Start Phase 3 responsive header refinement.
 
 Act as a senior frontend engineer and product UI/UX architect.
 
-The Squad Builder header currently looks unprofessional and has multiple issues.
+IMPORTANT RULE:
+Do NOT modify the desktop header layout.  
+Desktop (width > 1020px) is already correct and must remain exactly as it is.
 
-Fix the header layout and styling to match production-quality SaaS tools.
+Only improve responsive behavior for screens ≤1020px.
 
-IMPORTANT:
-Do NOT modify any logic related to:
-- formations
-- drag and drop
+No logic changes allowed.  
+Do not modify:
+- formation logic
+- drag/drop logic
 - squad calculations
-- save/load/export behavior
-- state management
+- save/load/export functionality
+- state handlers
+- event handlers
 
-Only improve layout, structure, and styling.
-
-------------------------------------------------
-
-1. REMOVE DUPLICATE THEME BUTTON
-
-There are currently two "change field theme" buttons.
-
-Find where the theme toggle button is rendered and ensure it appears ONLY once in the header.
-
-If it is rendered twice in JSX, remove the duplicate.
+This task is ONLY layout and responsive UI refinement.
 
 ------------------------------------------------
 
-2. FIX HEADER LAYOUT (SINGLE ROW)
+GOAL
 
-The squad header must fit in a single row on desktop.
+Make the squad-header professional and extremely space-efficient on small screens.
 
-Reorganize header structure into logical groups:
+Avoid wasted space, large gaps, or oversized controls.
 
-LEFT GROUP
-- "Squad Builder" title
-- squad name input
-- theme toggle button
+The layout should resemble professional dashboard toolbars used in modern SaaS applications.
 
-CENTER GROUP
-- Export
-- Badges
-- OVR indicator
-- VALUE indicator
-
-RIGHT GROUP
-- Formation selector
-- Save Squad
-- Load Squad
-- Reset
-- Fullscreen toggle
-- Close button
-
-These groups must be aligned horizontally using flex layout.
+Controls must be grouped logically and arranged for maximum efficiency.
 
 ------------------------------------------------
 
-3. FIX INPUT WIDTH
+BREAKPOINTS
 
-The squad name input is currently too wide.
+Implement responsive layouts for these breakpoints:
 
-Limit it so other controls fit in the same row.
+≤1020px  (tablet)
+≤768px   (large mobile)
+≤480px   (small mobile)
+≤368px   (very small phones)
 
-Use something like:
-
-max-width: 220px
-
-Do not allow it to stretch across the header.
+Desktop (>1020px) must not change.
 
 ------------------------------------------------
 
-4. FIX BUTTON ALIGNMENT
+TABLET LAYOUT (≤1020px)
 
-All buttons and controls must have identical height.
+Use two compact rows.
 
-Use a consistent height for all controls.
+Row 1:
+Squad Builder title
+Squad name input
+Theme toggle
+Fullscreen button
+Close button
+
+Row 2:
+Formation selector
+Save Squad
+Load Squad
+Reset
+Export
+Badges
+OVR
+VALUE
+
+Use flex-wrap or grid but maintain tight spacing.
+
+------------------------------------------------
+
+MOBILE LAYOUT (≤768px)
+
+Use structured multi-row layout without wasting horizontal space.
+
+Row 1:
+Title
+Fullscreen
+Close
+
+Row 2:
+Squad name input
+
+Row 3:
+Formation selector
+Save
+Load
+
+Row 4:
+Export
+Badges
+Reset
+
+Row 5:
+OVR
+VALUE
+
+Buttons should share width evenly where possible.
+
+------------------------------------------------
+
+SMALL MOBILE (≤480px)
+
+Use grid layout to maximize efficiency.
+
+Example grid:
+
+grid-template-columns: 1fr 1fr
+gap: 8px
+
+Buttons should fill the available width.
+
+Example grouping:
+
+Row 1:
+Title | Fullscreen
+
+Row 2:
+Squad name input
+
+Row 3:
+Formation selector
+
+Row 4:
+Save | Load
+
+Row 5:
+Export | Badges
+
+Row 6:
+OVR | VALUE
+
+------------------------------------------------
+
+VERY SMALL DEVICES (≤368px)
+
+Ensure layout never overflows.
+
+Use compact spacing and allow text truncation.
 
 Example:
 
-height: 40px
-
-Ensure the following align perfectly on the same baseline:
-- squad name input
-- export button
-- badges button
-- formation selector
-- save/load/reset buttons
-- fullscreen button
-- close button
+overflow: hidden
+text-overflow: ellipsis
+white-space: nowrap
 
 ------------------------------------------------
 
-5. UNIFY BUTTON COLORS
+MOBILE CONTROL SIZE
 
-Currently Save Squad and Load Squad are blue but other buttons are different.
-
-Standardize button styles.
-
-Use three button types:
-
-Primary
-- Save Squad
-
-Secondary
-- Load Squad
-- Export
-- Badges
-
-Ghost
-- Reset
-- Close
-- Fullscreen
-
-Use the existing Zenith app theme variables.
-
-Do not introduce random colors.
-
-------------------------------------------------
-
-6. IMPLEMENT REAL FULLSCREEN MODE
-
-The fullscreen button currently just enlarges the builder.
-
-Instead implement a real fullscreen experience using the browser Fullscreen API.
-
-When clicking the fullscreen button:
-
-call requestFullscreen() on the squad builder container.
-
-When exiting fullscreen:
-
-call document.exitFullscreen().
-
-Target the main squad builder wrapper.
-
-This should behave similar to F11 fullscreen.
-
-------------------------------------------------
-
-7. IMPROVE SPACING SYSTEM
-
-Apply consistent spacing across the header.
-
-Use spacing rhythm:
-
-8px
-16px
-24px
+Reduce button sizes for smaller screens.
 
 Use:
 
-gap: 12px between controls
-gap: 24px between control groups
+height: 36px
+padding: 6px 10px
+font-size: 13px
 
 ------------------------------------------------
 
-8. RESPONSIVE SAFETY
+SPACING SYSTEM
 
-On smaller screens the header may wrap into two rows.
+Use consistent spacing rhythm.
 
-But on standard desktop widths (1366px and above) it must remain a single row.
-
-------------------------------------------------
-
-9. KEEP CURRENT HANDLERS
-
-Do not rewrite event handlers.
-
-Keep existing functions for:
-- saveSquad
-- loadSquad
-- export
-- reset
-- formation change
-
-Only adjust layout and styling.
+gap between controls: 8px
+gap between rows: 12px
 
 ------------------------------------------------
 
-END GOAL
+HEADER PADDING
 
-The Squad Builder header should look like a professional dashboard toolbar similar to tools like Figma, Linear, or Vercel dashboards.
+Reduce container padding on small screens.
 
-Clean alignment.
-Consistent button styles.
-Proper control grouping.
-Single-row professional layout.
-Working fullscreen toggle.
+Use:
+
+padding: 12px
+
+------------------------------------------------
+
+INPUT WIDTH
+
+Limit squad name input width so it does not waste space.
+
+Example:
+
+max-width: 180px
+
+------------------------------------------------
+
+END RESULT
+
+The squad-header must look like a professional responsive toolbar used in production dashboard tools.
+
+It should be:
+
+compact  
+efficient  
+well-grouped  
+space optimized  
+visually clean  
+
+while preserving the existing desktop layout completely.

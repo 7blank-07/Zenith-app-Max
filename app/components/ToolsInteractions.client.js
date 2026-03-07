@@ -2386,10 +2386,14 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
               </div>
               <div className="squad-header-persistence">
                 <button className="squad-action-btn save-btn" onClick={saveSquad} type="button">
-                  💾 Save Squad
+                  <span aria-hidden="true">💾</span>
+                  <span className="squad-action-label squad-action-label--desktop">Save Squad</span>
+                  <span className="squad-action-label squad-action-label--mobile">Save</span>
                 </button>
                 <button className="squad-action-btn load-btn" onClick={loadSquad} type="button">
-                  📥 Load Squad
+                  <span aria-hidden="true">📥</span>
+                  <span className="squad-action-label squad-action-label--desktop">Load Squad</span>
+                  <span className="squad-action-label squad-action-label--mobile">Load</span>
                 </button>
                 <button className="squad-btn" onClick={clearSquad} type="button" title="Reset Squad" aria-label="Reset Squad">
                   ↻
