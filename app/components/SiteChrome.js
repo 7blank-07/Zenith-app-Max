@@ -5,7 +5,7 @@ function getNavClass(activeView, view) {
   return activeView === view ? 'nav-link active' : 'nav-link';
 }
 
-export default function SiteChrome({ activeView = '', showSlider = true, children }) {
+export default function SiteChrome({ activeView = '', showSlider = false, children }) {
   return (
     <>
       <header className="header">
