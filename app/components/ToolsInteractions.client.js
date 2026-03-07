@@ -2599,7 +2599,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                     return (
                       <div
                         key={`${formationId}-${slot.id}`}
-                        className={`squad-slot ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
+                        className={`squad-slot ${selectedSlotId === slot.id ? 'selected' : ''} ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
                         style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
                         data-slot-id={slot.id}
                         onClick={() => handleSquadSlotSelect(slot, !!player)}
@@ -2844,108 +2844,108 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
             </div>
           </div>
         </div>
-      </div>
 
-      <div id="badges-modal" className="modal" style={{ display: badgesModalOpen ? 'flex' : 'none' }}>
-        <div className="modal-backdrop" onClick={() => setBadgesModalOpen(false)} />
-        <div className="badges-modal-content" onClick={(event) => event.stopPropagation()}>
-          <div className="badges-modal-header">
-            <h2>Select Team Badges</h2>
-            <button className="modal-close-btn" onClick={() => setBadgesModalOpen(false)} type="button">
-              ×
-            </button>
+        <div id="badges-modal" className="modal" style={{ display: badgesModalOpen ? 'flex' : 'none' }}>
+          <div className="modal-backdrop" onClick={() => setBadgesModalOpen(false)} />
+          <div className="badges-modal-content" onClick={(event) => event.stopPropagation()}>
+            <div className="badges-modal-header">
+              <h2>Select Team Badges</h2>
+              <button className="modal-close-btn" onClick={() => setBadgesModalOpen(false)} type="button">
+                ×
+              </button>
+            </div>
+
+            <div className="badges-grid">
+              {[1, 2, 3].map((badgeNumber) => {
+                const badgeKey = `badge${badgeNumber}`;
+                const isActive = !!badges[badgeKey];
+                return (
+                  <div
+                    key={badgeKey}
+                    className={`badge-card ${isActive ? 'active' : ''}`}
+                    id={`badge-card-${badgeNumber}`}
+                    onClick={() => toggleBadge(badgeNumber)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleBadge(badgeNumber);
+                      }
+                    }}
+                  >
+                    <div className="badge-icon">
+                      <svg width="60" height="60" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+                        <path
+                          d="M30 5L35 20L50 20L38 30L43 45L30 37L17 45L22 30L10 20L25 20L30 5Z"
+                          fill="currentColor"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    </div>
+                    <h3>Badge {badgeNumber}</h3>
+                    <div className="badge-boost">+1 OVR</div>
+                    <div className="badge-checkbox">
+                      <span className="checkmark">✓</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="badges-modal-footer">
+              <button className="btn-primary" onClick={() => setBadgesModalOpen(false)} type="button">
+                Done
+              </button>
+            </div>
           </div>
+        </div>
 
-          <div className="badges-grid">
-            {[1, 2, 3].map((badgeNumber) => {
-              const badgeKey = `badge${badgeNumber}`;
-              const isActive = !!badges[badgeKey];
-              return (
+        <div
+          id="theme-selector-overlay"
+          className="theme-selector-overlay"
+          style={{ display: themeSelectorOpen ? 'flex' : 'none' }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setThemeSelectorOpen(false);
+            }
+          }}
+        >
+          <div className="theme-selector-content" onClick={(event) => event.stopPropagation()}>
+            <div className="theme-selector-header">
+              <h3>Select Field Theme</h3>
+              <button id="close-theme-selector" className="theme-close-btn" onClick={() => setThemeSelectorOpen(false)} type="button">
+                ✕
+              </button>
+            </div>
+            <div id="theme-gallery" className="theme-gallery">
+              {Object.values(FIELD_THEMES).map((theme) => (
                 <div
-                  key={badgeKey}
-                  className={`badge-card ${isActive ? 'active' : ''}`}
-                  id={`badge-card-${badgeNumber}`}
-                  onClick={() => toggleBadge(badgeNumber)}
+                  key={theme.id}
+                  className={`theme-option ${fieldThemeDraft === theme.id ? 'active' : ''}`}
+                  data-theme-id={theme.id}
                   role="button"
                   tabIndex={0}
+                  onClick={() => setFieldThemeDraft(theme.id)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      toggleBadge(badgeNumber);
+                      setFieldThemeDraft(theme.id);
                     }
                   }}
                 >
-                  <div className="badge-icon">
-                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-                      <path
-                        d="M30 5L35 20L50 20L38 30L43 45L30 37L17 45L22 30L10 20L25 20L30 5Z"
-                        fill="currentColor"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </div>
-                  <h3>Badge {badgeNumber}</h3>
-                  <div className="badge-boost">+1 OVR</div>
-                  <div className="badge-checkbox">
-                    <span className="checkmark">✓</span>
+                  <div className="theme-option-preview" style={{ background: theme.background, backgroundAttachment: 'fixed' }}>
+                    <div className="theme-option-name">{theme.name}</div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="badges-modal-footer">
-            <button className="btn-primary" onClick={() => setBadgesModalOpen(false)} type="button">
-              Done
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
-        id="theme-selector-overlay"
-        className="theme-selector-overlay"
-        style={{ display: themeSelectorOpen ? 'flex' : 'none' }}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            setThemeSelectorOpen(false);
-          }
-        }}
-      >
-        <div className="theme-selector-content" onClick={(event) => event.stopPropagation()}>
-          <div className="theme-selector-header">
-            <h3>Select Field Theme</h3>
-            <button id="close-theme-selector" className="theme-close-btn" onClick={() => setThemeSelectorOpen(false)} type="button">
-              ✕
-            </button>
-          </div>
-          <div id="theme-gallery" className="theme-gallery">
-            {Object.values(FIELD_THEMES).map((theme) => (
-              <div
-                key={theme.id}
-                className={`theme-option ${fieldThemeDraft === theme.id ? 'active' : ''}`}
-                data-theme-id={theme.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => setFieldThemeDraft(theme.id)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    setFieldThemeDraft(theme.id);
-                  }
-                }}
-              >
-                <div className="theme-option-preview" style={{ background: theme.background, backgroundAttachment: 'fixed' }}>
-                  <div className="theme-option-name">{theme.name}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="theme-selector-footer">
-            <button id="apply-theme-btn" className="apply-theme-btn" onClick={applyThemeSelection} type="button">
-              Apply Theme
-            </button>
+              ))}
+            </div>
+            <div className="theme-selector-footer">
+              <button id="apply-theme-btn" className="apply-theme-btn" onClick={applyThemeSelection} type="button">
+                Apply Theme
+              </button>
+            </div>
           </div>
         </div>
       </div>
