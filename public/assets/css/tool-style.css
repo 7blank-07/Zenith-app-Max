@@ -10183,12 +10183,21 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     display: none !important;
   }
 
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    display: none !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+  }
+
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input {
     grid-column: 1 / 2;
     grid-row: 1;
     width: 100%;
     min-width: 0;
-    max-width: 160px;
+    max-width: 220px;
     justify-self: start;
     height: 36px;
     padding: 6px 10px;
@@ -10311,7 +10320,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     flex: 1 1 auto;
     width: 100%;
     min-width: 0;
-    max-width: 160px;
+    max-width: 190px;
     justify-self: stretch;
     margin-right: 0;
     box-sizing: border-box;
