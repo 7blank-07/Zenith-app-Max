@@ -9536,13 +9536,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
-main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn {
-  background: linear-gradient(135deg, #1D4ED8, #172554);
-  border-color: rgba(var(--squad-border-rgb), 0.34);
-  color: #F8FAFC;
-  box-shadow: 0 2px 9px rgba(29, 78, 216, 0.42);
-}
-
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .load-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .export-btn,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn,
@@ -9639,11 +9633,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   transform: translateY(-1px);
 }
 
-main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn:hover {
-  background: linear-gradient(135deg, #2563EB, #1E3A8A);
-  color: #F8FAFC;
-}
-
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .save-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .load-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .export-btn:hover,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header .badges-btn:hover,
@@ -10324,7 +10314,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 @media (max-width: 768px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.17fr) minmax(0, 1.17fr) 36px;
+    grid-template-columns: minmax(0, 1.24fr) minmax(0, 1.08fr) minmax(0, 1.08fr) 36px;
     align-items: center;
     gap: 8px;
     row-gap: 8px;
@@ -10336,9 +10326,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     grid-column: 1 / 2;
     grid-row: 1;
     flex: 1 1 auto;
-    width: min(100%, 168px);
+    width: min(100%, 182px);
     min-width: 0;
-    max-width: 168px;
+    max-width: 182px;
     justify-self: start;
     margin-right: 0;
     box-sizing: border-box;
@@ -10455,7 +10445,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 @media (max-width: 480px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.17fr) minmax(0, 1.17fr) 36px;
+    grid-template-columns: minmax(0, 1.24fr) minmax(0, 1.08fr) minmax(0, 1.08fr) 36px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-input,
