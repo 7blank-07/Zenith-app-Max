@@ -1025,6 +1025,56 @@ function getPositionAdjustedOvr(player, slotLabel) {
   return Math.max(0, baseOvr + penalty);
 }
 
+function isGoalkeeperPosition(position) {
+  return String(position || '').toUpperCase().trim() === 'GK';
+}
+
+function isGoalkeeperSlot(slot) {
+  if (!slot) return false;
+  const slotLabel = String(slot?.label || slot?.id || '').toUpperCase().trim();
+  return slotLabel === 'GK';
+}
+
+function canAssignPlayerToSlot(player, slot) {
+  if (!player || !slot) return false;
+  const playerIsGoalkeeper = isGoalkeeperPosition(player.position);
+  const slotIsGoalkeeper = isGoalkeeperSlot(slot);
+  if (playerIsGoalkeeper && !slotIsGoalkeeper) return false;
+  if (!playerIsGoalkeeper && slotIsGoalkeeper) return false;
+  return true;
+}
+
+function resolvePendingPickTargetSlotId({ availableSlots, starters, preferredSlotId, preferredPosition, fallbackSlotId }) {
+  if (!Array.isArray(availableSlots) || !availableSlots.length) return '';
+  const startersBySlot = starters && typeof starters === 'object' ? starters : {};
+  const normalizedPreferredSlotId = String(preferredSlotId || '').trim();
+  const normalizedPreferredPosition = String(preferredPosition || '').toUpperCase().trim();
+  const normalizedFallbackSlotId = String(fallbackSlotId || '').trim();
+  const candidates = [];
+  const seen = new Set();
+  const pushCandidate = (slot) => {
+    if (!slot?.id || seen.has(slot.id)) return;
+    seen.add(slot.id);
+    candidates.push(slot);
+  };
+
+  if (normalizedPreferredSlotId) {
+    pushCandidate(availableSlots.find((slot) => slot.id === normalizedPreferredSlotId));
+  }
+  if (normalizedPreferredPosition) {
+    availableSlots
+      .filter((slot) => slot.id === normalizedPreferredPosition || String(slot.label || '').toUpperCase().trim() === normalizedPreferredPosition)
+      .forEach(pushCandidate);
+  }
+  if (normalizedFallbackSlotId) {
+    pushCandidate(availableSlots.find((slot) => slot.id === normalizedFallbackSlotId));
+  }
+  availableSlots.forEach(pushCandidate);
+
+  const emptyCandidate = candidates.find((slot) => !startersBySlot[slot.id]);
+  return emptyCandidate?.id || '';
+}
+
 function normalizeBadges(value) {
   return {
     badge1: !!value?.badge1,
@@ -1109,6 +1159,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
   useEffect(() => {
     let restoredFromRoundtrip = false;
+    let restoredThemeFromRoundtrip = false;
     let roundtripSupplementalPlayers = {};
     try {
       const rawRoundtripState = window.sessionStorage.getItem(SQUAD_BUILDER_ROUNDTRIP_STATE_KEY);
@@ -1132,6 +1183,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         if (FIELD_THEMES[nextThemeId]) {
           setFieldThemeId(nextThemeId);
           setFieldThemeDraft(nextThemeId);
+          restoredThemeFromRoundtrip = true;
         }
         roundtripSupplementalPlayers = normalizeSupplementalPlayers(parsedRoundtrip?.supplementalPlayers);
         restoredFromRoundtrip = true;
@@ -1185,14 +1237,16 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       console.error('[tools] Failed to load saved shard state:', error);
     }
 
-    try {
-      const savedTheme = window.localStorage.getItem('selectedFieldTheme') || 'camp-nou';
-      if (FIELD_THEMES[savedTheme]) {
-        setFieldThemeId(savedTheme);
-        setFieldThemeDraft(savedTheme);
+    if (!restoredThemeFromRoundtrip) {
+      try {
+        const savedTheme = window.localStorage.getItem('selectedFieldTheme') || 'camp-nou';
+        if (FIELD_THEMES[savedTheme]) {
+          setFieldThemeId(savedTheme);
+          setFieldThemeDraft(savedTheme);
+        }
+      } catch (error) {
+        console.error('[tools] Failed to load saved field theme:', error);
       }
-    } catch (error) {
-      console.error('[tools] Failed to load saved field theme:', error);
     }
 
     try {
@@ -1257,12 +1311,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, [shardMode, shardCounts]);
 
   useEffect(() => {
+    if (!squadStateHydrated) return;
     try {
       window.localStorage.setItem('selectedFieldTheme', fieldThemeId);
     } catch (error) {
       console.error('[tools] Failed to persist selected field theme:', error);
     }
-  }, [fieldThemeId]);
+  }, [fieldThemeId, squadStateHydrated]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -1468,8 +1523,8 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         return;
       }
       const rawPendingPlayer = pendingPick?.player && typeof pendingPick.player === 'object' ? pendingPick.player : null;
+      const normalizedPendingPlayer = rawPendingPlayer ? normalizePlayer(rawPendingPlayer) : null;
       if (rawPendingPlayer) {
-        const normalizedPendingPlayer = normalizePlayer(rawPendingPlayer);
         if (normalizedPendingPlayer?.playerId === playerId) {
           setSupplementalPlayers((current) => ({
             ...current,
@@ -1477,19 +1532,40 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
           }));
         }
       }
-      if (!playersById.has(playerId) && !rawPendingPlayer) {
+      if (!playersById.has(playerId) && !normalizedPendingPlayer) {
         return;
       }
       const availableSlots = SQUAD_FORMATIONS[formationId] || [];
       const fallbackSlotId = selectedSlotId || availableSlots[0]?.id || '';
-      const targetSlotById = availableSlots.find((slot) => slot.id === preferredSlotId);
-      const targetSlotByPosition = preferredPosition
-        ? availableSlots.find(
-            (slot) => slot.id === preferredPosition || String(slot.label || '').toUpperCase().trim() === preferredPosition
-          )
-        : null;
-      const targetSlotId = targetSlotById?.id || targetSlotByPosition?.id || fallbackSlotId;
-      if (!targetSlotId) return;
+      const targetSlotId = resolvePendingPickTargetSlotId({
+        availableSlots,
+        starters,
+        preferredSlotId,
+        preferredPosition,
+        fallbackSlotId
+      });
+      if (!targetSlotId) {
+        console.info('[tools] Skipped pending squad pick because no empty target slot was available', {
+          playerId,
+          preferredSlotId,
+          preferredPosition,
+          formationId
+        });
+        window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+        return;
+      }
+      const targetSlot = availableSlots.find((slot) => slot.id === targetSlotId) || null;
+      const pendingPlayerRecord = playersById.get(playerId) || normalizedPendingPlayer;
+      if (!canAssignPlayerToSlot(pendingPlayerRecord, targetSlot)) {
+        console.info('[tools] Rejected pending squad pick due goalkeeper slot rules', {
+          playerId,
+          playerPosition: pendingPlayerRecord?.position || '',
+          targetSlotId,
+          targetSlotLabel: targetSlot?.label || ''
+        });
+        window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+        return;
+      }
       console.info('[tools] Applying pending squad pick', {
         playerId,
         preferredSlotId,
@@ -1506,7 +1582,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     } catch (error) {
       console.error('[tools] Failed to apply pending squad player pick:', error);
     }
-  }, [assignedPlayerIds, formationId, playersById, selectedSlotId, squadStateHydrated]);
+  }, [assignedPlayerIds, formationId, playersById, selectedSlotId, squadStateHydrated, starters]);
 
   const squadPlayers = useMemo(
     () =>
@@ -1658,6 +1734,17 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     const slotId = selectedSlotId || formationSlots[0]?.id;
     if (!slotId) return;
     if (assignedPlayerIds.has(playerId)) return;
+    const targetSlot = formationSlots.find((slot) => slot.id === slotId) || null;
+    const playerRecord = playersById.get(playerId) || null;
+    if (!canAssignPlayerToSlot(playerRecord, targetSlot)) {
+      console.info('[tools] Rejected squad picker assignment due goalkeeper slot rules', {
+        playerId,
+        playerPosition: playerRecord?.position || '',
+        targetSlotId: slotId,
+        targetSlotLabel: targetSlot?.label || ''
+      });
+      return;
+    }
     setStarters((current) => ({
       ...current,
       [slotId]: playerId
@@ -1827,6 +1914,19 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     if (payload.source === 'slot' && destination.type === 'slot' && payload.slotId === destination.slotId) return;
     if (payload.source === 'bench' && destination.type === 'bench' && payload.benchIndex === destination.benchIndex) return;
     if (payload.source === 'picker' && assignedPlayerIds.has(movingPlayerId)) return;
+    if (destination.type === 'slot') {
+      const targetSlot = formationSlots.find((slot) => slot.id === destination.slotId) || null;
+      const movingPlayer = playersById.get(movingPlayerId) || null;
+      if (!canAssignPlayerToSlot(movingPlayer, targetSlot)) {
+        console.info('[tools] Rejected slot drop due goalkeeper slot rules', {
+          movingPlayerId,
+          playerPosition: movingPlayer?.position || '',
+          targetSlotId: destination.slotId,
+          targetSlotLabel: targetSlot?.label || ''
+        });
+        return;
+      }
+    }
 
     const nextStarters = { ...starters };
     const nextBench = [...bench];
@@ -1918,6 +2018,10 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
   const handleSlotDragOver = (event, slotId) => {
     if (!dragPayloadRef.current || !slotId) return;
+    const payload = dragPayloadRef.current;
+    const movingPlayer = playersById.get(payload?.playerId) || null;
+    const targetSlot = formationSlots.find((slot) => slot.id === slotId) || null;
+    if (!canAssignPlayerToSlot(movingPlayer, targetSlot)) return;
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
