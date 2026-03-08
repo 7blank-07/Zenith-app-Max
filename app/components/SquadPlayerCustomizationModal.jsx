@@ -186,6 +186,21 @@ function calculateGoalkeeperPhysical(finalStat) {
   );
 }
 
+const GK_STAT_ALIASES = Object.freeze({
+  diving: Object.freeze(['gk_diving', 'gk-diving', 'gkDiving', 'goalkeeper_diving', 'goalkeeper-diving', 'goalkeeperDiving']),
+  handling: Object.freeze(['gk_handling', 'gk-handling', 'gkHandling', 'goalkeeper_handling', 'goalkeeper-handling', 'goalkeeperHandling']),
+  kicking: Object.freeze(['gk_kicking', 'gk-kicking', 'gkKicking', 'goalkeeper_kicking', 'goalkeeper-kicking', 'goalkeeperKicking']),
+  positioning: Object.freeze([
+    'gk_positioning',
+    'gk-positioning',
+    'gkPositioning',
+    'goalkeeper_positioning',
+    'goalkeeper-positioning',
+    'goalkeeperPositioning'
+  ]),
+  reflexes: Object.freeze(['gk_reflexes', 'gk-reflexes', 'gkReflexes', 'goalkeeper_reflexes', 'goalkeeper-reflexes', 'goalkeeperReflexes'])
+});
+
 function buildLegacyStatsModel(player) {
   const isGoalkeeper = String(player?.position || '').toUpperCase() === 'GK';
   const trainingBoosts = player?.training_boosts || player?.trainingBoosts || null;
@@ -199,36 +214,36 @@ function buildLegacyStatsModel(player) {
         {
           key: 'diving',
           name: 'Diving',
-          mainValue: finalStat('diving'),
-          substats: [{ label: 'GK Diving', value: finalStat('gk_diving', 'diving') }]
+          mainValue: finalStat('diving', ...GK_STAT_ALIASES.diving),
+          substats: [{ label: 'GK Diving', value: finalStat(...GK_STAT_ALIASES.diving, 'diving') }]
         },
         {
           key: 'positioning',
           name: 'Positioning',
-          mainValue: finalStat('gk_positioning', 'positioning'),
-          substats: [{ label: 'GK Positioning', value: finalStat('gk_positioning', 'positioning') }]
+          mainValue: finalStat(...GK_STAT_ALIASES.positioning, 'positioning'),
+          substats: [{ label: 'GK Positioning', value: finalStat(...GK_STAT_ALIASES.positioning, 'positioning') }]
         },
         {
           key: 'handling',
           name: 'Handling',
-          mainValue: finalStat('handling'),
-          substats: [{ label: 'GK Handling', value: finalStat('gk_handling', 'handling') }]
+          mainValue: finalStat('handling', ...GK_STAT_ALIASES.handling),
+          substats: [{ label: 'GK Handling', value: finalStat(...GK_STAT_ALIASES.handling, 'handling') }]
         },
         {
           key: 'reflexes',
           name: 'Reflexes',
-          mainValue: finalStat('reflexes'),
+          mainValue: finalStat('reflexes', ...GK_STAT_ALIASES.reflexes),
           substats: [
-            { label: 'GK Reflexes', value: finalStat('gk_reflexes', 'reflexes') },
+            { label: 'GK Reflexes', value: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes') },
             { label: 'Jumping', value: finalStat('jumping') }
           ]
         },
         {
           key: 'kicking',
           name: 'Kicking',
-          mainValue: finalStat('kicking'),
+          mainValue: finalStat('kicking', ...GK_STAT_ALIASES.kicking),
           substats: [
-            { label: 'GK Kicking', value: finalStat('gk_kicking', 'kicking') },
+            { label: 'GK Kicking', value: finalStat(...GK_STAT_ALIASES.kicking, 'kicking') },
             { label: 'Long Passing', value: finalStat('long_passing') }
           ]
         },

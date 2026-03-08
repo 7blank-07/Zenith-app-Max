@@ -205,10 +205,32 @@ function extractAttributes(source) {
     physical: toNullableInteger(source.physical),
     acceleration: toNullableInteger(source.acceleration),
     sprintSpeed: toNullableInteger(firstDefined([source.sprint_speed, source.sprintSpeed], null)),
+    diving: toNullableInteger(source.diving),
+    handling: toNullableInteger(source.handling),
+    reflexes: toNullableInteger(source.reflexes),
+    kicking: toNullableInteger(source.kicking),
     finishing: toNullableInteger(source.finishing),
     shotPower: toNullableInteger(firstDefined([source.shot_power, source.shotPower], null)),
     longShot: toNullableInteger(firstDefined([source.long_shot, source.longShot], null)),
     positioning: toNullableInteger(source.positioning),
+    gkDiving: toNullableInteger(
+      firstDefined([source.gk_diving, source.gkDiving, source['gk-diving'], source.goalkeeper_diving, source.goalkeeperDiving], null)
+    ),
+    gkPositioning: toNullableInteger(
+      firstDefined(
+        [source.gk_positioning, source.gkPositioning, source['gk-positioning'], source.goalkeeper_positioning, source.goalkeeperPositioning],
+        null
+      )
+    ),
+    gkHandling: toNullableInteger(
+      firstDefined([source.gk_handling, source.gkHandling, source['gk-handling'], source.goalkeeper_handling, source.goalkeeperHandling], null)
+    ),
+    gkReflexes: toNullableInteger(
+      firstDefined([source.gk_reflexes, source.gkReflexes, source['gk-reflexes'], source.goalkeeper_reflexes, source.goalkeeperReflexes], null)
+    ),
+    gkKicking: toNullableInteger(
+      firstDefined([source.gk_kicking, source.gkKicking, source['gk-kicking'], source.goalkeeper_kicking, source.goalkeeperKicking], null)
+    ),
     volley: toNullableInteger(source.volley),
     penalties: toNullableInteger(source.penalties),
     shortPassing: toNullableInteger(firstDefined([source.short_passing, source.shortPassing], null)),
