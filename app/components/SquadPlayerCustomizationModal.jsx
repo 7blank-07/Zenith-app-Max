@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const RANK_OPTIONS = Object.freeze([
   { rank: 1, label: 'Green', icon: '/assets/images/rank_simple/green_rank_simple.png' },
@@ -22,8 +22,7 @@ const TRAINING_LEVEL_OPTIONS = Object.freeze([
   0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
 ]);
 
-const OUTFIELD_SKILL_OPTIONS = Object.freeze(['Pace', 'Shooting', 'Passing', 'Dribbling', 'Defending', 'Physical']);
-const GOALKEEPER_SKILL_OPTIONS = Object.freeze(['Diving', 'Handling', 'Kicking', 'Reflexes', 'Speed', 'Positioning']);
+const API_BASE_URL = 'https://zenithfcm.com/api';
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -45,6 +44,145 @@ function normalizeSelectedSkills(value) {
       seen.add(entry);
       return true;
     });
+}
+
+function getSkillId(skill) {
+  return String(skill?.skill_id ?? skill?.skillId ?? '').trim();
+}
+
+function getSkillName(skill) {
+  return String(skill?.skill_name ?? skill?.skillName ?? '').trim();
+}
+
+function getSkillImage(skill) {
+  return String(skill?.skill_image ?? skill?.skillImage ?? '').trim();
+}
+
+function normalizeSkillAllocationMap(value) {
+  if (!value || typeof value !== 'object') return {};
+  const normalized = {};
+  Object.entries(value).forEach(([skillId, level]) => {
+    const normalizedSkillId = String(skillId || '').trim();
+    if (!normalizedSkillId) return;
+    const normalizedLevel = Math.max(0, toNumber(level, 0));
+    if (normalizedLevel > 0) {
+      normalized[normalizedSkillId] = normalizedLevel;
+    }
+  });
+  return normalized;
+}
+
+function buildSelectedSkillNames(skills, skillLevelsById) {
+  if (!Array.isArray(skills) || !skills.length) return [];
+  const levels = skillLevelsById && typeof skillLevelsById === 'object' ? skillLevelsById : {};
+  const selected = [];
+  const seen = new Set();
+  skills.forEach((skill) => {
+    const skillId = getSkillId(skill);
+    if (!skillId || toNumber(levels[skillId], 0) <= 0) return;
+    const skillName = getSkillName(skill);
+    if (!skillName || seen.has(skillName)) return;
+    seen.add(skillName);
+    selected.push(skillName);
+  });
+  return selected;
+}
+
+function calculateSkillMaxLevels(skills) {
+  if (!Array.isArray(skills) || !skills.length) return {};
+  const maxLevels = {};
+  skills.forEach((skill) => {
+    const skillId = getSkillId(skill);
+    if (!skillId) return;
+    maxLevels[skillId] = 1;
+  });
+  skills.forEach((skill) => {
+    const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
+    const requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
+    if (!requiredSkillName) return;
+    const prerequisite = skills.find((candidate) => getSkillName(candidate).toUpperCase() === requiredSkillName.toUpperCase());
+    const prerequisiteId = getSkillId(prerequisite);
+    if (!prerequisiteId) return;
+    maxLevels[prerequisiteId] = Math.max(toNumber(maxLevels[prerequisiteId], 1), requiredLevel);
+  });
+  return maxLevels;
+}
+
+function checkSkillUnlocked(skill, skillLevelsById, allSkills) {
+  const requirementType = String(skill?.unlock_requirement_type || '').trim().toLowerCase();
+  const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
+  const requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
+  if (!requiredSkillName || requirementType !== 'skill_level') return true;
+
+  const normalizedLevels = skillLevelsById && typeof skillLevelsById === 'object' ? skillLevelsById : {};
+  const prerequisiteSkillId = toNumber(skill?.prerequisite_skill_id, 0);
+  if (prerequisiteSkillId > 0) {
+    return toNumber(normalizedLevels[String(prerequisiteSkillId)], 0) >= requiredLevel;
+  }
+
+  const prerequisiteSkill = (allSkills || []).find(
+    (candidate) => getSkillName(candidate).toUpperCase() === requiredSkillName.toUpperCase()
+  );
+  const prerequisiteId = getSkillId(prerequisiteSkill);
+  if (!prerequisiteId) return false;
+  return toNumber(normalizedLevels[prerequisiteId], 0) >= requiredLevel;
+}
+
+function getSkillUnlockMessage(skill) {
+  const explicitText = String(skill?.unlock_requirement_text || '').trim();
+  if (explicitText) return explicitText;
+  const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
+  const requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
+  if (requiredSkillName) {
+    return `Requires ${requiredSkillName} Level ${requiredLevel}`;
+  }
+  return 'Skill locked';
+}
+
+function pruneLockedSkillLevels(levels, skills) {
+  if (!levels || typeof levels !== 'object') return {};
+  const nextLevels = { ...levels };
+  let hasChanges = true;
+  while (hasChanges) {
+    hasChanges = false;
+    skills.forEach((skill) => {
+      const skillId = getSkillId(skill);
+      if (!skillId || toNumber(nextLevels[skillId], 0) <= 0) return;
+      if (!checkSkillUnlocked(skill, nextLevels, skills)) {
+        delete nextLevels[skillId];
+        hasChanges = true;
+      }
+    });
+  }
+  return nextLevels;
+}
+
+function resolveCurrentUserId() {
+  if (typeof window === 'undefined') return '';
+  const key = 'zenith_user_id';
+  try {
+    const existing = String(window.localStorage.getItem(key) || '').trim();
+    if (existing) return existing;
+    const generated = String(Date.now());
+    window.localStorage.setItem(key, generated);
+    return generated;
+  } catch (error) {
+    console.error('[squad-customization] Failed to resolve user id:', error);
+    return '';
+  }
+}
+
+async function fetchApiJson(endpoint, signal) {
+  const response = await fetch(`${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    signal
+  });
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Failed to fetch ${endpoint} (${response.status}): ${details || response.statusText}`);
+  }
+  return response.json();
 }
 
 function getPlayerType(player) {
@@ -349,32 +487,174 @@ function getStatAccentColor(value) {
 
 export default function SquadPlayerCustomizationModal({ player, onClose, onUpdatePlayer }) {
   const dialogRef = useRef(null);
+  const skillRequestSequenceRef = useRef(0);
   const [selectedRank, setSelectedRank] = useState(0);
   const [trainingLevel, setTrainingLevel] = useState(0);
   const [selectedSkills, setSelectedSkills] = useState([]);
+  const [skillPointBudget, setSkillPointBudget] = useState(0);
+  const [availableSkills, setAvailableSkills] = useState([]);
+  const [skillLevelsById, setSkillLevelsById] = useState({});
+  const [skillsLoadMessage, setSkillsLoadMessage] = useState('Select a rank to view skills');
+  const [skillsLoading, setSkillsLoading] = useState(false);
+  const [activeSkillDetail, setActiveSkillDetail] = useState(null);
+  const [skillBoostLevels, setSkillBoostLevels] = useState([]);
+  const [skillModalLoading, setSkillModalLoading] = useState(false);
+  const [skillModalError, setSkillModalError] = useState('');
   const [statsViewOpen, setStatsViewOpen] = useState(false);
 
-  const skillOptions = useMemo(
-    () => (String(player?.position || '').toUpperCase() === 'GK' ? GOALKEEPER_SKILL_OPTIONS : OUTFIELD_SKILL_OPTIONS),
-    [player?.position]
-  );
   const cardVariant = useMemo(() => getPlayerType(player), [player]);
   const baseOvr = useMemo(() => resolveBaseOvr(player), [player]);
-  const availableSkillPoints = Math.max(0, selectedRank);
+  const availableSkillPoints = Math.max(0, skillPointBudget);
+  const skillPointsSpent = useMemo(
+    () => Object.values(skillLevelsById).reduce((sum, level) => sum + Math.max(0, toNumber(level, 0)), 0),
+    [skillLevelsById]
+  );
+  const skillPointsRemaining = Math.max(0, availableSkillPoints - skillPointsSpent);
+  const skillMaxLevels = useMemo(() => calculateSkillMaxLevels(availableSkills), [availableSkills]);
+  const selectedSkillsByAllocation = useMemo(
+    () => buildSelectedSkillNames(availableSkills, skillLevelsById),
+    [availableSkills, skillLevelsById]
+  );
   const trainingBonus = Math.floor(Math.max(0, trainingLevel) / 5);
   const projectedOvr = baseOvr > 0 ? baseOvr + selectedRank + trainingBonus : baseOvr;
   const statsModel = useMemo(() => buildLegacyStatsModel(player), [player]);
 
   useEffect(() => {
+    const currentSelection = normalizeSelectedSkills(selectedSkills);
+    const nextSelection = normalizeSelectedSkills(selectedSkillsByAllocation);
+    if (currentSelection.join('|') === nextSelection.join('|')) return;
+    setSelectedSkills(nextSelection);
+  }, [selectedSkills, selectedSkillsByAllocation]);
+
+  useEffect(() => {
     if (!player) return;
     const initialRank = clamp(toNumber(player.rank, 0), 0, 5);
     const initialTrainingLevel = clamp(toNumber(player.trainingLevel ?? player.training_level, 0), 0, 30);
-    const initialSkills = normalizeSelectedSkills(player.selectedSkills).filter((skillName) => skillOptions.includes(skillName)).slice(0, initialRank);
+    const initialSkills = normalizeSelectedSkills(player.selectedSkills);
+    const initialSkillAllocations = normalizeSkillAllocationMap(player.skillAllocations ?? player.skill_allocations);
     setSelectedRank(initialRank);
     setTrainingLevel(initialTrainingLevel);
     setSelectedSkills(initialSkills);
+    setSkillPointBudget(initialRank);
+    setAvailableSkills([]);
+    setSkillLevelsById(initialSkillAllocations);
+    setSkillsLoadMessage(initialRank > 0 ? 'Loading skills...' : 'Select a rank to view skills');
+    setSkillsLoading(initialRank > 0);
+    setActiveSkillDetail(null);
+    setSkillBoostLevels([]);
+    setSkillModalError('');
+    setSkillModalLoading(false);
     setStatsViewOpen(false);
-  }, [player, skillOptions]);
+  }, [player]);
+
+  useEffect(() => {
+    const normalizedPlayerId = String(player?.playerId || '').trim();
+    if (!normalizedPlayerId) return undefined;
+
+    if (selectedRank <= 0) {
+      setAvailableSkills([]);
+      setSkillLevelsById({});
+      setSelectedSkills([]);
+      setSkillPointBudget(0);
+      setSkillsLoading(false);
+      setSkillsLoadMessage('Select a rank to view skills');
+      return undefined;
+    }
+
+    let isActive = true;
+    const controller = new AbortController();
+    setSkillsLoading(true);
+    setSkillsLoadMessage('Loading skills...');
+
+    const loadSkills = async () => {
+      try {
+        const userId = resolveCurrentUserId();
+        const detailsRequest = fetchApiJson(`/players/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(selectedRank)}`, controller.signal);
+        const allocationsRequest = userId
+          ? fetchApiJson(
+              `/skills/allocations/${encodeURIComponent(userId)}/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(selectedRank)}`,
+              controller.signal
+            ).catch((error) => {
+              if (error?.name === 'AbortError') throw error;
+              console.error('[squad-customization] Failed to load skill allocations:', error);
+              return { allocations: [] };
+            })
+          : Promise.resolve({ allocations: [] });
+
+        const [detailsPayload, allocationsPayload] = await Promise.all([detailsRequest, allocationsRequest]);
+        if (!isActive) return;
+
+        const fetchedSkills = Array.isArray(detailsPayload?.skills) ? detailsPayload.skills : [];
+        const fetchedBudget = Math.max(0, toNumber(detailsPayload?.available_skill_points, selectedRank));
+        const persistedAllocations = normalizeSkillAllocationMap(player?.skillAllocations ?? player?.skill_allocations);
+
+        const serverLevels = {};
+        const rawAllocations = Array.isArray(allocationsPayload?.allocations) ? allocationsPayload.allocations : [];
+        rawAllocations.forEach((allocation) => {
+          const skillId = String(allocation?.skill_id ?? allocation?.skillId ?? '').trim();
+          const skillLevel = Math.max(0, toNumber(allocation?.skill_level ?? allocation?.skillLevel, 0));
+          if (!skillId || skillLevel <= 0) return;
+          serverLevels[skillId] = skillLevel;
+        });
+
+        let nextLevels = Object.keys(persistedAllocations).length ? persistedAllocations : serverLevels;
+        if (!Object.keys(nextLevels).length) {
+          const fallbackSelectedSkills = normalizeSelectedSkills(player?.selectedSkills);
+          const fallbackLevels = {};
+          fetchedSkills.forEach((skill) => {
+            const skillId = getSkillId(skill);
+            const skillName = getSkillName(skill);
+            if (!skillId || !skillName) return;
+            if (fallbackSelectedSkills.includes(skillName)) {
+              fallbackLevels[skillId] = 1;
+            }
+          });
+          nextLevels = fallbackLevels;
+        }
+
+        let nextPrunedLevels = pruneLockedSkillLevels(nextLevels, fetchedSkills);
+        let spentPoints = Object.values(nextPrunedLevels).reduce((sum, level) => sum + Math.max(0, toNumber(level, 0)), 0);
+        if (spentPoints > fetchedBudget) {
+          const constrained = { ...nextPrunedLevels };
+          for (const skill of fetchedSkills) {
+            if (spentPoints <= fetchedBudget) break;
+            const skillId = getSkillId(skill);
+            const currentLevel = Math.max(0, toNumber(constrained[skillId], 0));
+            if (!skillId || currentLevel <= 0) continue;
+            const removable = Math.min(currentLevel, spentPoints - fetchedBudget);
+            const nextLevel = currentLevel - removable;
+            if (nextLevel > 0) constrained[skillId] = nextLevel;
+            else delete constrained[skillId];
+            spentPoints -= removable;
+          }
+          nextPrunedLevels = pruneLockedSkillLevels(constrained, fetchedSkills);
+        }
+
+        const nextSelectedSkills = buildSelectedSkillNames(fetchedSkills, nextPrunedLevels);
+        setAvailableSkills(fetchedSkills);
+        setSkillPointBudget(fetchedBudget);
+        setSkillLevelsById(nextPrunedLevels);
+        setSelectedSkills(nextSelectedSkills);
+        setSkillsLoadMessage(fetchedSkills.length ? '' : 'No skills available');
+        setSkillsLoading(false);
+      } catch (error) {
+        if (!isActive || error?.name === 'AbortError') return;
+        console.error('[squad-customization] Failed to load player skills:', error);
+        setAvailableSkills([]);
+        setSkillLevelsById({});
+        setSelectedSkills([]);
+        setSkillPointBudget(Math.max(0, selectedRank));
+        setSkillsLoadMessage('Failed to load skills');
+        setSkillsLoading(false);
+      }
+    };
+
+    loadSkills();
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [player?.playerId, player?.selectedSkills, player?.skillAllocations, player?.skill_allocations, selectedRank]);
 
   useEffect(() => {
     if (!player) return;
@@ -410,6 +690,14 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
+        if (activeSkillDetail) {
+          skillRequestSequenceRef.current += 1;
+          setActiveSkillDetail(null);
+          setSkillBoostLevels([]);
+          setSkillModalError('');
+          setSkillModalLoading(false);
+          return;
+        }
         onClose?.();
         return;
       }
@@ -441,7 +729,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
       document.body.style.overflow = previousOverflow;
       previouslyFocused?.focus();
     };
-  }, [onClose, player, statsViewOpen]);
+  }, [activeSkillDetail, onClose, player, statsViewOpen]);
 
   const emitUpdate = (nextState) => {
     if (!player?.playerId || typeof onUpdatePlayer !== 'function') return;
@@ -449,12 +737,17 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     const nextTrainingLevel = clamp(toNumber(nextState.trainingLevel, 0), 0, 30);
     const nextTrainingBonus = Math.floor(Math.max(0, nextTrainingLevel) / 5);
     const nextSkills = normalizeSelectedSkills(nextState.selectedSkills).slice(0, nextRank);
+    const nextSkillAllocations = normalizeSkillAllocationMap(
+      nextState.skillAllocations ?? skillLevelsById ?? player?.skillAllocations ?? player?.skill_allocations
+    );
     const nextProjectedOvr = baseOvr > 0 ? baseOvr + nextRank + nextTrainingBonus : baseOvr;
     onUpdatePlayer({
       playerId: player.playerId,
       rank: nextRank,
       trainingLevel: nextTrainingLevel,
       selectedSkills: nextSkills,
+      skillAllocations: nextSkillAllocations,
+      skill_allocations: nextSkillAllocations,
       trainingBonus: nextTrainingBonus,
       baseOvr,
       boostedOvr: nextProjectedOvr,
@@ -464,13 +757,23 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
 
   const handleRankSelect = (nextRank) => {
     const normalizedRank = clamp(toNumber(nextRank, 0), 0, 5);
-    const trimmedSkills = selectedSkills.slice(0, normalizedRank);
+    const resetSkills = [];
     setSelectedRank(normalizedRank);
-    setSelectedSkills(trimmedSkills);
+    setSelectedSkills(resetSkills);
+    setSkillLevelsById({});
+    setAvailableSkills([]);
+    setSkillPointBudget(normalizedRank);
+    setSkillsLoadMessage(normalizedRank > 0 ? 'Loading skills...' : 'Select a rank to view skills');
+    setSkillsLoading(normalizedRank > 0);
+    setActiveSkillDetail(null);
+    setSkillBoostLevels([]);
+    setSkillModalError('');
+    setSkillModalLoading(false);
     emitUpdate({
       rank: normalizedRank,
       trainingLevel,
-      selectedSkills: trimmedSkills
+      selectedSkills: resetSkills,
+      skillAllocations: {}
     });
   };
 
@@ -480,19 +783,8 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     emitUpdate({
       rank: selectedRank,
       trainingLevel: nextTrainingLevel,
-      selectedSkills
-    });
-  };
-
-  const handleSkillToggle = (skillName) => {
-    const exists = selectedSkills.includes(skillName);
-    if (!exists && selectedSkills.length >= availableSkillPoints) return;
-    const nextSkills = exists ? selectedSkills.filter((entry) => entry !== skillName) : [...selectedSkills, skillName];
-    setSelectedSkills(nextSkills);
-    emitUpdate({
-      rank: selectedRank,
-      trainingLevel,
-      selectedSkills: nextSkills
+      selectedSkills,
+      skillAllocations: skillLevelsById
     });
   };
 
@@ -500,19 +792,100 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSelectedRank(0);
     setTrainingLevel(0);
     setSelectedSkills([]);
+    setAvailableSkills([]);
+    setSkillLevelsById({});
+    setSkillPointBudget(0);
+    setSkillsLoading(false);
+    setSkillsLoadMessage('Select a rank to view skills');
+    setActiveSkillDetail(null);
+    setSkillBoostLevels([]);
+    setSkillModalError('');
+    setSkillModalLoading(false);
     emitUpdate({
       rank: 0,
       trainingLevel: 0,
-      selectedSkills: []
+      selectedSkills: [],
+      skillAllocations: {}
     });
   };
 
   const handleResetSkills = () => {
     setSelectedSkills([]);
+    setSkillLevelsById({});
+    setActiveSkillDetail(null);
+    setSkillBoostLevels([]);
+    setSkillModalError('');
+    setSkillModalLoading(false);
     emitUpdate({
       rank: selectedRank,
       trainingLevel,
-      selectedSkills: []
+      selectedSkills: [],
+      skillAllocations: {}
+    });
+  };
+
+  const closeSkillDetailModal = useCallback(() => {
+    skillRequestSequenceRef.current += 1;
+    setActiveSkillDetail(null);
+    setSkillBoostLevels([]);
+    setSkillModalError('');
+    setSkillModalLoading(false);
+  }, []);
+
+  const handleSkillCardOpen = async (skill) => {
+    if (!skill || selectedRank <= 0) return;
+    const skillId = getSkillId(skill);
+    if (!skillId) return;
+
+    const requestId = skillRequestSequenceRef.current + 1;
+    skillRequestSequenceRef.current = requestId;
+    setActiveSkillDetail(skill);
+    setSkillBoostLevels([]);
+    setSkillModalError('');
+    setSkillModalLoading(true);
+
+    try {
+      const payload = await fetchApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`);
+      if (requestId !== skillRequestSequenceRef.current) return;
+      setSkillBoostLevels(Array.isArray(payload?.boosts) ? payload.boosts : []);
+      setSkillModalLoading(false);
+    } catch (error) {
+      if (requestId !== skillRequestSequenceRef.current || error?.name === 'AbortError') return;
+      console.error('[squad-customization] Failed to load skill boosts:', error);
+      setSkillBoostLevels([]);
+      setSkillModalError('Failed to load skill details');
+      setSkillModalLoading(false);
+    }
+  };
+
+  const handleSkillLevelSelect = (targetLevel) => {
+    if (!activeSkillDetail) return;
+    const activeSkillId = getSkillId(activeSkillDetail);
+    if (!activeSkillId) return;
+
+    const currentLevel = Math.max(0, toNumber(skillLevelsById[activeSkillId], 0));
+    const maxLevel = Math.max(1, toNumber(skillMaxLevels[activeSkillId], 1));
+    const normalizedTargetLevel = clamp(toNumber(targetLevel, 0), 0, maxLevel);
+    const nextLevel = normalizedTargetLevel === currentLevel ? 0 : normalizedTargetLevel;
+    const unlocked = checkSkillUnlocked(activeSkillDetail, skillLevelsById, availableSkills);
+    if (!unlocked && nextLevel > 0) return;
+
+    const pointsDelta = nextLevel - currentLevel;
+    if (pointsDelta > skillPointsRemaining) return;
+
+    const provisionalLevels = { ...skillLevelsById };
+    if (nextLevel > 0) provisionalLevels[activeSkillId] = nextLevel;
+    else delete provisionalLevels[activeSkillId];
+
+    const nextLevels = pruneLockedSkillLevels(provisionalLevels, availableSkills);
+    const nextSelectedSkills = buildSelectedSkillNames(availableSkills, nextLevels);
+    setSkillLevelsById(nextLevels);
+    setSelectedSkills(nextSelectedSkills);
+    emitUpdate({
+      rank: selectedRank,
+      trainingLevel,
+      selectedSkills: nextSelectedSkills,
+      skillAllocations: nextLevels
     });
   };
 
@@ -524,6 +897,14 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   };
 
   if (!player) return null;
+
+  const activeSkillId = getSkillId(activeSkillDetail);
+  const activeSkillName = getSkillName(activeSkillDetail) || 'Skill';
+  const activeSkillCurrentLevel = Math.max(0, toNumber(skillLevelsById[activeSkillId], 0));
+  const activeSkillMaxLevel = Math.max(1, toNumber(skillMaxLevels[activeSkillId], 1));
+  const activeSkillUnlocked = activeSkillDetail ? checkSkillUnlocked(activeSkillDetail, skillLevelsById, availableSkills) : true;
+  const activeSkillUnlockMessage = activeSkillDetail ? getSkillUnlockMessage(activeSkillDetail) : 'Skill locked';
+  const availablePointsForActiveSkill = Math.max(0, skillPointsRemaining + activeSkillCurrentLevel);
 
   return (
     <div
@@ -838,40 +1219,73 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
           <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#E6EEF2', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.3px' }}>
             Skill Points
           </h3>
-          <div id="squad-custom-skills" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-            {skillOptions.map((skillName) => {
-              const selected = selectedSkills.includes(skillName);
-              const hasCapacity = selectedSkills.length < availableSkillPoints;
-              const interactive = selected || hasCapacity;
-              return (
-                <button
-                  key={skillName}
-                  className={`squad-skill-slot ${interactive ? 'unlocked' : 'locked'}`}
-                  type="button"
-                  onClick={() => handleSkillToggle(skillName)}
-                  aria-pressed={selected}
-                  aria-disabled={!interactive}
-                  title={skillName}
-                >
-                  <svg viewBox="0 0 24 24" fill={selected ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                    <path d="M12 2 14.9 8.2 22 9.2 17 14.1 18.2 21.2 12 17.8 5.8 21.2 7 14.1 2 9.2 9.1 8.2 12 2Z" />
-                  </svg>
-                  <span
-                    style={{
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.2px',
-                      textAlign: 'center',
-                      color: selected ? '#00C2A8' : '#E6EEF2',
-                      lineHeight: 1.1
+          <div
+            id="squad-custom-skills"
+            className="skills-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: '12px'
+            }}
+          >
+            {skillsLoading && <p style={{ color: '#98A0A6', textAlign: 'center', gridColumn: '1 / -1' }}>Loading skills...</p>}
+            {!skillsLoading && !!skillsLoadMessage && !availableSkills.length && (
+              <p style={{ color: '#98A0A6', textAlign: 'center', gridColumn: '1 / -1' }}>{skillsLoadMessage}</p>
+            )}
+            {!skillsLoading &&
+              availableSkills.map((skill) => {
+                const skillId = getSkillId(skill);
+                const skillName = getSkillName(skill) || 'Skill';
+                const skillImage = getSkillImage(skill) || '/assets/images/zenith_logo_svg.svg';
+                const currentLevel = Math.max(0, toNumber(skillLevelsById[skillId], 0));
+                const maxLevel = Math.max(1, toNumber(skillMaxLevels[skillId], 1));
+                const unlocked = checkSkillUnlocked(skill, skillLevelsById, availableSkills);
+                return (
+                  <div
+                    key={skillId || skillName}
+                    className={`skill-card ${unlocked ? '' : 'locked'}`}
+                    role="button"
+                    tabIndex={0}
+                    title={skillName}
+                    onClick={() => handleSkillCardOpen(skill)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleSkillCardOpen(skill);
+                      }
                     }}
                   >
-                    {skillName}
-                  </span>
-                </button>
-              );
-            })}
+                    <div className="skill-card-inner">
+                      <div className="skill-icon">
+                        <img
+                          src={skillImage}
+                          alt={skillName}
+                          onError={(event) => {
+                            event.currentTarget.src = '/assets/images/zenith_logo_svg.svg';
+                          }}
+                        />
+                        {!unlocked && <div className="lock-overlay">🔒</div>}
+                      </div>
+                      <div className="skill-name">{skillName}</div>
+                      <div className="skill-level">
+                        Level: <span className="level-number">{currentLevel}</span>/{maxLevel}
+                      </div>
+                      {!unlocked ? (
+                        <div className="unlock-requirement">
+                          <small>{getSkillUnlockMessage(skill)}</small>
+                        </div>
+                      ) : (
+                        <div className="skill-actions">
+                          {currentLevel >= maxLevel && <div className="max-level-badge">MAX LEVEL</div>}
+                          {currentLevel < maxLevel && skillPointsRemaining === 0 && (
+                            <small style={{ color: '#FF6B6B' }}>No points remaining</small>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
 
@@ -920,6 +1334,79 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
           </button>
         </div>
       </div>
+
+      {activeSkillDetail && (
+        <div id="skill-detail-modal" className="skill-detail-modal" onClick={closeSkillDetailModal}>
+          <div className="skill-modal-content" onClick={(event) => event.stopPropagation()}>
+            <button className="modal-close-btn" type="button" onClick={closeSkillDetailModal} aria-label="Close skill detail modal">
+              ×
+            </button>
+            <h2>{activeSkillName}</h2>
+            {!activeSkillUnlocked && (
+              <div style={{ marginTop: '8px', color: '#FFB86B', fontWeight: 600 }}>{activeSkillUnlockMessage}</div>
+            )}
+            <div className="points-info">
+              <div className="current-level-badge">Current Level: {activeSkillCurrentLevel}</div>
+              <div className="points-remaining-badge">
+                {availablePointsForActiveSkill} point{availablePointsForActiveSkill !== 1 ? 's' : ''} available
+              </div>
+            </div>
+            <div className="boosts-container">
+              {skillModalLoading && <p style={{ color: '#98A0A6' }}>Loading skill details...</p>}
+              {!skillModalLoading && !!skillModalError && <p style={{ color: '#FF6B6B' }}>{skillModalError}</p>}
+              {!skillModalLoading && !skillModalError && !skillBoostLevels.length && <p style={{ color: '#98A0A6' }}>No boost data available</p>}
+              {!skillModalLoading &&
+                !skillModalError &&
+                skillBoostLevels.map((boost) => {
+                  const levelNumber = Math.max(0, toNumber(boost?.level_number ?? boost?.levelNumber, 0));
+                  if (!levelNumber) return null;
+                  const isSelected = activeSkillCurrentLevel === levelNumber;
+                  const pointsNeeded = levelNumber - activeSkillCurrentLevel;
+                  const canAfford = pointsNeeded <= availablePointsForActiveSkill;
+                  const isDisabled = !isSelected && (!activeSkillUnlocked || !canAfford);
+                  const isPartiallyUnlocked = activeSkillCurrentLevel > levelNumber && !isSelected;
+                  return (
+                    <div
+                      key={`${activeSkillId}-${levelNumber}`}
+                      className={`boost-level-section ${isSelected ? 'selected' : ''} ${isPartiallyUnlocked ? 'unlocked' : ''} ${
+                        isDisabled ? 'disabled' : ''
+                      }`}
+                      onClick={() => {
+                        if (isDisabled) return;
+                        handleSkillLevelSelect(levelNumber);
+                      }}
+                      style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+                    >
+                      <div className={`level-checkbox ${isSelected ? 'checked' : ''} ${isPartiallyUnlocked ? 'partial' : ''} ${isDisabled ? 'disabled' : ''}`}>
+                        {isSelected ? '✓' : isPartiallyUnlocked ? '○' : ''}
+                      </div>
+                      <h4>Level {levelNumber}</h4>
+                      {isDisabled && pointsNeeded > 0 && (
+                        <div className="insufficient-points">Need {pointsNeeded} more point{pointsNeeded !== 1 ? 's' : ''}</div>
+                      )}
+                      <div className="boost-stats">
+                        {Object.entries(boost).map(([key, value]) => {
+                          if (!key.startsWith('boost_')) return null;
+                          const numericValue = toNumber(value, 0);
+                          if (!numericValue) return null;
+                          const statName = key.replace('boost_', '').replace(/_/g, ' ').toUpperCase();
+                          return (
+                            <div key={`${activeSkillId}-${levelNumber}-${key}`} className="boost-stat">
+                              +{numericValue} {statName}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            <button className="modal-action-btn" type="button" onClick={closeSkillDetailModal}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

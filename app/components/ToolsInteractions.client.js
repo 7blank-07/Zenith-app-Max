@@ -886,6 +886,18 @@ function normalizeSelectedSkills(value) {
     });
 }
 
+function normalizeSkillAllocations(value) {
+  if (!value || typeof value !== 'object') return {};
+  const normalized = {};
+  Object.entries(value).forEach(([skillId, level]) => {
+    const normalizedSkillId = String(skillId || '').trim();
+    const normalizedLevel = Math.max(0, toNumber(level, 0));
+    if (!normalizedSkillId || normalizedLevel <= 0) return;
+    normalized[normalizedSkillId] = normalizedLevel;
+  });
+  return normalized;
+}
+
 function toText(value) {
   return normalizeSearchText(value);
 }
@@ -932,6 +944,7 @@ function normalizePlayer(player, index) {
   const baseOvr = Math.max(0, toNumber(player?.baseOvr ?? player?.base_ovr, ovr));
   const trainingBonus = Math.max(0, toNumber(player?.trainingBonus ?? player?.training_bonus, Math.floor(trainingLevel / 5)));
   const selectedSkills = normalizeSelectedSkills(player?.selectedSkills ?? player?.selected_skills);
+  const skillAllocations = normalizeSkillAllocations(player?.skillAllocations ?? player?.skill_allocations);
   return {
     playerId: playerId || `player-${index}`,
     name: String(player?.name || 'Unknown'),
@@ -942,6 +955,7 @@ function normalizePlayer(player, index) {
     trainingLevel,
     trainingBonus,
     selectedSkills,
+    skillAllocations,
     position: String(player?.position || ''),
     alternatePosition: String(player?.alternatePosition || player?.alternate_position || ''),
     nation: String(player?.nation || ''),
@@ -1745,6 +1759,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     const trainingLevel = clamp(toNumber(payload?.trainingLevel ?? currentPlayer.trainingLevel, 0), 0, 30);
     const trainingBonus = Math.floor(trainingLevel / 5);
     const selectedSkills = normalizeSelectedSkills(payload?.selectedSkills ?? currentPlayer.selectedSkills).slice(0, rank);
+    const skillAllocations = normalizeSkillAllocations(payload?.skillAllocations ?? currentPlayer.skillAllocations ?? currentPlayer.skill_allocations);
     const baseOvr = Math.max(0, toNumber(payload?.baseOvr ?? currentPlayer.baseOvr ?? currentPlayer.ovr, 0));
     const boostedOvr = baseOvr > 0 ? baseOvr + rank + trainingBonus : baseOvr;
 
@@ -1757,6 +1772,8 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         rank,
         trainingLevel,
         selectedSkills,
+        skillAllocations,
+        skill_allocations: skillAllocations,
         baseOvr,
         boostedOvr,
         trainingBonus,
