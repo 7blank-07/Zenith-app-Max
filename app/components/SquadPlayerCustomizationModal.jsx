@@ -58,6 +58,30 @@ function getSkillImage(skill) {
   return String(skill?.skill_image ?? skill?.skillImage ?? '').trim();
 }
 
+function aggregateSkillBoostsByLevel(skillLevelsById, skillBoostCatalogById) {
+  if (!skillLevelsById || typeof skillLevelsById !== 'object') return {};
+  if (!skillBoostCatalogById || typeof skillBoostCatalogById !== 'object') return {};
+  const totals = {};
+  Object.entries(skillLevelsById).forEach(([skillId, levelValue]) => {
+    const selectedLevel = toNumber(levelValue, 0);
+    if (selectedLevel <= 0) return;
+    const skillBoostRows = skillBoostCatalogById[skillId];
+    if (!Array.isArray(skillBoostRows) || skillBoostRows.length === 0) return;
+    const matchingLevel = skillBoostRows.find(
+      (entry) => toNumber(entry?.level_number ?? entry?.levelNumber, 0) === selectedLevel
+    );
+    if (!matchingLevel) return;
+    Object.entries(matchingLevel).forEach(([key, rawValue]) => {
+      if (!key.startsWith('boost_')) return;
+      const boostValue = toNumber(rawValue, 0);
+      if (boostValue === 0) return;
+      const statKey = key.slice('boost_'.length);
+      totals[statKey] = (totals[statKey] || 0) + boostValue;
+    });
+  });
+  return totals;
+}
+
 function normalizeSkillAllocationMap(value) {
   if (!value || typeof value !== 'object') return {};
   const normalized = {};
@@ -339,10 +363,10 @@ const GK_STAT_ALIASES = Object.freeze({
   reflexes: Object.freeze(['gk_reflexes', 'gk-reflexes', 'gkReflexes', 'goalkeeper_reflexes', 'goalkeeper-reflexes', 'goalkeeperReflexes'])
 });
 
-function buildLegacyStatsModel(player) {
+function buildLegacyStatsModel(player, options = {}) {
   const isGoalkeeper = String(player?.position || '').toUpperCase() === 'GK';
-  const trainingBoosts = player?.training_boosts || player?.trainingBoosts || null;
-  const skillBoosts = player?.skill_boosts || player?.skillBoosts || null;
+  const trainingBoosts = options.trainingBoosts ?? player?.training_boosts ?? player?.trainingBoosts ?? null;
+  const skillBoosts = options.skillBoosts ?? player?.skill_boosts ?? player?.skillBoosts ?? null;
   const finalStat = (...names) => getFinalStatValue(player, trainingBoosts, skillBoosts, ...names);
 
   if (isGoalkeeper) {
@@ -494,8 +518,10 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   const [skillPointBudget, setSkillPointBudget] = useState(0);
   const [availableSkills, setAvailableSkills] = useState([]);
   const [skillLevelsById, setSkillLevelsById] = useState({});
-  const [skillsLoadMessage, setSkillsLoadMessage] = useState('Select a rank to view skills');
-  const [skillsLoading, setSkillsLoading] = useState(false);
+  const [skillsLoadMessage, setSkillsLoadMessage] = useState('Loading skills...');
+  const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skillBoostCatalogById, setSkillBoostCatalogById] = useState({});
+  const [computedSkillBoosts, setComputedSkillBoosts] = useState({});
   const [activeSkillDetail, setActiveSkillDetail] = useState(null);
   const [skillBoostLevels, setSkillBoostLevels] = useState([]);
   const [skillModalLoading, setSkillModalLoading] = useState(false);
@@ -517,7 +543,16 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   );
   const trainingBonus = Math.floor(Math.max(0, trainingLevel) / 5);
   const projectedOvr = baseOvr > 0 ? baseOvr + selectedRank + trainingBonus : baseOvr;
-  const statsModel = useMemo(() => buildLegacyStatsModel(player), [player]);
+  const effectiveSkillBoosts = useMemo(() => {
+    if (availableSkills.length > 0) {
+      return computedSkillBoosts;
+    }
+    return player?.skill_boosts || player?.skillBoosts || null;
+  }, [availableSkills.length, computedSkillBoosts, player]);
+  const statsModel = useMemo(
+    () => buildLegacyStatsModel(player, { skillBoosts: effectiveSkillBoosts }),
+    [effectiveSkillBoosts, player]
+  );
 
   useEffect(() => {
     const currentSelection = normalizeSelectedSkills(selectedSkills);
@@ -538,8 +573,10 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillPointBudget(initialRank);
     setAvailableSkills([]);
     setSkillLevelsById(initialSkillAllocations);
-    setSkillsLoadMessage(initialRank > 0 ? 'Loading skills...' : 'Select a rank to view skills');
-    setSkillsLoading(initialRank > 0);
+    setSkillsLoadMessage('Loading skills...');
+    setSkillsLoading(true);
+    setSkillBoostCatalogById({});
+    setComputedSkillBoosts({});
     setActiveSkillDetail(null);
     setSkillBoostLevels([]);
     setSkillModalError('');
@@ -550,16 +587,6 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   useEffect(() => {
     const normalizedPlayerId = String(player?.playerId || '').trim();
     if (!normalizedPlayerId) return undefined;
-
-    if (selectedRank <= 0) {
-      setAvailableSkills([]);
-      setSkillLevelsById({});
-      setSelectedSkills([]);
-      setSkillPointBudget(0);
-      setSkillsLoading(false);
-      setSkillsLoadMessage('Select a rank to view skills');
-      return undefined;
-    }
 
     let isActive = true;
     const controller = new AbortController();
@@ -655,6 +682,66 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
       controller.abort();
     };
   }, [player?.playerId, player?.selectedSkills, player?.skillAllocations, player?.skill_allocations, selectedRank]);
+
+  useEffect(() => {
+    const availableSkillIds = (availableSkills || [])
+      .map((skill) => getSkillId(skill))
+      .map((skillId) => String(skillId || '').trim())
+      .filter(Boolean);
+    if (!availableSkillIds.length) return undefined;
+    const missingSkillIds = availableSkillIds.filter((skillId) => !Array.isArray(skillBoostCatalogById[skillId]));
+    if (!missingSkillIds.length) return undefined;
+
+    let isActive = true;
+    const controller = new AbortController();
+
+    const loadMissingSkillBoostCatalog = async () => {
+      try {
+        const results = await Promise.all(
+          missingSkillIds.map(async (skillId) => {
+            try {
+              const payload = await fetchApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`, controller.signal);
+              return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
+            } catch (error) {
+              if (error?.name === 'AbortError') throw error;
+              console.error(`[squad-customization] Failed to load boosts for skill ${skillId}:`, error);
+              return [skillId, []];
+            }
+          })
+        );
+        if (!isActive) return;
+        setSkillBoostCatalogById((current) => {
+          const next = { ...current };
+          results.forEach(([skillId, boosts]) => {
+            next[skillId] = boosts;
+          });
+          return next;
+        });
+      } catch (error) {
+        if (!isActive || error?.name === 'AbortError') return;
+        console.error('[squad-customization] Failed to load missing skill boosts:', error);
+      }
+    };
+
+    loadMissingSkillBoostCatalog();
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [availableSkills, skillBoostCatalogById]);
+
+  useEffect(() => {
+    const aggregatedBoosts = aggregateSkillBoostsByLevel(skillLevelsById, skillBoostCatalogById);
+    setComputedSkillBoosts((current) => {
+      const currentKeys = Object.keys(current);
+      const nextKeys = Object.keys(aggregatedBoosts);
+      if (currentKeys.length === nextKeys.length) {
+        const unchanged = nextKeys.every((key) => toNumber(current[key], 0) === toNumber(aggregatedBoosts[key], 0));
+        if (unchanged) return current;
+      }
+      return aggregatedBoosts;
+    });
+  }, [skillLevelsById, skillBoostCatalogById]);
 
   useEffect(() => {
     if (!player) return;
@@ -763,8 +850,10 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillLevelsById({});
     setAvailableSkills([]);
     setSkillPointBudget(normalizedRank);
-    setSkillsLoadMessage(normalizedRank > 0 ? 'Loading skills...' : 'Select a rank to view skills');
-    setSkillsLoading(normalizedRank > 0);
+    setSkillsLoadMessage('Loading skills...');
+    setSkillsLoading(true);
+    setSkillBoostCatalogById({});
+    setComputedSkillBoosts({});
     setActiveSkillDetail(null);
     setSkillBoostLevels([]);
     setSkillModalError('');
@@ -795,8 +884,10 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setAvailableSkills([]);
     setSkillLevelsById({});
     setSkillPointBudget(0);
-    setSkillsLoading(false);
-    setSkillsLoadMessage('Select a rank to view skills');
+    setSkillsLoading(true);
+    setSkillsLoadMessage('Loading skills...');
+    setSkillBoostCatalogById({});
+    setComputedSkillBoosts({});
     setActiveSkillDetail(null);
     setSkillBoostLevels([]);
     setSkillModalError('');
@@ -833,7 +924,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   }, []);
 
   const handleSkillCardOpen = async (skill) => {
-    if (!skill || selectedRank <= 0) return;
+    if (!skill) return;
     const skillId = getSkillId(skill);
     if (!skillId) return;
 
@@ -847,7 +938,12 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     try {
       const payload = await fetchApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`);
       if (requestId !== skillRequestSequenceRef.current) return;
-      setSkillBoostLevels(Array.isArray(payload?.boosts) ? payload.boosts : []);
+      const boosts = Array.isArray(payload?.boosts) ? payload.boosts : [];
+      setSkillBoostLevels(boosts);
+      setSkillBoostCatalogById((current) => ({
+        ...current,
+        [skillId]: boosts
+      }));
       setSkillModalLoading(false);
     } catch (error) {
       if (requestId !== skillRequestSequenceRef.current || error?.name === 'AbortError') return;
