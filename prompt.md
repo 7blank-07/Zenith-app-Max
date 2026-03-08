@@ -1,204 +1,147 @@
-Start Phase 3 responsive header refinement.
+Implement the player customization modal that appears when clicking a player card on the squad field.
 
-Act as a senior frontend engineer and product UI/UX architect.
+Currently the old SPA version had this feature implemented using vanilla JavaScript.  
+Do NOT reuse or copy the old SPA logic.  
+Instead, rebuild the functionality using proper React / Next.js component architecture.
 
-IMPORTANT RULE:
-Do NOT modify the desktop header layout.  
-Desktop (width > 1020px) is already correct and must remain exactly as it is.
+IMPORTANT RULES
 
-Only improve responsive behavior for screens ≤1020px.
-
-No logic changes allowed.  
-Do not modify:
-- formation logic
-- drag/drop logic
-- squad calculations
-- save/load/export functionality
-- state handlers
-- event handlers
-
-This task is ONLY layout and responsive UI refinement.
+1. Do NOT import or reuse any old vanilla JS SPA code.
+2. Implement everything using React state and Next.js client components.
+3. Preserve the existing CSS classes and DOM structure so the UI appearance remains identical.
+4. Do NOT modify squad builder logic such as:
+   - formation coordinates
+   - drag/drop
+   - squad state
+   - save/load/export
+   - OVR calculations
+5. Only rebuild the modal interaction system.
 
 ------------------------------------------------
 
 GOAL
 
-Make the squad-header professional and extremely space-efficient on small screens.
+When the user clicks a player card in the squad-field, open a modal:
 
-Avoid wasted space, large gaps, or oversized controls.
+modal-content
+squad-customization-content
+squad-player-customization-modal
 
-The layout should resemble professional dashboard toolbars used in modern SaaS applications.
-
-Controls must be grouped logically and arranged for maximum efficiency.
-
-------------------------------------------------
-
-BREAKPOINTS
-
-Implement responsive layouts for these breakpoints:
-
-≤1020px  (tablet)
-≤768px   (large mobile)
-≤480px   (small mobile)
-≤368px   (very small phones)
-
-Desktop (>1020px) must not change.
+This modal should behave exactly like the old SPA version.
 
 ------------------------------------------------
 
-TABLET LAYOUT (≤1020px)
+TRIGGER
 
-Use two compact rows.
+Add an onClick handler to player cards rendered inside squad-field.
 
-Row 1:
-Squad Builder title
-Squad name input
-Theme toggle
-Fullscreen button
-Close button
+Example behavior:
 
-Row 2:
-Formation selector
-Save Squad
-Load Squad
-Reset
-Export
-Badges
-OVR
-VALUE
-
-Use flex-wrap or grid but maintain tight spacing.
+click player card → open customization modal with that player's data.
 
 ------------------------------------------------
 
-MOBILE LAYOUT (≤768px)
+REACT IMPLEMENTATION
 
-Use structured multi-row layout without wasting horizontal space.
+Create a React state in the squad builder component:
 
-Row 1:
-Title
-Fullscreen
-Close
-
-Row 2:
-Squad name input
-
-Row 3:
-Formation selector
-Save
-Load
-
-Row 4:
-Export
-Badges
-Reset
-
-Row 5:
-OVR
-VALUE
-
-Buttons should share width evenly where possible.
-
-------------------------------------------------
-
-SMALL MOBILE (≤480px)
-
-Use grid layout to maximize efficiency.
-
-Example grid:
-
-grid-template-columns: 1fr 1fr
-gap: 8px
-
-Buttons should fill the available width.
-
-Example grouping:
-
-Row 1:
-Title | Fullscreen
-
-Row 2:
-Squad name input
-
-Row 3:
-Formation selector
-
-Row 4:
-Save | Load
-
-Row 5:
-Export | Badges
-
-Row 6:
-OVR | VALUE
-
-------------------------------------------------
-
-VERY SMALL DEVICES (≤368px)
-
-Ensure layout never overflows.
-
-Use compact spacing and allow text truncation.
+selectedPlayerForCustomization
 
 Example:
 
-overflow: hidden
-text-overflow: ellipsis
-white-space: nowrap
+const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null)
+
+Clicking a player card should set this state.
 
 ------------------------------------------------
 
-MOBILE CONTROL SIZE
+MODAL RENDERING
 
-Reduce button sizes for smaller screens.
+Render the modal conditionally when selectedPlayerForCustomization is not null.
 
-Use:
+Example structure:
 
-height: 36px
-padding: 6px 10px
-font-size: 13px
+<div class="squad-player-customization-modal">
+  <div class="modal-content">
+    <div class="squad-customization-content">
 
-------------------------------------------------
+      Player card preview
 
-SPACING SYSTEM
+      Tabs or sections:
+      - Rank
+      - Training
+      - Skills
+      - Stats
 
-Use consistent spacing rhythm.
+    </div>
+  </div>
+</div>
 
-gap between controls: 8px
-gap between rows: 12px
-
-------------------------------------------------
-
-HEADER PADDING
-
-Reduce container padding on small screens.
-
-Use:
-
-padding: 12px
+Use the same CSS class names so existing styling still applies.
 
 ------------------------------------------------
 
-INPUT WIDTH
+MODAL FEATURES
 
-Limit squad name input width so it does not waste space.
+The modal must allow:
 
-Example:
+Rank selection
+Training level selection
+Skill boost selection
+Player stats display
+Player card preview
 
-max-width: 180px
+Changes should update the player object stored in squad state.
 
 ------------------------------------------------
 
-END RESULT
+STATE FLOW
 
-The squad-header must look like a professional responsive toolbar used in production dashboard tools.
+Player card click → setSelectedPlayerForCustomization(player)
 
-It should be:
+Modal reads data from selectedPlayerForCustomization
 
-compact  
-efficient  
-well-grouped  
-space optimized  
-visually clean  
+When user updates rank/training/skills → update squad state
 
-while preserving the existing desktop layout completely.
+Closing modal → setSelectedPlayerForCustomization(null)
+
+------------------------------------------------
+
+CLOSING MODAL
+
+Modal should close when:
+
+• clicking close button  
+• clicking overlay background  
+• pressing ESC key  
+
+------------------------------------------------
+
+ACCESSIBILITY
+
+Ensure modal traps focus while open.
+
+Add aria attributes if needed.
+
+------------------------------------------------
+
+ARCHITECTURE
+
+Create a reusable component:
+
+SquadPlayerCustomizationModal.jsx
+
+Props:
+
+player
+onClose
+onUpdatePlayer
+
+Use React props instead of global variables.
+
+------------------------------------------------
+
+RESULT
+
+Clicking a player on the squad field should open a fully functional player customization modal identical to the old SPA version, but implemented using React / Next.js components instead of vanilla JS.
+Any changes to rank or training must update the squad player state so OVR recalculates correctly using the existing squad builder logic.

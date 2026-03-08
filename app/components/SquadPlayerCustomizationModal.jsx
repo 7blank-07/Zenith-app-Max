@@ -1,0 +1,910 @@
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+const RANK_OPTIONS = Object.freeze([
+  { rank: 1, label: 'Green', icon: '/assets/images/rank_simple/green_rank_simple.png' },
+  { rank: 2, label: 'Blue', icon: '/assets/images/rank_simple/blue_rank_simple.png' },
+  { rank: 3, label: 'Purple', icon: '/assets/images/rank_simple/purple_rank_simple.png' },
+  { rank: 4, label: 'Red', icon: '/assets/images/rank_simple/red_rank_simple.png' },
+  { rank: 5, label: 'Orange', icon: '/assets/images/rank_simple/orange_gold_simple.png' }
+]);
+
+const RANK_OVERLAY_SPRITES = Object.freeze({
+  1: '/assets/images/ranks/green_rank_enhanced_main.webp',
+  2: '/assets/images/ranks/blue_rank_enhanced_main.webp',
+  3: '/assets/images/ranks/purple_rank_enhanced_main.webp',
+  4: '/assets/images/ranks/red_rank_enhanced_main.webp',
+  5: '/assets/images/ranks/gold_rank_enhanced_main.webp'
+});
+
+const TRAINING_LEVEL_OPTIONS = Object.freeze([
+  0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+]);
+
+const OUTFIELD_SKILL_OPTIONS = Object.freeze(['Pace', 'Shooting', 'Passing', 'Dribbling', 'Defending', 'Physical']);
+const GOALKEEPER_SKILL_OPTIONS = Object.freeze(['Diving', 'Handling', 'Kicking', 'Reflexes', 'Speed', 'Positioning']);
+
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function normalizeSelectedSkills(value) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  return value
+    .map((entry) => String(entry || '').trim())
+    .filter((entry) => {
+      if (!entry) return false;
+      if (seen.has(entry)) return false;
+      seen.add(entry);
+      return true;
+    });
+}
+
+function getPlayerType(player) {
+  return player?.leagueImage ? 'normal' : 'hero';
+}
+
+function resolveBaseOvr(player) {
+  const normalizedRank = clamp(toNumber(player?.rank, 0), 0, 5);
+  const normalizedTraining = clamp(toNumber(player?.trainingLevel ?? player?.training_level, 0), 0, 30);
+  const fallbackBase = Math.max(0, toNumber(player?.ovr, 0) - normalizedRank - Math.floor(normalizedTraining / 5));
+  return Math.max(0, toNumber(player?.baseOvr ?? player?.base_ovr, fallbackBase));
+}
+
+function getStatValue(player, key, fallback = 0) {
+  const attributes = player?.attributes && typeof player.attributes === 'object' ? player.attributes : {};
+  const keyText = String(key || '');
+  const compactKey = String(key || '')
+    .replace(/[_\-\s]/g, '')
+    .toLowerCase();
+  const camelCaseKey = String(key || '').replace(/[_\-\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ''));
+  const snakeCase = keyText.replace(/[A-Z]/g, (char) => `_${char.toLowerCase()}`);
+  const variants = [keyText, keyText.toLowerCase(), snakeCase, camelCaseKey, compactKey];
+  for (const variant of variants) {
+    const attrValue = toNumber(attributes?.[variant], Number.NaN);
+    if (Number.isFinite(attrValue)) return Math.max(0, Math.round(attrValue));
+    const directValue = toNumber(player?.[variant], Number.NaN);
+    if (Number.isFinite(directValue)) return Math.max(0, Math.round(directValue));
+  }
+  return fallback;
+}
+
+function normalizeStatKey(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[_\-\s]/g, '');
+}
+
+function getBoostValue(boosts, ...names) {
+  if (!boosts || typeof boosts !== 'object') return 0;
+  const entries = Object.entries(boosts);
+  for (const name of names) {
+    const normalizedName = normalizeStatKey(name);
+    const match = entries.find(([boostKey]) => normalizeStatKey(boostKey) === normalizedName);
+    if (match) {
+      return toNumber(match[1], 0);
+    }
+  }
+  return 0;
+}
+
+function getFinalStatValue(player, trainingBoosts, skillBoosts, ...names) {
+  let baseStat = Number.NaN;
+  for (const name of names) {
+    const value = getStatValue(player, name, Number.NaN);
+    if (Number.isFinite(value)) {
+      baseStat = value;
+      break;
+    }
+  }
+  const safeBaseStat = Number.isFinite(baseStat) ? baseStat : 0;
+  const trainingBoost = getBoostValue(trainingBoosts, ...names);
+  const skillBoost = getBoostValue(skillBoosts, ...names);
+  return Math.max(0, Math.round(safeBaseStat + trainingBoost + skillBoost));
+}
+
+function roundHalfUp(value) {
+  return Math.floor(value + 0.5);
+}
+
+function calculatePace(finalStat) {
+  return roundHalfUp(
+    0.49299585008602 * finalStat('acceleration') + 0.50528383239125 * finalStat('sprint_speed') - 0.13701200270336
+  );
+}
+
+function calculateShooting(finalStat) {
+  return roundHalfUp(
+    0.35066661652365 * finalStat('finishing') +
+      0.20012280256486 * finalStat('long_shot', 'long_shots', 'longshots') +
+      0.19946956407192 * finalStat('shot_power') +
+      0.15019769557113 * finalStat('positioning') +
+      0.04977322484935 * finalStat('volley', 'volleys') +
+      0.04962618730771 * finalStat('penalties') -
+      0.46621901229077
+  );
+}
+
+function calculatePassing(finalStat) {
+  return roundHalfUp(
+    0.30073301682698 * finalStat('short_passing') +
+      0.19979430277541 * finalStat('long_passing') +
+      0.24897437527999 * finalStat('vision') +
+      0.15031023108744 * finalStat('crossing') +
+      0.05004649307871 * finalStat('curve') +
+      0.05012756181062 * finalStat('free_kick', 'fk_accuracy') -
+      0.48084074176376
+  );
+}
+
+function calculateDribbling(finalStat) {
+  return roundHalfUp(
+    0.2504432923985 * finalStat('dribbling') +
+      0.10001066600723 * finalStat('balance') +
+      0.25025392646353 * finalStat('agility') +
+      0.15074674532686 * finalStat('reactions') +
+      0.24872793523704 * finalStat('ball_control') -
+      0.48832284057254
+  );
+}
+
+function calculateDefending(finalStat) {
+  return roundHalfUp(
+    0.2502944876732 * finalStat('marking') +
+      0.20107682619015 * finalStat('standing_tackle') +
+      0.19924427638513 * finalStat('sliding_tackle') +
+      0.19952899013166 * finalStat('awareness', 'interceptions') +
+      0.15010172584902 * finalStat('heading') -
+      0.49709228500345
+  );
+}
+
+function calculatePhysical(finalStat) {
+  return roundHalfUp(
+    0.44955969076149 * finalStat('strength') +
+      0.29976663944687 * finalStat('aggression') +
+      0.25058507302003 * finalStat('jumping') +
+      0.00061181921524 * finalStat('stamina_stat', 'stamina') -
+      0.50936016832054
+  );
+}
+
+function calculateGoalkeeperPhysical(finalStat) {
+  return roundHalfUp(
+    0.64960512284621 * finalStat('reactions') +
+      0.15093757174982 * finalStat('agility') +
+      0.09981357061375 * finalStat('sprint_speed') +
+      0.09995255942967 * finalStat('strength') -
+      0.48764601442207
+  );
+}
+
+function buildLegacyStatsModel(player) {
+  const isGoalkeeper = String(player?.position || '').toUpperCase() === 'GK';
+  const trainingBoosts = player?.training_boosts || player?.trainingBoosts || null;
+  const skillBoosts = player?.skill_boosts || player?.skillBoosts || null;
+  const finalStat = (...names) => getFinalStatValue(player, trainingBoosts, skillBoosts, ...names);
+
+  if (isGoalkeeper) {
+    return {
+      title: 'Goalkeeper Statistics',
+      categories: [
+        {
+          key: 'diving',
+          name: 'Diving',
+          mainValue: finalStat('diving'),
+          substats: [{ label: 'GK Diving', value: finalStat('gk_diving', 'diving') }]
+        },
+        {
+          key: 'positioning',
+          name: 'Positioning',
+          mainValue: finalStat('gk_positioning', 'positioning'),
+          substats: [{ label: 'GK Positioning', value: finalStat('gk_positioning', 'positioning') }]
+        },
+        {
+          key: 'handling',
+          name: 'Handling',
+          mainValue: finalStat('handling'),
+          substats: [{ label: 'GK Handling', value: finalStat('gk_handling', 'handling') }]
+        },
+        {
+          key: 'reflexes',
+          name: 'Reflexes',
+          mainValue: finalStat('reflexes'),
+          substats: [
+            { label: 'GK Reflexes', value: finalStat('gk_reflexes', 'reflexes') },
+            { label: 'Jumping', value: finalStat('jumping') }
+          ]
+        },
+        {
+          key: 'kicking',
+          name: 'Kicking',
+          mainValue: finalStat('kicking'),
+          substats: [
+            { label: 'GK Kicking', value: finalStat('gk_kicking', 'kicking') },
+            { label: 'Long Passing', value: finalStat('long_passing') }
+          ]
+        },
+        {
+          key: 'physical',
+          name: 'Physical',
+          mainValue: calculateGoalkeeperPhysical(finalStat),
+          substats: [
+            { label: 'Reactions', value: finalStat('reactions') },
+            { label: 'Agility', value: finalStat('agility') },
+            { label: 'Sprint Speed', value: finalStat('sprint_speed') },
+            { label: 'Strength', value: finalStat('strength') }
+          ]
+        }
+      ]
+    };
+  }
+
+  return {
+    title: 'Player Statistics',
+    categories: [
+      {
+        key: 'pace',
+        name: 'Pace',
+        mainValue: calculatePace(finalStat),
+        substats: [
+          { label: 'Acceleration', value: finalStat('acceleration') },
+          { label: 'Sprint Speed', value: finalStat('sprint_speed') }
+        ]
+      },
+      {
+        key: 'shooting',
+        name: 'Shooting',
+        mainValue: calculateShooting(finalStat),
+        substats: [
+          { label: 'Finishing', value: finalStat('finishing') },
+          { label: 'Long Shot', value: finalStat('long_shot', 'long_shots', 'longshots') },
+          { label: 'Shot Power', value: finalStat('shot_power') },
+          { label: 'Positioning', value: finalStat('positioning') },
+          { label: 'Volley', value: finalStat('volley', 'volleys') },
+          { label: 'Penalties', value: finalStat('penalties') }
+        ]
+      },
+      {
+        key: 'passing',
+        name: 'Passing',
+        mainValue: calculatePassing(finalStat),
+        substats: [
+          { label: 'Short Passing', value: finalStat('short_passing') },
+          { label: 'Long Passing', value: finalStat('long_passing') },
+          { label: 'Vision', value: finalStat('vision') },
+          { label: 'Crossing', value: finalStat('crossing') },
+          { label: 'Curve', value: finalStat('curve') },
+          { label: 'Free Kick', value: finalStat('free_kick', 'fk_accuracy') }
+        ]
+      },
+      {
+        key: 'dribbling',
+        name: 'Dribbling',
+        mainValue: calculateDribbling(finalStat),
+        substats: [
+          { label: 'Dribbling', value: finalStat('dribbling') },
+          { label: 'Balance', value: finalStat('balance') },
+          { label: 'Agility', value: finalStat('agility') },
+          { label: 'Reactions', value: finalStat('reactions') },
+          { label: 'Ball Control', value: finalStat('ball_control') }
+        ]
+      },
+      {
+        key: 'defending',
+        name: 'Defending',
+        mainValue: calculateDefending(finalStat),
+        substats: [
+          { label: 'Marking', value: finalStat('marking') },
+          { label: 'Standing Tackle', value: finalStat('standing_tackle') },
+          { label: 'Sliding Tackle', value: finalStat('sliding_tackle') },
+          { label: 'Awareness', value: finalStat('awareness', 'interceptions') },
+          { label: 'Heading', value: finalStat('heading') }
+        ]
+      },
+      {
+        key: 'physical',
+        name: 'Physical',
+        mainValue: calculatePhysical(finalStat),
+        substats: [
+          { label: 'Strength', value: finalStat('strength') },
+          { label: 'Aggression', value: finalStat('aggression') },
+          { label: 'Jumping', value: finalStat('jumping') },
+          { label: 'Stamina', value: finalStat('stamina_stat', 'stamina') }
+        ]
+      }
+    ]
+  };
+}
+
+function getStatAccentColor(value) {
+  const numericValue = toNumber(value, 0);
+  if (numericValue >= 90) return '#3BD671';
+  if (numericValue >= 80) return '#00C2A8';
+  if (numericValue >= 70) return '#FFB86B';
+  return '#98A0A6';
+}
+
+export default function SquadPlayerCustomizationModal({ player, onClose, onUpdatePlayer }) {
+  const dialogRef = useRef(null);
+  const [selectedRank, setSelectedRank] = useState(0);
+  const [trainingLevel, setTrainingLevel] = useState(0);
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [statsViewOpen, setStatsViewOpen] = useState(false);
+
+  const skillOptions = useMemo(
+    () => (String(player?.position || '').toUpperCase() === 'GK' ? GOALKEEPER_SKILL_OPTIONS : OUTFIELD_SKILL_OPTIONS),
+    [player?.position]
+  );
+  const cardVariant = useMemo(() => getPlayerType(player), [player]);
+  const baseOvr = useMemo(() => resolveBaseOvr(player), [player]);
+  const availableSkillPoints = Math.max(0, selectedRank);
+  const trainingBonus = Math.floor(Math.max(0, trainingLevel) / 5);
+  const projectedOvr = baseOvr > 0 ? baseOvr + selectedRank + trainingBonus : baseOvr;
+  const statsModel = useMemo(() => buildLegacyStatsModel(player), [player]);
+
+  useEffect(() => {
+    if (!player) return;
+    const initialRank = clamp(toNumber(player.rank, 0), 0, 5);
+    const initialTrainingLevel = clamp(toNumber(player.trainingLevel ?? player.training_level, 0), 0, 30);
+    const initialSkills = normalizeSelectedSkills(player.selectedSkills).filter((skillName) => skillOptions.includes(skillName)).slice(0, initialRank);
+    setSelectedRank(initialRank);
+    setTrainingLevel(initialTrainingLevel);
+    setSelectedSkills(initialSkills);
+    setStatsViewOpen(false);
+  }, [player, skillOptions]);
+
+  useEffect(() => {
+    if (!player) return;
+    const previousOverflow = document.body.style.overflow;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    document.body.style.overflow = 'hidden';
+
+    const getFocusableElements = () => {
+      if (!dialogRef.current) return [];
+      const selectors = [
+        'button:not([disabled])',
+        '[href]',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+      ].join(',');
+      return Array.from(dialogRef.current.querySelectorAll(selectors)).filter((element) => {
+        if (!(element instanceof HTMLElement)) return false;
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      });
+    };
+
+    const focusFirstElement = () => {
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose?.();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusableElements();
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+      if (event.shiftKey && activeElement === first) {
+        event.preventDefault();
+        last.focus();
+        return;
+      }
+      if (!event.shiftKey && activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const frameId = window.requestAnimationFrame(focusFirstElement);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [onClose, player, statsViewOpen]);
+
+  const emitUpdate = (nextState) => {
+    if (!player?.playerId || typeof onUpdatePlayer !== 'function') return;
+    const nextRank = clamp(toNumber(nextState.rank, 0), 0, 5);
+    const nextTrainingLevel = clamp(toNumber(nextState.trainingLevel, 0), 0, 30);
+    const nextTrainingBonus = Math.floor(Math.max(0, nextTrainingLevel) / 5);
+    const nextSkills = normalizeSelectedSkills(nextState.selectedSkills).slice(0, nextRank);
+    const nextProjectedOvr = baseOvr > 0 ? baseOvr + nextRank + nextTrainingBonus : baseOvr;
+    onUpdatePlayer({
+      playerId: player.playerId,
+      rank: nextRank,
+      trainingLevel: nextTrainingLevel,
+      selectedSkills: nextSkills,
+      trainingBonus: nextTrainingBonus,
+      baseOvr,
+      boostedOvr: nextProjectedOvr,
+      ovr: nextProjectedOvr
+    });
+  };
+
+  const handleRankSelect = (nextRank) => {
+    const normalizedRank = clamp(toNumber(nextRank, 0), 0, 5);
+    const trimmedSkills = selectedSkills.slice(0, normalizedRank);
+    setSelectedRank(normalizedRank);
+    setSelectedSkills(trimmedSkills);
+    emitUpdate({
+      rank: normalizedRank,
+      trainingLevel,
+      selectedSkills: trimmedSkills
+    });
+  };
+
+  const handleTrainingChange = (event) => {
+    const nextTrainingLevel = clamp(toNumber(event.target.value, 0), 0, 30);
+    setTrainingLevel(nextTrainingLevel);
+    emitUpdate({
+      rank: selectedRank,
+      trainingLevel: nextTrainingLevel,
+      selectedSkills
+    });
+  };
+
+  const handleSkillToggle = (skillName) => {
+    const exists = selectedSkills.includes(skillName);
+    if (!exists && selectedSkills.length >= availableSkillPoints) return;
+    const nextSkills = exists ? selectedSkills.filter((entry) => entry !== skillName) : [...selectedSkills, skillName];
+    setSelectedSkills(nextSkills);
+    emitUpdate({
+      rank: selectedRank,
+      trainingLevel,
+      selectedSkills: nextSkills
+    });
+  };
+
+  const handleResetRank = () => {
+    setSelectedRank(0);
+    setTrainingLevel(0);
+    setSelectedSkills([]);
+    emitUpdate({
+      rank: 0,
+      trainingLevel: 0,
+      selectedSkills: []
+    });
+  };
+
+  const handleResetSkills = () => {
+    setSelectedSkills([]);
+    emitUpdate({
+      rank: selectedRank,
+      trainingLevel,
+      selectedSkills: []
+    });
+  };
+
+  const handleRemovePlayer = () => {
+    onUpdatePlayer?.({
+      playerId: player?.playerId,
+      removePlayer: true
+    });
+  };
+
+  if (!player) return null;
+
+  return (
+    <div
+      id="squad-player-customization-modal"
+      className={`modal squad-player-customization-modal is-visible${statsViewOpen ? ' stats-mode' : ''}`}
+      style={{ display: 'flex' }}
+    >
+      <div className="modal-overlay" onClick={onClose} />
+
+      <div
+        className="modal-content squad-customization-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Squad player customization"
+        ref={dialogRef}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', position: 'relative' }}>
+          <button className="modal-close-btn" onClick={onClose} type="button" aria-label="Close customization modal">
+            ×
+          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button
+              id="squad-reset-rank-btn"
+              className="btn-reset-rank"
+              onClick={handleResetRank}
+              type="button"
+              style={{
+                backgroundColor: '#FF6B6B',
+                color: 'white',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Reset Rank
+            </button>
+            <button
+              id="squad-stats-btn"
+              className="btn-stats-view"
+              onClick={() => setStatsViewOpen(true)}
+              type="button"
+              style={{
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                color: '#E6EEF2',
+                padding: '8px 16px',
+                border: '1px solid rgba(59, 130, 246, 0.5)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Stats
+            </button>
+          </div>
+        </div>
+
+        <div id="squad-stats-view" className="squad-stats-view" style={{ display: statsViewOpen ? 'block' : 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <button
+              className="btn-stats-back"
+              onClick={() => setStatsViewOpen(false)}
+              type="button"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#E6EEF2',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              ← Back
+            </button>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#E6EEF2', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+              {statsModel.title}
+            </div>
+            <div style={{ width: '60px' }} />
+          </div>
+          <div id="squad-stats-content" className="squad-stats-content">
+            <section className="player-stats-section" style={{ maxWidth: '100%', margin: '0 auto', padding: 0 }}>
+              <h2
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 800,
+                  color: 'var(--color-text-primary, #E6EEF2)',
+                  margin: '0 0 14px 0',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {statsModel.title}
+              </h2>
+              <div className="stats-grid-container">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '14px' }}>
+                  {statsModel.categories.map((category) => (
+                    <article
+                      key={category.key}
+                      style={{
+                        background: 'var(--color-graphite-800, #14181C)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderLeft: '4px solid #00C2A8',
+                        borderRadius: '12px',
+                        padding: '18px'
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          paddingBottom: '10px',
+                          borderBottom: '1px solid rgba(255,255,255,0.08)'
+                        }}
+                      >
+                        <h3 style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-primary, #E6EEF2)', textTransform: 'uppercase' }}>
+                          {category.name}
+                        </h3>
+                        <div style={{ fontSize: '26px', fontWeight: 900, color: getStatAccentColor(category.mainValue), lineHeight: 1 }}>
+                          {category.mainValue}
+                        </div>
+                      </div>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <tbody>
+                          {category.substats.map((row, index) => (
+                            <tr key={`${category.key}-${row.label}-${index}`}>
+                              <th
+                                scope="row"
+                                style={{
+                                  textAlign: 'left',
+                                  padding: '6px 0',
+                                  borderBottom: '1px solid rgba(255,255,255,0.08)',
+                                  color: 'var(--color-text-muted, #98A0A6)',
+                                  fontWeight: 600,
+                                  width: '70%'
+                                }}
+                              >
+                                {row.label}
+                              </th>
+                              <td
+                                style={{
+                                  textAlign: 'right',
+                                  padding: '6px 0',
+                                  borderBottom: '1px solid rgba(255,255,255,0.08)',
+                                  color: getStatAccentColor(row.value),
+                                  fontWeight: 800
+                                }}
+                              >
+                                {row.value}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="squad-custom-player-card" className="squad-custom-player-card">
+          <div className="squad-custom-mini-card">
+            <img src={player.cardBackground || 'https://via.placeholder.com/180x240'} alt="Card Background" className="squad-custom-card-bg" />
+            {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="squad-custom-card-player-img" />}
+            <div className="squad-custom-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
+              {projectedOvr > 0 ? projectedOvr : 'N/A'}
+            </div>
+            <div className="squad-custom-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+              {player.position || 'N/A'}
+            </div>
+            <div className="squad-custom-card-flags">
+              {!!player.nationFlag && (
+                <img
+                  src={player.nationFlag}
+                  alt="Nation"
+                  className={`squad-modal-custom-card-flag ${cardVariant === 'normal' ? 'normal-modal-nation-flag' : 'hero-icon-modal-nation-flag'}`}
+                />
+              )}
+              {!!player.clubFlag && (
+                <img
+                  src={player.clubFlag}
+                  alt="Club"
+                  className={`squad-modal-custom-card-club ${cardVariant === 'normal' ? 'normal-modal-club-flag' : 'hero-icon-modal-club-flag'}`}
+                />
+              )}
+              {cardVariant === 'normal' && !!player.leagueImage && (
+                <img src={player.leagueImage} alt="League" className="squad-modal-custom-card-league normal-modal-league-flag" />
+              )}
+            </div>
+            <div className="squad-custom-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+              {player.name}
+            </div>
+            {selectedRank > 0 && (
+              <img
+                src={RANK_OVERLAY_SPRITES[selectedRank]}
+                alt=""
+                aria-hidden="true"
+                className="rank-diamond-overlay rank-overlay--squad-customization"
+              />
+            )}
+            {player.isUntradable && (
+              <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
+                <img src="/assets/images/untradable_img.png" alt="Untradable" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#E6EEF2', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.5px' }}>
+            Select Rank
+          </h3>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+            <button
+              id="squad-reset-rank-inline-btn"
+              className="btn-reset-rank"
+              onClick={handleResetRank}
+              type="button"
+              style={{
+                background: 'transparent',
+                color: '#98A0A6',
+                padding: '4px 0',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: '12px'
+              }}
+            >
+              Reset Rank
+            </button>
+          </div>
+          <div id="squad-rank-boxes" className="squad-rank-boxes-grid">
+            {RANK_OPTIONS.map((option) => {
+              const selected = selectedRank === option.rank;
+              return (
+                <div
+                  key={option.rank}
+                  className={`squad-rank-box ${selected ? 'selected' : ''}`}
+                  data-rank={option.rank}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleRankSelect(option.rank)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleRankSelect(option.rank);
+                    }
+                  }}
+                >
+                  <img src={option.icon} alt={`${option.label} Rank`} className="rank-icon" />
+                  <div className="rank-label">{option.label}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 700, color: '#E6EEF2', textTransform: 'uppercase', letterSpacing: '0.3px' }} htmlFor="squad-training-level">
+              Training Level
+            </label>
+            <div style={{ backgroundColor: 'rgba(0,194,168,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#00C2A8' }}>
+              <span id="squad-skill-points-display">
+                {availableSkillPoints} Point{availableSkillPoints !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+          <select
+            id="squad-training-level"
+            value={trainingLevel}
+            onChange={handleTrainingChange}
+            style={{
+              width: '100%',
+              backgroundColor: '#14181C',
+              border: '2px solid rgba(0,194,168,0.2)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#E6EEF2',
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+              appearance: 'none',
+              backgroundImage:
+                "url(\"data:image/svg+xml;charset=UTF-8,%3csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2300C2A8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e\")",
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 16px center',
+              paddingRight: '40px'
+            }}
+          >
+            {TRAINING_LEVEL_OPTIONS.map((level) => (
+              <option key={level} value={level}>
+                {level === 30 ? 'Training Level 30 (MAX)' : `Training Level ${level}`}
+              </option>
+            ))}
+          </select>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+            <button className="reset-skills-btn" type="button" onClick={handleResetSkills}>
+              Reset Skills
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '28px' }}>
+          <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#E6EEF2', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.3px' }}>
+            Skill Points
+          </h3>
+          <div id="squad-custom-skills" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+            {skillOptions.map((skillName) => {
+              const selected = selectedSkills.includes(skillName);
+              const hasCapacity = selectedSkills.length < availableSkillPoints;
+              const interactive = selected || hasCapacity;
+              return (
+                <button
+                  key={skillName}
+                  className={`squad-skill-slot ${interactive ? 'unlocked' : 'locked'}`}
+                  type="button"
+                  onClick={() => handleSkillToggle(skillName)}
+                  aria-pressed={selected}
+                  aria-disabled={!interactive}
+                  title={skillName}
+                >
+                  <svg viewBox="0 0 24 24" fill={selected ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M12 2 14.9 8.2 22 9.2 17 14.1 18.2 21.2 12 17.8 5.8 21.2 7 14.1 2 9.2 9.1 8.2 12 2Z" />
+                  </svg>
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.2px',
+                      textAlign: 'center',
+                      color: selected ? '#00C2A8' : '#E6EEF2',
+                      lineHeight: 1.1
+                    }}
+                  >
+                    {skillName}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '28px' }}>
+          <button
+            id="squad-remove-btn"
+            onClick={handleRemovePlayer}
+            type="button"
+            style={{
+              backgroundColor: '#FF6B6B',
+              color: 'white',
+              padding: '12px 20px',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s'
+            }}
+          >
+            <span>Remove</span>
+          </button>
+          <button
+            id="squad-apply-btn"
+            onClick={onClose}
+            type="button"
+            style={{
+              backgroundColor: '#3BD671',
+              color: 'white',
+              padding: '12px 20px',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s'
+            }}
+          >
+            <span>Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { normalizeSearchText } from './search-normalization';
+import SquadPlayerCustomizationModal from './SquadPlayerCustomizationModal';
 
 const TOOL_ALIASES = Object.freeze({
   squadbuilder: 'squadbuilder',
@@ -872,6 +873,19 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function normalizeSelectedSkills(value) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  return value
+    .map((entry) => String(entry || '').trim())
+    .filter((entry) => {
+      if (!entry) return false;
+      if (seen.has(entry)) return false;
+      seen.add(entry);
+      return true;
+    });
+}
+
 function toText(value) {
   return normalizeSearchText(value);
 }
@@ -908,10 +922,26 @@ function getValueClass(value, min, max) {
 
 function normalizePlayer(player, index) {
   const playerId = getPlayerId(player);
+  const rank = clamp(
+    toNumber(player?.rank ?? player?.selectedRank ?? player?.rank_level ?? player?.rankLevel, 0),
+    0,
+    5
+  );
+  const trainingLevel = clamp(toNumber(player?.trainingLevel ?? player?.training_level, 0), 0, 30);
+  const ovr = toNumber(player?.ovr, 0);
+  const baseOvr = Math.max(0, toNumber(player?.baseOvr ?? player?.base_ovr, ovr));
+  const trainingBonus = Math.max(0, toNumber(player?.trainingBonus ?? player?.training_bonus, Math.floor(trainingLevel / 5)));
+  const selectedSkills = normalizeSelectedSkills(player?.selectedSkills ?? player?.selected_skills);
   return {
     playerId: playerId || `player-${index}`,
     name: String(player?.name || 'Unknown'),
-    ovr: toNumber(player?.ovr, 0),
+    ovr,
+    baseOvr,
+    boostedOvr: Math.max(0, toNumber(player?.boostedOvr ?? player?.boosted_ovr, ovr)),
+    rank,
+    trainingLevel,
+    trainingBonus,
+    selectedSkills,
     position: String(player?.position || ''),
     alternatePosition: String(player?.alternatePosition || player?.alternate_position || ''),
     nation: String(player?.nation || ''),
@@ -1025,6 +1055,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [starters, setStarters] = useState({});
   const [bench, setBench] = useState(Array.from({ length: 7 }, () => ''));
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
+  const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null);
 
   const [comparePlayers, setComparePlayers] = useState([]);
   const [compareView, setCompareView] = useState('basic');
@@ -1239,6 +1270,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       setSquadFilterOpen(false);
       setThemeSelectorOpen(false);
       setBadgesModalOpen(false);
+      setSelectedPlayerForCustomization(null);
       if (document.fullscreenElement === squadBuilderContainerRef.current) {
         document.exitFullscreen().catch((error) => {
           console.error('[tools] Failed to exit squad fullscreen:', error);
@@ -1249,7 +1281,11 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, [activeTool]);
 
   useEffect(() => {
-    const lockBody = activeTool === 'squadbuilder' || activeTool === 'compare' || compareSearchOpen;
+    const lockBody =
+      activeTool === 'squadbuilder' ||
+      activeTool === 'compare' ||
+      compareSearchOpen ||
+      !!selectedPlayerForCustomization;
     if (lockBody) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -1258,7 +1294,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [activeTool, compareSearchOpen]);
+  }, [activeTool, compareSearchOpen, selectedPlayerForCustomization]);
 
   useEffect(() => {
     const mainContent = document.querySelector('main.main-content');
@@ -1303,6 +1339,11 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key !== 'Escape') return;
+      if (selectedPlayerForCustomization) {
+        event.preventDefault();
+        setSelectedPlayerForCustomization(null);
+        return;
+      }
       if (document.fullscreenElement === squadBuilderContainerRef.current) {
         document.exitFullscreen().catch((error) => {
           console.error('[tools] Failed to exit squad fullscreen:', error);
@@ -1335,7 +1376,15 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeTool, badgesModalOpen, compareConfigPlayerId, compareSearchOpen, squadFilterOpen, themeSelectorOpen]);
+  }, [
+    activeTool,
+    badgesModalOpen,
+    compareConfigPlayerId,
+    compareSearchOpen,
+    selectedPlayerForCustomization,
+    squadFilterOpen,
+    themeSelectorOpen
+  ]);
 
   useEffect(() => {
     const availableSlots = new Set((SQUAD_FORMATIONS[formationId] || []).map((slot) => slot.id));
@@ -1367,6 +1416,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     });
     return set;
   }, [starters, bench]);
+
+  useEffect(() => {
+    if (!selectedPlayerForCustomization?.playerId) return;
+    if (!assignedPlayerIds.has(selectedPlayerForCustomization.playerId)) {
+      setSelectedPlayerForCustomization(null);
+    }
+  }, [assignedPlayerIds, selectedPlayerForCustomization]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !squadStateHydrated) return;
@@ -1642,6 +1698,71 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     searchParams.set('formationId', formationId);
     searchParams.set('returnTo', '/tools?tool=squadbuilder');
     router.push(`/players?${searchParams.toString()}`);
+  };
+
+  const openSquadPlayerCustomizationModal = (playerId, context = {}) => {
+    const normalizedPlayerId = String(playerId || '').trim();
+    if (!normalizedPlayerId) return;
+    if (!playersById.has(normalizedPlayerId)) return;
+    setSelectedPlayerForCustomization({
+      playerId: normalizedPlayerId,
+      slotId: context.slotId || '',
+      benchIndex: Number.isInteger(context.benchIndex) ? context.benchIndex : null
+    });
+  };
+
+  const closeSquadPlayerCustomizationModal = () => {
+    setSelectedPlayerForCustomization(null);
+  };
+
+  const updateSquadPlayerCustomization = (payload = {}) => {
+    const playerId = String(payload?.playerId || selectedPlayerForCustomization?.playerId || '').trim();
+    if (!playerId) return;
+
+    if (payload?.removePlayer) {
+      const selectedSlot = String(selectedPlayerForCustomization?.slotId || '').trim();
+      const selectedBenchIndex = Number.isInteger(selectedPlayerForCustomization?.benchIndex)
+        ? selectedPlayerForCustomization.benchIndex
+        : -1;
+      if (selectedSlot) {
+        removeStarter(selectedSlot);
+      } else if (selectedBenchIndex >= 0) {
+        removeBenchPlayer(selectedBenchIndex);
+      } else {
+        const fallbackSlot = Object.entries(starters).find(([, id]) => id === playerId)?.[0];
+        if (fallbackSlot) removeStarter(fallbackSlot);
+        const fallbackBenchIndex = bench.findIndex((id) => id === playerId);
+        if (fallbackBenchIndex >= 0) removeBenchPlayer(fallbackBenchIndex);
+      }
+      setSelectedPlayerForCustomization(null);
+      return;
+    }
+
+    const currentPlayer = playersById.get(playerId);
+    if (!currentPlayer) return;
+
+    const rank = clamp(toNumber(payload?.rank ?? currentPlayer.rank, 0), 0, 5);
+    const trainingLevel = clamp(toNumber(payload?.trainingLevel ?? currentPlayer.trainingLevel, 0), 0, 30);
+    const trainingBonus = Math.floor(trainingLevel / 5);
+    const selectedSkills = normalizeSelectedSkills(payload?.selectedSkills ?? currentPlayer.selectedSkills).slice(0, rank);
+    const baseOvr = Math.max(0, toNumber(payload?.baseOvr ?? currentPlayer.baseOvr ?? currentPlayer.ovr, 0));
+    const boostedOvr = baseOvr > 0 ? baseOvr + rank + trainingBonus : baseOvr;
+
+    setSupplementalPlayers((current) => ({
+      ...current,
+      [playerId]: {
+        ...currentPlayer,
+        ...payload,
+        playerId,
+        rank,
+        trainingLevel,
+        selectedSkills,
+        baseOvr,
+        boostedOvr,
+        trainingBonus,
+        ovr: toNumber(payload?.ovr, boostedOvr)
+      }
+    }));
   };
 
   const removeStarter = (slotId) => {
@@ -2103,6 +2224,9 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
   const compareConfigPlayer = compareConfigPlayerId ? playersById.get(compareConfigPlayerId) : null;
   const compareConfigPoints = Math.max(0, toNumber(compareConfigDraft.rank, 0));
+  const selectedCustomizationPlayer = selectedPlayerForCustomization?.playerId
+    ? playersById.get(selectedPlayerForCustomization.playerId) || null
+    : null;
   const activeFieldTheme = FIELD_THEMES[fieldThemeId] || FIELD_THEMES['camp-nou'];
   const fieldThemeClassName = `theme-${activeFieldTheme.id}`;
   const isSquadBuilderActive = activeTool === 'squadbuilder';
@@ -2619,6 +2743,11 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                           <div
                             className={`player-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
                             data-player-id={player.playerId}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelectedSlotId(slot.id);
+                              openSquadPlayerCustomizationModal(player.playerId, { slotId: slot.id });
+                            }}
                             draggable
                             onDragStart={(event) => handleDragStart(event, { source: 'slot', playerId: player.playerId, slotId: slot.id }, dragKey)}
                             onDragEnd={handleDragEnd}
@@ -2953,6 +3082,20 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
           </div>
         </div>
       </div>
+
+      {selectedCustomizationPlayer && (
+        <SquadPlayerCustomizationModal
+          player={{
+            ...selectedCustomizationPlayer,
+            slotId: selectedPlayerForCustomization?.slotId || '',
+            benchIndex: Number.isInteger(selectedPlayerForCustomization?.benchIndex)
+              ? selectedPlayerForCustomization.benchIndex
+              : null
+          }}
+          onClose={closeSquadPlayerCustomizationModal}
+          onUpdatePlayer={updateSquadPlayerCustomization}
+        />
+      )}
 
       <div id="compare-players-modal" className="compare-modal-overlay" style={{ display: activeTool === 'compare' ? 'flex' : 'none' }}>
         <div className="compare-modal">

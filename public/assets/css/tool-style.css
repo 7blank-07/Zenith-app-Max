@@ -8428,11 +8428,26 @@ body.stats-open #squad-builder-modal {
 }
 
 #squad-player-customization-modal {
-    z-index: 22000 !important;
     position: fixed !important;
+    inset: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 22000 !important;
+}
+
+#squad-player-customization-modal .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(8px);
 }
 
 #squad-player-customization-modal .modal-content.squad-customization-content {
+    position: relative;
+    z-index: 1;
     width: min(92vw, 560px);
     max-width: 92vw;
     max-height: 90vh;
@@ -8552,13 +8567,8 @@ body.stats-open #squad-builder-modal {
     }
 }
 #squad-player-customization-modal {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 22000 !important;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 /* ============================================
