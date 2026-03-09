@@ -72,6 +72,8 @@ export const PLAYER_PAGE_REVALIDATE_SECONDS = 60 * 60 * 24 * 50;
 export const PLAYER_STABLE_RECORD_FIELDS = Object.freeze([
   'playerId',
   'name',
+  'fullName',
+  'eventName',
   'ovr',
   'position',
   'alternatePosition',
@@ -96,8 +98,10 @@ export const PLAYER_STABLE_RECORD_FIELDS = Object.freeze([
   'strongFootSide',
   'workRateAttack',
   'workRateDefense',
+  'heightFtIn',
   'heightCm',
   'weightKg',
+  'dateAdded',
   'traits',
   'skills',
   'attributes'
@@ -136,6 +140,16 @@ function toInteger(value, fallback = 0) {
 function toNullableInteger(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.trunc(parsed) : null;
+}
+
+function formatHeightFtIn(heightCmValue) {
+  const normalizedHeightCm = Number(heightCmValue);
+  if (!Number.isFinite(normalizedHeightCm) || normalizedHeightCm <= 0) return '';
+  const totalInches = Math.round(normalizedHeightCm / 2.54);
+  const feet = Math.floor(totalInches / 12);
+  const inches = totalInches % 12;
+  if (!feet && !inches) return '';
+  return `${feet}'${inches}"`;
 }
 
 function toBoolean(value) {
@@ -588,6 +602,8 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     ''
   );
   const name = toText(firstDefined([source.name, source.player_name], 'Unknown Player'));
+  const fullName = toText(firstDefined([source.full_name, source.fullname, source.fullName, source.player_full_name, source.name], ''), '');
+  const eventName = toText(firstDefined([source.event_name, source.event, source.program_name, source.eventName], ''), '');
   const ovr = toInteger(firstDefined([source.ovr, source.overall, source.rating], 0), 0);
   const position = toText(firstDefined([source.position, source.pos, source.primary_position], ''), '');
   const alternatePosition = toText(firstDefined([source.alternate_position, source.secondary_position], ''), '');
@@ -647,8 +663,13 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     ),
     ''
   );
-  const heightCm = toNullableInteger(firstDefined([source.height_cm], null));
+  const heightCm = toNullableInteger(firstDefined([source.height_cm, source.heightCm], null));
+  const heightFtIn = toText(
+    firstDefined([source.height_ft_in, source.height_ftin, source.height_feet_inches, source.heightFtIn], ''),
+    ''
+  );
   const weightKg = toNullableInteger(firstDefined([source.weight_kg], null));
+  const dateAdded = toText(firstDefined([source.date_added, source.created_at, source.added_at, source.dateAdded], ''), '');
   const traitImages = normalizeDelimitedList(firstDefined([source.traits], []));
   const skillImages = normalizeDelimitedList(firstDefined([source.skills], []));
   const traits = normalizeDelimitedList(firstDefined([source.traits_name], []));
@@ -659,6 +680,8 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   return {
     playerId,
     name,
+    fullName: fullName || name,
+    eventName,
     ovr,
     position,
     alternatePosition,
@@ -683,8 +706,10 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     strongFootSide,
     workRateAttack,
     workRateDefense,
+    heightFtIn: heightFtIn || formatHeightFtIn(heightCm),
     heightCm,
     weightKg,
+    dateAdded,
     traits: traits.length ? traits : traitImages,
     skills: skills.length ? skills : skillImages,
     traitImages,

@@ -221,22 +221,6 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
       cleanup.push(() => resetRankButton.removeEventListener('click', onClick));
     }
 
-    const trainingSelect = root.querySelector('[data-training-level]');
-    const trainingIndicator = root.querySelector('[data-training-indicator]');
-    const trainingLevelValue = root.querySelector('[data-training-level-value]');
-
-    const updateTrainingState = () => {
-      const trainingLevel = toNumber(trainingSelect?.value, 0);
-      if (trainingIndicator) trainingIndicator.style.display = trainingLevel > 0 ? 'flex' : 'none';
-      if (trainingLevelValue) trainingLevelValue.textContent = String(trainingLevel);
-    };
-
-    if (trainingSelect) {
-      trainingSelect.addEventListener('change', updateTrainingState);
-      cleanup.push(() => trainingSelect.removeEventListener('change', updateTrainingState));
-      updateTrainingState();
-    }
-
     return () => {
       cleanup.forEach((dispose) => dispose());
     };

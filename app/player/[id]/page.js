@@ -5,6 +5,7 @@ import PlayerPriceHistorySection from '../../components/PlayerPriceHistorySectio
 import PlayerRefreshTimePanel from '../../components/PlayerRefreshTimePanel.client';
 import PlayerSkillsAbilitiesSection from '../../components/PlayerSkillsAbilitiesSection.client';
 import PlayerStatisticsSection from '../../components/PlayerStatisticsSection.client';
+import PlayerTrainingLevelPanel from '../../components/PlayerTrainingLevelPanel.client';
 import PlayerDetailInteractions from '../../components/PlayerDetailInteractions.client';
 import SiteChrome from '../../components/SiteChrome';
 import { getPlayerUniqueId } from '../../../src/lib/legacy-parity-contract.mjs';
@@ -108,16 +109,6 @@ const RANK_SPRITES = Object.freeze({
   5: '/assets/images/ranks/gold_rank_enhanced_main.webp'
 });
 
-const RANK_SKILL_POINTS = Object.freeze({
-  0: 0,
-  1: 1,
-  2: 2,
-  3: 3,
-  4: 4,
-  5: 5
-});
-
-
 function buildProfileOverviewItems(names, images, fallbackPrefix, idPrefix) {
   const normalizedNames = Array.isArray(names) ? names.filter(Boolean) : [];
   const normalizedImages = Array.isArray(images) ? images.filter(Boolean) : [];
@@ -143,6 +134,12 @@ function formatWorkRateText(value) {
     .split(/\s+/)
     .map((part) => `${part[0]?.toUpperCase() || ''}${part.slice(1).toLowerCase()}`)
     .join(' ');
+}
+
+function formatProfileValue(value, fallback = 'Unknown') {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value).trim();
+  return text || fallback;
 }
 
 export async function generateStaticParams() {
@@ -208,6 +205,18 @@ export default async function PlayerDetailPage({ params, searchParams }) {
   const profileAbilityItems = buildProfileOverviewItems(record.skills, record.skillImages, 'Ability', 'profile-ability');
   const workRateAttackLabel = formatWorkRateText(record.workRateAttack);
   const workRateDefenseLabel = formatWorkRateText(record.workRateDefense);
+  const profileOverviewFields = [
+    { label: 'Full Name', value: formatProfileValue(record.fullName || record.name) },
+    { label: 'Event Name', value: formatProfileValue(record.eventName) },
+    { label: 'Nation', value: formatProfileValue(record.nation) },
+    { label: 'Height (ft/in)', value: formatProfileValue(record.heightFtIn) },
+    { label: 'Height (cm)', value: formatProfileValue(record.heightCm) },
+    { label: 'Weight (kg)', value: formatProfileValue(record.weightKg) },
+    { label: 'Work Rate Attack', value: workRateAttackLabel },
+    { label: 'Work Rate Defense', value: workRateDefenseLabel },
+    { label: 'Alternate Position', value: formatProfileValue(record.alternatePosition) },
+    { label: 'Date Added', value: formatProfileValue(record.dateAdded) }
+  ];
   const isAuctionable = !record.isUntradable;
   console.info('[metrics] /player render', {
     playerId: record.playerId,
@@ -605,74 +614,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                       })}
                     </div>
 
-                    <div
-                      style={{
-                        background: 'rgba(20,24,28)',
-                        border: '1px solid rgba(0,194,168,0.12)',
-                        borderRadius: '10px',
-                        padding: '16px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase' }}>
-                          Training Level
-                        </span>
-                        <div
-                          data-skill-points
-                          style={{
-                            background: 'rgba(0,194,168,0.15)',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            color: 'var(--color-teal-500)'
-                          }}
-                        >
-                          {RANK_SKILL_POINTS[rank] || 0} Points
-                        </div>
-                      </div>
-                      <select
-                        id={`training-level-${record.playerId}`}
-                        data-training-level
-                        defaultValue="0"
-                        style={{
-                          width: '100%',
-                          background: 'var(--color-graphite-800)',
-                          border: '2px solid rgba(0,194,168,0.2)',
-                          borderRadius: '8px',
-                          padding: '12px 16px',
-                          fontSize: '14px',
-                          fontWeight: 600,
-                          color: 'var(--color-text-primary)',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <option value="0">No Training</option>
-                        {Array.from({ length: 30 }, (_, index) => index + 1).map((level) => (
-                          <option key={`${record.playerId}-training-${level}`} value={level}>
-                            Level {level}
-                          </option>
-                        ))}
-                      </select>
-
-                      <div
-                        data-training-indicator
-                        style={{
-                          marginTop: '12px',
-                          padding: '10px',
-                          background: 'rgba(59,214,113,0.08)',
-                          border: '1px solid rgba(59,214,113,0.15)',
-                          borderRadius: '6px',
-                          display: 'none',
-                          alignItems: 'center',
-                          gap: '8px'
-                        }}
-                      >
-                        <span style={{ fontSize: '12px', color: '#3BD671', fontWeight: 600 }}>
-                          Training Level <span data-training-level-value>0</span> Active
-                        </span>
-                      </div>
-                    </div>
+                    <PlayerTrainingLevelPanel playerId={record.playerId} position={record.position} rank={rank} />
                   </div>
 
                   <PlayerRefreshTimePanel playerId={record.playerId} />
@@ -685,24 +627,12 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                     <h3>Profile Overview</h3>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px', marginBottom: '14px' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Work Rates</div>
-                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{workRateAttackLabel} / {workRateDefenseLabel}</div>
-                    </div>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Weak Foot</div>
-                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{renderStars(record.weakFoot)}</div>
-                    </div>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Skill Moves</div>
-                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{renderStars(record.skillMoves)}</div>
-                    </div>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Strong Foot</div>
-                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>
-                        {record.strongFootSide || 'Unknown'} {record.strongFoot ? `(${renderStars(record.strongFoot)})` : ''}
+                    {profileOverviewFields.map((item) => (
+                      <div key={item.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                        <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>{item.label}</div>
+                        <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{item.value}</div>
                       </div>
-                    </div>
+                    ))}
                   </div>
 
                   {!!profileTraitItems.length && (

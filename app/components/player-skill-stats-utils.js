@@ -1,5 +1,6 @@
 export const API_BASE_URL = 'https://zenithfcm.com/api';
 export const PLAYER_SKILL_BOOSTS_EVENT = 'player-detail-skill-boosts';
+export const PLAYER_TRAINING_BOOSTS_EVENT = 'player-detail-training-boosts';
 
 const GK_STAT_ALIASES = Object.freeze({
   diving: Object.freeze(['gk_diving', 'gk-diving', 'gkDiving', 'goalkeeper_diving', 'goalkeeper-diving', 'goalkeeperDiving']),
@@ -49,6 +50,16 @@ export async function fetchApiJson(endpoint, signal) {
     throw new Error(`Failed to fetch ${endpoint} (${response.status}): ${details || response.statusText}`);
   }
   return response.json();
+}
+
+export async function fetchTrainingBoosts(position, trainingLevel, signal) {
+  const normalizedPosition = String(position || '').trim();
+  const normalizedLevel = clamp(toNumber(trainingLevel, 0), 0, 30);
+  if (!normalizedPosition || normalizedLevel <= 0) return {};
+  const query = `/training/boosts?position=${encodeURIComponent(normalizedPosition)}&level=${encodeURIComponent(normalizedLevel)}`;
+  const payload = await fetchApiJson(query, signal);
+  const boosts = payload?.boosts;
+  return boosts && typeof boosts === 'object' ? boosts : {};
 }
 
 function normalizeStatKey(value) {
@@ -103,7 +114,7 @@ function getStatValue(player, key, fallback = Number.NaN) {
   return fallback;
 }
 
-function getFinalStatValue(player, skillBoosts, ...names) {
+function getFinalStatValue(player, trainingBoosts, skillBoosts, ...names) {
   let baseValue = Number.NaN;
   for (const name of names) {
     const resolved = getStatValue(player, name, Number.NaN);
@@ -113,8 +124,9 @@ function getFinalStatValue(player, skillBoosts, ...names) {
     }
   }
   const safeBase = Number.isFinite(baseValue) ? baseValue : 0;
+  const trainingBoost = getBoostValue(trainingBoosts, ...names);
   const skillBoost = getBoostValue(skillBoosts, ...names);
-  return Math.max(0, Math.round(safeBase + skillBoost));
+  return Math.max(0, Math.round(safeBase + trainingBoost + skillBoost));
 }
 
 function roundHalfUp(value) {
@@ -193,8 +205,9 @@ function calculateGoalkeeperPhysical(finalStat) {
 
 export function buildLegacyStatsModel(player, options = {}) {
   const isGoalkeeper = String(player?.position || '').toUpperCase() === 'GK';
+  const trainingBoosts = options.trainingBoosts ?? player?.training_boosts ?? player?.trainingBoosts ?? null;
   const skillBoosts = options.skillBoosts ?? player?.skill_boosts ?? player?.skillBoosts ?? null;
-  const finalStat = (...names) => getFinalStatValue(player, skillBoosts, ...names);
+  const finalStat = (...names) => getFinalStatValue(player, trainingBoosts, skillBoosts, ...names);
 
   if (isGoalkeeper) {
     return {

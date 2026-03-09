@@ -522,6 +522,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skillBoostCatalogById, setSkillBoostCatalogById] = useState({});
   const [computedSkillBoosts, setComputedSkillBoosts] = useState({});
+  const [computedTrainingBoosts, setComputedTrainingBoosts] = useState(null);
   const [activeSkillDetail, setActiveSkillDetail] = useState(null);
   const [skillBoostLevels, setSkillBoostLevels] = useState([]);
   const [skillModalLoading, setSkillModalLoading] = useState(false);
@@ -549,9 +550,15 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     }
     return player?.skill_boosts || player?.skillBoosts || null;
   }, [availableSkills.length, computedSkillBoosts, player]);
+  const effectiveTrainingBoosts = useMemo(() => {
+    if (computedTrainingBoosts && typeof computedTrainingBoosts === 'object') {
+      return computedTrainingBoosts;
+    }
+    return player?.training_boosts || player?.trainingBoosts || null;
+  }, [computedTrainingBoosts, player]);
   const statsModel = useMemo(
-    () => buildLegacyStatsModel(player, { skillBoosts: effectiveSkillBoosts }),
-    [effectiveSkillBoosts, player]
+    () => buildLegacyStatsModel(player, { trainingBoosts: effectiveTrainingBoosts, skillBoosts: effectiveSkillBoosts }),
+    [effectiveSkillBoosts, effectiveTrainingBoosts, player]
   );
 
   useEffect(() => {
@@ -577,6 +584,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillsLoading(true);
     setSkillBoostCatalogById({});
     setComputedSkillBoosts({});
+    setComputedTrainingBoosts(player?.training_boosts || player?.trainingBoosts || null);
     setActiveSkillDetail(null);
     setSkillBoostLevels([]);
     setSkillModalError('');
@@ -744,6 +752,39 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   }, [skillLevelsById, skillBoostCatalogById]);
 
   useEffect(() => {
+    const normalizedPosition = String(player?.position || '').trim();
+    const normalizedTrainingLevel = clamp(toNumber(trainingLevel, 0), 0, 30);
+    if (!normalizedPosition || normalizedTrainingLevel <= 0) {
+      setComputedTrainingBoosts(null);
+      return undefined;
+    }
+
+    let isActive = true;
+    const controller = new AbortController();
+    const loadTrainingBoosts = async () => {
+      try {
+        const payload = await fetchApiJson(
+          `/training/boosts?position=${encodeURIComponent(normalizedPosition)}&level=${encodeURIComponent(normalizedTrainingLevel)}`,
+          controller.signal
+        );
+        if (!isActive) return;
+        const nextBoosts = payload?.boosts && typeof payload.boosts === 'object' ? payload.boosts : null;
+        setComputedTrainingBoosts(nextBoosts);
+      } catch (error) {
+        if (!isActive || error?.name === 'AbortError') return;
+        console.error('[squad-customization] Failed to load training boosts:', error);
+        setComputedTrainingBoosts(null);
+      }
+    };
+
+    loadTrainingBoosts();
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [player?.position, trainingLevel]);
+
+  useEffect(() => {
     if (!player) return;
     const previousOverflow = document.body.style.overflow;
     const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -835,6 +876,10 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
       selectedSkills: nextSkills,
       skillAllocations: nextSkillAllocations,
       skill_allocations: nextSkillAllocations,
+      trainingBoosts: effectiveTrainingBoosts,
+      training_boosts: effectiveTrainingBoosts,
+      skillBoosts: effectiveSkillBoosts,
+      skill_boosts: effectiveSkillBoosts,
       trainingBonus: nextTrainingBonus,
       baseOvr,
       boostedOvr: nextProjectedOvr,

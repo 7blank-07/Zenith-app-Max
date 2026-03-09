@@ -1,14 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { PLAYER_SKILL_BOOSTS_EVENT, buildLegacyStatsModel, getStatAccentColor } from './player-skill-stats-utils';
+import {
+  PLAYER_SKILL_BOOSTS_EVENT,
+  PLAYER_TRAINING_BOOSTS_EVENT,
+  buildLegacyStatsModel,
+  getStatAccentColor
+} from './player-skill-stats-utils';
 
 export default function PlayerStatisticsSection({ player, playerId }) {
   const normalizedPlayerId = String(playerId || player?.playerId || '').trim();
   const [skillBoosts, setSkillBoosts] = useState({});
+  const [trainingBoosts, setTrainingBoosts] = useState({});
 
   useEffect(() => {
     setSkillBoosts({});
+    setTrainingBoosts({});
   }, [normalizedPlayerId]);
 
   useEffect(() => {
@@ -26,7 +33,25 @@ export default function PlayerStatisticsSection({ player, playerId }) {
     };
   }, [normalizedPlayerId]);
 
-  const statsModel = useMemo(() => buildLegacyStatsModel(player, { skillBoosts }), [player, skillBoosts]);
+  useEffect(() => {
+    if (!normalizedPlayerId || typeof window === 'undefined') return undefined;
+    const handleTrainingBoostChange = (event) => {
+      const detail = event?.detail || {};
+      const eventPlayerId = String(detail.playerId || '').trim();
+      if (eventPlayerId !== normalizedPlayerId) return;
+      const nextBoosts = detail.boosts && typeof detail.boosts === 'object' ? detail.boosts : {};
+      setTrainingBoosts(nextBoosts);
+    };
+    window.addEventListener(PLAYER_TRAINING_BOOSTS_EVENT, handleTrainingBoostChange);
+    return () => {
+      window.removeEventListener(PLAYER_TRAINING_BOOSTS_EVENT, handleTrainingBoostChange);
+    };
+  }, [normalizedPlayerId]);
+
+  const statsModel = useMemo(
+    () => buildLegacyStatsModel(player, { skillBoosts, trainingBoosts }),
+    [player, skillBoosts, trainingBoosts]
+  );
 
   return (
     <section className="player-stats-section" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 20px 24px' }}>
