@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import AnimatedRankIcon from '../../components/AnimatedRankIcon.client';
 import PlayerDetailInteractions from '../../components/PlayerDetailInteractions.client';
 import PlayerPriceWidget from '../../components/PlayerPriceWidget.client';
 import SiteChrome from '../../components/SiteChrome';
@@ -577,16 +578,12 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                             }}
                           >
                             <div style={{ fontSize: '16px', fontWeight: 800, color: rankColor, lineHeight: 1 }}>{rankNum}</div>
-                            <div
-                              className="rank-selector-icon"
+                            <AnimatedRankIcon
+                              className="rank-selector-icon animated-rank-icon"
+                              rank={rankNum}
+                              spriteUrl={RANK_SPRITES[rankNum]}
+                              size={56}
                               style={{
-                                width: '56px',
-                                height: '56px',
-                                backgroundImage: `url('${RANK_SPRITES[rankNum]}')`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                imageRendering: 'pixelated',
                                 filter: isSelected ? `drop-shadow(0 0 8px ${rankColor})` : 'none'
                               }}
                             />
@@ -769,7 +766,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                     </button>
                   </div>
                   <div className="points-info">
-                    <span className="current-level-badge">Current Rank: {rank}</span>
+                        <span className="current-level-badge">Current Rank: {rank}</span>
                     <span className="points-remaining-badge">Skills loaded: {skillEntries.length}</span>
                   </div>
                   <div className="skills-grid" id="player-skills-grid">
