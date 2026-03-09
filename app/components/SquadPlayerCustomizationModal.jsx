@@ -506,7 +506,8 @@ function getStatAccentColor(value) {
   if (numericValue >= 90) return '#3BD671';
   if (numericValue >= 80) return '#00C2A8';
   if (numericValue >= 70) return '#FFB86B';
-  return '#98A0A6';
+  if (numericValue >= 55) return '#E76A6A';
+  return '#B33939';
 }
 
 export default function SquadPlayerCustomizationModal({ player, onClose, onUpdatePlayer }) {

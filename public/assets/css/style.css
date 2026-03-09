@@ -9906,6 +9906,130 @@ watchlist-view .view-content {
   transform: scale(0.98);
 }
 
+.player-detail-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.player-detail-stat-card {
+  min-width: 0;
+}
+
+.player-detail-stats-grid.with-profile-rail {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+}
+
+.player-detail-profile-card {
+  background: var(--color-graphite-800, #14181c);
+  border: 1px solid rgba(0, 194, 168, 0.18);
+  border-radius: var(--radius-lg, 12px);
+  padding: 18px;
+  min-width: 0;
+}
+
+.player-detail-profile-card.inline-rail {
+  grid-column: 3 / span 2;
+  grid-row: 2;
+}
+
+.player-detail-profile-card h3 {
+  margin: 0 0 12px;
+  color: var(--color-text-primary, #e6eef2);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.player-detail-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.player-detail-profile-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.player-detail-profile-item h4 {
+  margin: 0 0 4px;
+  color: #98a0a6;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.player-detail-profile-item p {
+  margin: 0;
+  color: #e6eef2;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.player-detail-profile-group + .player-detail-profile-group {
+  margin-top: 12px;
+}
+
+.player-detail-profile-group h4 {
+  margin: 0 0 8px;
+  color: #98a0a6;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.player-detail-profile-media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.player-detail-profile-media-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.player-detail-profile-media-item img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.player-detail-profile-media-item span {
+  color: #e6eef2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.player-detail-profile-summary {
+  margin: 0;
+  color: var(--color-text-muted, #98a0a6);
+  line-height: 1.65;
+}
+
+@media (max-width: 1200px) {
+  .player-detail-stats-grid.with-profile-rail {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .player-detail-profile-card.inline-rail {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
 
 /* ==================== RESPONSIVE BREAKPOINTS ==================== */
 
@@ -9944,6 +10068,15 @@ watchlist-view .view-content {
   .reset-skills-btn {
     font-size: 12px;
     padding: 6px 12px;
+  }
+
+  .player-detail-stats-grid.with-profile-rail {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .player-detail-profile-card.inline-rail {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
@@ -9998,6 +10131,11 @@ watchlist-view .view-content {
     width: 100%;
     font-size: 11px;
     padding: 8px;
+  }
+
+  .player-detail-profile-grid,
+  .player-detail-profile-media-grid {
+    grid-template-columns: 1fr;
   }
 
   .lock-overlay {

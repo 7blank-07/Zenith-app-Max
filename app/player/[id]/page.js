@@ -622,80 +622,22 @@ export default async function PlayerDetailPage({ params, searchParams }) {
 
                 <PlayerSkillsAbilitiesSection playerId={record.playerId} currentRank={rank} />
 
-                <section className="player-skills-section" style={{ marginTop: '20px' }}>
-                  <div className="skills-header">
-                    <h3>Profile Overview</h3>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px', marginBottom: '14px' }}>
-                    {profileOverviewFields.map((item) => (
-                      <div key={item.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
-                        <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>{item.label}</div>
-                        <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{item.value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {!!profileTraitItems.length && (
-                    <div style={{ marginBottom: '12px' }}>
-                      <div style={{ fontSize: '12px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 700 }}>Traits</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
-                        {profileTraitItems.map((item) => (
-                          <div
-                            key={item.id}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              background: 'rgba(255,255,255,0.03)',
-                              border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: '8px',
-                              padding: '8px 10px'
-                            }}
-                          >
-                            {item.icon ? <img src={item.icon} alt={item.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} /> : null}
-                            <span style={{ fontSize: '12px', color: '#E6EEF2', fontWeight: 600 }}>{item.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {!!profileAbilityItems.length && (
-                    <div style={{ marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 700 }}>Abilities</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
-                        {profileAbilityItems.map((item) => (
-                          <div
-                            key={item.id}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              background: 'rgba(255,255,255,0.03)',
-                              border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: '8px',
-                              padding: '8px 10px'
-                            }}
-                          >
-                            {item.icon ? <img src={item.icon} alt={item.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} /> : null}
-                            <span style={{ fontSize: '12px', color: '#E6EEF2', fontWeight: 600 }}>{item.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {!profileTraitItems.length && !profileAbilityItems.length && (
-                    <p style={{ lineHeight: 1.65, marginTop: 0, marginBottom: 0 }}>{profileSummary}</p>
-                  )}
-                </section>
-
                 <PlayerPriceHistorySection playerId={record.playerId} rank={rank} isAuctionable={isAuctionable} />
               </div>
             </section>
           </div>
 
-          <PlayerStatisticsSection player={record} playerId={record.playerId} />
+          <PlayerStatisticsSection
+            player={record}
+            playerId={record.playerId}
+            profileSectionTitle="Profile Overview"
+            profileRows={profileOverviewFields}
+            profileCollections={[
+              { key: 'traits', title: 'Traits', items: profileTraitItems },
+              { key: 'abilities', title: 'Abilities', items: profileAbilityItems }
+            ]}
+            profileSummary={profileSummary}
+          />
 
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 24px 24px' }}>
             <section style={{ marginTop: '20px' }}>

@@ -1,14 +1,22 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import {
-  PLAYER_SKILL_BOOSTS_EVENT,
-  PLAYER_TRAINING_BOOSTS_EVENT,
-  buildLegacyStatsModel,
-  getStatAccentColor
-} from './player-skill-stats-utils';
+import { PLAYER_SKILL_BOOSTS_EVENT, PLAYER_TRAINING_BOOSTS_EVENT, buildLegacyStatsModel, getStatAccentColor } from './player-skill-stats-utils';
 
-export default function PlayerStatisticsSection({ player, playerId }) {
+function hasProfileValue(value) {
+  if (value == null) return false;
+  const text = String(value).trim();
+  return text.length > 0 && text.toLowerCase() !== 'unknown';
+}
+
+export default function PlayerStatisticsSection({
+  player,
+  playerId,
+  profileSectionTitle = 'Profile Overview',
+  profileRows = [],
+  profileCollections = [],
+  profileSummary = ''
+}) {
   const normalizedPlayerId = String(playerId || player?.playerId || '').trim();
   const [skillBoosts, setSkillBoosts] = useState({});
   const [trainingBoosts, setTrainingBoosts] = useState({});
@@ -52,6 +60,20 @@ export default function PlayerStatisticsSection({ player, playerId }) {
     () => buildLegacyStatsModel(player, { skillBoosts, trainingBoosts }),
     [player, skillBoosts, trainingBoosts]
   );
+  const visibleRows = Array.isArray(profileRows)
+    ? profileRows.filter((item) => item && item.label && hasProfileValue(item.value))
+    : [];
+  const visibleCollections = Array.isArray(profileCollections)
+    ? profileCollections
+        .map((group) => ({
+          key: group?.key,
+          title: group?.title,
+          items: Array.isArray(group?.items) ? group.items.filter((item) => item && item.name) : []
+        }))
+        .filter((group) => group.title && group.items.length > 0)
+    : [];
+  const shouldRenderProfile = visibleRows.length > 0 || visibleCollections.length > 0 || hasProfileValue(profileSummary);
+  const shouldUseInlineProfileRail = shouldRenderProfile && statsModel.categories.length >= 6;
 
   return (
     <section className="player-stats-section" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 20px 24px' }}>
@@ -68,10 +90,11 @@ export default function PlayerStatisticsSection({ player, playerId }) {
         {statsModel.title}
       </h2>
       <div className="stats-grid-container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+        <div className={`player-detail-stats-grid ${shouldUseInlineProfileRail ? 'with-profile-rail' : ''}`}>
           {statsModel.categories.map((category) => (
             <article
               key={category.key}
+              className="player-detail-stat-card"
               style={{
                 background: 'var(--color-graphite-800, #14181C)',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -127,6 +150,50 @@ export default function PlayerStatisticsSection({ player, playerId }) {
               </table>
             </article>
           ))}
+          {shouldRenderProfile ? (
+            <aside className={`player-detail-profile-card ${shouldUseInlineProfileRail ? 'inline-rail' : ''}`}>
+              <h3>{profileSectionTitle}</h3>
+              {visibleRows.length > 0 ? (
+                <div className="player-detail-profile-grid">
+                  {visibleRows.map((item) => (
+                    <article key={item.label} className="player-detail-profile-item">
+                      <h4>{item.label}</h4>
+                      <p>{item.value}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+
+              {visibleCollections.map((group) => (
+                <div key={group.key || group.title} className="player-detail-profile-group">
+                  <h4>{group.title}</h4>
+                  <div className="player-detail-profile-media-grid">
+                    {group.items.map((item) => (
+                      <article key={item.id || item.name} className="player-detail-profile-media-item">
+                        {item.icon ? (
+                          <img
+                            src={item.icon}
+                            alt={item.name}
+                            width="24"
+                            height="24"
+                            loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : null}
+                        <span>{item.name}</span>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {!visibleRows.length && !visibleCollections.length && hasProfileValue(profileSummary) ? (
+                <p className="player-detail-profile-summary">{profileSummary}</p>
+              ) : null}
+            </aside>
+          ) : null}
         </div>
       </div>
     </section>
