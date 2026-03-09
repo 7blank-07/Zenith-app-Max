@@ -3,6 +3,8 @@ import AnimatedRankIcon from '../../components/AnimatedRankIcon.client';
 import PlayerMarketValue from '../../components/PlayerMarketValue.client';
 import PlayerPriceHistorySection from '../../components/PlayerPriceHistorySection.client';
 import PlayerRefreshTimePanel from '../../components/PlayerRefreshTimePanel.client';
+import PlayerSkillsAbilitiesSection from '../../components/PlayerSkillsAbilitiesSection.client';
+import PlayerStatisticsSection from '../../components/PlayerStatisticsSection.client';
 import PlayerDetailInteractions from '../../components/PlayerDetailInteractions.client';
 import SiteChrome from '../../components/SiteChrome';
 import { getPlayerUniqueId } from '../../../src/lib/legacy-parity-contract.mjs';
@@ -55,18 +57,6 @@ function renderStars(value) {
 
 function getPlayerCardVariant(player) {
   return player?.leagueImage ? 'normal' : 'hero';
-}
-
-function getSectionAverage(section) {
-  const explicitMainValue = Number(section?.mainValue);
-  if (Number.isFinite(explicitMainValue)) {
-    return Math.round(explicitMainValue);
-  }
-  const values = (section?.rows || [])
-    .map((row) => Number(row.value))
-    .filter((value) => Number.isFinite(value));
-  if (!values.length) return null;
-  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
 function looksLikeImageUrl(value) {
@@ -127,38 +117,6 @@ const RANK_SKILL_POINTS = Object.freeze({
   5: 5
 });
 
-function buildSkillEntries(record) {
-  const skillNames = Array.isArray(record?.skills) ? record.skills.filter(Boolean) : [];
-  const traitNames = Array.isArray(record?.traits) ? record.traits.filter(Boolean) : [];
-  const skillImages = Array.isArray(record?.skillImages) ? record.skillImages.filter(Boolean) : [];
-  const traitImages = Array.isArray(record?.traitImages) ? record.traitImages.filter(Boolean) : [];
-
-  const skills = Array.from({ length: Math.max(skillNames.length, skillImages.length) }, (_, index) => {
-    const rawName = skillNames[index] || '';
-    const rawImage = skillImages[index] || '';
-    const icon = looksLikeImageUrl(rawImage) ? rawImage : looksLikeImageUrl(rawName) ? rawName : '';
-    return {
-      id: `skill-${index}`,
-      type: 'Skill',
-      name: deriveDisplayLabel(rawName || rawImage, 'Skill', index),
-      icon
-    };
-  }).filter((entry) => entry.name);
-
-  const traits = Array.from({ length: Math.max(traitNames.length, traitImages.length) }, (_, index) => {
-    const rawName = traitNames[index] || '';
-    const rawImage = traitImages[index] || '';
-    const icon = looksLikeImageUrl(rawImage) ? rawImage : looksLikeImageUrl(rawName) ? rawName : '';
-    return {
-      id: `trait-${index}`,
-      type: 'Trait',
-      name: deriveDisplayLabel(rawName || rawImage, 'Trait', index),
-      icon
-    };
-  }).filter((entry) => entry.name);
-
-  return [...skills, ...traits].slice(0, 12);
-}
 
 function buildProfileOverviewItems(names, images, fallbackPrefix, idPrefix) {
   const normalizedNames = Array.isArray(names) ? names.filter(Boolean) : [];
@@ -246,7 +204,6 @@ export default async function PlayerDetailPage({ params, searchParams }) {
     rank,
     is_untradable: record.isUntradable
   });
-  const skillEntries = buildSkillEntries(record);
   const profileTraitItems = buildProfileOverviewItems(record.traits, record.traitImages, 'Trait', 'profile-trait');
   const profileAbilityItems = buildProfileOverviewItems(record.skills, record.skillImages, 'Ability', 'profile-ability');
   const workRateAttackLabel = formatWorkRateText(record.workRateAttack);
@@ -721,54 +678,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                   <PlayerRefreshTimePanel playerId={record.playerId} />
                 </div>
 
-                <section className="player-skills-section" style={{ marginTop: '24px' }}>
-                  <div className="skills-header">
-                    <h3>Skills &amp; Abilities</h3>
-                    <button className="reset-skills-btn" id="reset-player-skills" type="button">
-                      Reset Skills
-                    </button>
-                  </div>
-                  <div className="points-info">
-                        <span className="current-level-badge">Current Rank: {rank}</span>
-                    <span className="points-remaining-badge">Skills loaded: {skillEntries.length}</span>
-                  </div>
-                  <div className="skills-grid" id="player-skills-grid">
-                    {skillEntries.map((entry) => (
-                      <div
-                        key={`${record.playerId}-${entry.id}`}
-                        className="skill-card"
-                        data-skill-name={entry.name}
-                        data-skill-type={entry.type}
-                        data-skill-level="0"
-                        data-skill-icon={entry.icon || ''}
-                      >
-                        <div className="skill-card-inner">
-                          <div className="skill-icon">
-                            <img src={entry.icon || '/assets/images/zenith_logo_svg.svg'} alt={entry.name} />
-                          </div>
-                          <div className="skill-name">{entry.name}</div>
-                          <div className="skill-level">
-                            Level: <span className="level-number">0</span>/1
-                          </div>
-                          <div className="skill-actions">
-                            <small style={{ color: '#98A0A6' }}>{entry.type}</small>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {!skillEntries.length && <p style={{ color: '#98A0A6', textAlign: 'center' }}>No skills available</p>}
-                  </div>
-
-                  <div className="skill-detail-modal" id="skill-detail-modal" style={{ display: 'none' }}>
-                    <div className="skill-modal-content" id="skill-modal-content">
-                      <button className="modal-close-btn" id="skill-modal-close" type="button">
-                        ×
-                      </button>
-                      <h3 style={{ marginTop: 0, color: '#E6EEF2' }}>Skill Details</h3>
-                      <p style={{ color: '#98A0A6' }}>Select a skill card to view details.</p>
-                    </div>
-                  </div>
-                </section>
+                <PlayerSkillsAbilitiesSection playerId={record.playerId} currentRank={rank} />
 
                 <section className="player-skills-section" style={{ marginTop: '20px' }}>
                   <div className="skills-header">
@@ -855,87 +765,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
             </section>
           </div>
 
-          <section className="player-stats-section" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 20px 24px' }}>
-            <h2
-              style={{
-                fontSize: '22px',
-                fontWeight: 800,
-                color: 'var(--color-text-primary, #E6EEF2)',
-                margin: '0 0 20px 0',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}
-            >
-              {String(record.position || '').toUpperCase() === 'GK' ? 'Goalkeeper Statistics' : 'Player Statistics'}
-            </h2>
-            <div className="stats-grid-container">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                {attributeSections.map((section) => {
-                  const sectionAverage = getSectionAverage(section);
-                  return (
-                    <article
-                      key={section.key}
-                      style={{
-                        background: 'var(--color-graphite-800, #14181C)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderLeft: '4px solid #00C2A8',
-                        borderRadius: 'var(--radius-lg, 12px)',
-                        padding: '20px'
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginBottom: '16px',
-                          paddingBottom: '12px',
-                          borderBottom: '1px solid rgba(255,255,255,0.08)'
-                        }}
-                      >
-                        <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--color-text-primary, #E6EEF2)', textTransform: 'uppercase' }}>
-                          {section.title}
-                        </h3>
-                        <div style={{ fontSize: '30px', fontWeight: 900, color: '#00C2A8', lineHeight: 1 }}>{sectionAverage ?? '-'}</div>
-                      </div>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <tbody>
-                          {section.rows.map((row) => (
-                            <tr key={`${section.key}-${row.key}`}>
-                              <th
-                                scope="row"
-                                style={{
-                                  textAlign: 'left',
-                                  padding: '7px 0',
-                                  borderBottom: '1px solid rgba(255,255,255,0.08)',
-                                  color: 'var(--color-text-muted, #98A0A6)',
-                                  fontWeight: 600,
-                                  width: '72%'
-                                }}
-                              >
-                                {row.label}
-                              </th>
-                              <td
-                                style={{
-                                  textAlign: 'right',
-                                  padding: '7px 0',
-                                  borderBottom: '1px solid rgba(255,255,255,0.08)',
-                                  color: 'var(--color-text-primary, #E6EEF2)',
-                                  fontWeight: 800
-                                }}
-                              >
-                                {row.value}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
+          <PlayerStatisticsSection player={record} playerId={record.playerId} />
 
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 24px 24px' }}>
             <section style={{ marginTop: '20px' }}>
