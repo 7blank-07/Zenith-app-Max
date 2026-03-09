@@ -144,4 +144,4 @@ Use React props instead of global variables.
 RESULT
 
 Clicking a player on the squad field should open a fully functional player customization modal identical to the old SPA version, but implemented using React / Next.js components instead of vanilla JS.
-Any changes to rank or training must update the squad player state so OVR recalculates correctly using the existing squad builder logic.
+Any changes to rank or training must update the squad player state so OVR recalculates correctly using the existing squad builder logic.npm run start

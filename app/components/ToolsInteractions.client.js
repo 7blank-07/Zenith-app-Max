@@ -869,6 +869,63 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function parsePriceValue(value) {
+  if (value === undefined || value === null || value === '') return 0;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
+  }
+  const normalized = String(value)
+    .trim()
+    .replace(/,/g, '')
+    .replace(/\s+/g, '')
+    .toUpperCase();
+  if (!normalized) return 0;
+
+  const compactMatch = normalized.match(/^(-?\d+(?:\.\d+)?)([KMB])$/);
+  if (compactMatch) {
+    const amount = Number(compactMatch[1]);
+    const suffix = compactMatch[2];
+    if (!Number.isFinite(amount)) return 0;
+    const multiplier = suffix === 'B' ? 1000000000 : suffix === 'M' ? 1000000 : 1000;
+    const compactPrice = amount * multiplier;
+    return compactPrice > 0 ? Math.round(compactPrice) : 0;
+  }
+
+  const numeric = Number(normalized.replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(numeric) && numeric > 0 ? Math.round(numeric) : 0;
+}
+
+function resolvePlayerPrice(player) {
+  const candidates = [
+    player?.price,
+    player?.latestPrice,
+    player?.latest_price,
+    player?.marketPrice,
+    player?.market_price,
+    player?.currentPrice,
+    player?.current_price,
+    player?.buyNowPrice,
+    player?.buy_now_price
+  ];
+  for (const candidate of candidates) {
+    const parsed = parsePriceValue(candidate);
+    if (parsed > 0) return parsed;
+  }
+  return 0;
+}
+
+function normalizeBenchIndex(value) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isInteger(parsed) || parsed < 0 || parsed >= 7) return -1;
+  return parsed;
+}
+
+function getSquadPriceCacheKey(playerId) {
+  const normalizedPlayerId = String(playerId || '').trim();
+  if (!normalizedPlayerId) return '';
+  return normalizedPlayerId;
+}
+
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
@@ -917,7 +974,7 @@ function getPlayerStat(player, key) {
 }
 
 function formatCoins(value) {
-  const safe = toNumber(value, 0);
+  const safe = parsePriceValue(value);
   if (!safe) return '0';
   if (safe >= 1000000000) return `${(safe / 1000000000).toFixed(2)}B`;
   if (safe >= 1000000) return `${(safe / 1000000).toFixed(1)}M`;
@@ -978,7 +1035,7 @@ function normalizePlayer(player, index) {
       player?.attributes?.skillmoves,
       0
     ),
-    price: Math.max(0, toNumber(player?.price, 0)),
+    price: resolvePlayerPrice(player),
     isUntradable: !!player?.isUntradable,
     attributes: player?.attributes && typeof player.attributes === 'object' ? player.attributes : {}
   };
@@ -1118,6 +1175,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [badgesModalOpen, setBadgesModalOpen] = useState(false);
   const [starters, setStarters] = useState({});
   const [bench, setBench] = useState(Array.from({ length: 7 }, () => ''));
+  const [squadLivePrices, setSquadLivePrices] = useState({});
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
   const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null);
 
@@ -1149,6 +1207,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [shardPlayerOvr, setShardPlayerOvr] = useState(105);
   const dragPayloadRef = useRef(null);
   const dragPreviewNodeRef = useRef(null);
+  const touchDragStateRef = useRef({
+    active: false,
+    moved: false,
+    payload: null,
+    startX: 0,
+    startY: 0
+  });
   const squadFilterTriggerRef = useRef(null);
   const squadBuilderContainerRef = useRef(null);
   const [draggingKey, setDraggingKey] = useState('');
@@ -1509,6 +1574,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       const playerId = String(pendingPick?.playerId || '').trim();
       const preferredSlotId = String(pendingPick?.slotId || '').trim();
       const preferredPosition = String(pendingPick?.position || '').toUpperCase().trim();
+      const preferredBenchIndex = normalizeBenchIndex(pendingPick?.benchIndex);
       const preferredFormationId = String(pendingPick?.formationId || '').trim();
       if (!playerId) {
         window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
@@ -1523,7 +1589,18 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         return;
       }
       const rawPendingPlayer = pendingPick?.player && typeof pendingPick.player === 'object' ? pendingPick.player : null;
-      const normalizedPendingPlayer = rawPendingPlayer ? normalizePlayer(rawPendingPlayer) : null;
+      const basePendingPlayer = playersById.get(playerId) || null;
+      const mergedPendingPlayer = rawPendingPlayer
+        ? {
+            ...(basePendingPlayer || {}),
+            ...rawPendingPlayer,
+            playerId
+          }
+        : null;
+      if (mergedPendingPlayer && resolvePlayerPrice(rawPendingPlayer) <= 0 && resolvePlayerPrice(basePendingPlayer) > 0) {
+        mergedPendingPlayer.price = basePendingPlayer.price;
+      }
+      const normalizedPendingPlayer = mergedPendingPlayer ? normalizePlayer(mergedPendingPlayer) : null;
       if (rawPendingPlayer) {
         if (normalizedPendingPlayer?.playerId === playerId) {
           setSupplementalPlayers((current) => ({
@@ -1534,6 +1611,34 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       }
       if (!playersById.has(playerId) && !normalizedPendingPlayer) {
         return;
+      }
+      if (preferredBenchIndex >= 0) {
+        const preferredBenchEmpty = !bench[preferredBenchIndex];
+        const fallbackBenchIndex = bench.findIndex((entry) => !entry);
+        const targetBenchIndex = preferredBenchEmpty ? preferredBenchIndex : fallbackBenchIndex;
+        if (targetBenchIndex >= 0) {
+          console.info('[tools] Applying pending squad pick to bench', {
+            playerId,
+            preferredBenchIndex,
+            targetBenchIndex
+          });
+          setActiveTool('squadbuilder');
+          setBench((current) => {
+            const preferredCurrentEmpty = !current[targetBenchIndex];
+            if (preferredCurrentEmpty) {
+              const next = [...current];
+              next[targetBenchIndex] = playerId;
+              return next;
+            }
+            const nextEmpty = current.findIndex((entry) => !entry);
+            if (nextEmpty < 0) return current;
+            const next = [...current];
+            next[nextEmpty] = playerId;
+            return next;
+          });
+          window.sessionStorage.removeItem(SQUAD_BUILDER_PENDING_PICK_KEY);
+          return;
+        }
       }
       const availableSlots = SQUAD_FORMATIONS[formationId] || [];
       const fallbackSlotId = selectedSlotId || availableSlots[0]?.id || '';
@@ -1582,16 +1687,94 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     } catch (error) {
       console.error('[tools] Failed to apply pending squad player pick:', error);
     }
-  }, [assignedPlayerIds, formationId, playersById, selectedSlotId, squadStateHydrated, starters]);
+  }, [assignedPlayerIds, bench, formationId, playersById, selectedSlotId, squadStateHydrated, starters]);
 
-  const squadPlayers = useMemo(
-    () =>
-      [...Object.values(starters), ...bench]
-        .filter(Boolean)
-        .map((playerId) => playersById.get(playerId))
-        .filter(Boolean),
-    [bench, playersById, starters]
-  );
+  const squadPlayers = useMemo(() => {
+    const seenPlayerIds = new Set();
+    return [...Object.values(starters), ...bench]
+      .filter((playerId) => {
+        const normalizedPlayerId = String(playerId || '').trim();
+        if (!normalizedPlayerId || seenPlayerIds.has(normalizedPlayerId)) return false;
+        seenPlayerIds.add(normalizedPlayerId);
+        return true;
+      })
+      .map((playerId) => playersById.get(playerId))
+      .filter(Boolean);
+  }, [bench, playersById, starters]);
+
+  const squadPriceLookupTargets = useMemo(() => {
+    const targets = [];
+    const seen = new Set();
+    squadPlayers.forEach((player) => {
+      if (!player?.playerId || player?.isUntradable) return;
+      const cacheKey = getSquadPriceCacheKey(player.playerId);
+      if (!cacheKey || seen.has(cacheKey)) return;
+      seen.add(cacheKey);
+      targets.push({ cacheKey, playerId: player.playerId });
+    });
+    return targets;
+  }, [squadPlayers]);
+
+  useEffect(() => {
+    if (!squadPriceLookupTargets.length) return;
+    const pendingTargets = squadPriceLookupTargets.filter((target) => parsePriceValue(squadLivePrices[target.cacheKey]) <= 0);
+    if (!pendingTargets.length) return;
+
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    async function hydrateSquadLivePrices() {
+      const priceEntries = await Promise.all(
+        pendingTargets.map(async (target) => {
+          try {
+            const response = await fetch(
+              `/api/player-price?id=${encodeURIComponent(target.playerId)}&rank=0`,
+              {
+                cache: 'no-store',
+                signal: abortController.signal
+              }
+            );
+            if (!response.ok) {
+              console.info('[tools] Squad live price request returned non-ok response', {
+                playerId: target.playerId,
+                status: response.status
+              });
+              return [target.cacheKey, 0];
+            }
+            const payload = await response.json();
+            return [target.cacheKey, parsePriceValue(payload?.price)];
+          } catch (error) {
+            if (error?.name !== 'AbortError') {
+              console.error('[tools] Failed to fetch live squad price', {
+                playerId: target.playerId,
+                error
+              });
+            }
+            return [target.cacheKey, 0];
+          }
+        })
+      );
+
+      if (cancelled) return;
+      const updates = {};
+      priceEntries.forEach(([cacheKey, price]) => {
+        if (!cacheKey || parsePriceValue(price) <= 0) return;
+        updates[cacheKey] = parsePriceValue(price);
+      });
+      if (Object.keys(updates).length) {
+        setSquadLivePrices((current) => ({
+          ...current,
+          ...updates
+        }));
+      }
+    }
+
+    hydrateSquadLivePrices();
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [squadLivePrices, squadPriceLookupTargets]);
 
   const starterAdjustedOvrBySlot = useMemo(() => {
     const adjustedBySlot = {};
@@ -1625,11 +1808,14 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const squadValue = useMemo(() => {
     if (!squadPlayers.length) return 0;
     return squadPlayers.reduce((sum, player) => {
-      const marketPrice = Math.max(0, toNumber(player.price, 0));
+      const livePriceCacheKey = getSquadPriceCacheKey(player?.playerId);
+      const livePrice = parsePriceValue(squadLivePrices[livePriceCacheKey]);
+      if (livePrice > 0) return sum + livePrice;
+      const marketPrice = resolvePlayerPrice(player);
       if (marketPrice > 0) return sum + marketPrice;
       return sum + Math.max(0, toNumber(player.ovr, 0) * 1000000);
     }, 0);
-  }, [squadPlayers]);
+  }, [squadLivePrices, squadPlayers]);
 
   const squadFilterOptions = useMemo(() => {
     const uniqueSorted = (values) => [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -1801,6 +1987,19 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     router.push(`/players?${searchParams.toString()}`);
   };
 
+  const handleBenchSlotSelect = (benchIndex, hasPlayer = false) => {
+    const normalizedBenchIndex = normalizeBenchIndex(benchIndex);
+    if (normalizedBenchIndex < 0) return;
+    if (hasPlayer) return;
+    persistRoundtripSquadState();
+    const searchParams = new URLSearchParams();
+    searchParams.set('squadPick', '1');
+    searchParams.set('benchIndex', String(normalizedBenchIndex));
+    searchParams.set('formationId', formationId);
+    searchParams.set('returnTo', '/tools?tool=squadbuilder');
+    router.push(`/players?${searchParams.toString()}`);
+  };
+
   const openSquadPlayerCustomizationModal = (playerId, context = {}) => {
     const normalizedPlayerId = String(playerId || '').trim();
     if (!normalizedPlayerId) return;
@@ -1902,9 +2101,107 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const clearDragState = () => {
     clearDragPreviewNode();
     dragPayloadRef.current = null;
+    touchDragStateRef.current = {
+      active: false,
+      moved: false,
+      payload: null,
+      startX: 0,
+      startY: 0
+    };
     setDraggingKey('');
     setDragOverSlotId('');
     setDragOverBenchIndex(-1);
+  };
+
+  const resolveTouchDestinationAtPoint = (clientX, clientY, payload) => {
+    if (typeof document === 'undefined' || !payload?.playerId) return null;
+    const target = document.elementFromPoint(clientX, clientY);
+    if (!target) return null;
+
+    const slotTarget = target.closest?.('[data-slot-id]');
+    if (slotTarget) {
+      const slotId = String(slotTarget.getAttribute('data-slot-id') || '').trim();
+      if (!slotId) return null;
+      const movingPlayer = playersById.get(payload.playerId) || null;
+      const targetSlot = formationSlots.find((slot) => slot.id === slotId) || null;
+      if (!canAssignPlayerToSlot(movingPlayer, targetSlot)) return null;
+      return { type: 'slot', slotId };
+    }
+
+    const benchTarget = target.closest?.('[data-bench-index]');
+    if (benchTarget) {
+      const benchIndex = normalizeBenchIndex(benchTarget.getAttribute('data-bench-index'));
+      if (benchIndex < 0) return null;
+      return { type: 'bench', benchIndex };
+    }
+
+    return null;
+  };
+
+  const updateTouchDragHighlights = (destination) => {
+    if (destination?.type === 'slot') {
+      setDragOverSlotId(destination.slotId);
+      setDragOverBenchIndex(-1);
+      return;
+    }
+    if (destination?.type === 'bench') {
+      setDragOverBenchIndex(destination.benchIndex);
+      setDragOverSlotId('');
+      return;
+    }
+    setDragOverSlotId('');
+    setDragOverBenchIndex(-1);
+  };
+
+  const handleTouchDragStart = (event, payload, sourceKey) => {
+    const touch = event.touches?.[0];
+    if (!touch || !payload?.playerId) return;
+    dragPayloadRef.current = payload;
+    touchDragStateRef.current = {
+      active: true,
+      moved: false,
+      payload,
+      startX: touch.clientX,
+      startY: touch.clientY
+    };
+    setDraggingKey(sourceKey || '');
+    updateTouchDragHighlights(null);
+  };
+
+  const handleTouchDragMove = (event) => {
+    const dragState = touchDragStateRef.current;
+    if (!dragState?.active || !dragState.payload) return;
+    const touch = event.touches?.[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - dragState.startX;
+    const deltaY = touch.clientY - dragState.startY;
+    if (!dragState.moved && Math.hypot(deltaX, deltaY) < 8) return;
+    dragState.moved = true;
+
+    event.preventDefault();
+    const destination = resolveTouchDestinationAtPoint(touch.clientX, touch.clientY, dragState.payload);
+    updateTouchDragHighlights(destination);
+  };
+
+  const handleTouchDragEnd = (event) => {
+    const dragState = touchDragStateRef.current;
+    if (!dragState?.active || !dragState.payload) {
+      clearDragState();
+      return;
+    }
+    const touch = event.changedTouches?.[0] || event.touches?.[0];
+    let destination = null;
+    if (dragState.moved && touch) {
+      destination = resolveTouchDestinationAtPoint(touch.clientX, touch.clientY, dragState.payload);
+    }
+    if (dragState.moved) {
+      event.preventDefault();
+      if (destination) {
+        movePlayer(dragState.payload, destination);
+      }
+    }
+    clearDragState();
   };
 
   const movePlayer = (payload, destination) => {
@@ -2870,8 +3167,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                               openSquadPlayerCustomizationModal(player.playerId, { slotId: slot.id });
                             }}
                             draggable
+                            style={{ touchAction: 'none' }}
                             onDragStart={(event) => handleDragStart(event, { source: 'slot', playerId: player.playerId, slotId: slot.id }, dragKey)}
                             onDragEnd={handleDragEnd}
+                            onTouchStart={(event) => handleTouchDragStart(event, { source: 'slot', playerId: player.playerId, slotId: slot.id }, dragKey)}
+                            onTouchMove={handleTouchDragMove}
+                            onTouchEnd={handleTouchDragEnd}
+                            onTouchCancel={handleTouchDragEnd}
                           >
                             <div className="preview-card-inner">
                               <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="preview-card-bg" />
@@ -3038,6 +3340,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                     key={`bench-${index}`}
                     className={`bench-cell ${player ? 'filled' : ''} ${dragOverBenchIndex === index ? 'drag-over' : ''}`}
                     data-bench-index={index}
+                    onClick={() => handleBenchSlotSelect(index, !!player)}
                     onDragOver={(event) => handleBenchDragOver(event, index)}
                     onDragLeave={() => handleBenchDragLeave(index)}
                     onDrop={(event) => handleDropOnBench(event, index)}
@@ -3049,9 +3352,18 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                       <div
                         className={`bench-preview-card ${draggingKey === dragKey ? 'dragging' : ''}`}
                         data-player-id={player.playerId}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          openSquadPlayerCustomizationModal(player.playerId, { benchIndex: index });
+                        }}
                         draggable
+                        style={{ touchAction: 'none' }}
                         onDragStart={(event) => handleDragStart(event, { source: 'bench', playerId: player.playerId, benchIndex: index }, dragKey)}
                         onDragEnd={handleDragEnd}
+                        onTouchStart={(event) => handleTouchDragStart(event, { source: 'bench', playerId: player.playerId, benchIndex: index }, dragKey)}
+                        onTouchMove={handleTouchDragMove}
+                        onTouchEnd={handleTouchDragEnd}
+                        onTouchCancel={handleTouchDragEnd}
                       >
                         <div className="bench-card-inner">
                           <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card" className="bench-card-bg" />
@@ -3086,7 +3398,14 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                               <img src="/assets/images/untradable_img.png" alt="Untradable" />
                             </div>
                           )}
-                          <button className="bench-card-remove" onClick={() => removeBenchPlayer(index)} type="button">
+                          <button
+                            className="bench-card-remove"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              removeBenchPlayer(index);
+                            }}
+                            type="button"
+                          >
                             ×
                           </button>
                         </div>

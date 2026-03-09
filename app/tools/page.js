@@ -46,6 +46,13 @@ function serializeToolPlayer(player) {
     colorName: player.colorName || '#FFFFFF',
     skillMoves: Number(player.skillMoves || player.skill_moves || player.skillmoves || 0) || 0,
     isUntradable: !!player.isUntradable,
+    price:
+      player.price ??
+      player.latestPrice ??
+      player.latest_price ??
+      player.marketPrice ??
+      player.market_price ??
+      0,
     attributes: player.attributes || {}
   };
 }

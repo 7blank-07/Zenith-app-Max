@@ -10484,3 +10484,76 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     font-size: 12px;
   }
 }
+
+/* Squad builder mobile bench: keep all 7 visible without horizontal scrolling */
+@media (max-width: 768px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+    height: min(60vh, 500px) !important;
+    min-height: 340px !important;
+    max-height: 500px !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    padding-bottom: 12px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {
+    min-height: 94px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-slot {
+    width: 44px;
+    height: 56px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-slot-label {
+    font-size: 6.5px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner {
+    width: 54px;
+    height: 68px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-player-img {
+    width: 58px;
+    height: 64px;
+    bottom: 2px;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
+    height: min(56vh, 480px) !important;
+    max-height: 480px !important;
+    min-height: 300px !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    gap: 6px;
+    padding: 10px 8px 12px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {
+    min-height: 84px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-slot {
+    width: 40px;
+    height: 50px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner {
+    width: 50px;
+    height: 62px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-player-img {
+    width: 54px;
+    height: 60px;
+  }
+}

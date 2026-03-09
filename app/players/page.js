@@ -36,6 +36,12 @@ function readSearchParam(searchParams, key, fallback = '') {
   return String(rawValue ?? fallback).trim();
 }
 
+function readBenchIndexParam(searchParams, key) {
+  const parsed = Number.parseInt(readSearchParam(searchParams, key), 10);
+  if (!Number.isInteger(parsed) || parsed < 0 || parsed >= 7) return null;
+  return parsed;
+}
+
 function buildPlayersJsonLd(players) {
   return {
     '@context': 'https://schema.org',
@@ -64,6 +70,7 @@ export default async function PlayersPage({ searchParams = {} }) {
   const initialSquadPickContext = {
     enabled: readSearchParam(searchParams, 'squadPick') === '1',
     slotId: readSearchParam(searchParams, 'slotId'),
+    benchIndex: readBenchIndexParam(searchParams, 'benchIndex'),
     position: readSearchParam(searchParams, 'position').toUpperCase(),
     formationId: readSearchParam(searchParams, 'formationId'),
     returnTo: readSearchParam(searchParams, 'returnTo', '/tools?tool=squadbuilder')

@@ -73,6 +73,7 @@ const SQUAD_BUILDER_PENDING_PICK_KEY = 'squad_builder_pending_pick';
 const DEFAULT_SQUAD_PICK_CONTEXT = Object.freeze({
   enabled: false,
   slotId: '',
+  benchIndex: null,
   position: '',
   formationId: '',
   returnTo: '/tools?tool=squadbuilder'
@@ -85,6 +86,11 @@ function normalizeSquadPickContext(context) {
   return {
     enabled: context.enabled === true,
     slotId: toText(context.slotId),
+    benchIndex: (() => {
+      const parsed = Number.parseInt(toText(context.benchIndex), 10);
+      if (!Number.isInteger(parsed) || parsed < 0 || parsed >= 7) return null;
+      return parsed;
+    })(),
     position: toText(context.position).toUpperCase(),
     formationId: toText(context.formationId),
     returnTo: toText(context.returnTo, DEFAULT_SQUAD_PICK_CONTEXT.returnTo)
@@ -447,6 +453,7 @@ export default function PlayersDatabaseInteractions({
     [
       initialSquadPickContext?.enabled,
       initialSquadPickContext?.slotId,
+      initialSquadPickContext?.benchIndex,
       initialSquadPickContext?.position,
       initialSquadPickContext?.formationId,
       initialSquadPickContext?.returnTo
@@ -459,6 +466,7 @@ export default function PlayersDatabaseInteractions({
       if (
         current.enabled === normalizedInitialSquadPickContext.enabled &&
         current.slotId === normalizedInitialSquadPickContext.slotId &&
+        current.benchIndex === normalizedInitialSquadPickContext.benchIndex &&
         current.position === normalizedInitialSquadPickContext.position &&
         current.formationId === normalizedInitialSquadPickContext.formationId &&
         current.returnTo === normalizedInitialSquadPickContext.returnTo
@@ -482,6 +490,7 @@ export default function PlayersDatabaseInteractions({
   }, [
     normalizedInitialSquadPickContext.enabled,
     normalizedInitialSquadPickContext.slotId,
+    normalizedInitialSquadPickContext.benchIndex,
     normalizedInitialSquadPickContext.position,
     normalizedInitialSquadPickContext.formationId,
     normalizedInitialSquadPickContext.returnTo
@@ -696,10 +705,11 @@ export default function PlayersDatabaseInteractions({
         window.sessionStorage.setItem(
           SQUAD_BUILDER_PENDING_PICK_KEY,
           JSON.stringify({
-            playerId: player.playerId,
-            slotId: squadPickContext.slotId,
-            position: squadPickContext.position,
-            formationId: squadPickContext.formationId,
+              playerId: player.playerId,
+              slotId: squadPickContext.slotId,
+              benchIndex: squadPickContext.benchIndex,
+              position: squadPickContext.position,
+              formationId: squadPickContext.formationId,
             player: {
               playerId: player.playerId,
               name: player.name,
