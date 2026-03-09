@@ -58,6 +58,10 @@ function getPlayerCardVariant(player) {
 }
 
 function getSectionAverage(section) {
+  const explicitMainValue = Number(section?.mainValue);
+  if (Number.isFinite(explicitMainValue)) {
+    return Math.round(explicitMainValue);
+  }
   const values = (section?.rows || [])
     .map((row) => Number(row.value))
     .filter((value) => Number.isFinite(value));
@@ -862,7 +866,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                 letterSpacing: '0.5px'
               }}
             >
-              Player Statistics
+              {String(record.position || '').toUpperCase() === 'GK' ? 'Goalkeeper Statistics' : 'Player Statistics'}
             </h2>
             <div className="stats-grid-container">
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
