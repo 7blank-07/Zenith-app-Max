@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react';
 
-const REFRESH_INTERVAL_SECONDS = 5 * 60;
-
 function toNumber(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -57,20 +55,6 @@ function getStoredPlayerUniqueId(player) {
   const untradable = String(player.is_untradable ?? player.isuntradable ?? '').trim();
   const normalizedUntradable = untradable === '1' || untradable.toLowerCase() === 'true' ? 1 : 0;
   return `${playerId}_${rank}_${normalizedUntradable}`;
-}
-
-function getSecondsUntilNextRefresh() {
-  const currentSeconds = Math.floor(Date.now() / 1000);
-  const remainder = currentSeconds % REFRESH_INTERVAL_SECONDS;
-  const remaining = REFRESH_INTERVAL_SECONDS - remainder;
-  return remaining === REFRESH_INTERVAL_SECONDS ? 0 : remaining;
-}
-
-function formatCountdown(totalSeconds) {
-  const safeSeconds = Math.max(0, Math.floor(totalSeconds));
-  const minutes = String(Math.floor(safeSeconds / 60)).padStart(2, '0');
-  const seconds = String(safeSeconds % 60).padStart(2, '0');
-  return `${minutes}:${seconds}`;
 }
 
 export default function PlayerDetailInteractions({ playerId, currentRank = 0, baseOvr = 0 }) {
@@ -240,13 +224,11 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     const trainingSelect = root.querySelector('[data-training-level]');
     const trainingIndicator = root.querySelector('[data-training-indicator]');
     const trainingLevelValue = root.querySelector('[data-training-level-value]');
-    const projectedOvr = root.querySelector('[data-projected-ovr]');
 
     const updateTrainingState = () => {
       const trainingLevel = toNumber(trainingSelect?.value, 0);
       if (trainingIndicator) trainingIndicator.style.display = trainingLevel > 0 ? 'flex' : 'none';
       if (trainingLevelValue) trainingLevelValue.textContent = String(trainingLevel);
-      if (projectedOvr) projectedOvr.textContent = String(normalizedBaseOvr + normalizedRank + Math.floor(trainingLevel / 5));
     };
 
     if (trainingSelect) {
@@ -322,46 +304,6 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
       };
       resetSkillsButton.addEventListener('click', onResetSkills);
       cleanup.push(() => resetSkillsButton.removeEventListener('click', onResetSkills));
-    }
-
-    const priceSection = root.querySelector('.player-price-history-section');
-    const rangeButtons = Array.from(root.querySelectorAll('.price-range-btn'));
-    const customDaysLabel = root.querySelector('#price-history-custom-days');
-    const customSlider = root.querySelector('#price-history-slider');
-
-    const setActiveRange = (range) => {
-      rangeButtons.forEach((button) => {
-        button.classList.toggle('active', button.getAttribute('data-range') === range);
-      });
-      if (priceSection) priceSection.setAttribute('data-range', range);
-    };
-
-    rangeButtons.forEach((button) => {
-      const onClick = () => setActiveRange(button.getAttribute('data-range') || '7D');
-      button.addEventListener('click', onClick);
-      cleanup.push(() => button.removeEventListener('click', onClick));
-    });
-
-    if (customSlider && customDaysLabel) {
-      const onInput = () => {
-        customDaysLabel.textContent = String(toNumber(customSlider.value, 7));
-      };
-      customSlider.addEventListener('input', onInput);
-      cleanup.push(() => customSlider.removeEventListener('input', onInput));
-      onInput();
-    }
-
-    const countdownNode = root.querySelector('[data-market-countdown]');
-    let countdownIntervalId;
-    if (countdownNode) {
-      const tick = () => {
-        countdownNode.textContent = formatCountdown(getSecondsUntilNextRefresh());
-      };
-      tick();
-      countdownIntervalId = window.setInterval(tick, 1000);
-    }
-    if (countdownIntervalId) {
-      cleanup.push(() => window.clearInterval(countdownIntervalId));
     }
 
     return () => {

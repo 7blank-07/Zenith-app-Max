@@ -343,8 +343,43 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot], 0), 0);
   const strongFoot = toInteger(firstDefined([source.strong_foot_stars], 0), 0);
   const strongFootSide = toText(firstDefined([source.strong_foot_side], ''), '');
-  const workRateAttack = toText(firstDefined([source.work_rate_attack], ''), '');
-  const workRateDefense = toText(firstDefined([source.work_rate_defense], ''), '');
+  const workRateAttack = toText(
+    firstDefined(
+      [
+        source.work_rate_attack,
+        source.work_rate_attacking,
+        source.attack_work_rate,
+        source.attacking_work_rate,
+        source.attackingworkrate,
+        source.workrate_attack,
+        source.workrateattacking,
+        source.workrateattack,
+        source.offensive_work_rate,
+        source.offensiveworkrate,
+        source.attackworkrate
+      ],
+      ''
+    ),
+    ''
+  );
+  const workRateDefense = toText(
+    firstDefined(
+      [
+        source.work_rate_defense,
+        source.work_rate_defensive,
+        source.defense_work_rate,
+        source.defensive_work_rate,
+        source.defensiveworkrate,
+        source.workrate_defense,
+        source.workratedefensive,
+        source.workratedefense,
+        source.defensive_workrate,
+        source.defendworkrate
+      ],
+      ''
+    ),
+    ''
+  );
   const heightCm = toNullableInteger(firstDefined([source.height_cm], null));
   const weightKg = toNullableInteger(firstDefined([source.weight_kg], null));
   const traitImages = normalizeDelimitedList(firstDefined([source.traits], []));

@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 import AnimatedRankIcon from '../../components/AnimatedRankIcon.client';
+import PlayerMarketValue from '../../components/PlayerMarketValue.client';
+import PlayerPriceHistorySection from '../../components/PlayerPriceHistorySection.client';
+import PlayerRefreshTimePanel from '../../components/PlayerRefreshTimePanel.client';
 import PlayerDetailInteractions from '../../components/PlayerDetailInteractions.client';
-import PlayerPriceWidget from '../../components/PlayerPriceWidget.client';
 import SiteChrome from '../../components/SiteChrome';
 import { getPlayerUniqueId } from '../../../src/lib/legacy-parity-contract.mjs';
 import {
@@ -95,12 +97,6 @@ function deriveDisplayLabel(value, fallbackPrefix, index) {
     .join(' ');
 }
 
-function mapDisplayList(values, fallbackPrefix) {
-  return (Array.isArray(values) ? values : [])
-    .map((value, index) => deriveDisplayLabel(value, fallbackPrefix, index))
-    .filter(Boolean);
-}
-
 const RANK_COLORS = Object.freeze({
   0: '#98A0A6',
   1: '#3BD671',
@@ -160,6 +156,33 @@ function buildSkillEntries(record) {
   return [...skills, ...traits].slice(0, 12);
 }
 
+function buildProfileOverviewItems(names, images, fallbackPrefix, idPrefix) {
+  const normalizedNames = Array.isArray(names) ? names.filter(Boolean) : [];
+  const normalizedImages = Array.isArray(images) ? images.filter(Boolean) : [];
+
+  return Array.from({ length: Math.max(normalizedNames.length, normalizedImages.length) }, (_, index) => {
+    const rawName = normalizedNames[index] || '';
+    const rawImage = normalizedImages[index] || '';
+    const icon = looksLikeImageUrl(rawImage) ? rawImage : looksLikeImageUrl(rawName) ? rawName : '';
+    return {
+      id: `${idPrefix}-${index}`,
+      name: deriveDisplayLabel(rawName || rawImage, fallbackPrefix, index),
+      icon
+    };
+  }).filter((entry) => entry.name);
+}
+
+function formatWorkRateText(value) {
+  const text = String(value || '')
+    .trim()
+    .replace(/[_-]+/g, ' ');
+  if (!text) return 'Unknown';
+  return text
+    .split(/\s+/)
+    .map((part) => `${part[0]?.toUpperCase() || ''}${part.slice(1).toLowerCase()}`)
+    .join(' ');
+}
+
 export async function generateStaticParams() {
   const prerenderLimit = getPlayerPrerenderLimit();
   const ids = await readTopPlayerIds();
@@ -209,22 +232,21 @@ export default async function PlayerDetailPage({ params, searchParams }) {
     throw error;
   }
 
-  const { record, metadata, seoParagraphs, attributeSections, relatedPlayers } = contract;
+  const { record, metadata, attributeSections, relatedPlayers } = contract;
   const cardVariant = getPlayerCardVariant(record);
   const cardBackground = record.cardBackground || record.image || '/assets/images/zenith_logo_svg.svg';
   const cardImage = record.playerImage || record.image || '';
-  const profileParagraphs = seoParagraphs.length
-    ? seoParagraphs
-    : [record.summary || `${record.name} profile and latest market context from Zenith.`];
+  const profileSummary = record.summary || `${record.name} profile and latest market context from Zenith.`;
   const watchlistUniqueId = getPlayerUniqueId({
     playerId: record.playerId,
     rank,
     is_untradable: record.isUntradable
   });
   const skillEntries = buildSkillEntries(record);
-  const profileTraitNames = mapDisplayList(record.traits, 'Trait');
-  const profileSkillNames = mapDisplayList(record.skills, 'Skill');
-  const currentRankColor = RANK_COLORS[rank] || RANK_COLORS[0];
+  const profileTraitItems = buildProfileOverviewItems(record.traits, record.traitImages, 'Trait', 'profile-trait');
+  const profileAbilityItems = buildProfileOverviewItems(record.skills, record.skillImages, 'Ability', 'profile-ability');
+  const workRateAttackLabel = formatWorkRateText(record.workRateAttack);
+  const workRateDefenseLabel = formatWorkRateText(record.workRateDefense);
   const isAuctionable = !record.isUntradable;
   console.info('[metrics] /player render', {
     playerId: record.playerId,
@@ -411,7 +433,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                       <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Work Rates</span>
                       <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>
-                        {record.workRateAttack || 'Unknown'} / {record.workRateDefense || 'Unknown'}
+                        {workRateAttackLabel} / {workRateDefenseLabel}
                       </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -460,7 +482,16 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                         gap: '10px'
                       }}
                     >
-                      {record.isUntradable ? 'Non-Auctionable' : 'Live price below'}
+                      {record.isUntradable ? (
+                        'Non-Auctionable'
+                      ) : (
+                        <>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                          </svg>
+                          <PlayerMarketValue playerId={record.playerId} rank={rank} isUntradable={record.isUntradable} fallbackPrice={record.price} />
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -680,82 +711,10 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                           Training Level <span data-training-level-value>0</span> Active
                         </span>
                       </div>
-
-                      <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--color-text-muted, #98A0A6)' }}>
-                        Projected OVR: <strong style={{ color: currentRankColor }} data-projected-ovr>{record.ovr + rank}</strong>
-                      </div>
                     </div>
                   </div>
 
-                  <div
-                    className="player-refresh-container"
-                    style={{
-                      background: 'var(--color-graphite-800)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 'var(--radius-lg)',
-                      padding: '20px',
-                      marginTop: '20px'
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: '16px',
-                        fontWeight: 800,
-                        color: 'var(--color-text-primary)',
-                        margin: '0 0 18px 0',
-                        textTransform: 'uppercase',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
-                      }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      Market Refresh
-                    </div>
-                    <div
-                      style={{
-                        background: 'rgba(0, 194, 168, 0.08)',
-                        border: '1px solid rgba(0, 194, 168, 0.25)',
-                        borderRadius: '10px',
-                        padding: '16px',
-                        marginBottom: '12px'
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: 'var(--color-text-muted)',
-                          marginBottom: '8px',
-                          textTransform: 'uppercase'
-                        }}
-                      >
-                        Next Refresh
-                      </div>
-                      <div className="player-refresh-time-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="player-refresh-time" style={{ fontSize: '20px', fontWeight: 900, color: 'var(--color-teal-500)' }}>
-                          Live
-                        </div>
-                        <div
-                          className="player-refresh-countdown"
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            color: 'var(--color-teal-500)',
-                            background: 'rgba(0,194,168,0.15)',
-                            padding: '6px 12px',
-                            borderRadius: '6px'
-                          }}
-                        >
-                          <span data-market-countdown>00:00</span>
-                        </div>
-                      </div>
-                    </div>
-                    <PlayerPriceWidget playerId={record.playerId} rank={rank} compact />
-                  </div>
+                  <PlayerRefreshTimePanel playerId={record.playerId} />
                 </div>
 
                 <section className="player-skills-section" style={{ marginTop: '24px' }}>
@@ -811,52 +770,83 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                   <div className="skills-header">
                     <h3>Profile Overview</h3>
                   </div>
-                  {profileParagraphs.map((paragraph, index) => (
-                    <p key={`${record.playerId}-seo-${index}`} style={{ lineHeight: 1.65, marginTop: 0, marginBottom: '10px' }}>
-                      {paragraph}
-                    </p>
-                  ))}
-                  {!!profileTraitNames.length && (
-                    <p style={{ marginTop: '12px', marginBottom: '6px' }}>
-                      <strong>Traits:</strong> {profileTraitNames.join(', ')}
-                    </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Work Rates</div>
+                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{workRateAttackLabel} / {workRateDefenseLabel}</div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Weak Foot</div>
+                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{renderStars(record.weakFoot)}</div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Skill Moves</div>
+                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>{renderStars(record.skillMoves)}</div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '11px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '4px' }}>Strong Foot</div>
+                      <div style={{ fontWeight: 700, color: '#E6EEF2' }}>
+                        {record.strongFootSide || 'Unknown'} {record.strongFoot ? `(${renderStars(record.strongFoot)})` : ''}
+                      </div>
+                    </div>
+                  </div>
+
+                  {!!profileTraitItems.length && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <div style={{ fontSize: '12px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 700 }}>Traits</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                        {profileTraitItems.map((item) => (
+                          <div
+                            key={item.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: 'rgba(255,255,255,0.03)',
+                              border: '1px solid rgba(255,255,255,0.08)',
+                              borderRadius: '8px',
+                              padding: '8px 10px'
+                            }}
+                          >
+                            {item.icon ? <img src={item.icon} alt={item.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} /> : null}
+                            <span style={{ fontSize: '12px', color: '#E6EEF2', fontWeight: 600 }}>{item.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  {!!profileSkillNames.length && (
-                    <p style={{ marginTop: '8px', marginBottom: 0 }}>
-                      <strong>Abilities:</strong> {profileSkillNames.join(', ')}
-                    </p>
+
+                  {!!profileAbilityItems.length && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', color: '#98A0A6', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 700 }}>Abilities</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                        {profileAbilityItems.map((item) => (
+                          <div
+                            key={item.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: 'rgba(255,255,255,0.03)',
+                              border: '1px solid rgba(255,255,255,0.08)',
+                              borderRadius: '8px',
+                              padding: '8px 10px'
+                            }}
+                          >
+                            {item.icon ? <img src={item.icon} alt={item.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} /> : null}
+                            <span style={{ fontSize: '12px', color: '#E6EEF2', fontWeight: 600 }}>{item.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!profileTraitItems.length && !profileAbilityItems.length && (
+                    <p style={{ lineHeight: 1.65, marginTop: 0, marginBottom: 0 }}>{profileSummary}</p>
                   )}
                 </section>
 
-                <section className="player-price-history-section" data-auctionable={isAuctionable ? 'true' : 'false'} data-range="7D">
-                  <div className="price-history-header">
-                    <div>
-                      <h3>Price History</h3>
-                      <span className="price-history-subtitle">Track market movement over time</span>
-                    </div>
-                    <div className="price-history-ranges" role="tablist" aria-label="Price history ranges">
-                      {['1D', '3D', '7D', '15D', '30D', 'Custom'].map((label) => (
-                        <button key={`${record.playerId}-range-${label}`} className={`price-range-btn ${label === '7D' ? 'active' : ''}`} data-range={label} type="button">
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="price-history-custom">
-                    <div className="price-history-custom-label">
-                      Custom range: <span id="price-history-custom-days">7</span> days
-                    </div>
-                    <input className="price-history-slider" id="price-history-slider" type="range" min="1" max="30" defaultValue="7" />
-                  </div>
-                  <div className="price-history-body">
-                    <div className="price-history-empty" id="price-history-empty" style={{ position: 'static', display: 'block' }}>
-                      Interactive chart updates in client mode. Use the range controls to inspect snapshots.
-                    </div>
-                    <div className="price-history-chart">
-                      <canvas id="player-price-history-chart" />
-                    </div>
-                  </div>
-                </section>
+                <PlayerPriceHistorySection playerId={record.playerId} rank={rank} isAuctionable={isAuctionable} />
               </div>
             </section>
           </div>
