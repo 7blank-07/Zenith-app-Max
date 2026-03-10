@@ -1,5 +1,6 @@
 import HomeDashboardInteractions from './components/HomeDashboardInteractions.client';
 import MarketNavLink from './components/MarketNavLink.client';
+import MobileNavigation from './components/MobileNavigation.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
@@ -313,6 +314,8 @@ export default async function HomePage() {
           </section>
         </div>
       </main>
+
+      <MobileNavigation activeView="home" />
 
       <footer className="zenith-footer">
         <div className="zenith-footer-inner">

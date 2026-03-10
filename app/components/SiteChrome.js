@@ -1,5 +1,6 @@
 import SiteChromeInteractions from './SiteChromeInteractions.client';
 import MarketNavLink from './MarketNavLink.client';
+import MobileNavigation from './MobileNavigation.client';
 
 function getNavClass(activeView, view) {
   return activeView === view ? 'nav-link active' : 'nav-link';
@@ -64,6 +65,8 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
       )}
 
       {children}
+
+      <MobileNavigation activeView={activeView} />
 
       <footer className="zenith-footer">
         <div className="zenith-footer-inner">
