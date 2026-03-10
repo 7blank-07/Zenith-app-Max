@@ -2,14 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
-import { createClient } from '@supabase/supabase-js';
 
 const RANGE_OPTIONS = ['1D', '3D', '7D', '15D', '30D', 'Custom'];
-const FALLBACK_SUPABASE_URL = 'https://ugszalubwvartwalsejx.supabase.co';
-const FALLBACK_SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnc3phbHVid3ZhcnR3YWxzZWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NTg4MzksImV4cCI6MjA3NDIzNDgzOX0.wHH6DctC6mtNcqZ4VeCdlPHk_Tg9xbfrY90EAUKvI8k';
-
-let supabaseClient = null;
 
 function normalizeRank(rankValue) {
   const parsed = Number.parseInt(String(rankValue ?? '0'), 10);
@@ -54,50 +48,19 @@ function formatMarketPrice(price) {
   return value.toLocaleString();
 }
 
-function getSupabaseClient() {
-  if (typeof window === 'undefined') return null;
-  if (supabaseClient) return supabaseClient;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-
-  supabaseClient = createClient(url, key, { auth: { persistSession: false } });
-  return supabaseClient;
-}
-
-async function fetchPriceHistoryFromSupabase({ playerId, startTime, endTime, priceColumn }) {
-  const client = getSupabaseClient();
-  if (!client) {
-    throw new Error('Supabase client not available');
+async function fetchPriceHistoryFromApi({ playerId, rank, days }) {
+  const params = new URLSearchParams({
+    id: String(playerId),
+    rank: String(rank),
+    days: String(days)
+  });
+  const response = await fetch(`/api/player-price-history?${params.toString()}`);
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${response.status}`);
   }
-
-  let query = client
-    .from('price_snapshots')
-    .select(`asset_id, captured_at, ${priceColumn}`)
-    .eq('asset_id', playerId)
-    .not(priceColumn, 'is', null)
-    .order('captured_at', { ascending: true });
-
-  if (startTime) query = query.gte('captured_at', startTime);
-  if (endTime) query = query.lte('captured_at', endTime);
-
-  const primary = await query;
-  if (!primary.error) return primary.data || [];
-  if (!/statement timeout/i.test(String(primary.error.message || ''))) {
-    throw primary.error;
-  }
-
-  const fallback = await client
-    .from('price_snapshots')
-    .select(`asset_id, captured_at, ${priceColumn}`)
-    .eq('asset_id', playerId)
-    .not(priceColumn, 'is', null)
-    .order('captured_at', { ascending: false })
-    .limit(2400);
-
-  if (fallback.error) throw fallback.error;
-  return (fallback.data || []).reverse();
+  const json = await response.json();
+  return Array.isArray(json.snapshots) ? json.snapshots : [];
 }
 
 export default function PlayerPriceHistorySection({ playerId, rank = 0, isAuctionable = true }) {
@@ -125,31 +88,28 @@ export default function PlayerPriceHistorySection({ playerId, rank = 0, isAuctio
       setError('');
 
       try {
-        const priceColumn = `price${normalizedRank}`;
-        const startTime = new Date();
-        startTime.setDate(startTime.getDate() - activeDays);
-        const endTime = new Date();
-
-        const history = await fetchPriceHistoryFromSupabase({
+        console.info('[PRICE HISTORY] Fetching', { playerId, rank: normalizedRank, days: activeDays });
+        const snapshots = await fetchPriceHistoryFromApi({
           playerId,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString(),
-          priceColumn
+          rank: normalizedRank,
+          days: activeDays
         });
 
-        const normalized = (Array.isArray(history) ? history : [])
+        const normalized = (Array.isArray(snapshots) ? snapshots : [])
           .map((entry) => ({
-            date: new Date(entry.captured_at),
-            price: Number(entry[priceColumn])
+            date: new Date(entry.capturedAt),
+            price: Number(entry.price)
           }))
-          .filter((entry) => Number.isFinite(entry.date.getTime()) && Number.isFinite(entry.price))
+          .filter((entry) => Number.isFinite(entry.date.getTime()) && Number.isFinite(entry.price) && entry.price > 0)
           .sort((a, b) => a.date.getTime() - b.date.getTime());
 
         if (cancelled) return;
-        setPoints(downsampleHistory(normalized, 200));
+        const downsampled = downsampleHistory(normalized, 200);
+        console.info('[PRICE HISTORY] Loaded', { playerId, pointsRaw: normalized.length, pointsDownsampled: downsampled.length });
+        setPoints(downsampled);
       } catch (requestError) {
         if (cancelled) return;
-        console.error('[PRICE HISTORY] Failed to load history:', requestError);
+        console.error('[PRICE HISTORY] Failed to load history:', { playerId, rank: normalizedRank, days: activeDays, error: requestError?.message || requestError });
         setError('Unable to load price history.');
         setPoints([]);
       } finally {
