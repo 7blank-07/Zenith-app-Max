@@ -206,7 +206,16 @@ function renderPlayerRow(player) {
   const metaParts = [toText(player.team), toText(player.league)].filter(Boolean);
   const metaText = metaParts.length ? metaParts.join(' • ') : toText(player.position || 'Unknown');
   const formattedPrice = formatPrice(player.price);
-  const shouldShowPrice = !player.is_untradable;
+  const priceMarkup = player.is_untradable
+    ? `<img src="/assets/images/untradable-red-flag.png"
+        alt="Non-auctionable"
+        style="height: 18px; width: auto; vertical-align: middle; opacity: 0.95; margin-left: 6px;"
+        title="Non-auctionable">`
+    : formattedPrice === '—'
+      ? '<span class="watchlist-price-empty">Loading...</span>'
+      : `<span class="price-inline"><img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon"><span class="price-text">${escapeHtml(
+          formattedPrice
+        )}</span></span>`;
   const alternatePositions = toText(player.alternate_position)
     .split(',')
     .map((entry) => toText(entry).toUpperCase())
@@ -275,6 +284,9 @@ function renderPlayerRow(player) {
       <div class="player-row-info">
         <div class="player-info-name">${escapeHtml(player.name)}</div>
         <div class="player-info-meta">${escapeHtml(metaText)}</div>
+        <div class="player-price" style="color:#fbbf24; font-weight:500; font-size:0.9rem; margin-top:4px; min-height:20px; display:flex; align-items:center;">
+          ${priceMarkup}
+        </div>
         ${
           alternatePositions.length
             ? `<div class="player-info-secondary">${alternatePositions
@@ -284,7 +296,7 @@ function renderPlayerRow(player) {
         }
       </div>
 
-      <div class="player-row-stats">
+      <div class="player-row-stats player-card-stats-row">
         <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.pace)}</div><div class="stat-pill-label">PAC</div></div>
         <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.shooting)}</div><div class="stat-pill-label">SHO</div></div>
         <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.passing)}</div><div class="stat-pill-label">PAS</div></div>
@@ -293,25 +305,11 @@ function renderPlayerRow(player) {
         <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.physical)}</div><div class="stat-pill-label">PHY</div></div>
       </div>
 
-      <div class="watchlist-row-actions">
-        <div class="player-price watchlist-player-price">
-          ${
-            shouldShowPrice
-              ? formattedPrice === '—'
-                ? '<span class="watchlist-price-empty">Loading...</span>'
-                : `<span class="price-inline"><img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon"><span class="price-text">${escapeHtml(
-                    formattedPrice
-                  )}</span></span>`
-              : ''
-          }
-        </div>
-
-        <button class="player-row-watchlist active" data-unique-id="${escapeHtml(uniqueId)}" type="button" aria-label="Remove from watchlist">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-          </svg>
-        </button>
-      </div>
+      <button class="player-row-watchlist active" data-unique-id="${escapeHtml(uniqueId)}" type="button" aria-label="Remove from watchlist">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
     </div>
   `;
 }

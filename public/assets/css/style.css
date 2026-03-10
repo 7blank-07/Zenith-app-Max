@@ -3877,7 +3877,7 @@ h1, h3, h4, h5, h6 {
 .player-row-watchlist {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
-  color: var(--renderz-text-secondary);
+  color: #9e1717;
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
@@ -3887,13 +3887,13 @@ h1, h3, h4, h5, h6 {
 
 .player-row-watchlist:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--color-teal-500);
+  color: #9e1717;
   border-color: var(--color-teal-500);
 }
 
 .player-row-watchlist.active {
   background: #0E1114;
-  color: #b71111;
+  color: #9e1717;
   border-color: transparent;
 }
 
@@ -9385,24 +9385,57 @@ watchlist-view .view-content {
 
 /* Responsive: Mobile */
 @media (max-width: 768px) {
+  #watchlist-view {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+
   #watchlist-players-grid .player-row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "card info action"
+      "stats stats stats";
+    align-items: start;
+    column-gap: 12px;
+    row-gap: 12px;
+    padding: 14px 16px 16px;
+  }
+
+  #watchlist-players-grid .player-row-card {
+    grid-area: card;
+    width: 110px;
+    height: 136px;
+    margin-right: 0;
   }
 
   #watchlist-players-grid .player-row-info {
-    flex: 1 1 calc(100% - 112px);
+    grid-area: info;
+    flex: initial;
     min-width: 0;
+    padding-top: 2px;
+  }
+
+  #watchlist-players-grid .player-row-watchlist {
+    grid-area: action;
+    align-self: center;
+    justify-self: end;
+    position: static;
+    top: auto;
+    right: auto;
+    margin-top: 0;
   }
 
   #watchlist-players-grid .player-row-stats {
-    order: 3;
-    flex: 1 1 100%;
-    margin-top: 10px;
+    grid-area: stats;
+    order: initial;
+    flex: initial;
+    width: 100%;
+    margin-top: 0 !important;
+    padding-bottom: 2px;
   }
 
-  #watchlist-players-grid .watchlist-row-actions {
-    order: 2;
-    margin-left: auto;
+  #watchlist-view .results-info {
+    margin-left: 0 !important;
   }
 
   .watchlist-layout {
@@ -9480,6 +9513,42 @@ watchlist-view .view-content {
   .filter-chip {
     max-width: 100%;
     word-break: break-word;
+  }
+}
+
+@media (max-width: 430px) {
+  #watchlist-players-grid .player-row {
+    grid-template-columns: 98px minmax(0, 1fr) auto;
+    padding-inline: 12px;
+  }
+
+  #watchlist-players-grid .player-row-card {
+    width: 98px;
+    height: 124px;
+  }
+}
+
+@media (max-width: 360px) {
+  #watchlist-players-grid .player-row {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "card info"
+      "stats stats" !important;
+    padding-inline: 10px;
+    padding-right: 52px;
+    position: relative;
+  }
+
+  #watchlist-players-grid .player-row-card {
+    width: 92px;
+    height: 118px;
+  }
+
+  #watchlist-players-grid .player-row-watchlist {
+    position: absolute !important;
+    top: 16px;
+    right: 10px;
+    margin: 0;
   }
 }
 
@@ -11602,6 +11671,36 @@ body.overflow-hidden {
     }
 
     .player-row-stats.player-card-stats-row::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    #watchlist-players-grid .player-row {
+        display: grid !important;
+        grid-template-columns: 110px minmax(0, 1fr) auto !important;
+        grid-template-areas:
+          "card info action"
+          "stats stats stats";
+    }
+
+    #watchlist-players-grid .player-row-stats.player-card-stats-row {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow: visible;
+        flex-wrap: unset;
+        width: 100%;
+        margin: 0 !important;
+        gap: 8px 6px;
+        padding-right: 0;
+    }
+
+    #watchlist-players-grid .player-row-stats.player-card-stats-row .stat-pill {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #watchlist-players-grid .player-row-stats.player-card-stats-row::-webkit-scrollbar {
         display: none;
     }
 }
