@@ -7,11 +7,12 @@ const FALLBACK_SUPABASE_URL = 'https://ugszalubwvartwalsejx.supabase.co';
 const FALLBACK_SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnc3phbHVid3ZhcnR3YWxzZWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NTg4MzksImV4cCI6MjA3NDIzNDgzOX0.wHH6DctC6mtNcqZ4VeCdlPHk_Tg9xbfrY90EAUKvI8k';
 
-// Tiered query limits — descend to smaller limits on timeout to stay under DB statement timeout
+// Tiered query limits — descend to smaller limits on timeout to stay under DB statement timeout.
+// Null filtering is done in JS (not in DB) so the query stays simple and index-friendly.
 const QUERY_TIERS = [
-  { limit: 300, withDateFilter: true },
-  { limit: 150, withDateFilter: false },
-  { limit: 60,  withDateFilter: false }
+  { limit: 500, withDateFilter: true },
+  { limit: 200, withDateFilter: false },
+  { limit: 80,  withDateFilter: false }
 ];
 
 function isTimeoutError(err) {
@@ -41,7 +42,6 @@ async function queryTier(supabase, { playerId, priceColumn, startIso, limit, wit
     .from('price_snapshots')
     .select(`asset_id, captured_at, ${priceColumn}`)
     .eq('asset_id', playerId)
-    .not(priceColumn, 'is', null)
     .order('captured_at', { ascending: false })
     .limit(limit);
 
