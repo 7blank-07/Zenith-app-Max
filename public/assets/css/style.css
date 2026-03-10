@@ -11861,6 +11861,115 @@ body.overflow-hidden {
   }
 }
 
+/* ==================== PLAYER DETAIL MOBILE/TABLET FLOW ==================== */
+@media (max-width: 1200px) {
+  .player-detail-shell .player-top-section {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 22px !important;
+  }
+
+  .player-detail-shell .player-summary-column,
+  .player-detail-shell .player-detail-main-flow {
+    width: 100%;
+  }
+
+  .player-detail-shell .player-detail-main-flow {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-detail-shell .player-rank-refresh-grid {
+    display: contents !important;
+  }
+
+  .player-detail-shell .player-rank-panel {
+    order: 1;
+  }
+
+  .player-detail-shell .player-skills-section {
+    order: 2;
+    margin-top: 0;
+  }
+
+  .player-detail-shell .player-price-history-section {
+    order: 3;
+    margin-top: 0;
+  }
+
+  .player-detail-shell .player-refresh-container {
+    order: 4;
+    margin-top: 0 !important;
+  }
+
+  .player-detail-shell .player-skills-section .skills-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-profile-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .player-detail-shell {
+    padding: 16px 12px 30px !important;
+    border-radius: 14px !important;
+  }
+
+  .player-detail-shell .player-detail-content {
+    padding: 16px 12px 0 !important;
+  }
+
+  .player-detail-shell .player-top-section {
+    margin-bottom: 24px !important;
+    gap: 18px !important;
+  }
+
+  .player-detail-shell .player-summary-panel {
+    padding: 20px 14px !important;
+  }
+
+  .player-detail-shell .player-rank-panel > div:first-child {
+    flex-wrap: wrap;
+  }
+
+  .player-detail-shell .player-rank-panel .reset-rank-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .player-detail-shell .player-rank-panel .rank-cards-grid {
+    gap: 10px !important;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-profile-grid,
+  .player-detail-shell .player-stats-section .player-detail-profile-media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .player-detail-shell .player-skills-section .skills-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-stat-card {
+    padding: 14px !important;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-profile-grid,
+  .player-detail-shell .player-stats-section .player-detail-profile-media-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Global background coverage for Home/Database */
 html,
 body {

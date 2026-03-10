@@ -231,6 +231,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
       <main className="main-content">
       <div id="player-detail-view" className="view active">
         <div
+          className="player-detail-shell"
           style={{
             maxWidth: '1400px',
             margin: '0 auto',
@@ -242,7 +243,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
             borderRadius: '16px'
           }}
         >
-          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 24px 0 24px' }}>
+          <div className="player-detail-content" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 24px 0 24px' }}>
             <button
               id="back-to-players-btn"
               data-go-back
@@ -272,8 +273,9 @@ export default async function PlayerDetailPage({ params, searchParams }) {
               className="player-top-section"
               style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '28px', marginBottom: '32px' }}
             >
-              <div>
+              <div className="player-summary-column">
                 <div
+                  className="player-summary-panel"
                   style={{
                     background: 'var(--color-graphite-800, #14181C)',
                     border: '1px solid rgba(0,194,168,0.15)',
@@ -463,63 +465,65 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                         </>
                       )}
                     </div>
+
+                    <button
+                      className="player-watchlist-btn"
+                      data-watchlist-toggle
+                      data-unique-id={watchlistUniqueId}
+                      data-player-id={record.playerId}
+                      data-player-name={record.name}
+                      data-rank={rank}
+                      data-untradable={record.isUntradable ? '1' : '0'}
+                      data-position={record.position || ''}
+                      data-ovr={record.ovr || 0}
+                      data-team={record.club || ''}
+                      data-club={record.club || ''}
+                      data-league={record.league || ''}
+                      data-nation={record.nation || ''}
+                      data-event={record.eventName || record.event || ''}
+                      data-skill={record.skillMoves || 0}
+                      data-price={record.price || 0}
+                      data-card-background={cardBackground}
+                      data-player-image={cardImage}
+                      data-nation-flag={record.nationFlag || ''}
+                      data-club-flag={record.clubFlag || ''}
+                      data-league-image={record.leagueImage || ''}
+                      data-color-name={record.colorName || '#FFFFFF'}
+                      data-color-rating={record.colorRating || '#FFB86B'}
+                      data-color-position={record.colorPosition || '#FFFFFF'}
+                      data-alternate-position={record.alternatePosition || ''}
+                      type="button"
+                      style={{
+                        width: '100%',
+                        background: 'transparent',
+                        border: '1px solid rgba(255,255,255,0.15)',
+                        color: 'var(--color-text-muted, #98A0A6)',
+                        padding: '16px 24px',
+                        borderRadius: 'var(--radius-base, 8px)',
+                        cursor: 'pointer',
+                        fontSize: '15px',
+                        fontWeight: 700,
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        marginTop: '16px'
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                      <span data-watchlist-label>Add to Watchlist</span>
+                    </button>
                   </div>
                 </div>
-
-                <button
-                  data-watchlist-toggle
-                  data-unique-id={watchlistUniqueId}
-                  data-player-id={record.playerId}
-                  data-player-name={record.name}
-                  data-rank={rank}
-                  data-untradable={record.isUntradable ? '1' : '0'}
-                  data-position={record.position || ''}
-                  data-ovr={record.ovr || 0}
-                  data-team={record.club || ''}
-                  data-club={record.club || ''}
-                  data-league={record.league || ''}
-                  data-nation={record.nation || ''}
-                  data-event={record.eventName || record.event || ''}
-                  data-skill={record.skillMoves || 0}
-                  data-price={record.price || 0}
-                  data-card-background={cardBackground}
-                  data-player-image={cardImage}
-                  data-nation-flag={record.nationFlag || ''}
-                  data-club-flag={record.clubFlag || ''}
-                  data-league-image={record.leagueImage || ''}
-                  data-color-name={record.colorName || '#FFFFFF'}
-                  data-color-rating={record.colorRating || '#FFB86B'}
-                  data-color-position={record.colorPosition || '#FFFFFF'}
-                  data-alternate-position={record.alternatePosition || ''}
-                  type="button"
-                  style={{
-                    width: '100%',
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: 'var(--color-text-muted, #98A0A6)',
-                    padding: '16px 24px',
-                    borderRadius: 'var(--radius-base, 8px)',
-                    cursor: 'pointer',
-                    fontSize: '15px',
-                    fontWeight: 700,
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    marginTop: '16px'
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                  <span data-watchlist-label>Add to Watchlist</span>
-                </button>
               </div>
 
-              <div>
+              <div className="player-detail-main-flow">
                 <div className="player-rank-refresh-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div
+                    className="player-rank-panel"
                     style={{
                       background: 'var(--color-graphite-800)',
                       border: '1px solid rgba(255,255,255,0.08)',
