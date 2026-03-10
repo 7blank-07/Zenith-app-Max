@@ -44,12 +44,6 @@ const MOBILE_TOOL_ITEMS = [
   }
 ];
 
-function handleKeyboardSelect(event, callback) {
-  if (event.key !== 'Enter' && event.key !== ' ') return;
-  event.preventDefault();
-  callback();
-}
-
 function getButtonClassName(isActive, extraClassName = '') {
   return `${['mobile-nav-btn', extraClassName, isActive ? 'active' : ''].filter(Boolean).join(' ')}`;
 }
@@ -63,7 +57,7 @@ export default function MobileNavigation({ activeView = '' }) {
     if (!isToolsSheetOpen) return undefined;
 
     const previousOverflow = document.body.style.overflow;
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
     const handleResize = (event) => {
       if (!event.matches) {
         setIsToolsSheetOpen(false);
@@ -179,11 +173,23 @@ export default function MobileNavigation({ activeView = '' }) {
         </button>
       </nav>
 
-      <div id="tools-sheet" className={`tools-sheet${isToolsSheetOpen ? ' active' : ''}`} aria-hidden={isToolsSheetOpen ? 'false' : 'true'}>
+      <div
+        className={`tools-sheet-backdrop${isToolsSheetOpen ? ' active' : ''}`}
+        aria-hidden={isToolsSheetOpen ? 'false' : 'true'}
+        onClick={closeToolsSheet}
+      />
+      <div
+        id="tools-sheet"
+        className={`tools-sheet${isToolsSheetOpen ? ' active' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={isToolsSheetOpen ? 'false' : 'true'}
+        aria-labelledby="mobile-tools-title"
+      >
         <div className="tools-sheet-handle" />
         <div className="tools-sheet-content">
           <div className="tools-sheet-header">
-            <h2>Tools</h2>
+            <h2 id="mobile-tools-title">Tools</h2>
             <button className="tools-sheet-close" type="button" onClick={closeToolsSheet} aria-label="Close tools menu">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -193,17 +199,15 @@ export default function MobileNavigation({ activeView = '' }) {
           </div>
           <div className="tools-sheet-grid">
             {MOBILE_TOOL_ITEMS.map((item) => (
-              <div
+              <button
                 key={item.key}
                 className="tool-item"
-                role="button"
-                tabIndex={0}
+                type="button"
                 onClick={() => navigateTo(item.href)}
-                onKeyDown={(event) => handleKeyboardSelect(event, () => navigateTo(item.href))}
               >
                 <div className="tool-item-icon">{item.icon}</div>
                 <span>{item.label}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
