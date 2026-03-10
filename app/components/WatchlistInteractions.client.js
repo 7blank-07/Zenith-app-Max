@@ -763,6 +763,12 @@ export default function WatchlistInteractions() {
       if (!event.key || (event.key !== 'watchlist' && event.key !== 'watchlistPlayers')) return;
       refreshFromStorage();
     });
+    bind(window, 'focus', refreshFromStorage);
+    bind(window, 'pageshow', refreshFromStorage);
+    bind(document, 'visibilitychange', () => {
+      if (document.hidden) return;
+      refreshFromStorage();
+    });
 
     refreshFromStorage();
 

@@ -505,13 +505,9 @@ export default function PlayersDatabaseInteractions({
   useEffect(() => {
     if (!storageHydrated) return;
     writeArrayStorage('watchlist', watchlist);
-    window.dispatchEvent(new Event('watchlist-updated'));
-  }, [storageHydrated, watchlist]);
-
-  useEffect(() => {
-    if (!storageHydrated) return;
     writeArrayStorage('watchlistPlayers', watchlistPlayers);
-  }, [storageHydrated, watchlistPlayers]);
+    window.dispatchEvent(new Event('watchlist-updated'));
+  }, [storageHydrated, watchlist, watchlistPlayers]);
 
   const watchedIds = useMemo(() => new Set(watchlist), [watchlist]);
 
