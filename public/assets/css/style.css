@@ -895,6 +895,13 @@ select.form-control {
   padding: 26px; /*26 can be better */
 }
 
+.player-detail-main-content {
+  width: 100%;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .view {
   display: none;
   animation: fadeIn 0.3s ease;
@@ -11918,8 +11925,8 @@ body.overflow-hidden {
 
 @media (max-width: 768px) {
   .player-detail-shell {
-    padding: 16px 12px 30px !important;
-    border-radius: 14px !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
   }
 
   .player-detail-shell .player-detail-content {

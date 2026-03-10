@@ -228,19 +228,20 @@ export default async function PlayerDetailPage({ params, searchParams }) {
 
   return (
     <SiteChrome activeView="players">
-      <main className="main-content">
+      <main className="main-content player-detail-main-content">
       <div id="player-detail-view" className="view active">
         <div
           className="player-detail-shell"
           style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            padding: '24px 16px 40px',
+            width: '100%',
+            maxWidth: 'none',
+            margin: '0',
+            padding: '0 0 32px',
             background: 'rgba(20, 24, 28, 0.5)',
             backdropFilter: 'blur(25px)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             minHeight: '100vh',
-            borderRadius: '16px'
+            borderRadius: '0'
           }}
         >
           <div className="player-detail-content" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 24px 0 24px' }}>
