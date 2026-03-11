@@ -63,7 +63,9 @@ export default async function ToolsPage({ searchParams }) {
   const players = await fetchPlayersByIds(topIds, { rank: 0 });
   const initialTool = normalizeToolParam(searchParams?.tool);
   const toolPlayers = players.map(serializeToolPlayer);
-  const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}`;
+  const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}${
+    initialTool === 'compare' ? ' main-content--compare' : ''
+  }`;
 
   console.info('[metrics] /tools render', {
     elapsedMs: Date.now() - startedAt,

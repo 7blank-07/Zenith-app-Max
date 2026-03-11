@@ -129,6 +129,12 @@ function getFinalStatValue(player, trainingBoosts, skillBoosts, ...names) {
   return Math.max(0, Math.round(safeBase + trainingBoost + skillBoost));
 }
 
+export function resolveLegacyStatValue(player, ...names) {
+  const trainingBoosts = player?.training_boosts ?? player?.trainingBoosts ?? null;
+  const skillBoosts = player?.skill_boosts ?? player?.skillBoosts ?? null;
+  return getFinalStatValue(player, trainingBoosts, skillBoosts, ...names);
+}
+
 function roundHalfUp(value) {
   return Math.floor(value + 0.5);
 }

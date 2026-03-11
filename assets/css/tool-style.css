@@ -13,6 +13,19 @@ main.main-content.main-content--squadbuilder {
   overflow: visible;
 }
 
+main.main-content.main-content--compare {
+  max-width: 100% !important;
+  width: 100% !important;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59, 130, 246, 0.18), transparent 42%),
+    radial-gradient(circle at 82% 100%, rgba(14, 165, 233, 0.14), transparent 48%),
+    linear-gradient(180deg, #071124 0%, #0a1429 100%);
+}
+
 .squad-page-view#squad-builder-modal {
   width: 100%;
   height: auto;
@@ -4995,6 +5008,19 @@ body.stats-open #squad-builder-modal {
   animation: overlayFadeIn 0.4s ease;
 }
 
+.compare-modal-overlay.compare-modal-overlay--page {
+  position: relative;
+  inset: auto;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 0;
+  padding: 24px 18px 32px;
+  background: transparent;
+  backdrop-filter: none;
+  z-index: auto;
+  animation: none;
+}
+
 @keyframes overlayFadeIn {
   from {
     opacity: 0;
@@ -5018,6 +5044,19 @@ body.stats-open #squad-builder-modal {
   flex-direction: column;
   overflow: hidden;
   animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.compare-modal.compare-modal--page {
+  width: min(1480px, 100%);
+  height: auto;
+  min-height: min(78vh, 920px);
+  max-height: none;
+  border-radius: 24px;
+  animation: none;
+}
+
+.compare-modal.compare-modal--page .compare-body {
+  min-height: min(68vh, 760px);
 }
 
 .compare-body {
@@ -5728,6 +5767,22 @@ body.stats-open #squad-builder-modal {
     height: 100vh;
     max-height: 100vh;
     border-radius: 0;
+  }
+
+  .compare-modal-overlay.compare-modal-overlay--page {
+    padding: 0;
+  }
+
+  .compare-modal.compare-modal--page {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .compare-modal.compare-modal--page .compare-body {
+    min-height: 0;
   }
 
   .compare-header {

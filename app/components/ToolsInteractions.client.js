@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { normalizeSearchText } from './search-normalization';
 import SquadPlayerCustomizationModal from './SquadPlayerCustomizationModal';
+import ComparePlayersTool from './ComparePlayersTool.client';
 
 const TOOL_ALIASES = Object.freeze({
   squadbuilder: 'squadbuilder',
@@ -527,39 +528,6 @@ const SQUAD_FORMATIONS = Object.freeze({
   ]
 });
 
-const BASIC_COMPARE_STATS = Object.freeze([
-  { key: 'pace', label: 'Pace' },
-  { key: 'shooting', label: 'Shooting' },
-  { key: 'passing', label: 'Passing' },
-  { key: 'dribbling', label: 'Dribbling' },
-  { key: 'defending', label: 'Defending' },
-  { key: 'physical', label: 'Physical' }
-]);
-
-const ADVANCED_COMPARE_STATS = Object.freeze([
-  { key: 'acceleration', label: 'Acceleration' },
-  { key: 'sprintSpeed', label: 'Sprint Speed' },
-  { key: 'finishing', label: 'Finishing' },
-  { key: 'shotPower', label: 'Shot Power' },
-  { key: 'longShot', label: 'Long Shot' },
-  { key: 'vision', label: 'Vision' },
-  { key: 'crossing', label: 'Crossing' },
-  { key: 'shortPassing', label: 'Short Passing' },
-  { key: 'longPassing', label: 'Long Passing' },
-  { key: 'agility', label: 'Agility' },
-  { key: 'balance', label: 'Balance' },
-  { key: 'reactions', label: 'Reactions' },
-  { key: 'ballControl', label: 'Ball Control' },
-  { key: 'marking', label: 'Marking' },
-  { key: 'standingTackle', label: 'Standing Tackle' },
-  { key: 'slidingTackle', label: 'Sliding Tackle' },
-  { key: 'heading', label: 'Heading' },
-  { key: 'strength', label: 'Strength' },
-  { key: 'stamina', label: 'Stamina' }
-]);
-
-const COMPARE_SKILL_OPTIONS = Object.freeze(['Pace', 'Shooting', 'Passing', 'Dribbling', 'Defending', 'Physical']);
-
 const FIELD_THEMES = Object.freeze({
   'stadium-blue': {
     id: 'stadium-blue',
@@ -967,12 +935,6 @@ function getPlayerType(player) {
   return player?.leagueImage ? 'normal' : 'hero';
 }
 
-function getPlayerStat(player, key) {
-  const attrValue = toNumber(player?.attributes?.[key], Number.NaN);
-  if (Number.isFinite(attrValue)) return attrValue;
-  return toNumber(player?.[key], 0);
-}
-
 function formatCoins(value) {
   const safe = parsePriceValue(value);
   if (!safe) return '0';
@@ -980,13 +942,6 @@ function formatCoins(value) {
   if (safe >= 1000000) return `${(safe / 1000000).toFixed(1)}M`;
   if (safe >= 1000) return `${(safe / 1000).toFixed(0)}K`;
   return String(Math.round(safe));
-}
-
-function getValueClass(value, min, max) {
-  if (max === min) return 'neutral';
-  if (value === max) return 'green';
-  if (value === min) return 'red';
-  return 'yellow';
 }
 
 function normalizePlayer(player, index) {
@@ -1178,18 +1133,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [squadLivePrices, setSquadLivePrices] = useState({});
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
   const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null);
-
-  const [comparePlayers, setComparePlayers] = useState([]);
-  const [compareView, setCompareView] = useState('basic');
-  const [compareSearchOpen, setCompareSearchOpen] = useState(false);
-  const [compareSearchQuery, setCompareSearchQuery] = useState('');
-  const [compareCustomizations, setCompareCustomizations] = useState({});
-  const [compareConfigPlayerId, setCompareConfigPlayerId] = useState(null);
-  const [compareConfigDraft, setCompareConfigDraft] = useState({
-    rank: 0,
-    trainingLevel: 0,
-    selectedSkills: []
-  });
 
   const [shardMode, setShardMode] = useState('counter');
   const [shardCounts, setShardCounts] = useState({
@@ -1416,11 +1359,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, [activeTool]);
 
   useEffect(() => {
-    const lockBody =
-      activeTool === 'squadbuilder' ||
-      activeTool === 'compare' ||
-      compareSearchOpen ||
-      !!selectedPlayerForCustomization;
+    const lockBody = activeTool === 'squadbuilder' || !!selectedPlayerForCustomization;
     if (lockBody) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -1429,7 +1368,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [activeTool, compareSearchOpen, selectedPlayerForCustomization]);
+  }, [activeTool, selectedPlayerForCustomization]);
 
   useEffect(() => {
     const mainContent = document.querySelector('main.main-content');
@@ -1447,8 +1386,14 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       mainContent.classList.remove('main-content--squadbuilder');
       mainContent.style.removeProperty('--squadbuilder-viewport-height');
     }
+    if (activeTool === 'compare') {
+      mainContent.classList.add('main-content--compare');
+    } else {
+      mainContent.classList.remove('main-content--compare');
+    }
     return () => {
       mainContent.classList.remove('main-content--squadbuilder');
+      mainContent.classList.remove('main-content--compare');
       mainContent.style.removeProperty('--squadbuilder-viewport-height');
       window.removeEventListener('resize', syncSquadViewportHeight);
     };
@@ -1485,10 +1430,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         });
         return;
       }
-      if (compareConfigPlayerId) {
-        setCompareConfigPlayerId(null);
-        return;
-      }
       if (badgesModalOpen) {
         setBadgesModalOpen(false);
         return;
@@ -1501,10 +1442,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         setSquadFilterOpen(false);
         return;
       }
-      if (compareSearchOpen) {
-        setCompareSearchOpen(false);
-        return;
-      }
       if (activeTool !== 'none') {
         setActiveTool('none');
       }
@@ -1514,8 +1451,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, [
     activeTool,
     badgesModalOpen,
-    compareConfigPlayerId,
-    compareSearchOpen,
     selectedPlayerForCustomization,
     squadFilterOpen,
     themeSelectorOpen
@@ -1852,53 +1787,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       .slice(0, 140);
   }, [assignedPlayerIds, normalizedPlayers, squadFilters, squadSearchQuery]);
 
-  const comparePositionMode = useMemo(() => {
-    if (!comparePlayers.length) return null;
-    return comparePlayers[0].position === 'GK' ? 'gk' : 'outfield';
-  }, [comparePlayers]);
-
-  const compareStatsConfig = compareView === 'basic' ? BASIC_COMPARE_STATS : ADVANCED_COMPARE_STATS;
-
-  const compareRows = useMemo(() => {
-    return compareStatsConfig.map((stat) => {
-      const values = comparePlayers.map((player) => getPlayerStat(player, stat.key));
-      const max = values.length ? Math.max(...values) : 0;
-      const min = values.length ? Math.min(...values) : 0;
-      const classes = values.map((value) => getValueClass(value, min, max));
-      return {
-        key: stat.key,
-        label: stat.label,
-        values,
-        classes
-      };
-    });
-  }, [comparePlayers, compareStatsConfig]);
-
-  const compareTotals = useMemo(() => {
-    if (!comparePlayers.length) return [];
-    const totals = comparePlayers.map((player) =>
-      compareStatsConfig.reduce((sum, stat) => sum + getPlayerStat(player, stat.key), 0)
-    );
-    const max = Math.max(...totals);
-    const min = Math.min(...totals);
-    const classes = totals.map((value) => getValueClass(value, min, max));
-    return totals.map((value, index) => ({ value, className: classes[index] }));
-  }, [comparePlayers, compareStatsConfig]);
-
-  const compareSearchResults = useMemo(() => {
-    const query = toText(compareSearchQuery);
-    if (query.length < 2) return [];
-    return normalizedPlayers
-      .filter((player) => {
-        if (comparePlayers.some((selected) => selected.playerId === player.playerId)) return false;
-        if (comparePositionMode === 'gk' && player.position !== 'GK') return false;
-        if (comparePositionMode === 'outfield' && player.position === 'GK') return false;
-        const searchable = toText(`${player.name} ${player.position} ${player.club} ${player.league} ${player.nation}`);
-        return searchable.includes(query);
-      })
-      .slice(0, 40);
-  }, [comparePlayers, comparePositionMode, compareSearchQuery, normalizedPlayers]);
-
   const shardCountTotal = useMemo(
     () => SHARD_OVRS.reduce((sum, ovr) => sum + toNumber(shardCounts[ovr], 0) * SHARD_COSTS[ovr], 0),
     [shardCounts]
@@ -2017,28 +1905,9 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     setSelectedPlayerForCustomization(null);
   };
 
-  const updateSquadPlayerCustomization = (payload = {}) => {
-    const playerId = String(payload?.playerId || selectedPlayerForCustomization?.playerId || '').trim();
+  const upsertCustomizedPlayer = (payload = {}) => {
+    const playerId = String(payload?.playerId || '').trim();
     if (!playerId) return;
-
-    if (payload?.removePlayer) {
-      const selectedSlot = String(selectedPlayerForCustomization?.slotId || '').trim();
-      const selectedBenchIndex = Number.isInteger(selectedPlayerForCustomization?.benchIndex)
-        ? selectedPlayerForCustomization.benchIndex
-        : -1;
-      if (selectedSlot) {
-        removeStarter(selectedSlot);
-      } else if (selectedBenchIndex >= 0) {
-        removeBenchPlayer(selectedBenchIndex);
-      } else {
-        const fallbackSlot = Object.entries(starters).find(([, id]) => id === playerId)?.[0];
-        if (fallbackSlot) removeStarter(fallbackSlot);
-        const fallbackBenchIndex = bench.findIndex((id) => id === playerId);
-        if (fallbackBenchIndex >= 0) removeBenchPlayer(fallbackBenchIndex);
-      }
-      setSelectedPlayerForCustomization(null);
-      return;
-    }
 
     const currentPlayer = playersById.get(playerId);
     if (!currentPlayer) return;
@@ -2068,6 +1937,31 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         ovr: toNumber(payload?.ovr, boostedOvr)
       }
     }));
+  };
+
+  const updateSquadPlayerCustomization = (payload = {}) => {
+    const playerId = String(payload?.playerId || selectedPlayerForCustomization?.playerId || '').trim();
+    if (!playerId) return;
+
+    if (payload?.removePlayer) {
+      const selectedSlot = String(selectedPlayerForCustomization?.slotId || '').trim();
+      const selectedBenchIndex = Number.isInteger(selectedPlayerForCustomization?.benchIndex)
+        ? selectedPlayerForCustomization.benchIndex
+        : -1;
+      if (selectedSlot) {
+        removeStarter(selectedSlot);
+      } else if (selectedBenchIndex >= 0) {
+        removeBenchPlayer(selectedBenchIndex);
+      } else {
+        const fallbackSlot = Object.entries(starters).find(([, id]) => id === playerId)?.[0];
+        if (fallbackSlot) removeStarter(fallbackSlot);
+        const fallbackBenchIndex = bench.findIndex((id) => id === playerId);
+        if (fallbackBenchIndex >= 0) removeBenchPlayer(fallbackBenchIndex);
+      }
+      setSelectedPlayerForCustomization(null);
+      return;
+    }
+    upsertCustomizedPlayer({ ...payload, playerId });
   };
 
   const removeStarter = (slotId) => {
@@ -2515,83 +2409,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     }
   };
 
-  const openCompareSearch = () => {
-    if (comparePlayers.length >= 5) return;
-    setCompareSearchQuery('');
-    setCompareSearchOpen(true);
-  };
-
-  const addComparePlayer = (playerId) => {
-    const player = playersById.get(playerId);
-    if (!player) return;
-    if (comparePlayers.some((entry) => entry.playerId === player.playerId)) return;
-    if (comparePlayers.length >= 5) return;
-
-    if (comparePositionMode === 'gk' && player.position !== 'GK') return;
-    if (comparePositionMode === 'outfield' && player.position === 'GK') return;
-
-    setComparePlayers((current) => [...current, player]);
-    setCompareSearchOpen(false);
-    setCompareSearchQuery('');
-  };
-
-  const removeComparePlayer = (playerId) => {
-    setComparePlayers((current) => current.filter((player) => player.playerId !== playerId));
-    setCompareCustomizations((current) => {
-      const next = { ...current };
-      delete next[playerId];
-      return next;
-    });
-    if (compareConfigPlayerId === playerId) {
-      setCompareConfigPlayerId(null);
-    }
-  };
-
-  const resetComparePlayers = () => {
-    setComparePlayers([]);
-    setCompareView('basic');
-    setCompareSearchOpen(false);
-    setCompareSearchQuery('');
-    setCompareCustomizations({});
-    setCompareConfigPlayerId(null);
-  };
-
-  const openCompareConfigModal = (playerId) => {
-    if (!playerId) return;
-    const existing = compareCustomizations[playerId] || {
-      rank: 0,
-      trainingLevel: 0,
-      selectedSkills: []
-    };
-    setCompareConfigDraft({
-      rank: toNumber(existing.rank, 0),
-      trainingLevel: toNumber(existing.trainingLevel, 0),
-      selectedSkills: Array.isArray(existing.selectedSkills) ? existing.selectedSkills : []
-    });
-    setCompareConfigPlayerId(playerId);
-  };
-
-  const applyCompareConfigModal = () => {
-    if (!compareConfigPlayerId) return;
-    setCompareCustomizations((current) => ({
-      ...current,
-      [compareConfigPlayerId]: {
-        rank: toNumber(compareConfigDraft.rank, 0),
-        trainingLevel: toNumber(compareConfigDraft.trainingLevel, 0),
-        selectedSkills: Array.isArray(compareConfigDraft.selectedSkills) ? compareConfigDraft.selectedSkills : []
-      }
-    }));
-    setCompareConfigPlayerId(null);
-  };
-
-  const resetCompareConfigModal = () => {
-    setCompareConfigDraft({
-      rank: 0,
-      trainingLevel: 0,
-      selectedSkills: []
-    });
-  };
-
   const updateShardCount = (ovr, delta) => {
     setShardCounts((current) => {
       const next = { ...current };
@@ -2635,25 +2452,18 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     });
   };
 
-  const compareSubtitle =
-    comparePlayers.length === 0
-      ? 'Add at least 2 players to see comparison'
-      : comparePlayers.length === 1
-        ? 'Add one more player to enable comparison'
-        : `Comparing ${comparePlayers.length} players`;
-
-  const compareConfigPlayer = compareConfigPlayerId ? playersById.get(compareConfigPlayerId) : null;
-  const compareConfigPoints = Math.max(0, toNumber(compareConfigDraft.rank, 0));
   const selectedCustomizationPlayer = selectedPlayerForCustomization?.playerId
     ? playersById.get(selectedPlayerForCustomization.playerId) || null
     : null;
   const activeFieldTheme = FIELD_THEMES[fieldThemeId] || FIELD_THEMES['camp-nou'];
   const fieldThemeClassName = `theme-${activeFieldTheme.id}`;
   const isSquadBuilderActive = activeTool === 'squadbuilder';
+  const isCompareActive = activeTool === 'compare';
+  const isFullPageToolActive = isSquadBuilderActive || isCompareActive;
 
   return (
     <>
-      <div id="tools-view" className={`view ${isSquadBuilderActive ? '' : 'active'}`}>
+      <div id="tools-view" className={`view ${isFullPageToolActive ? '' : 'active'}`}>
         <div className="tools-modal-content" style={{ width: 'min(1200px, 96vw)', margin: '18px auto', maxHeight: 'none' }}>
           <div className="tools-modal-header">
             <h2>Tools & Features</h2>
@@ -3539,243 +3349,13 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
         />
       )}
 
-      <div id="compare-players-modal" className="compare-modal-overlay" style={{ display: activeTool === 'compare' ? 'flex' : 'none' }}>
-        <div className="compare-modal">
-          <div className="compare-header">
-            <div className="compare-header-left">
-              <h2>⚡ Compare Players</h2>
-              <span id="compare-count-badge" className="compare-count-badge">
-                {comparePlayers.length}/5
-              </span>
-            </div>
-            <button className="compare-close-btn" onClick={closeOpenTool} type="button">
-              ✕
-            </button>
-          </div>
-
-          <div className="compare-body">
-            <div className="compare-stats-column">
-              <div className="compare-view-toggle">
-                <button
-                  id="basic-stats-btn"
-                  className={`compare-stats-btn ${compareView === 'basic' ? 'active' : ''}`}
-                  onClick={() => setCompareView('basic')}
-                  type="button"
-                >
-                  📊 Basic Stats
-                </button>
-                <button
-                  id="advanced-stats-btn"
-                  className={`compare-stats-btn ${compareView === 'advanced' ? 'active' : ''}`}
-                  onClick={() => setCompareView('advanced')}
-                  type="button"
-                >
-                  🔧 Advanced Stats
-                </button>
-              </div>
-
-              <div className="compare-stats-section">
-                <div className="compare-stats-header">
-                  <h3 id="compare-stats-view-title">{compareView === 'basic' ? 'Major Stats Comparison' : 'Advanced Stats Breakdown'}</h3>
-                  <p id="compare-stats-subtitle" className="compare-stats-subtitle">
-                    {compareSubtitle}
-                  </p>
-                </div>
-
-                <div id="compare-stats-grid" className="compare-stats-grid">
-                  {compareRows.map((row) => (
-                    <div key={row.key} className="stat-row" data-stat-field={row.key}>
-                      <div className="stat-name-cell">{row.label}</div>
-                      {comparePlayers.map((player, index) => (
-                        <div key={`${player.playerId}-${row.key}`} className="stat-value-cell" data-player-id={player.playerId}>
-                          <span className={`stat-value ${row.classes[index]}`}>{row.values[index]}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {comparePlayers.length >= 2 && (
-                    <div className="stat-row total-row" data-total-row="true">
-                      <div className="stat-name-cell">🏆 TOTAL STATS</div>
-                      {compareTotals.map((entry, index) => (
-                        <div key={`total-${comparePlayers[index]?.playerId || index}`} className="stat-value-cell total-cell">
-                          <span className={`total-stats-value ${entry.className}`}>{entry.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <aside className="compare-cards-column">
-              <div className="compare-cards-container">
-                <div id="compare-cards-grid" className="compare-cards-grid">
-                  {comparePlayers.map((player) => {
-                    const variant = getPlayerType(player);
-                    return (
-                      <div key={player.playerId} className="compare-player-card filled-state new-card" data-player-id={player.playerId}>
-                        <button className="player-remove-btn" onClick={() => removeComparePlayer(player.playerId)} type="button">
-                          ×
-                        </button>
-
-                        <div className="compare-card-container">
-                          <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card Background" className="compare-card-bg" />
-                          {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="compare-player-image" />}
-                          <div className="compare-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                            {player.ovr > 0 ? player.ovr : 'NA'}
-                          </div>
-                          <div className="compare-card-pos" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                            {player.position || 'NA'}
-                          </div>
-                          <div className="compare-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                            {player.name}
-                          </div>
-
-                          {!!player.nationFlag && (
-                            <img
-                              src={player.nationFlag}
-                              alt="Nation"
-                              className={`compare-nation-flag ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
-                            />
-                          )}
-                          {!!player.clubFlag && (
-                            <img
-                              src={player.clubFlag}
-                              alt="Club"
-                              className={`compare-club-flag ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
-                            />
-                          )}
-                          {variant === 'normal' && !!player.leagueImage && (
-                            <img src={player.leagueImage} alt="League" className="compare-league-flag normal-league-flag" />
-                          )}
-
-                          {player.isUntradable && (
-                            <div className="card-untradable-badge" style={{ right: '40px', pointerEvents: 'none' }}>
-                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
-                            </div>
-                          )}
-                        </div>
-
-                        <p className="compare-team-text">{player.club || 'N/A'}</p>
-                      </div>
-                    );
-                  })}
-
-                  {comparePlayers.length < 5 && (
-                    <div className="compare-player-card empty-state" onClick={openCompareSearch} role="button" tabIndex={0}>
-                      <div className="empty-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="11" cy="11" r="8" />
-                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                          <line x1="11" y1="8" x2="11" y2="14" />
-                          <line x1="8" y1="11" x2="14" y2="11" />
-                        </svg>
-                      </div>
-                      <p className="empty-text">Add Player {comparePlayers.length + 1}</p>
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-                  <button className="btn btn--outline btn--sm" onClick={openCompareSearch} type="button" disabled={comparePlayers.length >= 5}>
-                    Add Player
-                  </button>
-                  <button className="btn btn--outline btn--sm" onClick={resetComparePlayers} type="button">
-                    Reset
-                  </button>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
-
-      <div id="compare-search-modal" className="compare-search-overlay" style={{ display: compareSearchOpen ? 'flex' : 'none' }}>
-        <div className="compare-search-modal">
-          <div className="compare-search-header">
-            <h3>🔍 Search Players</h3>
-            <button className="compare-search-close" onClick={() => setCompareSearchOpen(false)} type="button">
-              ✕
-            </button>
-          </div>
-
-          <div className="compare-search-body">
-            <input
-              type="text"
-              id="compare-search-input"
-              className="compare-search-input"
-              value={compareSearchQuery}
-              onChange={(event) => setCompareSearchQuery(event.target.value)}
-              placeholder="Search player name..."
-              autoComplete="off"
-            />
-
-            <div id="compare-search-results" className="compare-search-results">
-              {toText(compareSearchQuery).length < 2 && (
-                <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '20px' }}>
-                  Type at least 2 characters...
-                </p>
-              )}
-
-              {toText(compareSearchQuery).length >= 2 && !compareSearchResults.length && (
-                <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '20px' }}>No players found.</p>
-              )}
-
-              {compareSearchResults.map((player) => {
-                const variant = getPlayerType(player);
-                return (
-                  <div key={player.playerId} className="compare-search-result-item" onClick={() => addComparePlayer(player.playerId)} role="button" tabIndex={0}>
-                    <div className="compare-search-result-image">
-                      <div className="picker-card-mini">
-                        <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
-                        {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
-                        <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                          {player.ovr > 0 ? player.ovr : 'NA'}
-                        </div>
-                        <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                          {player.position || 'NA'}
-                        </div>
-                        <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                          {player.name}
-                        </div>
-                        {!!player.nationFlag && (
-                          <img
-                            src={player.nationFlag}
-                            alt="Nation"
-                            className={`picker-card-flag-nation ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
-                          />
-                        )}
-                        {!!player.clubFlag && (
-                          <img
-                            src={player.clubFlag}
-                            alt="Club"
-                            className={`picker-card-flag-club ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
-                          />
-                        )}
-                        {variant === 'normal' && !!player.leagueImage && (
-                          <img src={player.leagueImage} alt="League" className="picker-card-flag-league-compare normal-league-flag-compare" />
-                        )}
-                        {player.isUntradable && (
-                          <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
-                            <img src="/assets/images/untradable_img.png" alt="Untradable" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="compare-search-result-info">
-                      <h4>{player.name}</h4>
-                      <p>
-                        {player.position || 'NA'} • {player.club || 'N/A'}
-                      </p>
-                    </div>
-                    <div className="compare-search-result-ovr">{player.ovr > 0 ? player.ovr : 'NA'}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
+      <ComparePlayersTool
+        isActive={isCompareActive}
+        normalizedPlayers={normalizedPlayers}
+        playersById={playersById}
+        onClose={closeOpenTool}
+        onUpdatePlayer={upsertCustomizedPlayer}
+      />
     </>
   );
 }
