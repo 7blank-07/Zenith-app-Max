@@ -379,36 +379,47 @@ function getCustomStatValue(player, statDefinition) {
 
 function renderPlayerCard(player) {
   const playerType = player.leagueImage ? 'normal' : 'hero';
+  const hasPlayerImage = !!player.playerImage;
   return (
     <div className="player-row-card">
-      <div className="player-card-image-container">
-        <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card Background" className="player-card-bg-image" />
-        <img src={player.playerImage || 'https://via.placeholder.com/200x300'} alt={player.name} className="player-card-main-image" />
-        <span className="player-initials">{getInitials(player.name)}</span>
+      <div className="player-card-image-placeholder">
+        {player.cardBackground ? <img src={player.cardBackground} alt="Card Background" className="player-row-card-bg" /> : null}
+        {hasPlayerImage ? (
+          <>
+            <img src={player.playerImage} alt={player.name} className="player-row-main-img" />
+            <span className="player-initials player-initials-hidden">{getInitials(player.name)}</span>
+          </>
+        ) : (
+          <span className="player-initials">{getInitials(player.name)}</span>
+        )}
 
-        <div className="player-card-name" style={{ color: player.colorName }}>
+        <div className="player-row-name" style={{ color: player.colorName }}>
           {player.name}
         </div>
-        <div className="player-card-ovr" style={{ color: player.colorRating }}>
+        <div className="player-row-ovr" style={{ color: player.colorRating }}>
           {player.ovr || '?'}
         </div>
-        <div className="player-card-position" style={{ color: player.colorPosition }}>
+        <div className="player-row-position" style={{ color: player.colorPosition }}>
           {player.position || '?'}
         </div>
 
-        <img
-          src={player.nationFlag || ''}
-          alt="Nation"
-          className={`player-view-card-nation-flag ${playerType === 'normal' ? 'normal-players-nation-flag' : 'hero-icon-players-nation-flag'}`}
-        />
-        <img
-          src={player.clubFlag || ''}
-          alt="Club"
-          className={`player-view-card-club-flag ${playerType === 'normal' ? 'normal-club-players-flag' : 'hero-icon-club-players-flag'}`}
-        />
-        {playerType === 'normal' && !!player.leagueImage && (
-          <img src={player.leagueImage} alt="League" className="player-view-card-league-flag normal-league-players-flag" />
-        )}
+        {player.nationFlag ? (
+          <img
+            src={player.nationFlag}
+            alt="Nation"
+            className={`player-card-nation-flag ${playerType === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
+          />
+        ) : null}
+        {player.clubFlag ? (
+          <img
+            src={player.clubFlag}
+            alt="Club"
+            className={`player-card-club-flag ${playerType === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
+          />
+        ) : null}
+        {playerType === 'normal' && player.leagueImage ? (
+          <img src={player.leagueImage} alt="League" className="player-card-league-watchlist-flag normal-league-watchlist-flag" />
+        ) : null}
 
         {player.isUntradable && (
           <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
@@ -1039,7 +1050,7 @@ export default function PlayersDatabaseInteractions({
                     data-price={resolvedPrice}
                     onClick={() => handlePlayerRowClick(player)}
                   >
-                    <div className="player-card-scale">{renderPlayerCard(player)}</div>
+                    {renderPlayerCard(player)}
 
                     <div className="player-row-info">
                       <div className="player-info-name">{player.name}</div>
