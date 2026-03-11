@@ -44,6 +44,7 @@ function addPublishedPostPaths(targetPaths, post) {
   const categorySlug = getCategorySlug(post);
   const articleSlug = toText(post?.slug);
 
+  targetPaths.add('/');
   targetPaths.add('/blogs');
   targetPaths.add('/sitemap.xml');
 

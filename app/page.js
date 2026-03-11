@@ -1,7 +1,9 @@
 import HomeDashboardInteractions from './components/HomeDashboardInteractions.client';
+import BlogArticleCard from './components/blog/BlogArticleCard';
 import MarketNavLink from './components/MarketNavLink.client';
 import MobileNavigation from './components/MobileNavigation.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
+import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
 
@@ -9,6 +11,7 @@ export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
 const HOME_PLAYER_LIMIT = 48;
 const HOME_SECTION_LIMIT = 12;
+const HOME_BLOG_LIMIT = 4;
 const RECENT_EVENT_GROUP_LIMIT = 3;
 const RECENT_EVENT_ROW_LIMIT = 7;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -64,6 +67,29 @@ function buildRecentEventGroups(players) {
   }
 
   return groups;
+}
+
+function getLatestBlogTimestamp(post) {
+  const timestamp = [post?.publishedAt, post?.updatedAt, post?.createdAt]
+    .map((value) => new Date(value || '').getTime())
+    .find((value) => Number.isFinite(value) && value > 0);
+
+  return timestamp || 0;
+}
+
+function buildHomeLatestBlogPosts(pageData) {
+  const candidates = [...(pageData?.featuredPosts || []), ...(pageData?.posts || [])];
+  const deduped = [];
+  const seen = new Set();
+
+  candidates.forEach((post) => {
+    const key = String(post?.id || post?.slug || '').trim();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    deduped.push(post);
+  });
+
+  return deduped.sort((left, right) => getLatestBlogTimestamp(right) - getLatestBlogTimestamp(left)).slice(0, HOME_BLOG_LIMIT);
 }
 
 function renderDashboardPlayerCard(player, key) {
@@ -123,20 +149,25 @@ function renderDashboardPlayerCard(player, key) {
 
 export default async function HomePage() {
   const startedAt = Date.now();
-  const topIds = await readTopPlayerIds(HOME_PLAYER_LIMIT);
-  const players = await fetchPlayersByIds(topIds, { rank: 0 });
+  const topIdsPromise = readTopPlayerIds(HOME_PLAYER_LIMIT);
+  const blogPageDataPromise = getBlogIndexPageData();
+  const topIds = await topIdsPromise;
+  const [players, blogPageData] = await Promise.all([fetchPlayersByIds(topIds, { rank: 0 }), blogPageDataPromise]);
   const latestPlayers = players.slice(0, HOME_SECTION_LIMIT);
   const trendingPlayers = players.slice(HOME_SECTION_LIMIT, HOME_SECTION_LIMIT * 2).length
     ? players.slice(HOME_SECTION_LIMIT, HOME_SECTION_LIMIT * 2)
     : players.slice(0, HOME_SECTION_LIMIT);
   const recentEventGroups = buildRecentEventGroups(players);
+  const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
+  const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
 
   console.info('[metrics] / render', {
     elapsedMs: Date.now() - startedAt,
     cardCount: players.length,
     latestCount: latestPlayers.length,
     trendingCount: trendingPlayers.length,
-    recentEventGroups: recentEventGroups.length
+    recentEventGroups: recentEventGroups.length,
+    latestBlogsCount: latestBlogPosts.length
   });
 
   return (
@@ -315,6 +346,50 @@ export default async function HomePage() {
             </div>
             <div id="trending-players-grid">{trendingPlayers.map((player) => renderDashboardPlayerCard(player, `trend-${player.playerId}`))}</div>
           </section>
+
+          {shouldRenderLatestBlogs ? (
+            <section className="dashboard-section">
+              <div className="section-header" style={{ alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                  <h2>📝 Latest Blogs</h2>
+                  <p
+                    style={{
+                      margin: 0,
+                      maxWidth: '720px',
+                      color: 'var(--color-text-muted, #98A0A6)',
+                      fontSize: '15px',
+                      lineHeight: 1.6
+                    }}
+                  >
+                    Fresh FC Mobile news, reviews, event guides, and investment reads from the Zenith editorial desk.
+                  </p>
+                </div>
+                <a href="/blogs" data-link="" data-nav-link="" className="view-all-btn">
+                  View All
+                </a>
+              </div>
+
+              {latestBlogPosts.length ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
+                  {latestBlogPosts.map((post) => (
+                    <BlogArticleCard key={post.id || post.slug} post={post} showTags={false} />
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '20px',
+                    padding: '24px',
+                    background: 'rgba(20, 24, 28, 0.55)',
+                    color: 'var(--color-text-muted, #98A0A6)'
+                  }}
+                >
+                  Published blog posts will appear here as soon as the latest stories go live.
+                </div>
+              )}
+            </section>
+          ) : null}
         </div>
       </main>
 
