@@ -154,9 +154,6 @@ export default async function HomePage() {
   const topIds = await topIdsPromise;
   const [players, blogPageData] = await Promise.all([fetchPlayersByIds(topIds, { rank: 0 }), blogPageDataPromise]);
   const latestPlayers = players.slice(0, HOME_SECTION_LIMIT);
-  const trendingPlayers = players.slice(HOME_SECTION_LIMIT, HOME_SECTION_LIMIT * 2).length
-    ? players.slice(HOME_SECTION_LIMIT, HOME_SECTION_LIMIT * 2)
-    : players.slice(0, HOME_SECTION_LIMIT);
   const recentEventGroups = buildRecentEventGroups(players);
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
@@ -165,7 +162,6 @@ export default async function HomePage() {
     elapsedMs: Date.now() - startedAt,
     cardCount: players.length,
     latestCount: latestPlayers.length,
-    trendingCount: trendingPlayers.length,
     recentEventGroups: recentEventGroups.length,
     latestBlogsCount: latestBlogPosts.length
   });
@@ -335,16 +331,6 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
-          </section>
-
-          <section className="dashboard-section">
-            <div className="section-header">
-              <h2>🔥 Trending Players</h2>
-              <a href="/players" data-link="" data-nav-link="" className="view-all-btn">
-                View All
-              </a>
-            </div>
-            <div id="trending-players-grid">{trendingPlayers.map((player) => renderDashboardPlayerCard(player, `trend-${player.playerId}`))}</div>
           </section>
 
           {shouldRenderLatestBlogs ? (

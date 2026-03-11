@@ -1,0 +1,36 @@
+Total messages: 6 (Errors: 4, Warnings: 0)
+Returning 4 messages for level "error"
+
+[ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:3001/:0
+[ERROR] ./app/globals.css
+Module parse failed: Unexpected token (1:11)
+> html, body {
+|   margin: 0;
+|   padding: 0; @ webpack-internal:///./node_modules/next/dist/client/components/react-dev-overlay/internal/helpers/hydration-error-info.js:62
+[ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3001/favicon.ico:0
+ModuleParseError: Module parse failed: Unexpected token (1:11)
+File was processed with these loaders:
+ * ./node_modules/next/dist/build/webpack/loaders/next-flight-css-loader.js
+You may need an additional loader to handle the result of these loaders.
+> html, body {
+|   margin: 0;
+|   padding: 0;
+    at <unknown> (File was processed with these loaders:)
+    at handleParseError (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:28:403799)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:28:405546)
+    at processResult (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:28:401241)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:28:402302)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:8727)
+    at iterateNormalLoaders (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5565)
+    at iterateNormalLoaders (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5650)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5879)
+    at runSyncOrAsync (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4293)
+    at iterateNormalLoaders (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5782)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5426)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:28:401777)
+    at eval (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:13:28858)
+    at Array.<anonymous> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\build\webpack\plugins\profiling-plugin.js:179:29)
+    at runCallbacks (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:1:167958)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:1:170085)
+    at <unknown> (file://C:\project-files\Zenith-app-Max\node_modules\next\dist\compiled\webpack\bundle5.js:1:268941)
+    at FSReqCallback.readFileAfterClose [as oncomplete] (node:internal/fs/read/context:68:3)

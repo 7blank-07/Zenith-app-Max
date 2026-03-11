@@ -9659,6 +9659,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
   --squad-sidebar-width: 380px;
   --squad-main-gap: 40px;
+  --squad-panel-height: clamp(520px, calc(var(--squadbuilder-viewport-height, 100vh) - 300px), 620px);
   height: auto;
   min-height: 0;
   padding: 0;
@@ -9672,19 +9673,19 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-gr
   height: auto;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--squad-sidebar-width);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, var(--squad-sidebar-width));
   gap: var(--squad-main-gap);
-  align-items: start;
+  align-items: stretch;
   overflow: visible;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
   width: 100%;
   min-width: 0;
-  min-height: min(520px, 100%);
-  height: min(100%, 620px);
-  max-height: 620px;
-  align-self: start;
+  min-height: var(--squad-panel-height);
+  height: var(--squad-panel-height);
+  max-height: var(--squad-panel-height);
+  align-self: stretch;
   border-radius: 16px;
   border: 1px solid rgba(148, 163, 184, 0.2);
   box-shadow: 0 16px 34px rgba(2, 6, 23, 0.38), 0 2px 12px rgba(30, 64, 175, 0.22);
@@ -9694,10 +9695,11 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-c
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
   width: 380px;
   max-width: 100%;
-  min-height: min(520px, 100%);
-  height: min(100%, 620px);
-  max-height: 620px;
+  min-height: var(--squad-panel-height);
+  height: var(--squad-panel-height);
+  max-height: var(--squad-panel-height);
   justify-self: end;
+  align-self: stretch;
   border-radius: 16px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.75) 100%);
