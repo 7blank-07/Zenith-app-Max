@@ -4,37 +4,48 @@ import BlogArticleBody from '../../../components/blog/BlogArticleBody';
 import BlogArticleHero from '../../../components/blog/BlogArticleHero';
 import RelatedArticles from '../../../components/blog/RelatedArticles';
 import styles from '../../../components/blog/BlogLayout.module.css';
-import { getBlogArticlePageData } from '../../../../src/lib/server/blog/public.mjs';
+import { buildBlogPostingSchema, buildBreadcrumbListSchema, serializeJsonLd } from '../../../../src/lib/server/blog/schema.mjs';
+import {
+  BLOG_ROUTE_REVALIDATE_SECONDS,
+  buildBlogArticleRouteMetadata,
+  getCachedBlogArticlePageData
+} from '../../../../src/lib/server/blog/seo.mjs';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = BLOG_ROUTE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({ params }) {
-  const pageData = await getBlogArticlePageData(params.category, params.slug);
-  const article = pageData?.post;
-
-  if (!article) {
-    return {
-      title: 'Blog Article | Zenith',
-      description: 'Read the latest FC Mobile editorial coverage from Zenith.'
-    };
-  }
-
-  return {
-    title: `${article.title} | Zenith Blogs`,
-    description: article.metaDescription || article.excerpt || 'Read the latest FC Mobile editorial coverage from Zenith.',
-    alternates: {
-      canonical: `/blogs/${encodeURIComponent(article.category?.slug || params.category)}/${encodeURIComponent(article.slug)}`
-    }
-  };
+  const pageData = await getCachedBlogArticlePageData(params.category, params.slug);
+  return buildBlogArticleRouteMetadata(pageData, {
+    categorySlug: params.category,
+    slug: params.slug
+  });
 }
 
 export default async function BlogArticlePage({ params }) {
   const startedAt = Date.now();
-  const pageData = await getBlogArticlePageData(params.category, params.slug);
+  const pageData = await getCachedBlogArticlePageData(params.category, params.slug);
 
   if (!pageData) {
     notFound();
   }
+
+  const schemas = !pageData.post || pageData.availability?.isConfigured === false
+    ? []
+    : [
+        buildBreadcrumbListSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Blogs', path: '/blogs' },
+          {
+            name: pageData.category?.name || params.category,
+            path: `/blogs/${encodeURIComponent(pageData.category?.slug || params.category)}`
+          },
+          {
+            name: pageData.post.title,
+            path: `/blogs/${encodeURIComponent(pageData.category?.slug || params.category)}/${encodeURIComponent(pageData.post.slug)}`
+          }
+        ]),
+        buildBlogPostingSchema(pageData.post)
+      ].filter(Boolean);
 
   console.info('[metrics] /blogs/[category]/[slug] render', {
     elapsedMs: Date.now() - startedAt,
@@ -48,6 +59,13 @@ export default async function BlogArticlePage({ params }) {
   return (
     <SiteChrome activeView="blogs">
       <main className="main-content">
+        {schemas.map((schema, index) => (
+          <script
+            key={`blog-article-schema-${index}`}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
+          />
+        ))}
         <div className={styles.page}>
           {!pageData.availability?.isConfigured ? (
             <section className={styles.unavailableState}>

@@ -247,8 +247,8 @@ export async function getBlogTagPageData(tagSlug, { searchParams = {}, rawEnv = 
   return {
     availability,
     categories,
-    title: `Tag: ${result.tag.name}`,
-    description: `Published FC Mobile articles tagged with ${result.tag.name}.`,
+    title: `${result.tag.name} FC Mobile Articles`,
+    description: `FC Mobile ${result.tag.name} guides, news, reviews, and market analysis from Zenith.`,
     activeCategorySlug: '',
     activeTag: result.tag,
     tag: result.tag,

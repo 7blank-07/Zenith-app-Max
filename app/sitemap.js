@@ -1,4 +1,5 @@
 import { readTopPlayerIds } from '../src/lib/server/top-players.mjs';
+import { getBlogSitemapEntries } from '../src/lib/server/blog/seo.mjs';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
@@ -8,7 +9,10 @@ function toAbsoluteUrl(path) {
 
 export default async function sitemap() {
   const lastModified = new Date();
-  const topPlayerIds = await readTopPlayerIds(10000);
+  const [topPlayerIds, blogEntries] = await Promise.all([
+    readTopPlayerIds(10000),
+    getBlogSitemapEntries()
+  ]);
 
   const staticEntries = [
     {
@@ -38,5 +42,5 @@ export default async function sitemap() {
     priority: 0.8
   }));
 
-  return [...staticEntries, ...playerEntries];
+  return [...staticEntries, ...playerEntries, ...blogEntries];
 }

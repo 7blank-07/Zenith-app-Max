@@ -120,6 +120,24 @@ Example VPS values:
 
 ---
 
+## 4.2) Blog SEO and indexing surfaces
+
+Public blog routes:
+- `/blogs`
+- `/blogs/<category>`
+- `/blogs/tag/<tag>`
+- `/blogs/<category>/<slug>`
+
+They now use server-side `generateMetadata` plus JSON-LD helpers:
+- archive pages emit collection and breadcrumb schema
+- article pages emit `BlogPosting` and `BreadcrumbList` schema
+
+Indexing routes:
+- `/robots.txt` allows public crawling, blocks `/admin`, and points to `/sitemap.xml`
+- `/sitemap.xml` includes published blog URLs alongside the existing site routes
+
+---
+
 ## 5) Start production server locally
 
 ### PowerShell (Windows)
@@ -137,7 +155,10 @@ Open:
 - `http://localhost:3000/`
 - `http://localhost:3000/players`
 - `http://localhost:3000/market`
+- `http://localhost:3000/blogs`
+- `http://localhost:3000/blogs/reviews`
 - `http://localhost:3000/player/<id-from-src/data/top-players.json>`
+- `http://localhost:3000/robots.txt`
 - `http://localhost:3000/sitemap.xml`
 - Next-native routes: `/watchlist`, `/tools`
 - Compatibility deep links still available: `/squad-builder`, `/compare`, `/shard-calculator` (redirect to `/tools`)
@@ -159,6 +180,19 @@ Used by:
 - `app/market/page.js`
 
 You can force refresh before expiry via revalidation API/script.
+
+Blog ISR window is:
+- `BLOG_ROUTE_REVALIDATE_SECONDS = 60 * 60`
+- Equals **3,600 seconds (1 hour)**
+
+Defined in:
+- `src/lib/server/blog/seo.mjs`
+
+Used by:
+- `app/blogs/page.js`
+- `app/blogs/[category]/page.js`
+- `app/blogs/tag/[tag]/page.js`
+- `app/blogs/[category]/[slug]/page.js`
 
 ---
 
@@ -186,6 +220,22 @@ Example:
 npm run revalidate:call -- --endpoint http://localhost:3000/api/revalidate --secret dev-secret --paths /players,/market --player-ids 24029805
 ```
 
+Blog publish/update payload example:
+```json
+{
+  "secret": "dev-secret",
+  "includeListings": false,
+  "blogPost": {
+    "status": "published",
+    "slug": "example-post",
+    "category": { "slug": "news" },
+    "tags": [{ "slug": "tag-one" }, { "slug": "tag-two" }]
+  }
+}
+```
+
+That payload revalidates `/blogs`, the affected category page, the article page, any affected tag pages, and `/sitemap.xml`.
+
 ---
 
 ## 9) Quick verification checklist
@@ -194,7 +244,7 @@ npm run revalidate:call -- --endpoint http://localhost:3000/api/revalidate --sec
 2. `TOP_PLAYERS_PRERENDER_LIMIT=20 npm run build` (or PowerShell equivalent)
 3. `npm run build` (full 10k pre-render validation)
 4. `REVALIDATE_SECRET=dev-secret npm run start` (or PowerShell equivalent)
-5. Open `/`, `/players`, `/market`, `/player/<id>`, `/sitemap.xml`
+5. Open `/`, `/players`, `/market`, `/blogs`, `/blogs/reviews`, `/player/<id>`, `/robots.txt`, `/sitemap.xml`
 6. Check tools routing (`/tools`, plus deep links `/squad-builder`, `/compare`, `/shard-calculator`)
 7. Run `npm run rollout:status`
 8. Run `npm run revalidate:call ...` and confirm success response

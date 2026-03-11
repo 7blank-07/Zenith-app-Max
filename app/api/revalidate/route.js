@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { buildBlogRevalidationPathsFromPayload, revalidateAppPaths } from '../../../src/lib/server/blog/revalidation.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +32,10 @@ function buildTargetPaths(body) {
     targetPaths.add('/market');
   }
 
+  for (const blogPath of buildBlogRevalidationPathsFromPayload(body)) {
+    targetPaths.add(blogPath);
+  }
+
   return [...targetPaths];
 }
 
@@ -57,14 +61,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'No valid paths to revalidate' }, { status: 400 });
   }
 
-  const failures = [];
-  for (const path of paths) {
-    try {
-      revalidatePath(path);
-    } catch (error) {
-      failures.push({ path, message: error instanceof Error ? error.message : String(error) });
-    }
-  }
+  const { failures } = await revalidateAppPaths(paths);
 
   if (failures.length) {
     console.error('[metrics] revalidate failure', {
@@ -76,7 +73,8 @@ export async function POST(request) {
 
   console.info('[metrics] revalidate success', {
     pathCount: paths.length,
-    playerIdCount: Array.isArray(body.playerIds) ? body.playerIds.length : 0
+    playerIdCount: Array.isArray(body.playerIds) ? body.playerIds.length : 0,
+    blogPathCount: buildBlogRevalidationPathsFromPayload(body).length
   });
   return NextResponse.json({ revalidated: true, paths });
 }
