@@ -165,6 +165,9 @@ export default async function HomePage() {
             <a href="/watchlist" data-link="" data-nav-link="" className="nav-link">
               Watchlist
             </a>
+            <a href="/blogs" data-link="" data-nav-link="" className="nav-link">
+              Blogs
+            </a>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
               <button className="tools-btn" id="tools-dropdown-btn" type="button">
@@ -336,6 +339,9 @@ export default async function HomePage() {
             </MarketNavLink>
             <a href="/watchlist" data-link="" data-nav-link="">
               Watchlist
+            </a>
+            <a href="/blogs" data-link="" data-nav-link="">
+              Blogs
             </a>
           </div>
 

@@ -156,6 +156,20 @@ export default function MobileNavigation({ activeView = '' }) {
           <span>Watchlist</span>
         </button>
         <button
+          className={getButtonClassName(activeView === 'blogs')}
+          data-view="blogs"
+          type="button"
+          onClick={() => navigateTo('/blogs')}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 17A2.5 2.5 0 0 0 4 19.5V5a2 2 0 0 1 2-2h14v14" />
+            <path d="M8 7h8" />
+            <path d="M8 11h8" />
+          </svg>
+          <span>Blogs</span>
+        </button>
+        <button
           className={getButtonClassName(activeView === 'tools' || isToolsSheetOpen, 'tools-btn')}
           type="button"
           title="Tools"

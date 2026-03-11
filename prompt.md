@@ -1,147 +1,237 @@
-Implement the player customization modal that appears when clicking a player card on the squad field.
+Act as a senior full-stack architect, CMS designer, and SEO engineer.
 
-Currently the old SPA version had this feature implemented using vanilla JavaScript.  
-Do NOT reuse or copy the old SPA logic.  
-Instead, rebuild the functionality using proper React / Next.js component architecture.
+Design a production-grade blog CMS system for a Next.js (App Router) + React application using a PostgreSQL database hosted on a VPS.
 
-IMPORTANT RULES
+The purpose of this system is to allow teammates to create blog posts daily without writing HTML or CSS.
 
-1. Do NOT import or reuse any old vanilla JS SPA code.
-2. Implement everything using React state and Next.js client components.
-3. Preserve the existing CSS classes and DOM structure so the UI appearance remains identical.
-4. Do NOT modify squad builder logic such as:
-   - formation coordinates
-   - drag/drop
-   - squad state
-   - save/load/export
-   - OVR calculations
-5. Only rebuild the modal interaction system.
+The system must be optimized for SEO, Google indexing, and long-term organic traffic growth.
+
+Do NOT generate implementation code yet.
+
+First generate a structured development plan with exactly 5 phases.
 
 ------------------------------------------------
 
-GOAL
+TECH STACK
 
-When the user clicks a player card in the squad-field, open a modal:
+Frontend
+Next.js (App Router)
+React
 
-modal-content
-squad-customization-content
-squad-player-customization-modal
+Backend
+Next.js server actions and API routes
 
-This modal should behave exactly like the old SPA version.
-
-------------------------------------------------
-
-TRIGGER
-
-Add an onClick handler to player cards rendered inside squad-field.
-
-Example behavior:
-
-click player card → open customization modal with that player's data.
+Database
+PostgreSQL (already hosted on VPS)
 
 ------------------------------------------------
 
-REACT IMPLEMENTATION
+BLOG CATEGORIES
 
-Create a React state in the squad builder component:
+Editors must choose one category when creating a blog:
 
-selectedPlayerForCustomization
+reviews
+event-guides
+investments
+news
+
+Categories must appear in the blog URL.
 
 Example:
 
-const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null)
+/blogs/investments/best-investment-in-fcmobile-march-2026
 
-Clicking a player card should set this state.
+Final URL structure must be:
 
-------------------------------------------------
+/blogs
+/blogs/[category]
+/blogs/[category]/[slug]
+/blogs/tag/[tag]
 
-MODAL RENDERING
-
-Render the modal conditionally when selectedPlayerForCustomization is not null.
-
-Example structure:
-
-<div class="squad-player-customization-modal">
-  <div class="modal-content">
-    <div class="squad-customization-content">
-
-      Player card preview
-
-      Tabs or sections:
-      - Rank
-      - Training
-      - Skills
-      - Stats
-
-    </div>
-  </div>
-</div>
-
-Use the same CSS class names so existing styling still applies.
+This structure is required for SEO.
 
 ------------------------------------------------
 
-MODAL FEATURES
+EDITOR WORKFLOW
 
-The modal must allow:
+Teammates should be able to access an admin panel.
 
-Rank selection
-Training level selection
-Skill boost selection
-Player stats display
-Player card preview
+Admin routes:
 
-Changes should update the player object stored in squad state.
+/admin
+/admin/blogs
+/admin/blogs/new
+/admin/blogs/edit/[id]
+/admin/blogs/drafts
+/admin/blogs/pending
 
-------------------------------------------------
+Workflow:
 
-STATE FLOW
+draft → pending → published
 
-Player card click → setSelectedPlayerForCustomization(player)
+Editors can:
 
-Modal reads data from selectedPlayerForCustomization
+create blog
+edit blog
+save draft
+submit for review
 
-When user updates rank/training/skills → update squad state
+Admin can:
 
-Closing modal → setSelectedPlayerForCustomization(null)
-
-------------------------------------------------
-
-CLOSING MODAL
-
-Modal should close when:
-
-• clicking close button  
-• clicking overlay background  
-• pressing ESC key  
+approve
+publish
+reject
+delete
 
 ------------------------------------------------
 
-ACCESSIBILITY
+BLOG DATA FIELDS
 
-Ensure modal traps focus while open.
+Each blog post must support:
 
-Add aria attributes if needed.
+title
+subtitle
+slug
+category
+tags
+seo_keywords
+meta_description
+author
+cover_image
+content (rich text)
+internal_links
+external_links
+status
+created_at
+updated_at
+published_at
+reading_time
+
+Slug must auto-generate from title.
 
 ------------------------------------------------
 
-ARCHITECTURE
+PUBLIC BLOG FEATURES
 
-Create a reusable component:
+Create public routes:
 
-SquadPlayerCustomizationModal.jsx
+/blogs
+/blogs/[category]
+/blogs/[category]/[slug]
+/blogs/tag/[tag]
 
-Props:
+Public pages must include:
 
-player
-onClose
-onUpdatePlayer
-
-Use React props instead of global variables.
+blog homepage
+category pages
+tag pages
+individual blog page
+related articles
+pagination
+reading time
+author display
 
 ------------------------------------------------
 
-RESULT
+SEO REQUIREMENTS
 
-Clicking a player on the squad field should open a fully functional player customization modal identical to the old SPA version, but implemented using React / Next.js components instead of vanilla JS.
-Any changes to rank or training must update the squad player state so OVR recalculates correctly using the existing squad builder logic.npm run start
+Every blog page must automatically generate:
+
+SEO title
+meta description
+OpenGraph metadata
+Twitter cards
+Article schema (structured data)
+
+Also implement:
+
+dynamic sitemap.xml
+robots.txt
+clean URL slugs
+internal linking between articles
+related articles system
+
+------------------------------------------------
+
+RICH TEXT EDITOR
+
+Use a modern editor so teammates do not write HTML.
+
+Recommended editor:
+
+Tiptap
+
+It must support:
+
+headings
+lists
+links
+images
+tables
+code blocks
+embedded media
+
+------------------------------------------------
+
+DATABASE DESIGN
+
+Design PostgreSQL schema including tables:
+
+users
+blogs
+blog_categories
+blog_tags
+blog_tag_relations
+
+Relationships must support:
+
+fast category queries
+fast tag queries
+SEO-friendly lookups
+
+Include indexes where necessary.
+
+------------------------------------------------
+
+PERFORMANCE
+
+The blog system must support:
+
+static generation for blog pages
+incremental revalidation
+fast category page loading
+efficient database queries
+
+------------------------------------------------
+
+DEVELOPMENT PLAN
+
+Create exactly 5 phases.
+
+Phase 1
+Database schema and core architecture.
+
+Phase 2
+Public blog routes and page layouts.
+
+Phase 3
+Admin authentication and CMS dashboard.
+
+Phase 4
+Blog editor, draft workflow, and publishing system.
+
+Phase 5
+SEO optimization, sitemap generation, schema markup, tag pages, and performance improvements.
+
+Each phase must clearly specify:
+
+files to create
+routes
+components
+database changes
+API endpoints
+important implementation notes
+
+Only generate the development plan.
+
+Do not write implementation code yet.

@@ -29,3 +29,6 @@ tests/
 # build output
 dist
 build
+
+#environment variables
+.env.local

@@ -27,6 +27,9 @@ npm install
 - `npm run revalidate:call`  
   Trigger on-demand revalidation for player/listing pages.
 
+- `npm run db:migrate:blog`  
+  Apply the blog CMS PostgreSQL schema migrations using `DATABASE_URL`.
+
 ---
 
 ## 3) Pre-render players (top list refresh)
@@ -49,6 +52,71 @@ npm run build
 ```bash
 TOP_PLAYERS_PRERENDER_LIMIT=20 npm run build
 ```
+
+---
+
+## 4.1) Blog CMS database migrations
+
+Set `DATABASE_URL` to your PostgreSQL connection string before running the migration command.
+
+### PowerShell (Windows)
+```powershell
+$env:DATABASE_URL='postgresql://user:password@host:5432/database'
+npm run db:migrate:blog
+```
+
+### Bash (Linux/macOS)
+```bash
+DATABASE_URL='postgresql://user:password@host:5432/database' npm run db:migrate:blog
+```
+
+Optional dry run:
+```bash
+node scripts/db/run-blog-migrations.mjs --dry-run
+```
+
+For admin login, also set `BLOG_SESSION_SECRET` plus bootstrap user credentials, then seed the initial users.
+
+### PowerShell (Windows)
+```powershell
+$env:BLOG_SESSION_SECRET='replace-with-a-long-random-secret'
+$env:BLOG_ADMIN_EMAIL='admin@example.com'
+$env:BLOG_ADMIN_PASSWORD='Password123!'
+$env:BLOG_EDITOR_EMAIL='editor@example.com'
+$env:BLOG_EDITOR_PASSWORD='Password123!'
+npm run db:seed:blog-users
+```
+
+### Bash (Linux/macOS)
+```bash
+BLOG_SESSION_SECRET='replace-with-a-long-random-secret' \
+BLOG_ADMIN_EMAIL='admin@example.com' \
+BLOG_ADMIN_PASSWORD='Password123!' \
+BLOG_EDITOR_EMAIL='editor@example.com' \
+BLOG_EDITOR_PASSWORD='Password123!' \
+npm run db:seed:blog-users
+```
+
+Optional bootstrap dry run:
+```bash
+node scripts/db/seed-blog-users.mjs --dry-run
+```
+
+Phase 4 editor routes:
+- `/admin/blogs/new`
+- `/admin/blogs/edit/<blog-id>`
+
+The protected image upload endpoint is:
+- `POST /api/blog/uploads`
+
+It expects these environment variables for authenticated local filesystem storage:
+- `BLOG_UPLOAD_DIR`
+- `BLOG_PUBLIC_URL`
+- optional `BLOG_IMAGE_MAX_BYTES`
+
+Example VPS values:
+- `BLOG_UPLOAD_DIR=/var/www/images.zenithfcm.com/blog`
+- `BLOG_PUBLIC_URL=https://images.zenithfcm.com/blog`
 
 ---
 
