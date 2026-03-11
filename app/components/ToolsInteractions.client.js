@@ -1334,6 +1334,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, []);
 
   useEffect(() => {
+    if (!squadStateHydrated) return;
     try {
       window.localStorage.setItem(
         'toolsSquadState',
@@ -1348,7 +1349,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     } catch (error) {
       console.error('[tools] Failed to persist squad state:', error);
     }
-  }, [badges, squadName, formationId, starters, bench]);
+  }, [badges, squadName, formationId, starters, bench, squadStateHydrated]);
 
   useEffect(() => {
     if (!squadStateHydrated) return;
@@ -1521,6 +1522,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   ]);
 
   useEffect(() => {
+    if (!squadStateHydrated) return;
     const availableSlots = new Set((SQUAD_FORMATIONS[formationId] || []).map((slot) => slot.id));
     setStarters((current) => {
       const next = {};
@@ -1538,7 +1540,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     if (!availableSlots.has(selectedSlotId)) {
       setSelectedSlotId((SQUAD_FORMATIONS[formationId] || [])[0]?.id || 'GK');
     }
-  }, [formationId, selectedSlotId]);
+  }, [formationId, selectedSlotId, squadStateHydrated]);
 
   const assignedPlayerIds = useMemo(() => {
     const set = new Set();
