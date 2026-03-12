@@ -2668,7 +2668,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
                     return (
                       <div
                         key={`${formationId}-${slot.id}`}
-                        className={`squad-slot ${selectedSlotId === slot.id ? 'selected' : ''} ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
+                        className={`squad-slot ${player ? 'filled' : ''} ${selectedSlotId === slot.id ? 'selected' : ''} ${dragOverSlotId === slot.id ? 'drag-over' : ''}`}
                         style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
                         data-slot-id={slot.id}
                         onClick={() => handleSquadSlotSelect(slot, !!player)}

@@ -10621,6 +10621,12 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     margin-top: 12px;
   }
 
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot.filled .position-dot {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   main.main-content.main-content--squadbuilder #squad-builder-modal .position-dot {
     width: 52px;
     height: 72px;
@@ -10705,5 +10711,19 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     left: 36px;
     width: 11px;
     height: 9px;
+  }
+}
+
+@media (max-width: 390px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot[data-slot-id="GK"] {
+    margin-top: 18px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .player-preview-card {
+    transform: translate(-50%, -50%) scale(0.68);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .player-preview-card:hover {
+    transform: translate(-50%, -50%) scale(0.72);
   }
 }
