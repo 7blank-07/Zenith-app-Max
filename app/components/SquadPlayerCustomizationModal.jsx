@@ -513,6 +513,7 @@ function getStatAccentColor(value) {
 export default function SquadPlayerCustomizationModal({ player, onClose, onUpdatePlayer }) {
   const dialogRef = useRef(null);
   const skillRequestSequenceRef = useRef(0);
+  const lastSyncedCustomizationRef = useRef('');
   const [selectedRank, setSelectedRank] = useState(0);
   const [trainingLevel, setTrainingLevel] = useState(0);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -571,6 +572,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
 
   useEffect(() => {
     if (!player) return;
+    lastSyncedCustomizationRef.current = '';
     const initialRank = clamp(toNumber(player.rank, 0), 0, 5);
     const initialTrainingLevel = clamp(toNumber(player.trainingLevel ?? player.training_level, 0), 0, 30);
     const initialSkills = normalizeSelectedSkills(player.selectedSkills);
@@ -591,7 +593,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillModalError('');
     setSkillModalLoading(false);
     setStatsViewOpen(false);
-  }, [player]);
+  }, [player?.playerId]);
 
   useEffect(() => {
     const normalizedPlayerId = String(player?.playerId || '').trim();
@@ -690,7 +692,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
       isActive = false;
       controller.abort();
     };
-  }, [player?.playerId, player?.selectedSkills, player?.skillAllocations, player?.skill_allocations, selectedRank]);
+  }, [player?.playerId, selectedRank]);
 
   useEffect(() => {
     const availableSkillIds = (availableSkills || [])
@@ -888,6 +890,41 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     });
   };
 
+  useEffect(() => {
+    if (!player?.playerId || typeof onUpdatePlayer !== 'function') return;
+    const nextSkillAllocations = normalizeSkillAllocationMap(skillLevelsById);
+    const nextSelectedSkills = normalizeSelectedSkills(selectedSkillsByAllocation.length ? selectedSkillsByAllocation : selectedSkills).slice(0, selectedRank);
+    const signature = JSON.stringify({
+      playerId: player.playerId,
+      rank: selectedRank,
+      trainingLevel,
+      selectedSkills: nextSelectedSkills,
+      skillAllocations: nextSkillAllocations,
+      trainingBoosts: effectiveTrainingBoosts,
+      skillBoosts: effectiveSkillBoosts,
+      baseOvr
+    });
+    if (lastSyncedCustomizationRef.current === signature) return;
+    lastSyncedCustomizationRef.current = signature;
+    emitUpdate({
+      rank: selectedRank,
+      trainingLevel,
+      selectedSkills: nextSelectedSkills,
+      skillAllocations: nextSkillAllocations
+    });
+  }, [
+    baseOvr,
+    effectiveSkillBoosts,
+    effectiveTrainingBoosts,
+    onUpdatePlayer,
+    player?.playerId,
+    selectedRank,
+    selectedSkills,
+    selectedSkillsByAllocation,
+    skillLevelsById,
+    trainingLevel
+  ]);
+
   const handleRankSelect = (nextRank) => {
     const normalizedRank = clamp(toNumber(nextRank, 0), 0, 5);
     const resetSkills = [];
@@ -904,23 +941,11 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillBoostLevels([]);
     setSkillModalError('');
     setSkillModalLoading(false);
-    emitUpdate({
-      rank: normalizedRank,
-      trainingLevel,
-      selectedSkills: resetSkills,
-      skillAllocations: {}
-    });
   };
 
   const handleTrainingChange = (event) => {
     const nextTrainingLevel = clamp(toNumber(event.target.value, 0), 0, 30);
     setTrainingLevel(nextTrainingLevel);
-    emitUpdate({
-      rank: selectedRank,
-      trainingLevel: nextTrainingLevel,
-      selectedSkills,
-      skillAllocations: skillLevelsById
-    });
   };
 
   const handleResetRank = () => {
@@ -938,12 +963,6 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillBoostLevels([]);
     setSkillModalError('');
     setSkillModalLoading(false);
-    emitUpdate({
-      rank: 0,
-      trainingLevel: 0,
-      selectedSkills: [],
-      skillAllocations: {}
-    });
   };
 
   const handleResetSkills = () => {
@@ -953,12 +972,6 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillBoostLevels([]);
     setSkillModalError('');
     setSkillModalLoading(false);
-    emitUpdate({
-      rank: selectedRank,
-      trainingLevel,
-      selectedSkills: [],
-      skillAllocations: {}
-    });
   };
 
   const closeSkillDetailModal = useCallback(() => {
@@ -1023,12 +1036,6 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     const nextSelectedSkills = buildSelectedSkillNames(availableSkills, nextLevels);
     setSkillLevelsById(nextLevels);
     setSelectedSkills(nextSelectedSkills);
-    emitUpdate({
-      rank: selectedRank,
-      trainingLevel,
-      selectedSkills: nextSelectedSkills,
-      skillAllocations: nextLevels
-    });
   };
 
   const handleRemovePlayer = () => {
