@@ -148,6 +148,8 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
       watchlistButton.style.background = active ? 'rgba(0,194,168,0.15)' : 'transparent';
       watchlistButton.style.borderColor = active ? 'var(--color-teal-500, #00C2A8)' : 'rgba(255,255,255,0.15)';
       watchlistButton.style.color = active ? 'var(--color-teal-500, #00C2A8)' : 'var(--color-text-muted, #98A0A6)';
+      watchlistButton.setAttribute('aria-label', active ? 'In watchlist' : 'Add to watchlist');
+      watchlistButton.setAttribute('aria-pressed', active ? 'true' : 'false');
       const label = watchlistButton.querySelector('[data-watchlist-label]');
       if (label) label.textContent = active ? 'In Watchlist' : 'Add to Watchlist';
       const icon = watchlistButton.querySelector('svg');

@@ -3547,6 +3547,20 @@ h1, h3, h4, h5, h6 {
   transform: scale(0.95);
 }
 
+.player-detail-shell .player-watchlist-btn,
+.player-detail-shell .player-watchlist-btn:hover,
+.player-detail-shell .player-watchlist-btn:active {
+  transition: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.player-detail-shell .player-watchlist-btn:hover {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--color-text-muted, #98A0A6);
+}
+
 /* Price change colors */
 .price-change.up {
   color: var(--color-status-success);
@@ -12244,6 +12258,26 @@ body.overflow-hidden {
 
   .player-detail-shell .player-stats-section .player-detail-stat-card {
     padding: 14px !important;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-stat-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start !important;
+    gap: 6px 8px !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-stat-title {
+    font-size: 12px !important;
+    line-height: 1.15 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .player-detail-shell .player-stats-section .player-detail-stat-value {
+    font-size: 20px !important;
+    line-height: 0.95 !important;
   }
 
   .player-detail-shell .player-stats-section .player-detail-profile-grid,

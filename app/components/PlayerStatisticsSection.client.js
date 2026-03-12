@@ -104,17 +104,41 @@ export default function PlayerStatisticsSection({
               }}
             >
               <div
+                className="player-detail-stat-header"
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  gap: '12px',
                   marginBottom: '16px',
                   paddingBottom: '12px',
                   borderBottom: '1px solid rgba(255,255,255,0.08)'
                 }}
               >
-                <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--color-text-primary, #E6EEF2)', textTransform: 'uppercase' }}>{category.name}</h3>
-                <div style={{ fontSize: '30px', fontWeight: 900, color: getStatAccentColor(category.mainValue), lineHeight: 1 }}>{category.mainValue}</div>
+                <h3
+                  className="player-detail-stat-title"
+                  style={{
+                    margin: 0,
+                    fontSize: '16px',
+                    color: 'var(--color-text-primary, #E6EEF2)',
+                    textTransform: 'uppercase',
+                    minWidth: 0
+                  }}
+                >
+                  {category.name}
+                </h3>
+                <div
+                  className="player-detail-stat-value"
+                  style={{
+                    fontSize: '30px',
+                    fontWeight: 900,
+                    color: getStatAccentColor(category.mainValue),
+                    lineHeight: 1,
+                    flexShrink: 0
+                  }}
+                >
+                  {category.mainValue}
+                </div>
               </div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>

@@ -395,29 +395,6 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               padding: '18px'
             }}
           >
-            <div
-              style={{
-                fontSize: '12px',
-                color: 'var(--color-text-muted, #98A0A6)',
-                fontWeight: 700,
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                marginBottom: '8px'
-              }}
-            >
-              Watchlist
-            </div>
-            <p
-              style={{
-                margin: '0 0 14px 0',
-                color: 'var(--color-text-muted, #98A0A6)',
-                fontSize: '14px',
-                lineHeight: 1.6
-              }}
-            >
-              Keep this player in your watchlist to monitor price movement and return quickly from the market.
-            </p>
-
             <button
               className="player-watchlist-btn"
               data-watchlist-toggle
@@ -460,13 +437,15 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 cursor: 'pointer',
                 fontSize: '15px',
                 fontWeight: 700,
-                transition: 'all 0.2s',
+                transition: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '10px',
-                marginTop: 0
+                marginTop: 0,
+                boxShadow: 'none'
               }}
+              aria-label="Add to watchlist"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
