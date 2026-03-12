@@ -9719,12 +9719,15 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
   min-height: 0;
   padding: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 0;
   overflow: visible;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+  grid-column: 1;
+  grid-row: 1;
   height: auto;
   min-height: 0;
   display: grid;
@@ -9889,6 +9892,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot.se
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: stretch;
   width: calc(100% - (var(--squad-sidebar-width) + var(--squad-main-gap)));
   max-width: 100%;
   margin-top: 40px;
@@ -9999,6 +10005,30 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
     width: 340px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1366px) and (pointer: coarse) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
+    --squad-sidebar-width: 0px;
+    --squad-main-gap: 0px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
+    display: none !important;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 24px;
+    margin-right: 0;
+    justify-self: stretch;
   }
 }
 
