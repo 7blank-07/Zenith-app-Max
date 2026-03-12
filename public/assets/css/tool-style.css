@@ -10614,3 +10614,96 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     height: 60px;
   }
 }
+
+/* Phone-only squad pitch spacing: keep slot cards separated without changing tablet/desktop */
+@media (max-width: 767px) {
+  main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot[data-slot-id="GK"] {
+    margin-top: 12px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .position-dot {
+    width: 52px;
+    height: 72px;
+    border-width: 1.5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.48);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .position-label {
+    font-size: 12px;
+    letter-spacing: 0.2px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .player-preview-card {
+    transform: translate(-50%, -50%) scale(0.74);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .player-preview-card:hover {
+    transform: translate(-50%, -50%) scale(0.79);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-inner {
+    width: 78px;
+    height: 94px;
+    margin: 0;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.68);
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-player-img {
+    width: 80px;
+    height: 86px;
+    bottom: 3px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-ovr {
+    top: 10px;
+    left: 14px;
+    font-size: 0.875rem;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-position {
+    top: 24px;
+    left: 14px;
+    font-size: 0.56rem;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-name {
+    bottom: 25px;
+    padding: 0 5px;
+    font-size: 0.54rem;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .card-nation-flag.hero-icon-nation-flag {
+    bottom: 17px;
+    left: 24px;
+    width: 11px;
+    height: 9px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .card-club-flag.hero-icon-club-flag {
+    bottom: 17px;
+    left: 48px;
+    width: 11px;
+    height: 9px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .card-nation-flag.normal-nation-flag {
+    bottom: 17px;
+    left: 18px;
+    width: 10px;
+    height: 8px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .card-club-flag.normal-club-flag {
+    bottom: 17px;
+    left: 52px;
+    width: 11px;
+    height: 9px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .card-league-flag.normal-league-flag {
+    bottom: 17px;
+    left: 36px;
+    width: 11px;
+    height: 9px;
+  }
+}
