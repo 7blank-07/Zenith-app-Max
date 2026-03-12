@@ -9,26 +9,8 @@ import ComparePlayersTool from './ComparePlayersTool.client';
 const TOOL_ALIASES = Object.freeze({
   squadbuilder: 'squadbuilder',
   'squad-builder': 'squadbuilder',
-  compare: 'compare',
-  shardcalculator: 'shardcalculator',
-  'shard-calculator': 'shardcalculator',
-  profit: 'shardcalculator',
-  'profit-calculator': 'shardcalculator'
+  compare: 'compare'
 });
-
-const SHARD_COSTS = Object.freeze({
-  105: 5,
-  106: 10,
-  107: 10,
-  108: 10,
-  109: 30,
-  110: 60,
-  111: 120,
-  112: 180,
-  113: 250
-});
-
-const SHARD_OVRS = Object.freeze([105, 106, 107, 108, 109, 110, 111, 112, 113]);
 const SQUAD_SAVE_KEY = 'savedSquad_main';
 const SQUAD_BUILDER_PENDING_PICK_KEY = 'squad_builder_pending_pick';
 const SQUAD_BUILDER_ROUNDTRIP_STATE_KEY = 'squad_builder_roundtrip_state';
@@ -1133,21 +1115,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   const [squadLivePrices, setSquadLivePrices] = useState({});
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
   const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null);
-
-  const [shardMode, setShardMode] = useState('counter');
-  const [shardCounts, setShardCounts] = useState({
-    105: 0,
-    106: 0,
-    107: 0,
-    108: 0,
-    109: 0,
-    110: 0,
-    111: 0,
-    112: 0,
-    113: 0
-  });
-  const [shardRequired, setShardRequired] = useState(0);
-  const [shardPlayerOvr, setShardPlayerOvr] = useState(105);
   const dragPayloadRef = useRef(null);
   const dragPreviewNodeRef = useRef(null);
   const touchDragStateRef = useRef({
@@ -1223,28 +1190,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       }
     }
 
-    try {
-      const savedShardMode = window.localStorage.getItem('shardCalcMode');
-      if (savedShardMode === 'counter' || savedShardMode === 'cost') {
-        setShardMode(savedShardMode);
-      }
-      const savedShardState = window.localStorage.getItem('shardCalcState');
-      if (savedShardState) {
-        const parsed = JSON.parse(savedShardState);
-        if (parsed?.counterShards && typeof parsed.counterShards === 'object') {
-          setShardCounts((current) => {
-            const next = { ...current };
-            SHARD_OVRS.forEach((ovr) => {
-              next[ovr] = Math.max(0, toNumber(parsed.counterShards[ovr], 0));
-            });
-            return next;
-          });
-        }
-      }
-    } catch (error) {
-      console.error('[tools] Failed to load saved shard state:', error);
-    }
-
     if (!restoredThemeFromRoundtrip) {
       try {
         const savedTheme = window.localStorage.getItem('selectedFieldTheme') || 'camp-nou';
@@ -1304,22 +1249,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, [squadStateHydrated, supplementalPlayers]);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem('shardCalcMode', shardMode);
-      window.localStorage.setItem(
-        'shardCalcState',
-        JSON.stringify({
-          mode: shardMode,
-          counterShards: shardCounts,
-          shardCosts: SHARD_COSTS
-        })
-      );
-    } catch (error) {
-      console.error('[tools] Failed to persist shard state:', error);
-    }
-  }, [shardMode, shardCounts]);
-
-  useEffect(() => {
     if (!squadStateHydrated) return;
     try {
       window.localStorage.setItem('selectedFieldTheme', fieldThemeId);
@@ -1339,11 +1268,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
   }, []);
 
   useEffect(() => {
-    if (activeTool !== 'compare') {
-      setCompareSearchOpen(false);
-      setCompareSearchQuery('');
-      setCompareConfigPlayerId(null);
-    }
     if (activeTool !== 'squadbuilder') {
       setSquadFilterOpen(false);
       setThemeSelectorOpen(false);
@@ -1404,8 +1328,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     const url = new URL(window.location.href);
     if (activeTool === 'none') {
       url.searchParams.delete('tool');
-    } else if (activeTool === 'shardcalculator') {
-      url.searchParams.set('tool', 'shard-calculator');
     } else {
       url.searchParams.set('tool', activeTool);
     }
@@ -1786,24 +1708,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
       })
       .slice(0, 140);
   }, [assignedPlayerIds, normalizedPlayers, squadFilters, squadSearchQuery]);
-
-  const shardCountTotal = useMemo(
-    () => SHARD_OVRS.reduce((sum, ovr) => sum + toNumber(shardCounts[ovr], 0) * SHARD_COSTS[ovr], 0),
-    [shardCounts]
-  );
-
-  const shardPlayerTotal = useMemo(
-    () => SHARD_OVRS.reduce((sum, ovr) => sum + toNumber(shardCounts[ovr], 0), 0),
-    [shardCounts]
-  );
-
-  const shardPlayersNeeded = useMemo(() => {
-    const shardCost = SHARD_COSTS[shardPlayerOvr] || 5;
-    const required = Math.max(0, toNumber(shardRequired, 0));
-    return Math.ceil(required / shardCost);
-  }, [shardPlayerOvr, shardRequired]);
-
-  const shardTotalCost = useMemo(() => shardPlayersNeeded * 1000000, [shardPlayersNeeded]);
 
   const assignPlayerToSelectedSlot = (playerId) => {
     if (!playerId) return;
@@ -2409,33 +2313,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     }
   };
 
-  const updateShardCount = (ovr, delta) => {
-    setShardCounts((current) => {
-      const next = { ...current };
-      next[ovr] = Math.max(0, toNumber(next[ovr], 0) + delta);
-      return next;
-    });
-  };
-
-  const resetShardCounter = () => {
-    setShardCounts({
-      105: 0,
-      106: 0,
-      107: 0,
-      108: 0,
-      109: 0,
-      110: 0,
-      111: 0,
-      112: 0,
-      113: 0
-    });
-  };
-
-  const resetShardCost = () => {
-    setShardRequired(0);
-    setShardPlayerOvr(105);
-  };
-
   const openTool = (toolName) => setActiveTool(normalizeTool(toolName));
   const closeOpenTool = () => setActiveTool('none');
   const toggleSquadFullscreen = () => {
@@ -2502,172 +2379,6 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
               <h3>Compare Players</h3>
               <p>Head-to-head stat comparison</p>
             </button>
-
-            <button className="tool-card" onClick={() => openTool('shard-calculator')} type="button">
-              <div className="tool-card-icon">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <line x1="9" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="12" x2="15" y2="12" />
-                  <line x1="15" y1="9" x2="15" y2="15" />
-                </svg>
-              </div>
-              <h3>Profit Calculator</h3>
-              <p>Count shards and calculate required cost</p>
-            </button>
-          </div>
-        </div>
-
-        <div id="shard-calculator-view" className={`view ${activeTool === 'shardcalculator' ? 'active' : ''}`}>
-          <div className="shard-tabs-container">
-            <button
-              className={`shard-tab-btn ${shardMode === 'counter' ? 'active' : ''}`}
-              data-mode="counter"
-              onClick={() => setShardMode('counter')}
-              type="button"
-            >
-              💎 Shard Counter
-            </button>
-            <button
-              className={`shard-tab-btn ${shardMode === 'cost' ? 'active' : ''}`}
-              data-mode="cost"
-              onClick={() => setShardMode('cost')}
-              type="button"
-            >
-              🧮 Shard Cost
-            </button>
-          </div>
-
-          <div id="shard-counter-section" className="shard-section" style={{ display: shardMode === 'counter' ? 'block' : 'none' }}>
-            <div className="shard-counter-card">
-              <div className="shard-counter-header">
-                <h2>💎 SHARD COUNTER CALCULATOR</h2>
-                <p>Count total number of shards and tokens in your account.</p>
-              </div>
-
-              <div className="shard-counter-stats">
-                <div className="stat-item">
-                  <span className="stat-label">Shard Count:</span>
-                  <span className="stat-value" id="shard-count-display">
-                    {shardCountTotal}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Total Players Added:</span>
-                  <span className="stat-value" id="player-count-display">
-                    {shardPlayerTotal}
-                  </span>
-                </div>
-              </div>
-
-              <div className="shard-levels-grid">
-                {SHARD_OVRS.map((ovr) => (
-                  <div key={ovr} className="shard-level-item">
-                    <div className="level-title">
-                      OVR {ovr} ({SHARD_COSTS[ovr]} shards)
-                    </div>
-                    <div className="level-counter">
-                      <button className="counter-btn minus" onClick={() => updateShardCount(ovr, -1)} type="button">
-                        −
-                      </button>
-                      <span className="counter-value" id={`counter-${ovr}`}>
-                        {toNumber(shardCounts[ovr], 0)}
-                      </span>
-                      <button className="counter-btn plus" onClick={() => updateShardCount(ovr, 1)} type="button">
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button className="shard-reset-btn" onClick={resetShardCounter} type="button">
-                  🔄 Reset Counter
-                </button>
-                <button className="shard-reset-btn" onClick={closeOpenTool} type="button">
-                  ← Back to Tools
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div id="shard-cost-section" className="shard-section" style={{ display: shardMode === 'cost' ? 'block' : 'none' }}>
-            <div className="shard-cost-card">
-              <span className="update-indicator">Live</span>
-              <div className="shard-cost-header">
-                <h2>🧮 SHARD COST CALCULATOR</h2>
-              </div>
-
-              <div className="shard-cost-form">
-                <label htmlFor="shard-required-input">Enter Shards Required</label>
-                <div className="shard-input-wrapper">
-                  <button className="input-btn minus" onClick={() => setShardRequired((value) => Math.max(0, value - 10))} type="button">
-                    −
-                  </button>
-                  <input
-                    type="text"
-                    id="shard-required-input"
-                    value={String(Math.max(0, toNumber(shardRequired, 0)))}
-                    onChange={(event) => setShardRequired(Math.max(0, toNumber(event.target.value.replace(/[^0-9]/g, ''), 0)))}
-                    placeholder="10"
-                  />
-                  <button className="input-btn plus" onClick={() => setShardRequired((value) => value + 10)} type="button">
-                    +
-                  </button>
-                </div>
-
-                <div className="shard-preset-btns">
-                  {[100, 200, 300, 600, 700, 750, 800, 850, 900, 1000, 1500].map((value) => (
-                    <button key={value} onClick={() => setShardRequired(value)} type="button">
-                      {value === 1000 ? '1k' : value === 1500 ? '1.5k' : value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="shard-cost-form">
-                <label htmlFor="shard-player-ovr">Select Player OVR</label>
-                <select id="shard-player-ovr" value={shardPlayerOvr} onChange={(event) => setShardPlayerOvr(toNumber(event.target.value, 105))}>
-                  {SHARD_OVRS.map((ovr) => (
-                    <option key={ovr} value={ovr}>
-                      OVR {ovr}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="shard-cost-results">
-                <div className="result-item players">
-                  <div className="result-icon">👥</div>
-                  <div className="result-info">
-                    <span className="result-value" id="shard-cost-players-result">
-                      {shardPlayersNeeded}
-                    </span>
-                    <span className="result-label">Players to Purchase</span>
-                  </div>
-                </div>
-
-                <div className="result-item cost">
-                  <div className="result-icon">💰</div>
-                  <div className="result-info">
-                    <span className="result-value" id="shard-cost-total-result">
-                      {formatCoins(shardTotalCost)}
-                    </span>
-                    <span className="result-label">Total Cost</span>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button className="shard-reset-btn" onClick={resetShardCost} type="button">
-                  🔄 RESET COST
-                </button>
-                <button className="shard-reset-btn" onClick={closeOpenTool} type="button">
-                  ← Back to Tools
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

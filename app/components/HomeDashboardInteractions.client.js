@@ -5,8 +5,7 @@ import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ROUTE_MAP = Object.freeze({
   compare: '/tools?tool=compare',
-  squadbuilder: '/tools?tool=squadbuilder',
-  'shard-calculator': '/tools?tool=shard-calculator'
+  squadbuilder: '/tools?tool=squadbuilder'
 });
 
 const VIEW_ROUTE_MAP = Object.freeze({

@@ -29,18 +29,6 @@ const MOBILE_TOOL_ITEMS = [
         <path d="m17 16-3 5h6l-3-5Z" />
       </svg>
     )
-  },
-  {
-    key: 'shard-calculator',
-    label: 'Shard Calculator',
-    href: '/tools?tool=shard-calculator',
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v10" />
-        <path d="M7 12h10" />
-      </svg>
-    )
   }
 ];
 

@@ -46,9 +46,6 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 <a href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ⚖️ Compare Players
                 </a>
-                <a href="/tools?tool=shard-calculator" data-link="" data-nav-link="" className="tools-dropdown-item">
-                  💎 Shard Calculator
-                </a>
               </div>
             </div>
           </nav>

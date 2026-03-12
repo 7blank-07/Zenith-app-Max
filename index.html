@@ -656,9 +656,6 @@
             <a href="/compare"          data-link data-nav-link class="tools-dropdown-item">
               ⚖️ Compare Players
             </a>
-            <a href="/shard-calculator" data-link data-nav-link class="tools-dropdown-item">
-              💎 Shard Calculator
-            </a>
           </div>
         </div>
       </nav>
@@ -2805,210 +2802,6 @@
     <div id="player-detail-view" class="view">
       <!-- Player detail content will be rendered dynamically by viewPlayerDetail() -->
     </div>
-
-
-
-    <!-- SHARD CALCULATOR VIEW -->
-    <div id="shard-calculator-view" class="view">
-      <!-- Tab Selector -->
-      <div class="shard-tabs-container">
-        <button class="shard-tab-btn active" data-mode="counter" onclick="switchShardMode('counter')">
-          💎 Shard Counter
-        </button>
-        <button class="shard-tab-btn" data-mode="cost" onclick="switchShardMode('cost')">
-          🧮 Shard Cost
-        </button>
-      </div>
-
-      <!-- SHARD COUNTER MODE -->
-      <div id="shard-counter-section" class="shard-section">
-        <div class="shard-counter-card">
-          <div class="shard-counter-header">
-            <h2>💎 SHARD COUNTER CALCULATOR</h2>
-            <p>Count total number of shards and tokens in your account.</p>
-          </div>
-
-          <!-- Stats Display -->
-          <div class="shard-counter-stats">
-            <div class="stat-item">
-              <span class="stat-label">Shard Count:</span>
-              <span class="stat-value" id="shard-count-display">0</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Total Players Added:</span>
-              <span class="stat-value" id="player-count-display">0</span>
-            </div>
-          </div>
-
-          <!-- OVR Levels Grid -->
-          <div class="shard-levels-grid">
-            <div class="shard-level-item">
-              <div class="level-title">OVR 105 (5 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(105)">−</button>
-                <span class="counter-value" id="counter-105">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(105)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 106 (10 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(106)">−</button>
-                <span class="counter-value" id="counter-106">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(106)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 107 (10 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(107)">−</button>
-                <span class="counter-value" id="counter-107">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(107)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 108 (10 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(108)">−</button>
-                <span class="counter-value" id="counter-108">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(108)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 109 (30 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(109)">−</button>
-                <span class="counter-value" id="counter-109">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(109)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 110 (60 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(110)">−</button>
-                <span class="counter-value" id="counter-110">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(110)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 111 (120 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(111)">−</button>
-                <span class="counter-value" id="counter-111">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(111)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 112 (180 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(112)">−</button>
-                <span class="counter-value" id="counter-112">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(112)">+</button>
-              </div>
-            </div>
-
-            <div class="shard-level-item">
-              <div class="level-title">OVR 113 (250 shards)</div>
-              <div class="level-counter">
-                <button class="counter-btn minus" onclick="decrementShardLevel(113)">−</button>
-                <span class="counter-value" id="counter-113">0</span>
-                <button class="counter-btn plus" onclick="incrementShardLevel(113)">+</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Reset Button -->
-          <button class="shard-reset-btn" onclick="resetShardCounter()">🔄 Reset Counter</button>
-        </div>
-      </div>
-
-      <!-- SHARD COST MODE -->
-      <div id="shard-cost-section" class="shard-section" style="display: none;">
-        <div class="shard-cost-card">
-          <span class="update-indicator">Live</span>
-          <div class="shard-cost-header">
-            <h2>🧮 SHARD COST CALCULATOR</h2>
-          </div>
-
-          <!-- Shard Input -->
-          <div class="shard-cost-form">
-            <label for="shard-required-input">Enter Shards Required</label>
-            <div class="shard-input-wrapper">
-              <button class="input-btn minus"
-                onclick="setShardValue(Math.max(0, parseInt(document.getElementById('shard-required-input').value) - 10))">−</button>
-              <input type="text" id="shard-required-input" placeholder="10" value="0">
-              <button class="input-btn plus"
-                onclick="setShardValue(parseInt(document.getElementById('shard-required-input').value) + 10)">+</button>
-            </div>
-
-            <!-- Preset Buttons -->
-            <div class="shard-preset-btns">
-              <button onclick="setShardValue(100)">100</button>
-              <button onclick="setShardValue(200)">200</button>
-              <button onclick="setShardValue(300)">300</button>
-              <button onclick="setShardValue(600)">600</button>
-              <button onclick="setShardValue(700)">700</button>
-              <button onclick="setShardValue(750)">750</button>
-              <button onclick="setShardValue(800)">800</button>
-              <button onclick="setShardValue(850)">850</button>
-              <button onclick="setShardValue(900)">900</button>
-              <button onclick="setShardValue(1000)">1k</button>
-              <button onclick="setShardValue(1500)">1.5k</button>
-            </div>
-          </div>
-
-          <!-- Player OVR Selection -->
-          <div class="shard-cost-form">
-            <label for="shard-player-ovr">Select Player OVR</label>
-            <select id="shard-player-ovr" onchange="calculateShardCost()">
-              <option value="105">OVR 105</option>
-              <option value="106">OVR 106</option>
-              <option value="107">OVR 107</option>
-              <option value="108">OVR 108</option>
-              <option value="109">OVR 109</option>
-              <option value="110">OVR 110</option>
-              <option value="111">OVR 111</option>
-              <option value="112">OVR 112</option>
-              <option value="113">OVR 113</option>
-            </select>
-          </div>
-
-          <!-- Results -->
-          <div class="shard-cost-results">
-            <div class="result-item players">
-              <div class="result-icon">👥</div>
-              <div class="result-info">
-                <span class="result-value" id="shard-cost-players-result">34</span>
-                <span class="result-label">Players to Purchase</span>
-              </div>
-            </div>
-
-            <div class="result-item cost">
-              <div class="result-icon">💰</div>
-              <div class="result-info">
-                <span class="result-value" id="shard-cost-total-result">839.8M</span>
-                <span class="result-label">Total Cost</span>
-              </div>
-            </div>
-          </div>
-
-          <button class="shard-reset-btn" onclick="resetShardCost()">🔄 RESET COST</button>
-          <style>
-            .shard-reset-btn {
-              text-align-last: center;
-            }
-          </style>
-        </div>
-      </div>
-    </div>
-
   </main>
 
 
@@ -3227,18 +3020,6 @@
           </svg>
         </div>
         <span>ROI Calc</span>
-      </div>
-
-
-      <div class="tool-item" onclick="openTool('shardcalculator'); closeToolsSheet();">
-        <div class="tool-item-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-            <path d="M2 17l10 5 10-5"></path>
-            <path d="M2 12l10 5 10-5"></path>
-          </svg>
-        </div>
-        <span>Shard Calculator</span>
       </div>
     </div>
   </div>
@@ -5399,20 +5180,6 @@
           <span>ROI Calc</span>
         </div>
 
-
-
-        <!-- Shard Calculator -->
-        <div class="tool-item" onclick="openTool('shardcalculator'); closeToolsSheet();">
-          <div class="tool-item-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M8 12h8M12 8v8"></path>
-            </svg>
-          </div>
-          <span>Shard Calculator</span>
-        </div>
-
-
       </div>
     </div>
   </div>
@@ -5483,7 +5250,6 @@
   <script src="assets/js/views/squadBuilder-saveload.js"></script>
   <script src="assets/js/views/squadBuilder-export.js"></script>
   <script src="assets/js/views/eventGuide.js"></script>
-  <script src="assets/js/views/shardCalculator.js"></script>
   <script src="assets/js/watchlist-professional.js"></script>
 
   <script src="assets/js/refresh-time.js"></script>

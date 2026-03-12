@@ -15,7 +15,6 @@ const LEGACY_SCRIPT_SOURCES = [
   "/assets/js/views/squadBuilder-saveload.js",
   "/assets/js/views/squadBuilder-export.js",
   "/assets/js/views/eventGuide.js",
-  "/assets/js/views/shardCalculator.js",
   "/assets/js/watchlist-professional.js",
   "/assets/js/refresh-time.js",
   "/assets/js/router.js",
