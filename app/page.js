@@ -1,5 +1,5 @@
 import HomeDashboardInteractions from './components/HomeDashboardInteractions.client';
-import BlogArticleCard from './components/blog/BlogArticleCard';
+import HomeLatestBlogsSection from './components/HomeLatestBlogsSection.client';
 import MarketNavLink from './components/MarketNavLink.client';
 import MobileNavigation from './components/MobileNavigation.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
@@ -11,7 +11,7 @@ export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
 const HOME_PLAYER_LIMIT = 48;
 const HOME_SECTION_LIMIT = 12;
-const HOME_BLOG_LIMIT = 4;
+const HOME_BLOG_LIMIT = 8;
 const RECENT_EVENT_GROUP_LIMIT = 3;
 const RECENT_EVENT_ROW_LIMIT = 7;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -331,47 +331,11 @@ export default async function HomePage() {
           </section>
 
           {shouldRenderLatestBlogs ? (
-            <section className="dashboard-section">
-              <div className="section-header" style={{ alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  <h2>📝 Latest Blogs</h2>
-                  <p
-                    style={{
-                      margin: 0,
-                      maxWidth: '720px',
-                      color: 'var(--color-text-muted, #98A0A6)',
-                      fontSize: '15px',
-                      lineHeight: 1.6
-                    }}
-                  >
-                    Fresh FC Mobile news, reviews, event guides, and investment reads from the Zenith editorial desk.
-                  </p>
-                </div>
-                <a href="/blogs" data-link="" data-nav-link="" className="view-all-btn">
-                  View All
-                </a>
-              </div>
-
-              {latestBlogPosts.length ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
-                  {latestBlogPosts.map((post) => (
-                    <BlogArticleCard key={post.id || post.slug} post={post} showTags={false} />
-                  ))}
-                </div>
-              ) : (
-                <div
-                  style={{
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '20px',
-                    padding: '24px',
-                    background: 'rgba(20, 24, 28, 0.55)',
-                    color: 'var(--color-text-muted, #98A0A6)'
-                  }}
-                >
-                  Published blog posts will appear here as soon as the latest stories go live.
-                </div>
-              )}
-            </section>
+            <HomeLatestBlogsSection
+              posts={latestBlogPosts}
+              categories={blogPageData?.categories || []}
+              availability={blogPageData?.availability || null}
+            />
           ) : null}
         </div>
       </main>
