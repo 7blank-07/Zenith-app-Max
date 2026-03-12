@@ -302,21 +302,38 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                   {compareRows.map((row) => (
                     <div key={row.key} className="stat-row" data-stat-field={row.key}>
                       <div className="stat-name-cell">{row.label}</div>
-                      {comparePlayers.map((player, index) => (
-                        <div key={`${player.playerId}-${row.key}`} className="stat-value-cell" data-player-id={player.playerId}>
-                          <span className={`stat-value ${row.classes[index]}`}>{row.values[index]}</span>
-                        </div>
-                      ))}
+                      {comparePlayers.map((player, index) => {
+                        const playerLabel = player?.name || `Player ${index + 1}`;
+                        return (
+                          <div
+                            key={`${player.playerId}-${row.key}`}
+                            className="stat-value-cell"
+                            data-player-id={player.playerId}
+                            data-player-label={playerLabel}
+                          >
+                            <span className="stat-player-label">{playerLabel}</span>
+                            <span className={`stat-value ${row.classes[index]}`}>{row.values[index]}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   ))}
                   {comparePlayers.length >= 2 && (
                     <div className="stat-row total-row" data-total-row="true">
                       <div className="stat-name-cell">🏆 TOTAL STATS</div>
-                      {compareTotals.map((entry, index) => (
-                        <div key={`total-${comparePlayers[index]?.playerId || index}`} className="stat-value-cell total-cell">
-                          <span className={`total-stats-value ${entry.className}`}>{entry.value}</span>
-                        </div>
-                      ))}
+                      {compareTotals.map((entry, index) => {
+                        const playerLabel = comparePlayers[index]?.name || `Player ${index + 1}`;
+                        return (
+                          <div
+                            key={`total-${comparePlayers[index]?.playerId || index}`}
+                            className="stat-value-cell total-cell"
+                            data-player-label={playerLabel}
+                          >
+                            <span className="stat-player-label">{playerLabel}</span>
+                            <span className={`total-stats-value ${entry.className}`}>{entry.value}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
