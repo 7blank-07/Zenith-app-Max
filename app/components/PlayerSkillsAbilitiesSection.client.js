@@ -1,5 +1,6 @@
 'use client';
 
+import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   PLAYER_SKILL_BOOSTS_EVENT,
@@ -34,7 +35,9 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
   const normalizedPlayerId = String(playerId || '').trim();
   const normalizedRank = clamp(toNumber(currentRank, 0), 0, 5);
   const skillRequestSequenceRef = useRef(0);
+  const skillModalRef = useRef(null);
 
+  const [hasMounted, setHasMounted] = useState(false);
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skillsLoadMessage, setSkillsLoadMessage] = useState('Loading skills...');
   const [availableSkills, setAvailableSkills] = useState([]);
@@ -56,6 +59,10 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
     () => aggregateSkillBoostsByLevel(skillLevelsById, skillBoostCatalogById),
     [skillLevelsById, skillBoostCatalogById]
   );
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     dispatchSkillBoosts(normalizedPlayerId, aggregatedBoosts);
@@ -174,6 +181,31 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
     setSkillModalError('');
     setSkillModalLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!activeSkillDetail || typeof document === 'undefined') return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const frameId = window.requestAnimationFrame(() => {
+      skillModalRef.current?.focus({ preventScroll: true });
+      skillModalRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      closeSkillDetailModal();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [activeSkillDetail, closeSkillDetailModal]);
 
   const handleSkillCardOpen = async (skill) => {
     if (!skill) return;
@@ -319,13 +351,23 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
           })}
       </div>
 
-      {activeSkillDetail && (
+      {hasMounted && activeSkillDetail
+        ? createPortal(
         <div id="skill-detail-modal" className="skill-detail-modal" onClick={closeSkillDetailModal}>
-          <div id="skill-modal-content" className="skill-modal-content" onClick={(event) => event.stopPropagation()}>
+          <div
+            id="skill-modal-content"
+            ref={skillModalRef}
+            className="skill-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="player-skill-detail-title"
+            tabIndex={-1}
+            onClick={(event) => event.stopPropagation()}
+          >
             <button className="modal-close-btn" type="button" onClick={closeSkillDetailModal} aria-label="Close skill detail modal">
               ×
             </button>
-            <h2>{activeSkillName}</h2>
+            <h2 id="player-skill-detail-title">{activeSkillName}</h2>
             {!activeSkillUnlocked && <div style={{ marginTop: '8px', color: '#FFB86B', fontWeight: 600 }}>{activeSkillUnlockMessage}</div>}
             <div className="points-info">
               <div className="current-level-badge">
@@ -395,8 +437,10 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                 })}
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+        : null}
     </section>
   );
 }

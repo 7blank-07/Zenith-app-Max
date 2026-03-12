@@ -36,7 +36,14 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             </a>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
-              <button className="tools-btn" id="tools-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-dropdown-menu">
+              <button
+                className={`tools-btn${activeView === 'tools' ? ' active' : ''}`}
+                id="tools-dropdown-btn"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="tools-dropdown-menu"
+              >
                 Tools ▾
               </button>
               <div className="tools-dropdown-menu" id="tools-dropdown-menu" style={{ display: 'none' }}>
