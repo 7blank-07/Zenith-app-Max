@@ -9714,7 +9714,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
   --squad-sidebar-width: 380px;
   --squad-main-gap: 40px;
-  --squad-panel-height: clamp(520px, calc(var(--squadbuilder-viewport-height, 100vh) - 300px), 620px);
+  --squad-panel-height: clamp(610px, calc(var(--squadbuilder-viewport-height, 100vh) - 210px), 710px);
   height: auto;
   min-height: 0;
   padding: 0;
@@ -10009,15 +10009,15 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-field-container {
-    min-height: min(480px, 100%);
-    height: min(100%, 580px);
-    max-height: 580px;
+    min-height: 590px;
+    height: min(100%, 670px);
+    max-height: 670px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-picker {
-    min-height: min(480px, 100%);
-    height: min(100%, 580px);
-    max-height: 580px;
+    min-height: 590px;
+    height: min(100%, 670px);
+    max-height: 670px;
     width: 320px;
   }
 

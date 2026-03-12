@@ -63,7 +63,6 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     if (!root) return;
 
     const cleanup = [];
-    const encodedPlayerId = encodeURIComponent(String(playerId || ''));
     const normalizedRank = toNumber(currentRank, 0);
     const normalizedBaseOvr = toNumber(baseOvr, 0);
 
@@ -200,25 +199,6 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     if (backButton) {
       backButton.addEventListener('click', handleBack);
       cleanup.push(() => backButton.removeEventListener('click', handleBack));
-    }
-
-    const rankCards = Array.from(root.querySelectorAll('[data-rank-card]'));
-    rankCards.forEach((card) => {
-      const onClick = () => {
-        const nextRank = toNumber(card.getAttribute('data-rank'), 0);
-        if (nextRank === normalizedRank) return;
-        const nextPath = nextRank > 0 ? `/player/${encodedPlayerId}?rank=${nextRank}` : `/player/${encodedPlayerId}`;
-        window.location.assign(nextPath);
-      };
-      card.addEventListener('click', onClick);
-      cleanup.push(() => card.removeEventListener('click', onClick));
-    });
-
-    const resetRankButton = root.querySelector('[data-reset-rank]');
-    if (resetRankButton) {
-      const onClick = () => window.location.assign(`/player/${encodedPlayerId}`);
-      resetRankButton.addEventListener('click', onClick);
-      cleanup.push(() => resetRankButton.removeEventListener('click', onClick));
     }
 
     return () => {
