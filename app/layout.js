@@ -1,6 +1,7 @@
 import './globals.css';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
+import ImageCacheServiceWorker from './components/ImageCacheServiceWorker.client';
 import WebVitalsReporter from './components/WebVitalsReporter.client';
 
 const inter = Inter({
@@ -44,6 +45,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <ImageCacheServiceWorker />
         <WebVitalsReporter />
         <Script
           id="simple-analytics"

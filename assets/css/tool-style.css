@@ -9772,7 +9772,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-sh
   height: auto;
   min-height: 0;
   margin: 0 auto;
-  padding: 24px 56px;
+  padding: 24px 56px 12px;
   box-sizing: border-box;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -10242,9 +10242,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
   justify-self: stretch;
   width: calc(100% - (var(--squad-sidebar-width) + var(--squad-main-gap)));
   max-width: 100%;
-  margin-top: 40px;
+  margin-top: 24px;
   margin-right: auto;
-  padding: 12px 14px;
+  padding: 10px 14px 8px;
   gap: 10px;
   border-radius: 16px;
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -10433,7 +10433,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-shell {
     height: auto;
     min-height: 100%;
-    padding: 20px 20px 24px;
+    padding: 20px 20px 12px;
     row-gap: 20px;
   }
 
@@ -10472,7 +10472,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
     overflow-x: auto;
     overflow-y: hidden;
     margin-top: 24px;
-    padding-bottom: 18px;
+    padding-bottom: 10px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {
@@ -10482,7 +10482,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 @media (max-width: 768px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-page-shell {
-    padding: 16px 20px 20px;
+    padding: 16px 20px 10px;
     row-gap: 16px;
   }
 
@@ -10558,7 +10558,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
     width: 100%;
     margin-top: 16px;
-    padding: 12px 12px 16px;
+    padding: 10px 12px 8px;
     gap: 8px;
   }
 }
@@ -10967,7 +10967,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-bench {
     gap: 6px;
-    padding: 10px 8px 12px;
+    padding: 8px 8px 6px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-cell {

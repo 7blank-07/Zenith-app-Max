@@ -1802,6 +1802,26 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     if (!slotId) return;
     setSelectedSlotId(slotId);
     if (hasPlayer) return;
+    const pickerElement = squadBuilderContainerRef.current?.querySelector('.squad-picker');
+    const canUseInlinePicker = (() => {
+      if (!pickerElement || typeof window === 'undefined') return false;
+      const pickerStyle = window.getComputedStyle(pickerElement);
+      const pickerHidden =
+        pickerStyle.display === 'none' ||
+        pickerStyle.visibility === 'hidden' ||
+        pickerStyle.pointerEvents === 'none' ||
+        pickerElement.clientHeight === 0;
+      return !pickerHidden;
+    })();
+
+    if (canUseInlinePicker) {
+      const pickerSearchInput = squadBuilderContainerRef.current?.querySelector('#squad-picker-search');
+      if (pickerSearchInput instanceof HTMLInputElement) {
+        pickerSearchInput.focus();
+      }
+      return;
+    }
+
     persistRoundtripSquadState(slotId);
     const searchParams = new URLSearchParams();
     searchParams.set('squadPick', '1');

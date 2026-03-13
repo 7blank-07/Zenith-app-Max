@@ -4,6 +4,7 @@ import MarketNavLink from './components/MarketNavLink.client';
 import MobileNavigation from './components/MobileNavigation.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
@@ -174,7 +175,7 @@ export default async function HomePage() {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <a href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <Link href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
               <Image
                 src="/assets/images/zenith_logo_svg.svg"
                 alt="Zenith logo"
@@ -184,37 +185,37 @@ export default async function HomePage() {
                 sizes="64px"
               />
               <span className="logo-text">Zenith</span>
-            </a>
+            </Link>
           </div>
 
           <nav className="nav-desktop">
-            <a href="/" data-link="" data-nav-link="" className="nav-link active">
+            <Link href="/" data-link="" data-nav-link="" className="nav-link active">
               Home
-            </a>
-            <a href="/players" data-link="" data-nav-link="" className="nav-link">
+            </Link>
+            <Link href="/players" data-link="" data-nav-link="" className="nav-link">
               Players
-            </a>
+            </Link>
             <MarketNavLink href="/market" data-link="" data-nav-link="" className="nav-link">
               Market
             </MarketNavLink>
-            <a href="/watchlist" data-link="" data-nav-link="" className="nav-link">
+            <Link href="/watchlist" data-link="" data-nav-link="" className="nav-link">
               Watchlist
-            </a>
-            <a href="/blogs" data-link="" data-nav-link="" className="nav-link">
+            </Link>
+            <Link href="/blogs" data-link="" data-nav-link="" className="nav-link">
               Blogs
-            </a>
+            </Link>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
               <button className="tools-btn" id="tools-dropdown-btn" type="button">
                 Tools ▾
               </button>
               <div className="tools-dropdown-menu" id="tools-dropdown-menu" style={{ display: 'none' }}>
-                <a href="/tools?tool=squadbuilder" data-link="" data-nav-link="" className="tools-dropdown-item">
+                <Link href="/tools?tool=squadbuilder" data-link="" data-nav-link="" className="tools-dropdown-item">
                   🏟️ Squad Builder
-                </a>
-                <a href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
+                </Link>
+                <Link href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ⚖️ Compare Players
-                </a>
+                </Link>
               </div>
             </div>
           </nav>
@@ -336,9 +337,9 @@ export default async function HomePage() {
           <section className="dashboard-section">
             <div className="section-header">
               <h2>⚡ Latest Players</h2>
-              <a href="/players" data-link="" data-nav-link="" className="view-all-btn">
+              <Link href="/players" data-link="" data-nav-link="" className="view-all-btn">
                 View All
-              </a>
+              </Link>
             </div>
             <div id="latest-players-grid">{latestPlayers.map((player) => renderDashboardPlayerCard(player, `latest-${player.playerId}`))}</div>
           </section>
@@ -386,21 +387,21 @@ export default async function HomePage() {
           </div>
 
           <div className="zenith-footer-center">
-            <a href="/" data-link="" data-nav-link="">
+            <Link href="/" data-link="" data-nav-link="">
               Home
-            </a>
-            <a href="/players" data-link="" data-nav-link="">
+            </Link>
+            <Link href="/players" data-link="" data-nav-link="">
               Database
-            </a>
+            </Link>
             <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
             </MarketNavLink>
-            <a href="/watchlist" data-link="" data-nav-link="">
+            <Link href="/watchlist" data-link="" data-nav-link="">
               Watchlist
-            </a>
-            <a href="/blogs" data-link="" data-nav-link="">
+            </Link>
+            <Link href="/blogs" data-link="" data-nav-link="">
               Blogs
-            </a>
+            </Link>
           </div>
 
           <div className="zenith-footer-right">
