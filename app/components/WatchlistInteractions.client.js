@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { normalizeSearchText } from './search-normalization';
 
 function toNumber(value, fallback = 0) {
@@ -315,6 +316,8 @@ function renderPlayerRow(player) {
 }
 
 export default function WatchlistInteractions() {
+  const router = useRouter();
+
   useEffect(() => {
     const root = document.getElementById('watchlist-view');
     const grid = document.getElementById('watchlist-players-grid');
@@ -645,7 +648,7 @@ export default function WatchlistInteractions() {
       if (!row) return;
       const playerId = toText(row.getAttribute('data-player-id'));
       if (!playerId) return;
-      window.location.assign(`/player/${encodeURIComponent(playerId)}`);
+      router.push(`/player/${encodeURIComponent(playerId)}`);
     };
 
     const bind = (element, eventName, handler) => {
@@ -725,7 +728,7 @@ export default function WatchlistInteractions() {
     });
 
     bind(document.getElementById('clear-watchlist-filters'), 'click', clearFilters);
-    bind(browsePlayersButton, 'click', () => window.location.assign('/players'));
+    bind(browsePlayersButton, 'click', () => router.push('/players'));
 
     bind(mobileFilterOpen, 'click', openMobileFilters);
     bind(mobileFilterClose, 'click', closeMobileFilters);
@@ -776,7 +779,7 @@ export default function WatchlistInteractions() {
       priceHydrationRun += 1;
       cleanup.forEach((dispose) => dispose());
     };
-  }, []);
+  }, [router]);
 
   return null;
 }

@@ -2,6 +2,7 @@ import SiteChromeInteractions from './SiteChromeInteractions.client';
 import MarketNavLink from './MarketNavLink.client';
 import MobileNavigation from './MobileNavigation.client';
 import Image from 'next/image';
+import Link from 'next/link';
 
 function getNavClass(activeView, view) {
   return activeView === view ? 'nav-link active' : 'nav-link';
@@ -13,7 +14,7 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <a href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <Link href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
               <Image
                 src="/assets/images/zenith_logo_svg.svg"
                 alt="Zenith logo"
@@ -23,25 +24,25 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 sizes="64px"
               />
               <span className="logo-text">Zenith</span>
-            </a>
+            </Link>
           </div>
 
           <nav className="nav-desktop">
-            <a href="/" data-link="" data-nav-link="" className={getNavClass(activeView, 'home')}>
+            <Link href="/" data-link="" data-nav-link="" className={getNavClass(activeView, 'home')}>
               Home
-            </a>
-            <a href="/players" data-link="" data-nav-link="" className={getNavClass(activeView, 'players')}>
+            </Link>
+            <Link href="/players" data-link="" data-nav-link="" className={getNavClass(activeView, 'players')}>
               Players
-            </a>
+            </Link>
             <MarketNavLink href="/market" data-link="" data-nav-link="" className={getNavClass(activeView, 'market')}>
               Market
             </MarketNavLink>
-            <a href="/watchlist" data-link="" data-nav-link="" className={getNavClass(activeView, 'watchlist')}>
+            <Link href="/watchlist" data-link="" data-nav-link="" className={getNavClass(activeView, 'watchlist')}>
               Watchlist
-            </a>
-            <a href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
+            </Link>
+            <Link href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
               Blogs
-            </a>
+            </Link>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
               <button
@@ -55,12 +56,12 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 Tools ▾
               </button>
               <div className="tools-dropdown-menu" id="tools-dropdown-menu" style={{ display: 'none' }}>
-                <a href="/tools?tool=squadbuilder" data-link="" data-nav-link="" className="tools-dropdown-item">
+                <Link href="/tools?tool=squadbuilder" data-link="" data-nav-link="" className="tools-dropdown-item">
                   🏟️ Squad Builder
-                </a>
-                <a href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
+                </Link>
+                <Link href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ⚖️ Compare Players
-                </a>
+                </Link>
               </div>
             </div>
           </nav>
@@ -98,21 +99,21 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
           </div>
 
           <div className="zenith-footer-center">
-            <a href="/" data-link="" data-nav-link="">
+            <Link href="/" data-link="" data-nav-link="">
               Home
-            </a>
-            <a href="/players" data-link="" data-nav-link="">
+            </Link>
+            <Link href="/players" data-link="" data-nav-link="">
               Database
-            </a>
+            </Link>
             <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
             </MarketNavLink>
-            <a href="/watchlist" data-link="" data-nav-link="">
+            <Link href="/watchlist" data-link="" data-nav-link="">
               Watchlist
-            </a>
-            <a href="/blogs" data-link="" data-nav-link="">
+            </Link>
+            <Link href="/blogs" data-link="" data-nav-link="">
               Blogs
-            </a>
+            </Link>
           </div>
 
           <div className="zenith-footer-right">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 function toNumber(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
@@ -58,6 +59,8 @@ function getStoredPlayerUniqueId(player) {
 }
 
 export default function PlayerDetailInteractions({ playerId, currentRank = 0, baseOvr = 0 }) {
+  const router = useRouter();
+
   useEffect(() => {
     const root = document.getElementById('player-detail-view');
     if (!root) return;
@@ -196,7 +199,7 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     cleanup.push(() => window.removeEventListener('storage', handleStorageChange));
     cleanup.push(() => window.removeEventListener('watchlist-updated', handleWatchlistUpdated));
 
-    const handleBack = () => window.location.assign('/players');
+    const handleBack = () => router.push('/players');
     const backButton = root.querySelector('[data-go-back]');
     if (backButton) {
       backButton.addEventListener('click', handleBack);
@@ -206,7 +209,7 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     return () => {
       cleanup.forEach((dispose) => dispose());
     };
-  }, [playerId, currentRank, baseOvr]);
+  }, [playerId, currentRank, baseOvr, router]);
 
   return null;
 }
