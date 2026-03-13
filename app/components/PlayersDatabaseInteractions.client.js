@@ -456,6 +456,7 @@ export default function PlayersDatabaseInteractions({
   leagues = [],
   clubs = [],
   nations = [],
+  events = [],
   skillMoves = [],
   initialSquadPickContext = DEFAULT_SQUAD_PICK_CONTEXT
 }) {
@@ -463,7 +464,10 @@ export default function PlayersDatabaseInteractions({
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer).filter((player) => !!player.playerId), [players]);
   const playerByUniqueId = useMemo(() => new Map(normalizedPlayers.map((player) => [player.uniqueId, player])), [normalizedPlayers]);
 
-  const eventOptions = useMemo(() => uniqueSorted(normalizedPlayers.map((player) => player.event)), [normalizedPlayers]);
+  const eventOptions = useMemo(
+    () => uniqueSorted([...events, ...normalizedPlayers.map((player) => player.event)]),
+    [events, normalizedPlayers]
+  );
   const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
   const [mobileFilters, setMobileFilters] = useState({ ...DEFAULT_FILTERS });
   const [searchQuery, setSearchQuery] = useState('');

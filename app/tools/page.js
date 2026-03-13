@@ -1,11 +1,12 @@
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import SiteChrome from '../components/SiteChrome';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
-import { fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
+import { fetchAllPlayerFilterMetadata, fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
 
-const ToolsInteractions = dynamic(() => import('../components/ToolsInteractions.client'));
+const ToolsInteractions = nextDynamic(() => import('../components/ToolsInteractions.client'));
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
+export const dynamic = 'force-dynamic';
 
 const TOOLS_PLAYER_POOL_LIMIT = 350;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -62,9 +63,19 @@ function serializeToolPlayer(player) {
 export default async function ToolsPage({ searchParams }) {
   const startedAt = Date.now();
   const topIds = await readTopPlayerIds(TOOLS_PLAYER_POOL_LIMIT);
-  const players = await fetchPlayersByIds(topIds, { rank: 0 });
+  const [players, filterMetadata] = await Promise.all([
+    fetchPlayersByIds(topIds, { rank: 0 }),
+    fetchAllPlayerFilterMetadata({ rank: 0 })
+  ]);
   const initialTool = normalizeToolParam(searchParams?.tool);
   const toolPlayers = players.map(serializeToolPlayer);
+  const squadFilterOptions = {
+    positions: filterMetadata.positions,
+    leagues: filterMetadata.leagues,
+    clubs: filterMetadata.clubs,
+    nations: filterMetadata.nations,
+    skillMoves: filterMetadata.skillMoves
+  };
   const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}${
     initialTool === 'compare' ? ' main-content--compare' : ''
   }`;
@@ -78,7 +89,7 @@ export default async function ToolsPage({ searchParams }) {
   return (
     <SiteChrome activeView="tools">
       <main className={mainContentClassName}>
-        <ToolsInteractions players={toolPlayers} initialTool={initialTool} />
+        <ToolsInteractions players={toolPlayers} initialTool={initialTool} filterOptions={squadFilterOptions} />
       </main>
     </SiteChrome>
   );

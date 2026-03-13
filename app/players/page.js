@@ -2,9 +2,10 @@ import PlayersDatabaseInteractions from '../components/PlayersDatabaseInteractio
 import SiteChrome from '../components/SiteChrome';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getPrerenderRolloutState } from '../../src/lib/server/prerender-rollout.mjs';
-import { fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
+import { fetchAllPlayerFilterMetadata, fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
+export const dynamic = 'force-dynamic';
 
 const LISTING_LIMIT = 350;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -21,12 +22,6 @@ export const metadata = {
     type: 'website'
   }
 };
-
-function uniqueSorted(values) {
-  return [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((left, right) =>
-    left.localeCompare(right)
-  );
-}
 
 function readSearchParam(searchParams, key, fallback = '') {
   const rawValue = searchParams?.[key];
@@ -59,14 +54,18 @@ export default async function PlayersPage({ searchParams = {} }) {
   const startedAt = Date.now();
   const rollout = getPrerenderRolloutState();
   const topIds = await readTopPlayerIds(LISTING_LIMIT);
-  const players = await fetchPlayersByIds(topIds, { rank: 0 });
+  const [players, filterMetadata] = await Promise.all([
+    fetchPlayersByIds(topIds, { rank: 0 }),
+    fetchAllPlayerFilterMetadata({ rank: 0 })
+  ]);
   const jsonLd = buildPlayersJsonLd(players);
 
-  const positions = uniqueSorted(players.map((player) => player.position));
-  const leagues = uniqueSorted(players.map((player) => player.league));
-  const clubs = uniqueSorted(players.map((player) => player.club));
-  const nations = uniqueSorted(players.map((player) => player.nation));
-  const skillMoves = uniqueSorted(players.map((player) => player.skillMoves).filter((value) => Number(value) > 0)).sort((a, b) => Number(b) - Number(a));
+  const positions = filterMetadata.positions;
+  const leagues = filterMetadata.leagues;
+  const clubs = filterMetadata.clubs;
+  const nations = filterMetadata.nations;
+  const events = filterMetadata.events;
+  const skillMoves = filterMetadata.skillMoves;
   const initialSquadPickContext = {
     enabled: readSearchParam(searchParams, 'squadPick') === '1',
     slotId: readSearchParam(searchParams, 'slotId'),
@@ -92,6 +91,7 @@ export default async function PlayersPage({ searchParams = {} }) {
           leagues={leagues}
           clubs={clubs}
           nations={nations}
+          events={events}
           skillMoves={skillMoves}
           initialSquadPickContext={initialSquadPickContext}
         />

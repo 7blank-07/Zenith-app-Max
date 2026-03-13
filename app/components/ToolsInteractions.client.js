@@ -1095,7 +1095,7 @@ function normalizeBadges(value) {
   };
 }
 
-export default function ToolsInteractions({ players = [], initialTool = '' }) {
+export default function ToolsInteractions({ players = [], initialTool = '', filterOptions = null }) {
   const router = useRouter();
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer), [players]);
   const [supplementalPlayers, setSupplementalPlayers] = useState({});
@@ -1696,16 +1696,26 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
 
   const squadFilterOptions = useMemo(() => {
     const uniqueSorted = (values) => [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const normalizeSkillMoveOptions = (values) =>
+      [...new Set((values || []).map((value) => toNumber(value, 0)).filter((value) => value > 0))].sort((a, b) => b - a);
+
+    const normalizedFilterOptions = filterOptions && typeof filterOptions === 'object' ? filterOptions : null;
+    const providedPositions = uniqueSorted(normalizedFilterOptions?.positions || []);
+    const providedLeagues = uniqueSorted(normalizedFilterOptions?.leagues || []);
+    const providedClubs = uniqueSorted(normalizedFilterOptions?.clubs || []);
+    const providedNations = uniqueSorted(normalizedFilterOptions?.nations || []);
+    const providedSkillMoves = normalizeSkillMoveOptions(normalizedFilterOptions?.skillMoves || []);
+
     const skillMoveOptions = [...new Set(normalizedPlayers.map((player) => toNumber(player.skillMoves, 0)).filter((value) => value > 0))]
       .sort((a, b) => b - a);
     return {
-      positions: uniqueSorted(normalizedPlayers.map((player) => player.position)),
-      leagues: uniqueSorted(normalizedPlayers.map((player) => player.league)),
-      clubs: uniqueSorted(normalizedPlayers.map((player) => player.club)),
-      nations: uniqueSorted(normalizedPlayers.map((player) => player.nation)),
-      skillMoves: skillMoveOptions
+      positions: providedPositions.length ? providedPositions : uniqueSorted(normalizedPlayers.map((player) => player.position)),
+      leagues: providedLeagues.length ? providedLeagues : uniqueSorted(normalizedPlayers.map((player) => player.league)),
+      clubs: providedClubs.length ? providedClubs : uniqueSorted(normalizedPlayers.map((player) => player.club)),
+      nations: providedNations.length ? providedNations : uniqueSorted(normalizedPlayers.map((player) => player.nation)),
+      skillMoves: providedSkillMoves.length ? providedSkillMoves : skillMoveOptions
     };
-  }, [normalizedPlayers]);
+  }, [filterOptions, normalizedPlayers]);
 
   const squadPickerPlayers = useMemo(() => {
     const query = toText(squadSearchQuery);
