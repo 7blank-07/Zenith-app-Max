@@ -945,6 +945,7 @@ function normalizePlayer(player, index) {
   const trainingBonus = Math.max(0, toNumber(player?.trainingBonus ?? player?.training_bonus, Math.floor(trainingLevel / 5)));
   const selectedSkills = normalizeSelectedSkills(player?.selectedSkills ?? player?.selected_skills);
   const skillAllocations = normalizeSkillAllocations(player?.skillAllocations ?? player?.skill_allocations);
+  const alternatePositionRaw = player?.alternatePosition ?? player?.alternate_position ?? player?.alternateposition ?? '';
   return {
     playerId: playerId || `player-${index}`,
     name: String(player?.name || 'Unknown'),
@@ -957,7 +958,7 @@ function normalizePlayer(player, index) {
     selectedSkills,
     skillAllocations,
     position: String(player?.position || ''),
-    alternatePosition: String(player?.alternatePosition || player?.alternate_position || ''),
+    alternatePosition: String(alternatePositionRaw),
     nation: String(player?.nation || ''),
     club: String(player?.club || ''),
     league: String(player?.league || ''),
@@ -1011,6 +1012,17 @@ function parseAlternatePositions(value) {
     .split(/[|,/]/)
     .map((entry) => entry.toUpperCase().trim())
     .filter(Boolean);
+}
+
+function matchesSelectedPosition(player, selectedPosition) {
+  const normalizedSelected = String(selectedPosition || '').toUpperCase().trim();
+  if (!normalizedSelected) return true;
+  const playerPosition = String(player?.position || '').toUpperCase().trim();
+  if (playerPosition === normalizedSelected) return true;
+  const alternatePositions = parseAlternatePositions(
+    player?.alternatePosition ?? player?.alternate_position ?? player?.alternateposition
+  );
+  return alternatePositions.includes(normalizedSelected);
 }
 
 function getPositionAdjustedOvr(player, slotLabel) {
@@ -1700,7 +1712,7 @@ export default function ToolsInteractions({ players = [], initialTool = '' }) {
     return normalizedPlayers
       .filter((player) => {
         if (assignedPlayerIds.has(player.playerId)) return false;
-        if (squadFilters.position && toText(player.position) !== toText(squadFilters.position)) return false;
+        if (squadFilters.position && !matchesSelectedPosition(player, squadFilters.position)) return false;
         if (squadFilters.league && toText(player.league) !== toText(squadFilters.league)) return false;
         if (squadFilters.club && toText(player.club) !== toText(squadFilters.club)) return false;
         if (squadFilters.nation && toText(player.nation) !== toText(squadFilters.nation)) return false;

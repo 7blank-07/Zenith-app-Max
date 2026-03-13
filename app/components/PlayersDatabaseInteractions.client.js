@@ -234,6 +234,13 @@ function parseAlternatePositions(value) {
     .filter((entry) => entry && entry !== '0');
 }
 
+function matchesSelectedPosition(player, selectedPosition) {
+  const normalizedSelected = normalizeSearchText(selectedPosition);
+  if (!normalizedSelected) return true;
+  if (normalizeSearchText(player?.position) === normalizedSelected) return true;
+  return (player?.alternatePositions || []).some((position) => normalizeSearchText(position) === normalizedSelected);
+}
+
 function normalizeAttributes(attributes) {
   if (!attributes || typeof attributes !== 'object') return {};
   return attributes;
@@ -276,7 +283,7 @@ function normalizePlayer(player) {
     colorName: toText(player?.colorName, '#FFFFFF') || '#FFFFFF',
     colorRating: toText(player?.colorRating, '#FFB86B') || '#FFB86B',
     colorPosition: toText(player?.colorPosition, '#FFFFFF') || '#FFFFFF',
-    alternatePositions: parseAlternatePositions(player?.alternatePosition),
+    alternatePositions: parseAlternatePositions(player?.alternatePosition || player?.alternate_position || player?.alternateposition),
     pac: toNumber(attributes?.pace, 0),
     sho: toNumber(attributes?.shooting, 0),
     pas: toNumber(attributes?.passing, 0),
@@ -611,7 +618,7 @@ export default function PlayersDatabaseInteractions({
     const next = normalizedPlayers.filter((player) => {
       if (normalizedSearchQuery && !player.searchText.includes(normalizedSearchQuery)) return false;
       if (filters.auctionable && player.isUntradable) return false;
-      if (filters.position && normalizeSearchText(player.position) !== normalizeSearchText(filters.position)) return false;
+      if (filters.position && !matchesSelectedPosition(player, filters.position)) return false;
       if (filters.league && normalizeSearchText(player.league) !== normalizeSearchText(filters.league)) return false;
       if (filters.club && normalizeSearchText(player.club) !== normalizeSearchText(filters.club)) return false;
       if (filters.nation && normalizeSearchText(player.nation) !== normalizeSearchText(filters.nation)) return false;
@@ -1010,7 +1017,7 @@ export default function PlayersDatabaseInteractions({
                 value={filters.skill}
                 onChange={(event) => setFilters((current) => ({ ...current, skill: event.target.value }))}
               >
-                <option value="">Any</option>
+                <option value="">Any Skill Moves</option>
                 {skillMoves.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -1455,7 +1462,7 @@ export default function PlayersDatabaseInteractions({
                 value={mobileFilters.skill}
                 onChange={(event) => setMobileFilters((current) => ({ ...current, skill: event.target.value }))}
               >
-                <option value="">Any</option>
+                <option value="">Any Skill Moves</option>
                 {skillMoves.map((option) => (
                   <option key={option} value={option}>
                     {option}

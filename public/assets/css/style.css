@@ -7779,14 +7779,25 @@ watchlist-view .view-content {
   }
 }
 
+@media (max-width: 640px) {
+  .card-untradable-badge--players {
+    top: 2px;
+    right: 6px;
+    width: 10px !important;
+    height: 10px !important;
+    max-width: 10px !important;
+    max-height: 10px !important;
+  }
+}
+
 @media (max-width: 480px) {
   .card-untradable-badge--players {
-    top: 3px;
-    right: 9px;
-    width: 7px !important;
-    height: 7px !important;
-    max-width: 7px !important;
-    max-height: 7px !important;
+    top: 2px;
+    right: 6px;
+    width: 10px !important;
+    height: 10px !important;
+    max-width: 10px !important;
+    max-height: 10px !important;
     transform: none;
   }
 }
@@ -9092,14 +9103,18 @@ watchlist-view .view-content {
 
 /* hide native selected text */
 #filter-skill {
-  color: transparent;
-  padding-left: 60px;
+  color: var(--color-text-primary);
+  padding-left: 12px;
 }
 
 /* dropdown list stars only */
 #filter-skill option {
-  color: #f5c518;
-  font-size: 15px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+#filter-skill option[value=""] {
+  color: var(--color-text-primary);
 }
 
 
