@@ -413,7 +413,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                           )}
 
                           {player.isUntradable && (
-                            <div className="card-untradable-badge card-untradable-badge--compare-selected" style={{ right: '40px', pointerEvents: 'none' }}>
+                            <div className="card-untradable-badge card-untradable-badge--compare-selected" style={{ pointerEvents: 'none' }}>
                               <img src="/assets/images/untradable_img.png" alt="Untradable" />
                             </div>
                           )}
