@@ -744,19 +744,19 @@ select.form-control {
 .header-content {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 16px 32px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 24px;
   background-color: transparent; /* Let the blur show through */
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 20px;
+  gap: 10px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--color-text-primary);
   /* Replaced gradient with solid text or simple Teal accent if desired */
@@ -766,7 +766,7 @@ select.form-control {
 
 /* Responsive logo image */
 .logo-image {
-  --logo-size: clamp(2.8rem, 6vw, 4rem);
+  --logo-size: clamp(2.1rem, 4.8vw, 3.1rem);
   width: var(--logo-size);
   height: var(--logo-size);
   max-height: 120%;
@@ -777,14 +777,14 @@ select.form-control {
   border-radius: 50%;
   background: rgba(14, 17, 20, 0.85);
   border: 1px solid rgba(0, 194, 168, 0.35);
-  padding: clamp(0.12rem, 0.3vw, 0.24rem);
+  padding: clamp(0.1rem, 0.2vw, 0.18rem);
   box-sizing: border-box;
 }
 
 /* Optional: If you want the logo to pop with Teal */
 .logo-text {
   color: var(--color-teal-500);
-  font-size: clamp(1.2rem, 1.8vw, 1.8rem);
+  font-size: clamp(1.05rem, 1.4vw, 1.4rem);
   font-weight: 700;
 }
 
@@ -799,9 +799,9 @@ select.form-control {
   background: transparent;
   border: none;
   color: var(--color-text-muted);
-  padding: 10px 20px;
+  padding: 8px 14px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -819,7 +819,7 @@ select.form-control {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .search-container-header {
@@ -845,8 +845,8 @@ select.form-control {
 }
 
 .avatar-circle {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--color-graphite-700);
   border: 1px solid var(--color-border);
@@ -854,7 +854,7 @@ select.form-control {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--color-teal-500);
   cursor: pointer;
   transition: transform 0.2s;
@@ -2325,7 +2325,7 @@ select.form-control {
   }
 
   .header-content {
-    padding: 12px 16px;
+    padding: 8px 14px;
   }
 
   .search-container-header {
@@ -6748,7 +6748,7 @@ watchlist-view .view-content {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 10px 20px;
+  padding: 8px 14px;
   color: var(--color-text-muted);
   display: flex;
   align-items: center;
@@ -6756,7 +6756,7 @@ watchlist-view .view-content {
   transition: color 250ms cubic-bezier(0.4, 0, 0.2, 1), background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 250ms cubic-bezier(0.4, 0, 0.2, 1), text-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
   position: relative;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -9317,6 +9317,33 @@ watchlist-view .view-content {
 
 .filter-chip button:hover {
   transform: scale(1.2);
+}
+
+.filter-chip--removable {
+  cursor: pointer;
+}
+
+.filter-chip--removable:focus-visible {
+  outline: 2px solid var(--color-graphite-900);
+  outline-offset: 2px;
+}
+
+.filter-chip .filter-chip-remove-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+}
+
+.filter-chip .filter-chip-remove-btn:hover {
+  background: rgba(17, 21, 26, 0.14);
+  transform: none;
 }
 
 /* Empty State Styles */

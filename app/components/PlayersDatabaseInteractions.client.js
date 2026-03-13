@@ -644,17 +644,42 @@ export default function PlayersDatabaseInteractions({
 
   const activeFilterChips = useMemo(() => {
     const chips = [];
-    if (filters.position) chips.push({ label: 'Position', value: filters.position.toUpperCase() });
-    if (filters.league) chips.push({ label: 'League', value: filters.league });
-    if (filters.club) chips.push({ label: 'Club', value: filters.club });
-    if (filters.nation) chips.push({ label: 'Nation', value: filters.nation });
-    if (filters.event) chips.push({ label: 'Event', value: filters.event });
-    if (filters.skill) chips.push({ label: 'Skill', value: `${filters.skill}★` });
-    if (filters.auctionable) chips.push({ label: 'Auction', value: 'Only With Prices' });
-    if (filters.ratingMin !== 40 || filters.ratingMax !== 150) chips.push({ label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
-    if (selectedStats.length) chips.push({ label: 'Stats', value: `${selectedStats.length} selected` });
+    if (filters.position) chips.push({ key: 'position', label: 'Position', value: filters.position.toUpperCase() });
+    if (filters.league) chips.push({ key: 'league', label: 'League', value: filters.league });
+    if (filters.club) chips.push({ key: 'club', label: 'Club', value: filters.club });
+    if (filters.nation) chips.push({ key: 'nation', label: 'Nation', value: filters.nation });
+    if (filters.event) chips.push({ key: 'event', label: 'Event', value: filters.event });
+    if (filters.skill) chips.push({ key: 'skill', label: 'Skill', value: `${filters.skill}★` });
+    if (filters.auctionable) chips.push({ key: 'auctionable', label: 'Auction', value: 'Only With Prices' });
+    if (filters.ratingMin !== 40 || filters.ratingMax !== 150) chips.push({ key: 'ovr', label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
+    if (selectedStats.length) chips.push({ key: 'stats', label: 'Stats', value: `${selectedStats.length} selected` });
     return chips;
   }, [filters, selectedStats.length]);
+
+  const removeFilterChip = useCallback((chipKey) => {
+    if (chipKey === 'stats') {
+      setSelectedStats([]);
+      setStatsDraftSelected([]);
+      return;
+    }
+
+    if (chipKey === 'ovr') {
+      setFilters((current) => ({ ...current, ratingMin: DEFAULT_FILTERS.ratingMin, ratingMax: DEFAULT_FILTERS.ratingMax }));
+      setMobileFilters((current) => ({ ...current, ratingMin: DEFAULT_FILTERS.ratingMin, ratingMax: DEFAULT_FILTERS.ratingMax }));
+      return;
+    }
+
+    if (chipKey === 'auctionable') {
+      setFilters((current) => ({ ...current, auctionable: false }));
+      setMobileFilters((current) => ({ ...current, auctionable: false }));
+      return;
+    }
+
+    if (chipKey === 'position' || chipKey === 'league' || chipKey === 'club' || chipKey === 'nation' || chipKey === 'event' || chipKey === 'skill') {
+      setFilters((current) => ({ ...current, [chipKey]: '' }));
+      setMobileFilters((current) => ({ ...current, [chipKey]: '' }));
+    }
+  }, []);
 
   const selectedStatDefinitions = useMemo(
     () => selectedStats.map((statId) => CUSTOM_STATS_BY_ID.get(statId)).filter(Boolean),
@@ -1031,8 +1056,34 @@ export default function PlayersDatabaseInteractions({
 
             <div className="active-filters" id="active-filters">
               {activeFilterChips.map((chip) => (
-                <div key={`${chip.label}-${chip.value}`} className="filter-chip">
-                  {chip.label}: {chip.value}
+                <div
+                  key={chip.key}
+                  className="filter-chip filter-chip--removable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => removeFilterChip(chip.key)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      removeFilterChip(chip.key);
+                    }
+                  }}
+                  aria-label={`Remove ${chip.label} filter`}
+                >
+                  <span>
+                    {chip.label}: {chip.value}
+                  </span>
+                  <button
+                    type="button"
+                    className="filter-chip-remove-btn"
+                    aria-label={`Remove ${chip.label} filter`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      removeFilterChip(chip.key);
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
