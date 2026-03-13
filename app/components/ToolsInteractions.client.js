@@ -2763,7 +2763,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                                 <img src={player.leagueImage} alt="League" className="card-league-flag normal-league-flag" />
                               )}
                               {player.isUntradable && (
-                                <div className="card-untradable-badge with-remove">
+                                <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch">
                                   <img src="/assets/images/untradable_img.png" alt="Untradable" />
                                 </div>
                               )}

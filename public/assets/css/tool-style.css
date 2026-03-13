@@ -9073,8 +9073,8 @@ body.stats-open #squad-builder-modal {
 .card-untradable-badge.card-untradable-badge--players {
     top: 1px;
     right: 4px;
-    width: 13px !important;
-    height: 13px !important;
+    width: 16px !important;
+    height: 16px !important;
     margin-right: 0;
     margin-bottom: 0;
     z-index: 10;
@@ -9090,8 +9090,8 @@ body.stats-open #squad-builder-modal {
 .card-untradable-badge.card-untradable-badge--squad-picker {
     top: 3px;
     right: 4px;
-    width: 12px;
-    height: 12px;
+    width: 15px;
+    height: 15px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
@@ -9108,8 +9108,8 @@ body.stats-open #squad-builder-modal {
 .card-untradable-badge.card-untradable-badge--compare-search {
     top: 2px;
     right: 4px;
-    width: 12px;
-    height: 12px;
+    width: 15px;
+    height: 15px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
@@ -9121,6 +9121,12 @@ body.stats-open #squad-builder-modal {
     height: 100%;
     object-fit: contain;
     display: block;
+}
+
+.card-untradable-badge.card-untradable-badge--squad-pitch,
+.card-untradable-badge.card-untradable-badge--compare-selected {
+    width: 24px;
+    height: 24px;
 }
 
 
@@ -9138,8 +9144,8 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--players {
     top: 1px;
     right: 4px;
-    width: 13px !important;
-    height: 13px !important;
+    width: 16px !important;
+    height: 16px !important;
     margin-right: 0;
     margin-bottom: 0;
   }
@@ -9147,8 +9153,8 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--squad-picker {
     top: 3px;
     right: 4px;
-    width: 11px;
-    height: 11px;
+    width: 13px;
+    height: 13px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
@@ -9157,11 +9163,17 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--compare-search {
     top: 2px;
     right: 4px;
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
+  }
+
+  .card-untradable-badge.card-untradable-badge--squad-pitch,
+  .card-untradable-badge.card-untradable-badge--compare-selected {
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -9182,8 +9194,8 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--players {
     top: 1px;
     right: 4px;
-    width: 13px !important;
-    height: 13px !important;
+    width: 16px !important;
+    height: 16px !important;
     margin-right: 0;
     margin-bottom: 0;
     transform: none;
@@ -9192,8 +9204,8 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--squad-picker {
     top: 3px;
     right: 4px;
-    width: 11px;
-    height: 11px;
+    width: 13px;
+    height: 13px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
@@ -9202,11 +9214,17 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--compare-search {
     top: 2px;
     right: 4px;
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
+  }
+
+  .card-untradable-badge.card-untradable-badge--squad-pitch,
+  .card-untradable-badge.card-untradable-badge--compare-selected {
+    width: 9px;
+    height: 9px;
   }
 }
 
