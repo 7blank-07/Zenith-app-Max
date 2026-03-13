@@ -7754,6 +7754,43 @@ watchlist-view .view-content {
   }
 }
 
+.card-untradable-badge--players {
+    top: 0;
+    right: 6px;
+    width: 11px;
+    height: 11px;
+}
+
+.card-untradable-badge--players img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+@media (max-width: 768px) {
+  .card-untradable-badge--players {
+    right: 10px;
+    width: 8px !important;
+    height: 8px !important;
+    max-width: 8px !important;
+    max-height: 8px !important;
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-untradable-badge--players {
+    top: 3px;
+    right: 9px;
+    width: 7px !important;
+    height: 7px !important;
+    max-width: 7px !important;
+    max-height: 7px !important;
+    transform: none;
+  }
+}
+
 
 .card-container {
     position: relative;

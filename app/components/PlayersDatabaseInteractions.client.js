@@ -192,6 +192,15 @@ function formatDate(value) {
   return new Date(parsed).toLocaleDateString();
 }
 
+function toDateTimestamp(value) {
+  if (value === undefined || value === null || value === '') return 0;
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value > 9999999999 ? value : value * 1000;
+  }
+  const parsed = Date.parse(String(value));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function getInitials(name) {
   const words = toText(name)
     .split(/\s+/)
@@ -234,6 +243,8 @@ function normalizePlayer(player) {
   const playerId = toText(player?.playerId);
   const attributes = normalizeAttributes(player?.attributes);
   const isUntradable = !!player?.isUntradable;
+  const rawDateAdded = player?.dateAdded || player?.date_added || player?.createdAt || player?.created_at;
+  const dateAdded = toText(rawDateAdded);
   const uniqueId = getPlayerUniqueId({
     playerId,
     rank: 0,
@@ -253,7 +264,8 @@ function normalizePlayer(player) {
     weakFoot: toNumber(player?.weakFoot, 0),
     heightCm: toNumber(player?.heightCm, 0),
     weightKg: toNumber(player?.weightKg, 0),
-    dateAdded: toText(player?.dateAdded || player?.date_added || player?.createdAt || player?.created_at),
+    dateAdded,
+    dateAddedTimestamp: toDateTimestamp(rawDateAdded),
     isUntradable,
     price: toNumber(player?.price, 0),
     cardBackground: toText(player?.cardBackground),
@@ -422,7 +434,7 @@ function renderPlayerCard(player) {
         ) : null}
 
         {player.isUntradable && (
-          <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
+          <div className="card-untradable-badge card-untradable-badge--players" style={{ pointerEvents: 'none' }}>
             <img src="/assets/images/untradable_img.png" alt="Untradable" />
           </div>
         )}
@@ -448,7 +460,7 @@ export default function PlayersDatabaseInteractions({
   const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
   const [mobileFilters, setMobileFilters] = useState({ ...DEFAULT_FILTERS });
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('latest');
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [selectedStats, setSelectedStats] = useState([]);
   const [statsDraftSelected, setStatsDraftSelected] = useState([]);
@@ -609,6 +621,12 @@ export default function PlayersDatabaseInteractions({
     });
 
     next.sort((left, right) => {
+      if (sortBy === 'latest') {
+        const dateDifference = right.dateAddedTimestamp - left.dateAddedTimestamp;
+        if (dateDifference !== 0) return dateDifference;
+        if (right.ovr !== left.ovr) return right.ovr - left.ovr;
+        return normalizeSearchText(left.name).localeCompare(normalizeSearchText(right.name));
+      }
       if (sortBy === 'rating') return right.ovr - left.ovr;
       if (sortBy === 'price') return getResolvedPrice(right) - getResolvedPrice(left);
       return normalizeSearchText(left.name).localeCompare(normalizeSearchText(right.name));
@@ -659,7 +677,7 @@ export default function PlayersDatabaseInteractions({
 
   const resetAllFilters = () => {
     setSearchQuery('');
-    setSortBy('name');
+    setSortBy('latest');
     setFilters({ ...DEFAULT_FILTERS });
     setMobileFilters({ ...DEFAULT_FILTERS });
   };
@@ -1003,6 +1021,7 @@ export default function PlayersDatabaseInteractions({
 
               <div className="toolbar-actions">
                 <select id="sort-by" className="sort-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                  <option value="latest">Sort by Latest</option>
                   <option value="name">Sort by Name</option>
                   <option value="rating">Sort by Rating</option>
                   <option value="price">Sort by Price</option>
