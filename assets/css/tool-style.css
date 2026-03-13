@@ -236,6 +236,7 @@ main.main-content.main-content--compare {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
   transition: all 100ms ease;
 }
 
@@ -5027,6 +5028,7 @@ body.stats-open #squad-builder-modal {
 .compare-modal-overlay.compare-modal-overlay--page {
   position: relative;
   inset: auto;
+  display: none;
   align-items: stretch;
   justify-content: center;
   min-height: 0;
@@ -5042,6 +5044,7 @@ body.stats-open #squad-builder-modal {
 }
 
 .compare-modal-overlay.compare-modal-overlay--page.is-open {
+  display: flex;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -5199,6 +5202,7 @@ body.stats-open #squad-builder-modal {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
   transition: all var(--duration-fast) var(--ease-standard);
 }
 

@@ -2348,6 +2348,11 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
 
   const openTool = (toolName) => setActiveTool(normalizeTool(toolName));
   const closeOpenTool = () => setActiveTool('none');
+  const goHomeFromSquadClose = () => {
+    if (typeof window !== 'undefined') {
+      window.location.assign('/');
+    }
+  };
   const toggleSquadFullscreen = () => {
     const squadContainer = squadBuilderContainerRef.current;
     if (!squadContainer) return;
@@ -2507,7 +2512,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                 >
                   ⛶
                 </button>
-                <button className="squad-close" onClick={closeOpenTool} type="button" aria-label="Close Squad Builder">
+                <button className="squad-close" onClick={goHomeFromSquadClose} type="button" aria-label="Close Squad Builder">
                   ✕
                 </button>
               </div>

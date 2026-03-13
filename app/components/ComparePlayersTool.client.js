@@ -276,9 +276,9 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                 {comparePlayers.length}/5
               </span>
             </div>
-            <button className="compare-close-btn" onClick={onClose} type="button" aria-label="Back to tools">
+            <a href="/" data-link="" data-nav-link="" className="compare-close-btn" aria-label="Back to tools">
               ✕
-            </button>
+            </a>
           </div>
 
           <div className="compare-body">
