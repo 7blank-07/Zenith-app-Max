@@ -236,44 +236,34 @@ body {
   padding: 0;
 }
 
-/* Global route loading progress (Next.js app/loading.js) */
+/* Global route loading progress overlay */
 .route-loading-progress {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 4px;
+  height: 3px;
   z-index: 9999;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(var(--color-teal-rgb), 0.16), rgba(255, 255, 255, 0.02));
+  background: transparent;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.route-loading-progress.is-visible {
+  opacity: 1;
 }
 
 .route-loading-progress__bar {
   position: absolute;
   top: 0;
-  left: -35%;
-  width: 35%;
+  left: 0;
+  width: 0;
   height: 100%;
-  background: linear-gradient(90deg, rgba(0, 194, 168, 0.15) 0%, rgba(0, 194, 168, 0.95) 45%, rgba(77, 168, 255, 0.92) 100%);
-  box-shadow: 0 0 12px rgba(0, 194, 168, 0.55), 0 0 24px rgba(77, 168, 255, 0.35);
-  border-radius: 999px;
-  animation: zenith-route-progress-indeterminate 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-@keyframes zenith-route-progress-indeterminate {
-  0% {
-    left: -35%;
-    width: 24%;
-  }
-  60% {
-    left: 52%;
-    width: 42%;
-  }
-  100% {
-    left: 100%;
-    width: 26%;
-  }
+  background: #00c2a8;
+  box-shadow: 0 0 12px rgba(0, 194, 168, 0.45);
+  transition: width 170ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 *,

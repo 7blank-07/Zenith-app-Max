@@ -1,7 +1,9 @@
 import './globals.css';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
+import { Suspense } from 'react';
 import ImageCacheServiceWorker from './components/ImageCacheServiceWorker.client';
+import RouteProgress from './components/RouteProgress.client';
 import WebVitalsReporter from './components/WebVitalsReporter.client';
 
 const inter = Inter({
@@ -44,6 +46,9 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png" />
       </head>
       <body>
+        <Suspense fallback={null}>
+          <RouteProgress />
+        </Suspense>
         {children}
         <ImageCacheServiceWorker />
         <WebVitalsReporter />
