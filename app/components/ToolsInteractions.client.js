@@ -1151,6 +1151,11 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   const formationSlots = SQUAD_FORMATIONS[formationId] || SQUAD_FORMATIONS['4-3-3'];
 
   useEffect(() => {
+    const normalizedInitialTool = normalizeTool(initialTool);
+    setActiveTool((currentTool) => (currentTool === normalizedInitialTool ? currentTool : normalizedInitialTool));
+  }, [initialTool]);
+
+  useEffect(() => {
     let restoredFromRoundtrip = false;
     let restoredThemeFromRoundtrip = false;
     let roundtripSupplementalPlayers = {};
@@ -2858,7 +2863,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                             <img src={player.leagueImage} alt="League" className="picker-squad-card-flag-league normal-squad-league-flag" />
                           )}
                           {player.isUntradable && (
-                            <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
+                            <div className="card-untradable-badge card-untradable-badge--squad-picker" style={{ pointerEvents: 'none' }}>
                               <img src="/assets/images/untradable_img.png" alt="Untradable" />
                             </div>
                           )}

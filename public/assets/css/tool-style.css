@@ -9070,6 +9070,59 @@ body.stats-open #squad-builder-modal {
     height: 20px;
 }
 
+.card-untradable-badge.card-untradable-badge--players {
+    top: 1px;
+    right: 4px;
+    width: 13px !important;
+    height: 13px !important;
+    margin-right: 0;
+    margin-bottom: 0;
+    z-index: 10;
+}
+
+.card-untradable-badge.card-untradable-badge--players img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.card-untradable-badge.card-untradable-badge--squad-picker {
+    top: 3px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    transform: none;
+    margin-right: 0;
+    margin-bottom: 0;
+    z-index: 10;
+}
+
+.card-untradable-badge.card-untradable-badge--squad-picker img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.card-untradable-badge.card-untradable-badge--compare-search {
+    top: 2px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    transform: none;
+    margin-right: 0;
+    margin-bottom: 0;
+    z-index: 10;
+}
+
+.card-untradable-badge.card-untradable-badge--compare-search img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
 
 @media (max-width: 768px){
   .card-untradable-badge {
@@ -9081,6 +9134,35 @@ body.stats-open #squad-builder-modal {
     width: 15px;
     height: 15px;
 }
+
+  .card-untradable-badge.card-untradable-badge--players {
+    top: 1px;
+    right: 4px;
+    width: 13px !important;
+    height: 13px !important;
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  .card-untradable-badge.card-untradable-badge--squad-picker {
+    top: 3px;
+    right: 4px;
+    width: 11px;
+    height: 11px;
+    transform: none;
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  .card-untradable-badge.card-untradable-badge--compare-search {
+    top: 2px;
+    right: 4px;
+    width: 10px;
+    height: 10px;
+    transform: none;
+    margin-right: 0;
+    margin-bottom: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -9095,6 +9177,36 @@ body.stats-open #squad-builder-modal {
     height: 7px;
 
     z-index: 10;
+  }
+
+  .card-untradable-badge.card-untradable-badge--players {
+    top: 1px;
+    right: 4px;
+    width: 13px !important;
+    height: 13px !important;
+    margin-right: 0;
+    margin-bottom: 0;
+    transform: none;
+  }
+
+  .card-untradable-badge.card-untradable-badge--squad-picker {
+    top: 3px;
+    right: 4px;
+    width: 11px;
+    height: 11px;
+    transform: none;
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  .card-untradable-badge.card-untradable-badge--compare-search {
+    top: 2px;
+    right: 4px;
+    width: 10px;
+    height: 10px;
+    transform: none;
+    margin-right: 0;
+    margin-bottom: 0;
   }
 }
 
