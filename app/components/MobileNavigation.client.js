@@ -32,6 +32,17 @@ const MOBILE_TOOL_ITEMS = [
   }
 ];
 
+const MOBILE_PREFETCH_ROUTES = Object.freeze([
+  '/',
+  '/players',
+  '/tools',
+  '/tools?tool=squadbuilder',
+  '/tools?tool=compare',
+  '/market',
+  '/watchlist',
+  '/blogs'
+]);
+
 function getButtonClassName(isActive, extraClassName = '') {
   return `${['mobile-nav-btn', extraClassName, isActive ? 'active' : ''].filter(Boolean).join(' ')}`;
 }
@@ -40,6 +51,12 @@ export default function MobileNavigation({ activeView = '' }) {
   const router = useRouter();
   const [isToolsSheetOpen, setIsToolsSheetOpen] = useState(false);
   const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
+
+  useEffect(() => {
+    MOBILE_PREFETCH_ROUTES.forEach((route) => {
+      Promise.resolve(router.prefetch(route)).catch(() => {});
+    });
+  }, [router]);
 
   useEffect(() => {
     if (!isToolsSheetOpen) return undefined;

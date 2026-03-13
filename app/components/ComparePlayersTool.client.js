@@ -266,8 +266,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
     <>
       <div
         id="compare-players-modal"
-        className="compare-modal-overlay compare-modal-overlay--page"
-        style={{ display: isActive ? 'flex' : 'none' }}
+        className={`compare-modal-overlay compare-modal-overlay--page${isActive ? ' is-open' : ''}`}
       >
         <div className="compare-modal compare-modal--page">
           <div className="compare-header">

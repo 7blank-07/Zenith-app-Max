@@ -6,10 +6,22 @@ const TOP_PLAYERS_PATH = path.join(process.cwd(), 'src', 'data', 'top-players.js
 const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
 const DEFAULT_FILTER_PAGE_SIZE = 500;
 const DEFAULT_FILTER_MAX_PAGES = 100;
-const DEFAULT_FILTER_CACHE_TTL_MS = 1000 * 60 * 15;
+const DEFAULT_FILTER_FETCH_CONCURRENCY = 6;
+const DEFAULT_FILTER_CACHE_TTL_MS = 1000 * 60 * 60;
+const DEFAULT_BY_IDS_CACHE_TTL_MS = 1000 * 60 * 5;
+const DEFAULT_TOP_IDS_CACHE_TTL_MS = 1000 * 60 * 10;
+const DEFAULT_CACHE_MAX_ENTRIES = 20;
 
 let playerFilterMetadataCache = {
   key: '',
+  expiresAt: 0,
+  value: null,
+  inFlight: null
+};
+
+const playersByIdsCache = new Map();
+
+let topPlayerIdsCache = {
   expiresAt: 0,
   value: null,
   inFlight: null
@@ -22,6 +34,23 @@ function ensureList(payload) {
     if (payload[key]) return ensureList(payload[key]);
   }
   return [];
+}
+
+function ensurePositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  const normalized = Math.floor(parsed);
+  if (normalized <= 0) return fallback;
+  return normalized;
+}
+
+function setBoundedCacheEntry(cacheMap, cacheKey, value) {
+  cacheMap.set(cacheKey, value);
+  if (cacheMap.size <= DEFAULT_CACHE_MAX_ENTRIES) return;
+  const oldestKey = cacheMap.keys().next().value;
+  if (oldestKey !== undefined) {
+    cacheMap.delete(oldestKey);
+  }
 }
 
 function splitIntoChunks(items, size) {
@@ -73,68 +102,142 @@ function resolveEventText(row, normalizedRow) {
 }
 
 export async function readTopPlayerIds(limit = 10000) {
-  let fileContent;
+  const parsedLimit = Number(limit);
+  const normalizedLimit = Number.isFinite(parsedLimit) ? Math.max(0, Math.floor(parsedLimit)) : 10000;
+  const now = Date.now();
+
+  if (Array.isArray(topPlayerIdsCache.value) && topPlayerIdsCache.expiresAt > now) {
+    return topPlayerIdsCache.value.slice(0, normalizedLimit);
+  }
+
+  if (topPlayerIdsCache.inFlight) {
+    const cachedIds = await topPlayerIdsCache.inFlight;
+    return cachedIds.slice(0, normalizedLimit);
+  }
+
+  const inFlight = (async () => {
+    let fileContent;
+    try {
+      fileContent = await fs.readFile(TOP_PLAYERS_PATH, 'utf8');
+    } catch (error) {
+      if (error?.code === 'ENOENT') return [];
+      throw error;
+    }
+
+    const parsed = JSON.parse(fileContent);
+    if (!Array.isArray(parsed)) {
+      throw new Error('src/data/top-players.json must contain an array of player IDs');
+    }
+
+    return parsed.map((id) => String(id)).filter(Boolean);
+  })();
+
+  topPlayerIdsCache = {
+    ...topPlayerIdsCache,
+    inFlight
+  };
+
   try {
-    fileContent = await fs.readFile(TOP_PLAYERS_PATH, 'utf8');
+    const resolvedIds = await inFlight;
+    topPlayerIdsCache = {
+      value: resolvedIds,
+      expiresAt: Date.now() + DEFAULT_TOP_IDS_CACHE_TTL_MS,
+      inFlight: null
+    };
+    return resolvedIds.slice(0, normalizedLimit);
   } catch (error) {
-    if (error?.code === 'ENOENT') return [];
+    topPlayerIdsCache = {
+      ...topPlayerIdsCache,
+      inFlight: null
+    };
     throw error;
   }
-
-  const parsed = JSON.parse(fileContent);
-  if (!Array.isArray(parsed)) {
-    throw new Error('src/data/top-players.json must contain an array of player IDs');
-  }
-
-  const normalized = parsed.map((id) => String(id)).filter(Boolean);
-  return normalized.slice(0, limit);
 }
 
 export async function fetchPlayersByIds(playerIds, options = {}) {
   if (!Array.isArray(playerIds) || !playerIds.length) return [];
 
   const rank = options.rank ?? 0;
-  const chunkSize = options.chunkSize ?? 100;
+  const chunkSize = ensurePositiveInteger(options.chunkSize, 100);
+  const cacheTtlMs = ensurePositiveInteger(options.cacheTtlMs, DEFAULT_BY_IDS_CACHE_TTL_MS);
   const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
   const normalizedIds = playerIds.map((id) => String(id)).filter(Boolean);
-  const byId = new Map();
+  const cacheKey = `${baseUrl}|${rank}|${chunkSize}|${normalizedIds.join(',')}`;
+  const now = Date.now();
+  const cached = playersByIdsCache.get(cacheKey);
 
-  for (const chunk of splitIntoChunks(normalizedIds, chunkSize)) {
-    const query = new URLSearchParams({
-      ids: chunk.join(','),
-      rank: String(rank)
-    });
-    const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
-    const response = await fetch(requestUrl, {
-      method: 'GET',
-      headers: { Accept: 'application/json' }
-    });
-
-    if (!response.ok) {
-      const details = await response.text();
-      throw new Error(`Failed to fetch /players/by-ids (${response.status}): ${details || response.statusText}`);
-    }
-
-    const payload = await response.json();
-    const rows = ensureList(payload);
-
-    for (const row of rows) {
-      const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
-      if (!normalized.playerId || byId.has(normalized.playerId)) continue;
-      byId.set(normalized.playerId, normalized);
-    }
+  if (cached?.value && cached.expiresAt > now) {
+    return cached.value;
   }
 
-  return normalizedIds
-    .map((id) => byId.get(id))
-    .filter(Boolean);
+  if (cached?.inFlight) {
+    return cached.inFlight;
+  }
+
+  const inFlight = (async () => {
+    const chunks = splitIntoChunks(normalizedIds, chunkSize);
+    const rowsPerChunk = await Promise.all(
+      chunks.map(async (chunk) => {
+        const query = new URLSearchParams({
+          ids: chunk.join(','),
+          rank: String(rank)
+        });
+        const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
+        const response = await fetch(requestUrl, {
+          method: 'GET',
+          headers: { Accept: 'application/json' }
+        });
+
+        if (!response.ok) {
+          const details = await response.text();
+          throw new Error(`Failed to fetch /players/by-ids (${response.status}): ${details || response.statusText}`);
+        }
+
+        const payload = await response.json();
+        return ensureList(payload);
+      })
+    );
+
+    const byId = new Map();
+    for (const rows of rowsPerChunk) {
+      for (const row of rows) {
+        const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
+        if (!normalized.playerId || byId.has(normalized.playerId)) continue;
+        byId.set(normalized.playerId, normalized);
+      }
+    }
+
+    return normalizedIds
+      .map((id) => byId.get(id))
+      .filter(Boolean);
+  })();
+
+  setBoundedCacheEntry(playersByIdsCache, cacheKey, {
+    value: cached?.value || null,
+    expiresAt: 0,
+    inFlight
+  });
+
+  try {
+    const value = await inFlight;
+    setBoundedCacheEntry(playersByIdsCache, cacheKey, {
+      value,
+      expiresAt: Date.now() + cacheTtlMs,
+      inFlight: null
+    });
+    return value;
+  } catch (error) {
+    playersByIdsCache.delete(cacheKey);
+    throw error;
+  }
 }
 
 export async function fetchAllPlayerFilterMetadata(options = {}) {
   const rank = options.rank ?? 0;
-  const pageSize = options.pageSize ?? DEFAULT_FILTER_PAGE_SIZE;
-  const maxPages = options.maxPages ?? DEFAULT_FILTER_MAX_PAGES;
-  const cacheTtlMs = options.cacheTtlMs ?? DEFAULT_FILTER_CACHE_TTL_MS;
+  const pageSize = ensurePositiveInteger(options.pageSize, DEFAULT_FILTER_PAGE_SIZE);
+  const maxPages = ensurePositiveInteger(options.maxPages, DEFAULT_FILTER_MAX_PAGES);
+  const fetchConcurrency = ensurePositiveInteger(options.fetchConcurrency, DEFAULT_FILTER_FETCH_CONCURRENCY);
+  const cacheTtlMs = ensurePositiveInteger(options.cacheTtlMs, DEFAULT_FILTER_CACHE_TTL_MS);
   const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
   const cacheKey = `${baseUrl}|${rank}|${pageSize}|${maxPages}`;
   const now = Date.now();
@@ -159,7 +262,21 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
     const events = new Set();
     const skillMoves = new Set();
 
-    for (let page = 0; page < maxPages; page += 1) {
+    const collectRows = (rows) => {
+      for (const row of rows) {
+        const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
+        addIfPresent(positions, toText(normalized.position).toUpperCase());
+        parseAlternatePositions(normalized.alternatePosition).forEach((position) => addIfPresent(positions, position));
+        addIfPresent(leagues, normalized.league);
+        addIfPresent(clubs, normalized.club);
+        addIfPresent(nations, normalized.nation);
+        addIfPresent(events, resolveEventText(row, normalized));
+        const moves = Number(normalized.skillMoves);
+        if (Number.isFinite(moves) && moves > 0) skillMoves.add(moves);
+      }
+    };
+
+    const fetchPageRows = async (page) => {
       const offset = page * pageSize;
       const query = new URLSearchParams({
         limit: String(pageSize),
@@ -181,21 +298,51 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
 
       const payload = await response.json();
       const rows = ensureList(payload);
-      if (!rows.length) break;
+      const total = Number(payload?.pagination?.total);
+      const hasMore = payload?.pagination?.has_more;
+      return {
+        rows,
+        total: Number.isFinite(total) ? total : null,
+        hasMore: typeof hasMore === 'boolean' ? hasMore : null
+      };
+    };
 
-      for (const row of rows) {
-        const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
-        addIfPresent(positions, toText(normalized.position).toUpperCase());
-        parseAlternatePositions(normalized.alternatePosition).forEach((position) => addIfPresent(positions, position));
-        addIfPresent(leagues, normalized.league);
-        addIfPresent(clubs, normalized.club);
-        addIfPresent(nations, normalized.nation);
-        addIfPresent(events, resolveEventText(row, normalized));
-        const moves = Number(normalized.skillMoves);
-        if (Number.isFinite(moves) && moves > 0) skillMoves.add(moves);
+    const firstPage = await fetchPageRows(0);
+    if (firstPage.rows.length) {
+      collectRows(firstPage.rows);
+    }
+
+    const computedTotalPages = firstPage.total ? Math.ceil(firstPage.total / pageSize) : null;
+    const effectiveMaxPages = Math.min(maxPages, computedTotalPages || maxPages);
+    const firstPageStops = !firstPage.rows.length || firstPage.rows.length < pageSize || firstPage.hasMore === false;
+
+    if (!firstPageStops) {
+      for (let pageStart = 1; pageStart < effectiveMaxPages; pageStart += fetchConcurrency) {
+        const batchPages = [];
+        const pageUpperBound = Math.min(effectiveMaxPages, pageStart + fetchConcurrency);
+        for (let page = pageStart; page < pageUpperBound; page += 1) {
+          batchPages.push(page);
+        }
+
+        const batchResults = await Promise.all(batchPages.map((page) => fetchPageRows(page)));
+        let shouldStop = false;
+
+        for (const result of batchResults) {
+          if (!result.rows.length) {
+            shouldStop = true;
+            break;
+          }
+
+          collectRows(result.rows);
+
+          if (result.rows.length < pageSize || result.hasMore === false) {
+            shouldStop = true;
+            break;
+          }
+        }
+
+        if (shouldStop) break;
       }
-
-      if (rows.length < pageSize) break;
     }
 
     const value = {

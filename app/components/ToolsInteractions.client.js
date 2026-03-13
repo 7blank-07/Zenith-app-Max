@@ -2419,8 +2419,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
       <div
         id="squad-builder-modal"
         ref={squadBuilderContainerRef}
-        className={`squad-page-view${isSquadFullscreen ? ' squad-fullscreen' : ''}`}
-        style={{ display: isSquadBuilderActive ? 'block' : 'none' }}
+        className={`squad-page-view${isSquadBuilderActive ? ' is-open' : ''}${isSquadFullscreen ? ' squad-fullscreen' : ''}`}
       >
         <div className="squad-page-shell">
           {/* Squad Builder region: top bar controls */}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ROUTE_MAP = Object.freeze({
@@ -15,11 +16,6 @@ const VIEW_ROUTE_MAP = Object.freeze({
   market: '/market',
   watchlist: '/watchlist'
 });
-
-function navigate(path) {
-  if (!path) return;
-  window.location.assign(path);
-}
 
 function readCardText(card) {
   const textParts = [
@@ -54,8 +50,14 @@ function getInitials(name) {
 }
 
 export default function HomeDashboardInteractions() {
+  const router = useRouter();
+
   useEffect(() => {
     const cleanup = [];
+    const navigate = (path) => {
+      if (!path) return;
+      router.push(path);
+    };
 
     const handleCardClick = (event) => {
       const card = event.target?.closest?.('.dashboard-player-card[data-player-id]');
@@ -305,7 +307,7 @@ export default function HomeDashboardInteractions() {
     return () => {
       cleanup.forEach((dispose) => dispose());
     };
-  }, []);
+  }, [router]);
 
   return null;
 }

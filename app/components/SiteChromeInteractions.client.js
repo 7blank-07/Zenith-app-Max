@@ -1,8 +1,49 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+const PREFETCH_ROUTES = Object.freeze([
+  '/',
+  '/players',
+  '/tools',
+  '/tools?tool=squadbuilder',
+  '/tools?tool=compare',
+  '/market',
+  '/watchlist',
+  '/blogs'
+]);
 
 export default function SiteChromeInteractions() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const prefetchRoutes = () => {
+      PREFETCH_ROUTES.forEach((route) => {
+        Promise.resolve(router.prefetch(route)).catch(() => {});
+      });
+    };
+
+    let timeoutId = null;
+    let idleId = null;
+
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(prefetchRoutes, { timeout: 1200 });
+      return () => {
+        if (typeof window.cancelIdleCallback === 'function' && idleId != null) {
+          window.cancelIdleCallback(idleId);
+        }
+      };
+    }
+
+    timeoutId = window.setTimeout(prefetchRoutes, 250);
+    return () => {
+      if (timeoutId != null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [router]);
+
   useEffect(() => {
     const toolsButton = document.getElementById('tools-dropdown-btn');
     const toolsMenu = document.getElementById('tools-dropdown-menu');

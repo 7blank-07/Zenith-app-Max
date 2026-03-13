@@ -45,6 +45,22 @@ main.main-content.main-content--compare {
   overflow: visible;
 }
 
+.squad-page-view.is-open {
+  display: block !important;
+  animation: toolSurfaceEnter 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toolSurfaceEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .squad-page-shell {
   width: 100%;
   height: auto;
@@ -5019,6 +5035,28 @@ body.stats-open #squad-builder-modal {
   backdrop-filter: none;
   z-index: auto;
   animation: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 200ms ease, visibility 0ms linear 200ms;
+}
+
+.compare-modal-overlay.compare-modal-overlay--page.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 200ms ease;
+}
+
+.compare-modal-overlay.compare-modal-overlay--page .compare-modal.compare-modal--page {
+  opacity: 0;
+  transform: translateY(10px) scale(0.995);
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.compare-modal-overlay.compare-modal-overlay--page.is-open .compare-modal.compare-modal--page {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 @keyframes overlayFadeIn {
