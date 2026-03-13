@@ -3,7 +3,9 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import html2canvas from 'html2canvas';
 import { normalizeSearchText } from './search-normalization';
+import SquadExportCapture from './SquadExportCapture.client';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -1095,6 +1097,55 @@ function normalizeBadges(value) {
   };
 }
 
+function waitForExportRenderCycle() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+}
+
+function waitForSingleImage(imageElement, timeoutMs = 6000) {
+  if (!imageElement) return Promise.resolve();
+  if (imageElement.complete && imageElement.naturalWidth > 0) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const onDone = () => {
+      if (settled) return;
+      settled = true;
+      imageElement.removeEventListener('load', onDone);
+      imageElement.removeEventListener('error', onDone);
+      clearTimeout(timeoutId);
+      resolve();
+    };
+    const timeoutId = setTimeout(onDone, timeoutMs);
+    imageElement.addEventListener('load', onDone);
+    imageElement.addEventListener('error', onDone);
+  });
+}
+
+async function waitForExportImages(container) {
+  if (!container) return;
+  const images = Array.from(container.querySelectorAll('img'));
+  if (!images.length) return;
+  await Promise.all(images.map((imageElement) => waitForSingleImage(imageElement)));
+}
+
+function canvasToBlob(canvas, mimeType = 'image/png') {
+  return new Promise((resolve, reject) => {
+    if (!canvas) {
+      reject(new Error('Canvas element is required to export squad image.'));
+      return;
+    }
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Failed to generate squad export image blob.'));
+        return;
+      }
+      resolve(blob);
+    }, mimeType);
+  });
+}
+
 export default function ToolsInteractions({ players = [], initialTool = '', filterOptions = null }) {
   const router = useRouter();
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer), [players]);
@@ -1132,6 +1183,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   const [bench, setBench] = useState(Array.from({ length: 7 }, () => ''));
   const [squadLivePrices, setSquadLivePrices] = useState({});
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
+  const [isExportingSquad, setIsExportingSquad] = useState(false);
   const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null);
   const dragPayloadRef = useRef(null);
   const dragPreviewNodeRef = useRef(null);
@@ -1144,6 +1196,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   });
   const squadFilterTriggerRef = useRef(null);
   const squadBuilderContainerRef = useRef(null);
+  const squadExportRootRef = useRef(null);
   const [draggingKey, setDraggingKey] = useState('');
   const [dragOverSlotId, setDragOverSlotId] = useState('');
   const [dragOverBenchIndex, setDragOverBenchIndex] = useState(-1);
@@ -2326,23 +2379,48 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     }
   };
 
-  const exportSquad = () => {
+  const exportSquad = async () => {
+    if (isExportingSquad) return;
+    setIsExportingSquad(true);
     try {
+      const exportRoot = squadExportRootRef.current;
+      if (!exportRoot) {
+        throw new Error('Squad export view is not ready yet.');
+      }
+      await waitForExportRenderCycle();
+      await waitForExportImages(exportRoot);
+      const captureWidth = exportRoot.scrollWidth || exportRoot.offsetWidth;
+      const captureHeight = exportRoot.scrollHeight || exportRoot.offsetHeight;
+      const canvas = await html2canvas(exportRoot, {
+        backgroundColor: '#0a1628',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+        foreignObjectRendering: false,
+        imageTimeout: 15000,
+        width: captureWidth,
+        height: captureHeight,
+        x: 0,
+        y: 0
+      });
+      const blob = await canvasToBlob(canvas, 'image/png');
       const snapshot = buildSquadSnapshot();
-      const content = JSON.stringify(snapshot, null, 2);
-      const blob = new Blob([content], { type: 'application/json;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
+      const squadNameForFile = String(snapshot.name || 'My Squad').trim() || 'My Squad';
       const link = document.createElement('a');
-      const safeName = (snapshot.name || 'My Squad').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+      const safeName = squadNameForFile.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
       const timestamp = snapshot.timestamp.replace(/[:.]/g, '-');
+      const url = URL.createObjectURL(blob);
       link.href = url;
-      link.download = `${safeName || 'My_Squad'}_${timestamp}.json`;
+      link.download = `${safeName || 'My_Squad'}_${timestamp}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('[tools] Failed to export squad snapshot:', error);
+      console.error('[tools] Failed to export squad image:', error);
+    } finally {
+      setIsExportingSquad(false);
     }
   };
 
@@ -2445,8 +2523,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
 
             <div className="squad-header-center">
               <div className="squad-header-actions">
-                <button className="squad-action-btn export-btn" onClick={exportSquad} type="button">
-                  📸 Export
+                <button className="squad-action-btn export-btn" onClick={exportSquad} type="button" disabled={isExportingSquad}>
+                  {isExportingSquad ? '📸 Exporting…' : '📸 Export'}
                 </button>
                 <button className="badges-btn" onClick={() => setBadgesModalOpen(true)} title="Manage Team Badges" type="button">
                   <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
@@ -2977,6 +3055,21 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
             </div>
           </div>
         </div>
+
+        <SquadExportCapture
+          exportRootRef={squadExportRootRef}
+          squadName={squadName}
+          squadOvr={squadOvr}
+          squadValue={squadValue}
+          formationId={formationId}
+          badges={badges}
+          formationSlots={formationSlots}
+          starters={starters}
+          bench={bench}
+          playersById={playersById}
+          starterAdjustedOvrBySlot={starterAdjustedOvrBySlot}
+          fieldBackground={activeFieldTheme.background}
+        />
 
         <div id="badges-modal" className="modal" style={{ display: badgesModalOpen ? 'flex' : 'none' }}>
           <div className="modal-backdrop" onClick={() => setBadgesModalOpen(false)} />
