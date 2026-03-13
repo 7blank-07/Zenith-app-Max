@@ -3,6 +3,7 @@ import HomeLatestBlogsSection from './components/HomeLatestBlogsSection.client';
 import MarketNavLink from './components/MarketNavLink.client';
 import MobileNavigation from './components/MobileNavigation.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
+import Image from 'next/image';
 import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
@@ -174,7 +175,14 @@ export default async function HomePage() {
         <div className="header-content">
           <div className="logo">
             <a href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              <img src="/assets/images/zenith_logo_svg.svg" alt="Zenith logo" className="logo-image" />
+              <Image
+                src="/assets/images/zenith_logo_svg.svg"
+                alt="Zenith logo"
+                className="logo-image"
+                width={1024}
+                height={1024}
+                sizes="64px"
+              />
               <span className="logo-text">Zenith</span>
             </a>
           </div>
@@ -243,10 +251,16 @@ export default async function HomePage() {
           <section className="hero-banner-section">
             <div className="hero-banner-slider">
               <div className="banner-slide active" data-redirect="view" data-target="database">
-                <picture>
-                  <source media="(max-width: 1023px)" srcSet="/assets/images/1024_banner_2_upload.webp" />
-                  <img src="/assets/images/banner2.webp" alt="Market Update" className="banner-image" />
-                </picture>
+                <Image
+                  src="/assets/images/banner2.webp"
+                  alt="Market Update"
+                  className="banner-image"
+                  width={1600}
+                  height={400}
+                  sizes="(max-width: 1400px) 100vw, 1400px"
+                  priority
+                  fetchPriority="high"
+                />
                 <div className="banner-overlay">
                   <div className="banner-content">
                     <h2 className="banner-title">Explore Players</h2>
@@ -256,10 +270,16 @@ export default async function HomePage() {
               </div>
 
               <div className="banner-slide" data-redirect="tool" data-target="compare">
-                <picture>
-                  <source media="(max-width: 1023px)" srcSet="/assets/images/banner_1_1024px_upload.webp" />
-                  <img src="/assets/images/banner1.webp" alt="FC Mobile Event" className="banner-image" />
-                </picture>
+                <Image
+                  src="/assets/images/banner1.webp"
+                  alt="FC Mobile Event"
+                  className="banner-image"
+                  width={1600}
+                  height={400}
+                  sizes="(max-width: 1400px) 100vw, 1400px"
+                  loading="lazy"
+                  fetchPriority="low"
+                />
                 <div className="banner-overlay">
                   <div className="banner-content">
                     <h2 className="banner-title">Compare Players</h2>
@@ -269,7 +289,16 @@ export default async function HomePage() {
               </div>
 
               <div className="banner-slide" data-redirect="tool" data-target="squadbuilder">
-                <img src="/assets/images/squad-build-bg.jpeg" alt="Squad Building" className="banner-image" />
+                <Image
+                  src="/assets/images/squad-build-bg.jpeg"
+                  alt="Squad Building"
+                  className="banner-image"
+                  width={1600}
+                  height={400}
+                  sizes="(max-width: 1400px) 100vw, 1400px"
+                  loading="lazy"
+                  fetchPriority="low"
+                />
                 <div className="banner-overlay">
                   <div className="banner-content">
                     <h2 className="banner-title">Build Your Squad</h2>
@@ -345,7 +374,14 @@ export default async function HomePage() {
       <footer className="zenith-footer">
         <div className="zenith-footer-inner">
           <div className="zenith-footer-left">
-            <img src="/assets/images/zenith_logo_svg.svg" alt="Zenith logo" className="zenith-footer-logo" />
+            <Image
+              src="/assets/images/zenith_logo_svg.svg"
+              alt="Zenith logo"
+              className="zenith-footer-logo"
+              width={1024}
+              height={1024}
+              sizes="26px"
+            />
             <span className="zenith-footer-tag">FC Mobile Database Engine</span>
           </div>
 

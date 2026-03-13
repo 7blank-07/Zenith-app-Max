@@ -1,6 +1,13 @@
 import './globals.css';
 import Script from 'next/script';
+import { Inter } from 'next/font/google';
 import WebVitalsReporter from './components/WebVitalsReporter.client';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter'
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
@@ -22,7 +29,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />

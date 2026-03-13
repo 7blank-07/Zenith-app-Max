@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AuthorByline from './AuthorByline';
 import BlogTagPills from './BlogTagPills';
+import OptimizedCoverImage from './OptimizedCoverImage';
 import styles from './BlogLayout.module.css';
 
 function getArticleHref(post) {
@@ -18,7 +19,16 @@ export default function BlogArticleCard({ post, showTags = true }) {
       <Link href={articleHref} className={styles.cardLink}>
         <span className={styles.cardMedia}>
           {post.coverImage ? (
-            <img src={post.coverImage} alt={post.title} className={styles.cardImage} />
+            <OptimizedCoverImage
+              src={post.coverImage}
+              alt={post.title}
+              className={styles.cardImage}
+              width={1200}
+              height={720}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              loading="lazy"
+              fetchPriority="low"
+            />
           ) : (
             <span className={styles.cardFallback}>{post.title}</span>
           )}

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AuthorByline from './AuthorByline';
 import BlogTagPills from './BlogTagPills';
+import OptimizedCoverImage from './OptimizedCoverImage';
 import styles from './BlogLayout.module.css';
 
 export default function BlogArticleHero({ article }) {
@@ -21,7 +22,15 @@ export default function BlogArticleHero({ article }) {
 
       <div className={styles.articleCover}>
         {article.coverImage ? (
-          <img src={article.coverImage} alt={article.title} className={styles.articleCoverImage} />
+          <OptimizedCoverImage
+            src={article.coverImage}
+            alt={article.title}
+            className={styles.articleCoverImage}
+            width={1600}
+            height={900}
+            sizes="(max-width: 1024px) 100vw, 62vw"
+            priority
+          />
         ) : (
           <div className={styles.articleCoverFallback}>{article.title}</div>
         )}

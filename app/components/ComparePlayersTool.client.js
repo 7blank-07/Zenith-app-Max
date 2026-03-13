@@ -1,9 +1,13 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { normalizeSearchText } from './search-normalization';
-import SquadPlayerCustomizationModal from './SquadPlayerCustomizationModal';
 import { buildLegacyStatsModel, resolveLegacyStatValue, toNumber } from './player-skill-stats-utils';
+
+const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
+  loading: () => null
+});
 
 const OUTFIELD_COMPARE_STATS = Object.freeze({
   basic: Object.freeze([

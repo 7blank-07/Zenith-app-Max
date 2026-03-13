@@ -1,7 +1,9 @@
-import ToolsInteractions from '../components/ToolsInteractions.client';
+import dynamic from 'next/dynamic';
 import SiteChrome from '../components/SiteChrome';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
+
+const ToolsInteractions = dynamic(() => import('../components/ToolsInteractions.client'));
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 

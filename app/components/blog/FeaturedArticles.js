@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AuthorByline from './AuthorByline';
+import OptimizedCoverImage from './OptimizedCoverImage';
 import styles from './BlogLayout.module.css';
 
 function getArticleHref(post) {
@@ -25,7 +26,15 @@ export default function FeaturedArticles({ posts = [] }) {
           <Link href={getArticleHref(primary)} className={styles.featuredLink}>
             <span className={styles.featuredMedia}>
               {primary.coverImage ? (
-                <img src={primary.coverImage} alt={primary.title} className={styles.featuredImage} />
+                <OptimizedCoverImage
+                  src={primary.coverImage}
+                  alt={primary.title}
+                  className={styles.featuredImage}
+                  width={1600}
+                  height={900}
+                  sizes="(max-width: 1024px) 100vw, 62vw"
+                  priority
+                />
               ) : (
                 <span className={styles.featuredFallback}>{primary.title}</span>
               )}
@@ -50,7 +59,16 @@ export default function FeaturedArticles({ posts = [] }) {
               <Link href={getArticleHref(post)} className={styles.featuredLink}>
                 <span className={styles.cardMedia}>
                   {post.coverImage ? (
-                    <img src={post.coverImage} alt={post.title} className={styles.cardImage} />
+                    <OptimizedCoverImage
+                      src={post.coverImage}
+                      alt={post.title}
+                      className={styles.cardImage}
+                      width={1200}
+                      height={720}
+                      sizes="(max-width: 1024px) 100vw, 32vw"
+                      loading="lazy"
+                      fetchPriority="low"
+                    />
                   ) : (
                     <span className={styles.cardFallback}>{post.title}</span>
                   )}

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import AuthorByline from './blog/AuthorByline';
+import OptimizedCoverImage from './blog/OptimizedCoverImage';
 import styles from './HomeLatestBlogsSection.module.css';
 
 function toText(value, fallback = '') {
@@ -48,7 +49,16 @@ function BlogFeatureCard({ post }) {
       <Link href={getArticleHref(post)} className={styles.featuredMediaLink}>
         <div className={styles.featuredMedia}>
           {post.coverImage ? (
-            <img src={post.coverImage} alt={post.title} className={styles.featuredImage} />
+            <OptimizedCoverImage
+              src={post.coverImage}
+              alt={post.title}
+              className={styles.featuredImage}
+              width={1400}
+              height={840}
+              sizes="(max-width: 1024px) 100vw, 58vw"
+              loading="lazy"
+              fetchPriority="low"
+            />
           ) : (
             <div className={styles.featuredFallback}>{post.title}</div>
           )}
@@ -80,7 +90,16 @@ function BlogCompactCard({ post }) {
       <Link href={getArticleHref(post)} className={styles.compactMediaLink}>
         <div className={styles.compactMedia}>
           {post.coverImage ? (
-            <img src={post.coverImage} alt={post.title} className={styles.compactImage} />
+            <OptimizedCoverImage
+              src={post.coverImage}
+              alt={post.title}
+              className={styles.compactImage}
+              width={1200}
+              height={720}
+              sizes="(max-width: 1024px) 100vw, 32vw"
+              loading="lazy"
+              fetchPriority="low"
+            />
           ) : (
             <div className={styles.compactFallback}>{post.title}</div>
           )}

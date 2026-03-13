@@ -1,6 +1,7 @@
 import SiteChromeInteractions from './SiteChromeInteractions.client';
 import MarketNavLink from './MarketNavLink.client';
 import MobileNavigation from './MobileNavigation.client';
+import Image from 'next/image';
 
 function getNavClass(activeView, view) {
   return activeView === view ? 'nav-link active' : 'nav-link';
@@ -13,7 +14,14 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
         <div className="header-content">
           <div className="logo">
             <a href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              <img src="/assets/images/zenith_logo_svg.svg" alt="Zenith logo" className="logo-image" />
+              <Image
+                src="/assets/images/zenith_logo_svg.svg"
+                alt="Zenith logo"
+                className="logo-image"
+                width={1024}
+                height={1024}
+                sizes="64px"
+              />
               <span className="logo-text">Zenith</span>
             </a>
           </div>
@@ -78,7 +86,14 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
       <footer className="zenith-footer">
         <div className="zenith-footer-inner">
           <div className="zenith-footer-left">
-            <img src="/assets/images/zenith_logo_svg.svg" alt="Zenith logo" className="zenith-footer-logo" />
+            <Image
+              src="/assets/images/zenith_logo_svg.svg"
+              alt="Zenith logo"
+              className="zenith-footer-logo"
+              width={1024}
+              height={1024}
+              sizes="26px"
+            />
             <span className="zenith-footer-tag">FC Mobile Database Engine</span>
           </div>
 

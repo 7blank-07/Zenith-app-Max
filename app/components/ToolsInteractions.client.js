@@ -1,10 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { normalizeSearchText } from './search-normalization';
-import SquadPlayerCustomizationModal from './SquadPlayerCustomizationModal';
-import ComparePlayersTool from './ComparePlayersTool.client';
+
+const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
+  loading: () => null
+});
+const ComparePlayersTool = dynamic(() => import('./ComparePlayersTool.client'), {
+  loading: () => null
+});
 
 const TOOL_ALIASES = Object.freeze({
   squadbuilder: 'squadbuilder',

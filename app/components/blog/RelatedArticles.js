@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AuthorByline from './AuthorByline';
+import OptimizedCoverImage from './OptimizedCoverImage';
 import styles from './BlogLayout.module.css';
 
 function getArticleHref(post) {
@@ -22,7 +23,16 @@ export default function RelatedArticles({ posts = [] }) {
             <Link href={getArticleHref(post)} className={styles.relatedLink}>
               <span className={styles.relatedMedia}>
                 {post.coverImage ? (
-                  <img src={post.coverImage} alt={post.title} className={styles.relatedImage} />
+                  <OptimizedCoverImage
+                    src={post.coverImage}
+                    alt={post.title}
+                    className={styles.relatedImage}
+                    width={1200}
+                    height={720}
+                    sizes="(max-width: 1024px) 100vw, 30vw"
+                    loading="lazy"
+                    fetchPriority="low"
+                  />
                 ) : (
                   <span className={styles.relatedFallback}>{post.title}</span>
                 )}

@@ -1,237 +1,180 @@
-Act as a senior full-stack architect, CMS designer, and SEO engineer.
+Perform a full architecture and runtime behavior audit of this project and generate a comprehensive documentation file called:
 
-Design a production-grade blog CMS system for a Next.js (App Router) + React application using a PostgreSQL database hosted on a VPS.
+zenith-details.md
 
-The purpose of this system is to allow teammates to create blog posts daily without writing HTML or CSS.
+The goal is to clearly document how the Zenith application works internally.
 
-The system must be optimized for SEO, Google indexing, and long-term organic traffic growth.
+This document must analyze the real implementation and confirm behavior based on code, not assumptions.
 
-Do NOT generate implementation code yet.
+Topics that must be covered in detail:
 
-First generate a structured development plan with exactly 5 phases.
+1. Technology Stack
+- Determine if the app is fully Next.js App Router based or if any SPA behavior still exists.
+- Identify all frameworks and libraries used (Next.js, React, ISR, etc).
+- Confirm if any legacy SPA scripts remain and where they are used.
 
-------------------------------------------------
+2. Rendering Architecture
+Explain exactly how pages are rendered:
 
-TECH STACK
+- Static generation
+- ISR (Incremental Static Regeneration)
+- Dynamic rendering
+- Server rendering
+- Client components
 
-Frontend
-Next.js (App Router)
-React
+Confirm how the following pages render:
 
-Backend
-Next.js server actions and API routes
+/
+ /players
+ /player/[id]
+ /blogs
+ /tools
+ /watchlist
+ /compare
+ /legacy
 
-Database
-PostgreSQL (already hosted on VPS)
+3. Player Page Generation Strategy
+Investigate the generateStaticParams logic and explain:
 
-------------------------------------------------
+- prerenderLimit (currently 10,000)
+- how the first 10k players are selected
+- what happens for the remaining ~25k players
 
-BLOG CATEGORIES
+Document the exact flow:
 
-Editors must choose one category when creating a blog:
+Build time
+User first visit
+ISR cache generation
+Subsequent visits
 
-reviews
-event-guides
-investments
-news
+Explain where the cached HTML is stored and how Next.js handles it.
 
-Categories must appear in the blog URL.
+4. Cache and Revalidation
+Explain all caching layers used in the project:
 
-Example:
+Next.js ISR cache
+Browser caching
+Nginx caching
+Static asset caching
+Image CDN caching
 
-/blogs/investments/best-investment-in-fcmobile-march-2026
+If possible determine:
 
-Final URL structure must be:
+- ISR revalidation interval
+- whether player pages are permanent or periodically regenerated
 
-/blogs
-/blogs/[category]
-/blogs/[category]/[slug]
-/blogs/tag/[tag]
+5. Static Assets and CDN
+Document how assets are served:
 
-This structure is required for SEO.
+images.zenithfcm.com
+_next/static bundles
+public assets
 
-------------------------------------------------
+Explain how caching works for these resources.
 
-EDITOR WORKFLOW
+6. Tools System Architecture
+Explain how tools are implemented:
 
-Teammates should be able to access an admin panel.
+Compare tool
+Squad builder
+Shard calculator
 
-Admin routes:
+Identify:
 
-/admin
-/admin/blogs
-/admin/blogs/new
-/admin/blogs/edit/[id]
-/admin/blogs/drafts
-/admin/blogs/pending
+client components
+dynamic imports
+bundle splitting
 
-Workflow:
+7. Blog System Architecture
+Explain the blog CMS system:
 
-draft → pending → published
+- PostgreSQL schema
+- admin workflow
+- blog routes
+- ISR behavior
+- SEO structure
 
-Editors can:
+8. Data Layer
+Explain where data comes from:
 
-create blog
-edit blog
-save draft
-submit for review
-
-Admin can:
-
-approve
-publish
-reject
-delete
-
-------------------------------------------------
-
-BLOG DATA FIELDS
-
-Each blog post must support:
-
-title
-subtitle
-slug
-category
-tags
-seo_keywords
-meta_description
-author
-cover_image
-content (rich text)
-internal_links
-external_links
-status
-created_at
-updated_at
-published_at
-reading_time
-
-Slug must auto-generate from title.
-
-------------------------------------------------
-
-PUBLIC BLOG FEATURES
-
-Create public routes:
-
-/blogs
-/blogs/[category]
-/blogs/[category]/[slug]
-/blogs/tag/[tag]
-
-Public pages must include:
-
-blog homepage
-category pages
-tag pages
-individual blog page
-related articles
-pagination
-reading time
-author display
-
-------------------------------------------------
-
-SEO REQUIREMENTS
-
-Every blog page must automatically generate:
-
-SEO title
-meta description
-OpenGraph metadata
-Twitter cards
-Article schema (structured data)
-
-Also implement:
-
-dynamic sitemap.xml
-robots.txt
-clean URL slugs
-internal linking between articles
-related articles system
-
-------------------------------------------------
-
-RICH TEXT EDITOR
-
-Use a modern editor so teammates do not write HTML.
-
-Recommended editor:
-
-Tiptap
-
-It must support:
-
-headings
-lists
-links
-images
-tables
-code blocks
-embedded media
-
-------------------------------------------------
-
-DATABASE DESIGN
-
-Design PostgreSQL schema including tables:
-
-users
-blogs
-blog_categories
-blog_tags
-blog_tag_relations
-
-Relationships must support:
-
-fast category queries
-fast tag queries
-SEO-friendly lookups
-
-Include indexes where necessary.
-
-------------------------------------------------
-
-PERFORMANCE
-
-The blog system must support:
-
-static generation for blog pages
-incremental revalidation
-fast category page loading
-efficient database queries
-
-------------------------------------------------
-
-DEVELOPMENT PLAN
-
-Create exactly 5 phases.
-
-Phase 1
-Database schema and core architecture.
-
-Phase 2
-Public blog routes and page layouts.
-
-Phase 3
-Admin authentication and CMS dashboard.
-
-Phase 4
-Blog editor, draft workflow, and publishing system.
-
-Phase 5
-SEO optimization, sitemap generation, schema markup, tag pages, and performance improvements.
-
-Each phase must clearly specify:
-
-files to create
-routes
-components
-database changes
+PostgreSQL tables
 API endpoints
-important implementation notes
+server functions
+repository layer
 
-Only generate the development plan.
+9. Build System
+Document the build pipeline:
 
-Do not write implementation code yet.
+npm run build
+static generation
+ISR page generation
+bundle creation
+
+Explain what the build output shows and what it means.
+
+10. Runtime Architecture
+Explain how production runs:
+
+PM2
+Next.js server
+Nginx reverse proxy
+image CDN
+
+Document the request flow:
+
+User
+↓
+Nginx
+↓
+Next.js
+↓
+Database
+
+11. Performance Strategy
+Document how the system scales:
+
+10k prerendered player pages
+ISR generation for remaining players
+lazy-loaded tools
+optimized images
+
+Explain how the system handles 35k+ player pages.
+
+12. Deployment Process
+Document the full deployment workflow:
+
+Laptop development
+GitHub push
+VPS pull
+npm install
+npm run build
+pm2 restart
+
+13. Known Limits
+Document important limits in the architecture:
+
+prerenderLimit
+players list limits
+bundle sizes
+ISR behavior
+
+14. Future Scaling Considerations
+Explain what would happen if traffic grows to:
+
+10k users/day
+50k users/day
+100k users/day
+
+Identify potential bottlenecks.
+
+Output Requirements:
+
+Create a clear, structured markdown document with sections and diagrams where useful.
+
+File must be created at:
+
+zenith-details.md
+
+Do not modify any application code.
+
+Only analyze the project and generate documentation.
