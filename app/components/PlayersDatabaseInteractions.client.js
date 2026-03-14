@@ -249,6 +249,7 @@ function normalizeAttributes(attributes) {
 
 function normalizePlayer(player) {
   const playerId = toText(player?.playerId);
+  const recordId = toText(player?.recordId || player?.record_id || player?.id);
   const attributes = normalizeAttributes(player?.attributes);
   const isUntradable = !!player?.isUntradable;
   const rawDateAdded = player?.dateAdded || player?.date_added || player?.createdAt || player?.created_at;
@@ -260,6 +261,7 @@ function normalizePlayer(player) {
   });
   return {
     playerId,
+    recordId,
     uniqueId,
     name: toText(player?.name, 'Unknown Player'),
     ovr: toNumber(player?.ovr, 0),
@@ -306,11 +308,13 @@ function getStoredPlayerUniqueId(player) {
 }
 
 function buildWatchlistSnapshot(player, resolvedPrice) {
+  const recordId = toText(player.recordId || player.record_id || player.id);
   return {
     unique_id: player.uniqueId,
     player_id: player.playerId,
+    record_id: recordId || player.playerId,
     playerid: player.playerId,
-    id: player.playerId,
+    id: recordId || player.playerId,
     name: player.name,
     position: player.position,
     team: player.club,

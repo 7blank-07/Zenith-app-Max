@@ -150,7 +150,7 @@ function getPlayerType(player) {
 function normalizeWatchlistPlayer(player) {
   const parsedPlayer = player && typeof player === 'object' ? player : {};
   const playerId = getPlayerId(parsedPlayer);
-  const recordId = toText(parsedPlayer.record_id || parsedPlayer.recordId);
+  const recordId = toText(parsedPlayer.record_id || parsedPlayer.recordId || parsedPlayer.id);
   const uniqueId = getPlayerUniqueId(parsedPlayer);
   const parsedUnique = parseUniqueId(uniqueId);
   return {
@@ -158,7 +158,7 @@ function normalizeWatchlistPlayer(player) {
     player_id: playerId || parsedUnique.playerId,
     record_id: recordId,
     playerid: playerId || parsedUnique.playerId,
-    id: playerId || parsedUnique.playerId,
+    id: recordId || playerId || parsedUnique.playerId,
     name: toText(parsedPlayer.name) || `Player ${playerId || parsedUnique.playerId}`,
     position: toText(parsedPlayer.position),
     team: toText(parsedPlayer.team || parsedPlayer.club),

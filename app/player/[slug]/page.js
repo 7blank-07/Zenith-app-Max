@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import PlayerDetailContent from '../../components/PlayerDetailContent.client';
 import SiteChrome from '../../components/SiteChrome';
 import {
@@ -111,6 +111,22 @@ export default async function PlayerDetailPage({ params, searchParams }) {
   }
 
   const { record, metadata, attributeSections, relatedPlayers } = contract;
+  const incomingSlug = (() => {
+    const raw = String(params?.slug || '').trim();
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  })();
+  const canonicalSlug = buildPlayerSlug(record) || String(record?.playerId || '').trim();
+  if (canonicalSlug && incomingSlug !== canonicalSlug) {
+    const canonicalPath = rank > 0
+      ? `/player/${encodeURIComponent(canonicalSlug)}?rank=${rank}`
+      : `/player/${encodeURIComponent(canonicalSlug)}`;
+    redirect(canonicalPath);
+  }
+
   console.info('[metrics] /player render', {
     playerId: record.playerId,
     rank,
