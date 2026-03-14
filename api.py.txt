@@ -1,0 +1,1040 @@
+## This is api.py backup the real api.py is on vps this is just exact clone as backup so you can read and understand
+how real api.py is in vps
+
+from fastapi import FastAPI, Query, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import os
+import unicodedata
+import re
+
+app = FastAPI(title="Zenith FC Mobile API", version="1.0.0")
+
+# Enable CORS for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Database configuration
+DB_CONFIG = {
+    'host': 'localhost',
+    'database': 'zenith_data',
+    'user': 'zenith_bot',
+    'password': 'zenith6Z@',
+    'port': 5432
+}
+
+# ==================== HELPER FUNCTIONS ====================
+
+def remove_accents(text: str) -> str:
+    """Remove accents/diacritics from text. Raúl -> Raul, Eusébio -> Eusebio"""
+    if not text:
+        return ""
+    nfd = unicodedata.normalize('NFD', text)
+    return ''.join(char for char in nfd if unicodedata.category(char) != 'Mn')
+
+def clean_name(s: str) -> str:
+    """Clean name for matching: lowercase, remove special chars"""
+    if not s:
+        return ""
+    return re.sub(r"[^a-z0-9\s]", "", s.lower()).strip()
+
+# ==================== DATABASE ====================
+
+def get_db_connection():
+    """Create database connection with dict cursor"""
+    try:
+        conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
+        return conn
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        raise HTTPException(status_code=500, detail="Database connection failed")
+
+# ==================== HEALTH CHECK ====================
+
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "app": "Zenith FC Mobile API",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+def health_check():
+    """Check API and database health"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) as count FROM player_stats")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "total_players": result['count']
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+
+# ==================== PLAYER ENDPOINTS ====================
+
+@app.get("/api/players")
+def get_players(
+    limit: int = Query(100, le=1000, description="Max 1000 players per request"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    position: Optional[str] = Query(None, description="Filter by position (ST, CM, CB, etc.)"),
+    min_ovr: Optional[int] = Query(None, ge=0, le=120, description="Minimum overall rating"),
+    max_ovr: Optional[int] = Query(None, ge=0, le=120, description="Maximum overall rating"),
+    team: Optional[str] = Query(None, description="Filter by team name"),
+    league: Optional[str] = Query(None, description="Filter by league"),
+    nation: Optional[str] = Query(None, description="Filter by nation"),
+    event: Optional[str] = Query(None, description="Filter by event"),
+    rank: Optional[int] = Query(None, ge=0, le=5, description="Filter by rank (0-5)"),
+    name_starts_with: Optional[str] = Query(None, min_length=1, description="Search players whose name starts with this text"),
+    skill_moves: Optional[int] = None,
+    is_untradable: Optional[int] = Query(None, description="Filter by tradable status (0=tradable, 1=untradable)"),
+    sort_by: Optional[str] = Query(None, description="Sort field: ovr"),
+    order: Optional[str] = Query(None, description="Sort direction: asc or desc"),
+):
+
+    """
+    Get paginated list of players with optional filters.
+    Returns player cards with essential stats for grid display.
+    ✅ ACCENT-INSENSITIVE: Search 'vidic' finds 'Vidić'
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Build dynamic query
+    query = """
+        SELECT
+            player_id,
+            rank,
+            training_level,
+            name,
+            position,
+            alternate_position,
+            team,
+            league,
+            nation_region,
+            skill_moves_stars,
+            strong_foot_side,
+            strong_foot_stars,
+            weak_foot_stars,
+            height_ft_in,
+            height_cm,
+            weight_kg,
+            work_rate_attack,
+            work_rate_defense,
+            date_added,
+            ovr,
+
+            stamina_stat,
+
+            pace,
+            acceleration,
+            sprint_speed,
+
+            shooting,
+            finishing,
+            long_shot,
+            shot_power,
+            positioning,
+            volley,
+            penalties,
+
+            passing,
+            short_passing,
+            long_passing,
+            vision,
+            crossing,
+            curve,
+            free_kick,
+
+            dribbling_head,
+            dribbling,
+            balance,
+            agility,
+            reactions,
+            ball_control,
+
+            defending,
+            marking,
+            standing_tackle,
+            sliding_tackle,
+            awareness,
+            heading,
+
+            physical,
+            strength,
+            aggression,
+            jumping,
+
+            diving,
+            gk_diving,
+            gk_positioning,
+            handling,
+            gk_handling,
+            reflexes,
+            gk_reflexes,
+            kicking,
+            gk_kicking,
+
+            league_image,
+            skills,
+            traits,
+            traits_name,
+            event,
+            is_untradable,
+            player_image,
+            card_background,
+            nation_flag,
+            club_flag,
+            id,
+            color_rating,
+            color_position,
+            color_name,
+            color_level
+        FROM player_stats
+        WHERE rank = COALESCE(%s, rank)
+    """
+    params = [rank]
+
+    # ✅ ACCENT-INSENSITIVE: Name starts with filter using unaccent
+    if name_starts_with:
+        query += " AND unaccent(lower(name)) LIKE unaccent(lower(%s))"
+        params.append(f"{name_starts_with}%")
+
+    if position:
+        query += " AND (position = %s OR alternate_position ILIKE %s OR alternate_position ILIKE %s OR alternate_position ILIKE %s)"
+        pos = position.upper()
+        params.append(pos)           # exact primary match
+        params.append(pos)           # alternate is exactly this e.g. "ST"
+        params.append(f"{pos},%")    # alternate starts with e.g. "ST, CF"
+        params.append(f"%, {pos}%")  # alternate ends with e.g. "CF, ST"
+    if min_ovr:
+        query += " AND ovr >= %s"
+        params.append(min_ovr)
+    if max_ovr:
+        query += " AND ovr <= %s"
+        params.append(max_ovr)
+    if team:
+        query += " AND team ILIKE %s"
+        params.append(f"%{team}%")
+    if league:
+        query += " AND league ILIKE %s"
+        params.append(f"%{league}%")
+    if nation:
+        query += " AND nation_region ILIKE %s"
+        params.append(f"%{nation}%")
+    if event:
+        query += " AND event ILIKE %s"
+        params.append(f"%{event}%")
+    if skill_moves:
+        query += " AND skill_moves_stars = %s"
+        params.append(skill_moves)
+
+    # ✅ NEW: Filter by tradable status
+    if is_untradable is not None:
+        if is_untradable == 0:
+            # Show tradable players (empty or NULL)
+            query += " AND (is_untradable = '' OR is_untradable IS NULL)"
+            print(f"[DEBUG] Added tradable filter (empty/null)")
+        else:
+            # Show untradable players ("True")
+            query += " AND is_untradable = 'True'"
+            params.append('True')
+            print(f"[DEBUG] Added untradable filter (True)")
+
+
+
+    sort_direction = 'ASC' if order == 'asc' else 'DESC'
+    print(f"[DEBUG] Sorting by ovr {sort_direction}")
+    if position:
+        query += f" ORDER BY CASE WHEN position = %s THEN 0 ELSE 1 END ASC, ovr {sort_direction}, name ASC LIMIT %s OFFSET %s"
+        params.extend([position.upper(), limit, offset])
+    else:
+        query += f" ORDER BY ovr {sort_direction}, name ASC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+
+
+    print(f"[DEBUG] Final query: {query}")  # ✅ ADD THIS
+    print(f"[DEBUG] Params: {params}")      # ✅ ADD THIS
+
+    try:
+        cur.execute(query, params)
+        players = cur.fetchall()
+        print(f"[DEBUG] Successfully fetched {len(players)} players")  # ✅ ADD THIS
+    except Exception as e:
+        print(f"[ERROR] Query failed: {e}")  # ✅ ADD THIS
+        print(f"[ERROR] Query was: {query}")
+        print(f"[ERROR] Params were: {params}")
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
+
+
+    # Get total count for pagination (with same filters)
+    count_query = "SELECT COUNT(*) as total FROM player_stats WHERE rank = COALESCE(%s, rank)"
+    count_params = [rank]
+
+    if name_starts_with:
+        count_query += " AND unaccent(lower(name)) LIKE unaccent(lower(%s))"
+        count_params.append(f"{name_starts_with}%")
+    if position:
+        count_query += " AND (position = %s OR alternate_position ILIKE %s OR alternate_position ILIKE %s OR alternate_position ILIKE %s)"
+        pos = position.upper()
+        count_params.append(pos)
+        count_params.append(pos)
+        count_params.append(f"{pos},%")
+        count_params.append(f"%, {pos}%")
+    if min_ovr:
+        count_query += " AND ovr >= %s"
+        count_params.append(min_ovr)
+    if max_ovr:
+        count_query += " AND ovr <= %s"
+        count_params.append(max_ovr)
+    if team:
+        count_query += " AND team ILIKE %s"
+        count_params.append(f"%{team}%")
+    if league:
+        count_query += " AND league ILIKE %s"
+        count_params.append(f"%{league}%")
+    if nation:
+        count_query += " AND nation_region ILIKE %s"
+        count_params.append(f"%{nation}%")
+    if event:
+        count_query += " AND event ILIKE %s"
+        count_params.append(f"%{event}%")
+    if skill_moves:
+        count_query += " AND skill_moves_stars = %s"
+        count_params.append(skill_moves)
+
+    # ✅ NEW: Count filter for tradable status
+    if is_untradable is not None:
+        if is_untradable == 0:
+            # Count tradable players (empty or NULL)
+            count_query += " AND (is_untradable = '' OR is_untradable IS NULL)"
+        else:
+            # Count untradable players ("True")
+            count_query += " AND is_untradable = 'True'"
+            count_params.append('True')
+
+
+
+    print(f"[DEBUG] Count query: {count_query}")  # ✅ ADD THIS
+    print(f"[DEBUG] Count params: {count_params}")  # ✅ ADD THIS
+
+    try:
+        cur.execute(count_query, count_params)
+        total = cur.fetchone()['total']
+        print(f"[DEBUG] Total count: {total}")  # ✅ ADD THIS
+    except Exception as e:
+        print(f"[ERROR] Count query failed: {e}")  # ✅ ADD THIS
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Count query failed: {str(e)}")
+
+
+    cur.close()
+    conn.close()
+
+    return {
+        "players": [dict(p) for p in players],
+        "pagination": {
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + limit) < total
+        }
+    }
+
+
+@app.get("/api/players/search")
+def search_players(
+    q: str = Query(..., min_length=1, description="Search query (name starts with)"),
+    limit: int = Query(20, le=100),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    rank: int = Query(0, description="Filter by rank")
+):
+    """
+    Search players by name (starts with). Returns matching players sorted by overall rating.
+    ✅ ACCENT-INSENSITIVE: Search 'vidic' finds 'Vidić', 'raul' finds 'Raúl'
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # ✅ ACCENT-INSENSITIVE: Use unaccent for both search term and database name
+
+    cur.execute("""
+        SELECT
+            player_id,
+            rank,
+            training_level,
+            name,
+            position,
+            alternate_position,
+            team,
+            league,
+            nation_region,
+            skill_moves_stars,
+            strong_foot_side,
+            strong_foot_stars,
+            weak_foot_stars,
+            height_ft_in,
+            height_cm,
+            weight_kg,
+            work_rate_attack,
+            work_rate_defense,
+            date_added,
+            ovr,
+
+            stamina_stat,
+
+            pace,
+            acceleration,
+            sprint_speed,
+
+            shooting,
+            finishing,
+            long_shot,
+            shot_power,
+            positioning,
+            volley,
+            penalties,
+
+            passing,
+            short_passing,
+            long_passing,
+            vision,
+            crossing,
+            curve,
+            free_kick,
+
+            dribbling_head,
+            dribbling,
+            balance,
+            agility,
+            reactions,
+            ball_control,
+
+            defending,
+            marking,
+            standing_tackle,
+            sliding_tackle,
+            awareness,
+            heading,
+
+            physical,
+            strength,
+            aggression,
+            jumping,
+
+            diving,
+            gk_diving,
+            gk_positioning,
+            handling,
+            gk_handling,
+            reflexes,
+            gk_reflexes,
+            kicking,
+            gk_kicking,
+
+            league_image,
+            skills,
+            traits,
+            traits_name,
+            event,
+            is_untradable,
+            player_image,
+            card_background,
+            nation_flag,
+            club_flag,
+            id,
+            color_rating,
+            color_position,
+            color_name,
+            color_level
+
+        FROM player_stats
+        WHERE unaccent(lower(name)) LIKE unaccent(lower(%s))
+          AND rank = %s
+        ORDER BY ovr DESC, name ASC
+        LIMIT %s OFFSET %s
+    """, (f"{q}%", rank, limit, offset))
+
+
+    results = cur.fetchall()
+
+    # Get total count
+    cur.execute("""
+        SELECT COUNT(*) as total
+        FROM player_stats
+        WHERE unaccent(lower(name)) LIKE unaccent(lower(%s)) AND rank = %s
+    """, (f"{q}%", rank))
+
+    total = cur.fetchone()['total']
+
+    cur.close()
+    conn.close()
+
+    return {
+        "results": [dict(r) for r in results],
+        "count": len(results),
+        "total": total,
+        "has_more": (offset + limit) < total
+    }
+
+@app.get("/api/players/by-ids")
+def get_players_by_ids(
+    ids: str = Query(..., description="Comma-separated player IDs"),
+    rank: int = Query(0, ge=0, le=5)
+):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    id_list = [int(i) for i in ids.split(",") if i.strip().isdigit()]
+    if not id_list:
+        raise HTTPException(status_code=400, detail="No valid IDs provided")
+
+    print(f"[DEBUG] Fetching players by IDs: {id_list}, rank={rank}")
+
+    cur.execute("""
+        SELECT * FROM player_stats
+        WHERE player_id = ANY(%s) AND rank = %s
+    """, (id_list, rank))
+
+    players = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    print(f"[DEBUG] Found {len(players)} players by IDs")
+
+    return {"players": [dict(p) for p in players]}
+
+
+@app.get("/api/players/{player_id}")
+def get_player_detail(
+    player_id: int,
+    rank: int = Query(0, ge=0, le=5, description="Player rank (0-5)")
+):
+    """Get complete player details including all stats and available skills."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get player stats
+    cur.execute("""
+        SELECT * FROM player_stats
+        WHERE player_id = %s AND rank = %s
+    """, (player_id, rank))
+
+    player = cur.fetchone()
+    if not player:
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    # Get available skills
+    cur.execute("""
+        SELECT
+            pas.skill_id,
+            sc.skill_name,
+            sc.skill_image,
+            pas.is_locked,
+            pas.unlock_requirement_type,
+            pas.unlock_requirement_skillname,
+            pas.unlock_requirement_level,
+            pas.unlock_requirement_text,
+            pas.prerequisite_skill_id,
+            pas.prerequisite_level
+        FROM player_available_skills pas
+        LEFT JOIN skills_catalog sc ON pas.skill_id = sc.skill_id
+        WHERE pas.player_id = %s AND pas.rank = %s AND pas.training_level = 0
+        ORDER BY pas.skill_id
+    """, (player_id, rank))
+
+    skills = cur.fetchall()
+
+    # ✅ Calculate available points dynamically (rank = points)
+    # Rank 0 = 0 points, Rank 1 = 1 point, etc.
+    available_points = rank
+
+    cur.close()
+    conn.close()
+
+    return {
+        "player": dict(player),
+        "skills": [dict(s) for s in skills],
+        "available_skill_points": available_points  # ✅ Now correct
+    }
+
+
+
+# ==================== SKILLS ENDPOINTS ====================
+
+@app.get("/api/skills")
+def get_all_skills():
+    """Get all available skills in the game"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM skills_catalog ORDER BY skill_name")
+    skills = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return {
+        "skills": [dict(s) for s in skills],
+        "count": len(skills)
+    }
+
+@app.get("/api/skill-boosts/{skill_id}")
+def get_skill_boosts(skill_id: int):
+    """Get stat boosts for a specific skill at all levels"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # ✅ FIX: Use DISTINCT ON to get only one row per level_number
+    cur.execute("""
+        SELECT DISTINCT ON (level_number)
+            level_number,
+            boost_pace, boost_shooting, boost_passing, boost_dribbling,
+            boost_defending, boost_physical, boost_acceleration, boost_sprint_speed,
+            boost_finishing, boost_shot_power, boost_long_shot, boost_positioning,
+            boost_volley, boost_penalties, boost_short_passing, boost_long_passing,
+            boost_crossing, boost_curve, boost_free_kick, boost_vision,
+            boost_ball_control, boost_agility, boost_reactions, boost_balance,
+            boost_composure, boost_interceptions, boost_heading, boost_marking,
+            boost_standing_tackle, boost_sliding_tackle, boost_awareness,
+            boost_jumping, boost_stamina, boost_strength, boost_aggression,
+            boost_gk_diving, boost_gk_handling, boost_gk_kicking,
+            boost_gk_positioning, boost_gk_reflexes, boost_long_shot_accuracy,
+            boost_free_kick_accuracy
+        FROM skill_level_boosts
+        WHERE skill_id = %s
+        ORDER BY level_number ASC
+    """, (skill_id,))
+
+    boosts = cur.fetchall()
+
+    if not boosts:
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Skill not found")
+
+    cur.close()
+    conn.close()
+
+    return {
+        "skill_id": skill_id,
+        "boosts": [dict(b) for b in boosts]
+    }
+
+
+# ==================== FILTER OPTIONS ====================
+
+@app.get("/api/filters/positions")
+def get_positions():
+    """Get all unique positions for filter dropdown"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT DISTINCT position
+        FROM player_stats
+        WHERE position IS NOT NULL
+        ORDER BY position
+    """)
+
+    positions = [row['position'] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+
+    return {"positions": positions}
+
+@app.get("/api/filters/teams")
+def get_teams():
+    """Get all unique teams for filter dropdown WITH club flags"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT DISTINCT team, club_flag
+        FROM player_stats
+        WHERE team IS NOT NULL
+        AND team != ''
+        AND rank = 0
+        ORDER BY team
+    """)
+
+    teams = [dict(row) for row in cur.fetchall()]
+
+    # Debug log
+    print(f"[API] Returning {len(teams)} teams")
+
+    cur.close()
+    conn.close()
+
+    return {"teams": teams}
+
+
+@app.get("/api/filters/leagues")
+def get_leagues():
+    """Get all unique leagues for filter dropdown WITH league images"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT DISTINCT league, league_image
+        FROM player_stats
+        WHERE league IS NOT NULL
+        AND league != ''
+        AND rank = 0
+        ORDER BY league
+    """)
+
+    leagues = [dict(row) for row in cur.fetchall()]
+
+    # Debug log
+    print(f"[API] Returning {len(leagues)} leagues")
+
+    cur.close()
+    conn.close()
+
+    return {"leagues": leagues}
+
+
+
+@app.get("/api/filters/nations")
+def get_nations():
+    """Get all unique nations for filter dropdown"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT DISTINCT nation_region as nation
+        FROM player_stats
+        WHERE nation_region IS NOT NULL AND rank = 0
+        ORDER BY nation_region
+        LIMIT 200
+    """)
+
+    nations = [row['nation'] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+
+    return {"nations": nations}
+
+@app.get("/api/filters/events")
+def get_events():
+    """Get all unique events for filter dropdown"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT DISTINCT event
+        FROM player_stats
+        WHERE event IS NOT NULL AND event != '' AND rank = 0
+        ORDER BY event
+    """)
+
+    events = [row['event'] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+
+    return {"events": events}
+
+# ==================== STATISTICS ====================
+
+@app.get("/api/stats/summary")
+def get_database_stats():
+    """Get overall database statistics"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Total unique players
+    cur.execute("SELECT COUNT(DISTINCT player_id) as count FROM player_stats")
+    total_players = cur.fetchone()['count']
+
+    # Total skills
+    cur.execute("SELECT COUNT(*) as count FROM skills_catalog")
+    total_skills = cur.fetchone()['count']
+
+    # Position distribution (rank 0 only)
+    cur.execute("""
+        SELECT position, COUNT(*) as count
+        FROM player_stats
+        WHERE rank = 0
+        GROUP BY position
+        ORDER BY count DESC
+    """)
+    position_dist = cur.fetchall()
+
+    # Top OVR players (rank 0)
+    cur.execute("""
+        SELECT name, position, ovr, team, player_image
+        FROM player_stats
+        WHERE rank = 0
+        ORDER BY ovr DESC
+        LIMIT 10
+    """)
+    top_players = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return {
+        "total_players": total_players,
+        "total_skills": total_skills,
+        "position_distribution": [dict(p) for p in position_dist],
+        "top_players": [dict(p) for p in top_players]
+    }
+
+# ==================== TrainingBoosts====================
+@app.get("/api/training/boosts")
+def get_training_boosts(
+    position: str = Query(..., description="Player position (ST, CM, CB, GK, etc.)"),
+    level: int = Query(..., ge=1, le=30, description="Training level (1-30)")
+):
+    """
+    Get training stat boosts for a position at a specific level.
+    Returns the CUMULATIVE totals at that level (not summed increments).
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # ✅ FIX: Get ONLY the specific level row (not BETWEEN 1 AND level)
+        cur.execute("""
+            SELECT * FROM position_training_calc
+            WHERE position = %s
+            AND training_level = %s
+        """, (position.upper(), level))
+
+        row = cur.fetchone()  # ← Get single row, not fetchall()
+
+        if not row:
+            cur.close()
+            conn.close()
+            return {
+                "position": position.upper(),
+                "level": level,
+                "boosts": {},
+                "message": "No training data found for this position"
+            }
+
+        # ✅ Extract boosts directly - NO SUMMING needed!
+        boosts = {}
+        for key, value in dict(row).items():
+            # Skip metadata columns
+            if key in ['id', 'position', 'training_level']:
+                continue
+
+            # Add boost value
+            if value is not None:
+                try:
+                    boosts[key] = int(value)
+                except (ValueError, TypeError):
+                    pass
+
+        cur.close()
+        conn.close()
+
+        return {
+            "position": position.upper(),
+            "level": level,
+            "boosts": boosts
+        }
+
+    except Exception as e:
+        cur.close()
+        conn.close()
+        print(f"[ERROR] Training boosts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/skills/allocations/{user_id}/{player_id}")
+def get_user_skill_allocations(
+    user_id: int,
+    player_id: int,
+    rank: int = Query(0, ge=0, le=5, description="Player rank")
+):
+    """
+    Get user's skill allocations for a specific player at a specific rank.
+    Returns which skills the user has leveled up and to what level.
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT skill_id, skill_level, updated_at
+        FROM user_skill_allocations
+        WHERE user_id = %s AND player_id = %s AND rank = %s
+        ORDER BY skill_id
+    """, (user_id, player_id, rank))
+
+    allocations = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return {
+        "user_id": user_id,
+        "player_id": player_id,
+        "rank": rank,
+        "allocations": [dict(a) for a in allocations],
+        "total_points_spent": sum(a['skill_level'] for a in allocations)
+    }
+
+
+@app.post("/api/skills/upgrade")
+def upgrade_skill(
+    user_id: int = Query(..., description="User ID"),
+    player_id: int = Query(..., description="Player ID"),
+    rank: int = Query(..., ge=0, le=5, description="Player rank"),
+    skill_id: int = Query(..., description="Skill to upgrade"),
+    new_level: int = Query(..., ge=1, description="New skill level")
+):
+    """
+    Upgrade a skill to a new level for a user's player.
+    Validates skill points budget and prerequisites.
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # 1. Get available points for this rank
+        cur.execute("""
+            SELECT available_points
+            FROM player_skills_meta
+            WHERE player_id = %s AND rank = %s AND training_level = 0
+        """, (player_id, rank))
+
+        meta = cur.fetchone()
+        available_points = meta['available_points'] if meta else rank
+
+        # 2. Get current allocations
+        cur.execute("""
+            SELECT skill_id, skill_level
+            FROM user_skill_allocations
+            WHERE user_id = %s AND player_id = %s AND rank = %s
+        """, (user_id, player_id, rank))
+
+        current_allocations = cur.fetchall()
+        total_spent = sum(a['skill_level'] for a in current_allocations)
+
+        # 3. Get current level of this skill
+        current_level = 0
+        for a in current_allocations:
+            if a['skill_id'] == skill_id:
+                current_level = a['skill_level']
+                break
+
+        # 4. Calculate points needed
+        points_needed = new_level - current_level
+
+        if points_needed <= 0:
+            raise HTTPException(status_code=400, detail="New level must be higher than current level")
+
+        if total_spent + points_needed > available_points:
+            raise HTTPException(status_code=400, detail=f"Not enough skill points. Available: {available_points - total_spent}")
+
+        # 5. Check prerequisites
+        cur.execute("""
+            SELECT prerequisite_skill_id, prerequisite_level
+            FROM player_available_skills
+            WHERE player_id = %s AND rank = %s AND skill_id = %s
+        """, (player_id, rank, skill_id))
+
+        skill_info = cur.fetchone()
+
+        if skill_info and skill_info['prerequisite_skill_id'] and skill_info['prerequisite_skill_id'] != 0:
+            prereq_id = skill_info['prerequisite_skill_id']
+            prereq_level = skill_info['prerequisite_level']
+
+            # Check if user has the prerequisite at required level
+            prereq_met = False
+            for a in current_allocations:
+                if a['skill_id'] == prereq_id and a['skill_level'] >= prereq_level:
+                    prereq_met = True
+                    break
+
+            if not prereq_met:
+                raise HTTPException(status_code=400, detail=f"Prerequisite not met. Need skill {prereq_id} at level {prereq_level}")
+
+        # 6. Insert or update allocation
+        cur.execute("""
+            INSERT INTO user_skill_allocations (user_id, player_id, rank, skill_id, skill_level)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, player_id, rank, skill_id)
+            DO UPDATE SET skill_level = %s, updated_at = NOW()
+        """, (user_id, player_id, rank, skill_id, new_level, new_level))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {
+            "success": True,
+            "message": f"Skill upgraded to level {new_level}",
+            "skill_id": skill_id,
+            "new_level": new_level,
+            "points_remaining": available_points - (total_spent + points_needed)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/skills/reset")
+def reset_skills(
+    user_id: int = Query(..., description="User ID"),
+    player_id: int = Query(..., description="Player ID"),
+    rank: int = Query(..., ge=0, le=5, description="Player rank")
+):
+    """
+    Reset all skill allocations for a user's player at a specific rank.
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        DELETE FROM user_skill_allocations
+        WHERE user_id = %s AND player_id = %s AND rank = %s
+    """, (user_id, player_id, rank))
+
+    deleted_count = cur.rowcount
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": f"Reset {deleted_count} skill allocations",
+        "user_id": user_id,
+        "player_id": player_id,
+        "rank": rank
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    print("Starting Zenith API on http://0.0.0.0:8000")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+

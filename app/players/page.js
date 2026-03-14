@@ -3,12 +3,11 @@ import SiteChrome from '../components/SiteChrome';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getPrerenderRolloutState } from '../../src/lib/server/prerender-rollout.mjs';
-import { fetchAllPlayerFilterMetadata, fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
+import { fetchAllPlayerFilterMetadata } from '../../src/lib/server/top-players.mjs';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 export const dynamic = 'force-dynamic';
 
-const LISTING_LIMIT = 350;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
@@ -54,11 +53,8 @@ function buildPlayersJsonLd(players) {
 export default async function PlayersPage({ searchParams = {} }) {
   const startedAt = Date.now();
   const rollout = getPrerenderRolloutState();
-  const topIds = await readTopPlayerIds(LISTING_LIMIT);
-  const [players, filterMetadata] = await Promise.all([
-    fetchPlayersByIds(topIds, { rank: 0 }),
-    fetchAllPlayerFilterMetadata({ rank: 0 })
-  ]);
+  const players = [];
+  const filterMetadata = await fetchAllPlayerFilterMetadata({ rank: 0 });
   const jsonLd = buildPlayersJsonLd(players);
 
   const positions = filterMetadata.positions;

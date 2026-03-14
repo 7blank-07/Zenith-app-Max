@@ -6,7 +6,7 @@ import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
 
-const PAGE_SIZE = 70;
+const SEARCH_PAGE_SIZE = 50;
 const BASE_ROW_STATS = Object.freeze([
   { key: 'pac', label: 'PAC' },
   { key: 'sho', label: 'SHO' },
@@ -235,23 +235,20 @@ function parseAlternatePositions(value) {
     .filter((entry) => entry && entry !== '0');
 }
 
-function matchesSelectedPosition(player, selectedPosition) {
-  const normalizedSelected = normalizeSearchText(selectedPosition);
-  if (!normalizedSelected) return true;
-  if (normalizeSearchText(player?.position) === normalizedSelected) return true;
-  return (player?.alternatePositions || []).some((position) => normalizeSearchText(position) === normalizedSelected);
-}
-
 function normalizeAttributes(attributes) {
   if (!attributes || typeof attributes !== 'object') return {};
   return attributes;
 }
 
 function normalizePlayer(player) {
-  const playerId = toText(player?.playerId);
+  const playerId = toText(player?.playerId || player?.player_id || player?.playerid || player?.id);
   const recordId = toText(player?.recordId || player?.record_id || player?.id);
   const attributes = normalizeAttributes(player?.attributes);
-  const isUntradable = !!player?.isUntradable;
+  const isUntradable =
+    player?.isUntradable === true ||
+    player?.is_untradable === true ||
+    String(player?.is_untradable || '').trim().toLowerCase() === 'true' ||
+    String(player?.isuntradable || '').trim() === '1';
   const rawDateAdded = player?.dateAdded || player?.date_added || player?.createdAt || player?.created_at;
   const dateAdded = toText(rawDateAdded);
   const uniqueId = getPlayerUniqueId({
@@ -264,35 +261,35 @@ function normalizePlayer(player) {
     recordId,
     uniqueId,
     name: toText(player?.name, 'Unknown Player'),
-    ovr: toNumber(player?.ovr, 0),
+    ovr: toNumber(player?.ovr || player?.overallrating || player?.rating, 0),
     position: toText(player?.position),
     league: toText(player?.league),
-    club: toText(player?.club),
-    nation: toText(player?.nation),
+    club: toText(player?.club || player?.team),
+    nation: toText(player?.nation || player?.nation_region),
     event: resolvePlayerEvent(player),
-    skillMoves: toNumber(player?.skillMoves, 0),
-    weakFoot: toNumber(player?.weakFoot, 0),
+    skillMoves: toNumber(player?.skillMoves || player?.skill_moves_stars || player?.skill_moves, 0),
+    weakFoot: toNumber(player?.weakFoot || player?.weak_foot_stars, 0),
     heightCm: toNumber(player?.heightCm, 0),
     weightKg: toNumber(player?.weightKg, 0),
     dateAdded,
     dateAddedTimestamp: toDateTimestamp(rawDateAdded),
     isUntradable,
     price: toNumber(player?.price, 0),
-    cardBackground: toText(player?.cardBackground),
-    playerImage: toText(player?.playerImage || player?.image),
-    nationFlag: toText(player?.nationFlag),
-    clubFlag: toText(player?.clubFlag),
-    leagueImage: toText(player?.leagueImage),
-    colorName: toText(player?.colorName, '#FFFFFF') || '#FFFFFF',
-    colorRating: toText(player?.colorRating, '#FFB86B') || '#FFB86B',
-    colorPosition: toText(player?.colorPosition, '#FFFFFF') || '#FFFFFF',
+    cardBackground: toText(player?.cardBackground || player?.card_background),
+    playerImage: toText(player?.playerImage || player?.player_image || player?.image),
+    nationFlag: toText(player?.nationFlag || player?.nation_flag),
+    clubFlag: toText(player?.clubFlag || player?.club_flag),
+    leagueImage: toText(player?.leagueImage || player?.league_image),
+    colorName: toText(player?.colorName || player?.color_name, '#FFFFFF') || '#FFFFFF',
+    colorRating: toText(player?.colorRating || player?.color_rating, '#FFB86B') || '#FFB86B',
+    colorPosition: toText(player?.colorPosition || player?.color_position, '#FFFFFF') || '#FFFFFF',
     alternatePositions: parseAlternatePositions(player?.alternatePosition || player?.alternate_position || player?.alternateposition),
-    pac: toNumber(attributes?.pace, 0),
-    sho: toNumber(attributes?.shooting, 0),
-    pas: toNumber(attributes?.passing, 0),
-    dri: toNumber(attributes?.dribbling, 0),
-    def: toNumber(attributes?.defending, 0),
-    phy: toNumber(attributes?.physical, 0),
+    pac: toNumber(attributes?.pace ?? player?.pace, 0),
+    sho: toNumber(attributes?.shooting ?? player?.shooting, 0),
+    pas: toNumber(attributes?.passing ?? player?.passing, 0),
+    dri: toNumber(attributes?.dribbling ?? player?.dribbling, 0),
+    def: toNumber(attributes?.defending ?? player?.defending, 0),
+    phy: toNumber(attributes?.physical ?? player?.physical, 0),
     attributes,
     searchText: normalizeSearchText(`${player?.name || ''} ${player?.position || ''} ${player?.club || ''} ${player?.league || ''} ${player?.nation || ''}`)
   };
@@ -466,7 +463,17 @@ export default function PlayersDatabaseInteractions({
   initialSquadPickContext = DEFAULT_SQUAD_PICK_CONTEXT
 }) {
   const router = useRouter();
-  const normalizedPlayers = useMemo(() => players.map(normalizePlayer).filter((player) => !!player.playerId), [players]);
+  const [queriedPlayers, setQueriedPlayers] = useState(() => players);
+  const [searchOffset, setSearchOffset] = useState(0);
+  const [serverPagination, setServerPagination] = useState({
+    total: 0,
+    limit: SEARCH_PAGE_SIZE,
+    offset: 0,
+    hasMore: false
+  });
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const normalizedPlayers = useMemo(() => queriedPlayers.map(normalizePlayer).filter((player) => !!player.playerId), [queriedPlayers]);
   const playerByUniqueId = useMemo(() => new Map(normalizedPlayers.map((player) => [player.uniqueId, player])), [normalizedPlayers]);
 
   const eventOptions = useMemo(
@@ -482,7 +489,6 @@ export default function PlayersDatabaseInteractions({
   const [statsDraftSelected, setStatsDraftSelected] = useState([]);
   const [statsSearchQuery, setStatsSearchQuery] = useState('');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [watchlist, setWatchlist] = useState([]);
   const [watchlistPlayers, setWatchlistPlayers] = useState([]);
   const [storageHydrated, setStorageHydrated] = useState(false);
@@ -540,6 +546,10 @@ export default function PlayersDatabaseInteractions({
     setWatchlistPlayers(readArrayStorage('watchlistPlayers'));
     setStorageHydrated(true);
   }, []);
+
+  useEffect(() => {
+    setQueriedPlayers(players);
+  }, [players]);
 
   useEffect(() => {
     if (!storageHydrated) return;
@@ -621,42 +631,128 @@ export default function PlayersDatabaseInteractions({
     });
   }, [getResolvedPrice, playerByUniqueId, watchlistPlayers.length, watchedIds]);
 
-  const normalizedSearchQuery = useMemo(() => normalizeSearchText(searchQuery), [searchQuery]);
+  const visiblePlayers = normalizedPlayers;
+  const hasPreviousPage = serverPagination.offset > 0;
+  const hasNextPage = serverPagination.hasMore;
 
-  const filteredPlayers = useMemo(() => {
-    const next = normalizedPlayers.filter((player) => {
-      if (normalizedSearchQuery && !player.searchText.includes(normalizedSearchQuery)) return false;
-      if (filters.auctionable && player.isUntradable) return false;
-      if (filters.position && !matchesSelectedPosition(player, filters.position)) return false;
-      if (filters.league && normalizeSearchText(player.league) !== normalizeSearchText(filters.league)) return false;
-      if (filters.club && normalizeSearchText(player.club) !== normalizeSearchText(filters.club)) return false;
-      if (filters.nation && normalizeSearchText(player.nation) !== normalizeSearchText(filters.nation)) return false;
-      if (filters.event && normalizeSearchText(player.event) !== normalizeSearchText(filters.event)) return false;
-      if (filters.skill && String(player.skillMoves) !== String(filters.skill)) return false;
-      return !(player.ovr < filters.ratingMin || player.ovr > filters.ratingMax);
-    });
-
-    next.sort((left, right) => {
-      if (sortBy === 'latest') {
-        const dateDifference = right.dateAddedTimestamp - left.dateAddedTimestamp;
-        if (dateDifference !== 0) return dateDifference;
-        if (right.ovr !== left.ovr) return right.ovr - left.ovr;
-        return normalizeSearchText(left.name).localeCompare(normalizeSearchText(right.name));
-      }
-      if (sortBy === 'rating') return right.ovr - left.ovr;
-      if (sortBy === 'price') return getResolvedPrice(right) - getResolvedPrice(left);
-      return normalizeSearchText(left.name).localeCompare(normalizeSearchText(right.name));
-    });
-
-    return next;
-  }, [filters, getResolvedPrice, normalizedPlayers, normalizedSearchQuery, sortBy]);
-
-  const visiblePlayers = useMemo(() => filteredPlayers.slice(0, visibleCount), [filteredPlayers, visibleCount]);
-  const hasMorePlayers = visibleCount < filteredPlayers.length;
+  const sortQuery = useMemo(() => {
+    if (sortBy === 'name') return { sortBy: 'name', order: 'asc' };
+    if (sortBy === 'rating') return { sortBy: 'ovr', order: 'desc' };
+    if (sortBy === 'price') return { sortBy: 'price', order: 'desc' };
+    return { sortBy: 'date_added', order: 'desc' };
+  }, [sortBy]);
 
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [filters, normalizedSearchQuery, sortBy]);
+    setSearchOffset(0);
+  }, [
+    searchQuery,
+    sortBy,
+    filters.auctionable,
+    filters.position,
+    filters.league,
+    filters.club,
+    filters.nation,
+    filters.event,
+    filters.skill,
+    filters.ratingMin,
+    filters.ratingMax
+  ]);
+
+  useEffect(() => {
+    let disposed = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      const params = new URLSearchParams({
+        limit: String(SEARCH_PAGE_SIZE),
+        offset: String(searchOffset),
+        rank: '0',
+        sort_by: sortQuery.sortBy,
+        order: sortQuery.order
+      });
+      const namePrefix = toText(searchQuery);
+      if (namePrefix) params.set('name_starts_with', namePrefix);
+      if (filters.position) params.set('position', filters.position);
+      if (filters.league) params.set('league', filters.league);
+      if (filters.club) params.set('team', filters.club);
+      if (filters.nation) params.set('nation', filters.nation);
+      if (filters.event) params.set('event', filters.event);
+      if (filters.skill) params.set('skill_moves', String(filters.skill));
+      if (filters.ratingMin > DEFAULT_FILTERS.ratingMin) params.set('min_ovr', String(filters.ratingMin));
+      if (filters.ratingMax < DEFAULT_FILTERS.ratingMax) params.set('max_ovr', String(filters.ratingMax));
+      if (filters.auctionable) params.set('is_untradable', '0');
+
+      setIsSearching(true);
+      setSearchError('');
+      try {
+        const response = await fetch(`/api/players/search?${params.toString()}`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.error || `Player search failed (${response.status})`);
+        }
+
+        const rows = Array.isArray(payload?.players)
+          ? payload.players
+          : Array.isArray(payload?.results)
+            ? payload.results
+            : [];
+        const pagination = payload?.pagination && typeof payload.pagination === 'object'
+          ? payload.pagination
+          : {
+              total: toNumber(payload?.total, rows.length),
+              limit: SEARCH_PAGE_SIZE,
+              offset: searchOffset,
+              has_more: payload?.has_more === true
+            };
+
+        if (disposed) return;
+        setLivePrices({});
+        setQueriedPlayers(rows);
+        setServerPagination({
+          total: toNumber(pagination.total, rows.length),
+          limit: toNumber(pagination.limit, SEARCH_PAGE_SIZE),
+          offset: toNumber(pagination.offset, searchOffset),
+          hasMore: pagination.has_more === true
+        });
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+        if (disposed) return;
+        setQueriedPlayers([]);
+        setServerPagination({
+          total: 0,
+          limit: SEARCH_PAGE_SIZE,
+          offset: searchOffset,
+          hasMore: false
+        });
+        setSearchError(error instanceof Error ? error.message : 'Player search request failed');
+      } finally {
+        if (disposed) return;
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => {
+      disposed = true;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [
+    searchOffset,
+    searchQuery,
+    sortQuery.order,
+    sortQuery.sortBy,
+    filters.auctionable,
+    filters.position,
+    filters.league,
+    filters.club,
+    filters.nation,
+    filters.event,
+    filters.skill,
+    filters.ratingMin,
+    filters.ratingMax
+  ]);
 
   const activeFilterChips = useMemo(() => {
     const chips = [];
@@ -721,6 +817,7 @@ export default function PlayersDatabaseInteractions({
     setSortBy('latest');
     setFilters({ ...DEFAULT_FILTERS });
     setMobileFilters({ ...DEFAULT_FILTERS });
+    setSearchOffset(0);
   };
 
   const persistWatchlistState = useCallback((nextWatchlist, nextWatchlistPlayers) => {
@@ -829,7 +926,13 @@ export default function PlayersDatabaseInteractions({
     setStatsDraftSelected((current) => (current.length === allCustomStatIds.length ? [] : allCustomStatIds));
   };
 
-  const resultsCountText = `${visiblePlayers.length} players shown`;
+  const resultStart = serverPagination.total > 0 ? serverPagination.offset + 1 : 0;
+  const resultEnd = serverPagination.total > 0
+    ? Math.min(serverPagination.offset + visiblePlayers.length, serverPagination.total)
+    : 0;
+  const resultsCountText = isSearching
+    ? 'Searching players...'
+    : `${resultStart}-${resultEnd} of ${serverPagination.total} players`;
 
   return (
     <>
@@ -1107,6 +1210,16 @@ export default function PlayersDatabaseInteractions({
             <div className="results-info" id="players-results-info" style={{ marginBottom: '1rem', color: '#d4d4d4', fontSize: '1.1rem', marginLeft: '8px' }}>
               {resultsCountText}
             </div>
+            {searchError ? (
+              <div style={{ margin: '0 8px 16px', color: '#ff8f8f', fontSize: '0.95rem' }}>
+                {searchError}
+              </div>
+            ) : null}
+            {!isSearching && !searchError && !visiblePlayers.length ? (
+              <div style={{ margin: '0 8px 16px', color: 'var(--color-text-muted, #98A0A6)', fontSize: '0.95rem' }}>
+                No players matched your filters.
+              </div>
+            ) : null}
 
             <div className="players-grid" id="players-grid" style={{ background: 'transparent', minHeight: '60vh' }}>
               {visiblePlayers.map((player) => {
@@ -1207,11 +1320,22 @@ export default function PlayersDatabaseInteractions({
               <button
                 id="load-more-btn"
                 className="btn btn-primary load-more-btn"
-                style={{ display: hasMorePlayers ? 'block' : 'none' }}
+                style={{ display: 'inline-block', marginRight: '10px', opacity: hasPreviousPage && !isSearching ? 1 : 0.6 }}
                 type="button"
-                onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+                disabled={!hasPreviousPage || isSearching}
+                onClick={() => setSearchOffset((current) => Math.max(0, current - serverPagination.limit))}
               >
-                Load More Players
+                Previous
+              </button>
+              <button
+                id="load-more-next-btn"
+                className="btn btn-primary load-more-btn"
+                style={{ display: 'inline-block', opacity: hasNextPage && !isSearching ? 1 : 0.6 }}
+                type="button"
+                disabled={!hasNextPage || isSearching}
+                onClick={() => setSearchOffset((current) => current + serverPagination.limit)}
+              >
+                Next
               </button>
             </div>
           </div>
