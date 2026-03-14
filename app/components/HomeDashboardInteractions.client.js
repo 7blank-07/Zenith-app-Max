@@ -18,19 +18,6 @@ const VIEW_ROUTE_MAP = Object.freeze({
   watchlist: '/watchlist'
 });
 
-function readCardText(card) {
-  const textParts = [
-    card?.dataset?.playerName,
-    card?.dataset?.playerPosition,
-    card?.dataset?.playerClub,
-    card?.dataset?.playerNation
-  ];
-  return textParts
-    .map((value) => normalizeSearchText(value))
-    .filter(Boolean)
-    .join(' ');
-}
-
 function escapeHtml(value) {
   return String(value || '')
     .replaceAll('&', '&amp;')
@@ -167,31 +154,12 @@ export default function HomeDashboardInteractions() {
     const homeSearchInput = document.getElementById('home-search');
     const searchDropdown = document.getElementById('search-dropdown');
     const searchResultsDropdown = document.getElementById('search-results-dropdown');
-    const allCards = Array.from(document.querySelectorAll('.dashboard-player-card[data-player-id]'));
-
-    if (homeSearchInput && searchDropdown && searchResultsDropdown && allCards.length) {
+    if (homeSearchInput && searchDropdown && searchResultsDropdown) {
       let selectedDropdownIndex = -1;
       let activeResults = [];
-      const homePlayers = allCards.map((card) => ({
-        playerId: card.getAttribute('data-player-id') || '',
-        recordId: card.getAttribute('data-record-id') || '',
-        name: card.getAttribute('data-player-name') || '',
-        ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0,
-        position: card.getAttribute('data-player-position') || '',
-        searchableText: readCardText(card),
-        playerPath:
-          card.getAttribute('data-player-link') ||
-          buildPlayerPath({
-            playerId: card.getAttribute('data-player-id') || '',
-            recordId: card.getAttribute('data-record-id') || '',
-            name: card.getAttribute('data-player-name') || '',
-            ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0
-          }),
-        cardBackground: card.querySelector('.card-background-img')?.getAttribute('src') || '',
-        playerImage: card.querySelector('.player-image-img')?.getAttribute('src') || '',
-        ovrText: String(card.querySelector('.card-ovr')?.textContent || '').trim() || 'N/A',
-        isUntradable: !!card.querySelector('.card-untradable-badge')
-      }));
+      let searchTimeoutId = null;
+      let searchRequestId = 0;
+      let activeController = null;
 
       const closeDropdown = () => {
         searchDropdown.classList.remove('active');
@@ -250,6 +218,88 @@ export default function HomeDashboardInteractions() {
         });
       };
 
+      const toText = (value, fallback = '') => {
+        if (value === null || value === undefined) return fallback;
+        const text = String(value).trim();
+        return text || fallback;
+      };
+
+      const toNumber = (value, fallback = 0) => {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : fallback;
+      };
+
+      const toPlayerCard = (player) => {
+        const playerId = toText(player?.player_id || player?.playerid || player?.id);
+        if (!playerId) return null;
+
+        const recordId = toText(player?.record_id || player?.recordId || player?.id || playerId);
+        const name = toText(player?.name, 'Unknown Player');
+        const ovr = toNumber(player?.ovr, 0);
+        const position = toText(player?.position, 'N/A');
+        const isUntradableText = toText(player?.is_untradable || player?.isuntradable).toLowerCase();
+        const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
+        const ovrText = ovr > 0 ? String(ovr) : 'N/A';
+
+        return {
+          playerId,
+          recordId,
+          name,
+          ovr,
+          position,
+          playerPath: buildPlayerPath({ playerId, recordId, name, ovr }),
+          cardBackground: toText(player?.card_background || player?.cardBackground || player?.cardbackground),
+          playerImage: toText(player?.player_image || player?.playerImage || player?.playerimage || player?.image),
+          ovrText,
+          isUntradable
+        };
+      };
+
+      const loadSearchResults = async (rawQuery, requestId) => {
+        if (activeController) activeController.abort();
+        activeController = new AbortController();
+
+        const params = new URLSearchParams({
+          q: rawQuery,
+          limit: '20',
+          offset: '0'
+        });
+
+        const response = await fetch(`/api/players/search?${params.toString()}`, {
+          cache: 'no-store',
+          signal: activeController.signal
+        });
+
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch {
+          payload = {};
+        }
+
+        if (!response.ok) {
+          const message = toText(payload?.error || payload?.detail, `Search failed (${response.status})`);
+          throw new Error(message);
+        }
+
+        if (requestId !== searchRequestId) return;
+
+        const rows = Array.isArray(payload?.players)
+          ? payload.players
+          : Array.isArray(payload?.results)
+            ? payload.results
+            : [];
+        activeResults = rows.map(toPlayerCard).filter(Boolean);
+        selectedDropdownIndex = -1;
+
+        if (!activeResults.length) {
+          renderNoResults(rawQuery);
+          return;
+        }
+
+        renderDropdownResults(activeResults);
+      };
+
       const updateSelection = () => {
         const rows = Array.from(searchResultsDropdown.querySelectorAll('.dropdown-player-row'));
         rows.forEach((row, index) => {
@@ -270,17 +320,32 @@ export default function HomeDashboardInteractions() {
           searchResultsDropdown.innerHTML = '';
           closeDropdown();
           activeResults = [];
+          if (activeController) activeController.abort();
+          if (searchTimeoutId) window.clearTimeout(searchTimeoutId);
           return;
         }
 
-        activeResults = homePlayers.filter((player) => player.searchableText.includes(normalizedQuery)).slice(0, 20);
-        selectedDropdownIndex = -1;
-        if (!activeResults.length) {
-          renderNoResults(rawQuery);
-        } else {
-          renderDropdownResults(activeResults);
-        }
         searchDropdown.classList.add('active');
+        searchResultsDropdown.innerHTML = `
+          <div class="dropdown-loading">
+            <p style="color: var(--color-text-muted); font-size: 13px;">Searching...</p>
+          </div>
+        `;
+
+        if (searchTimeoutId) window.clearTimeout(searchTimeoutId);
+        const requestId = ++searchRequestId;
+        searchTimeoutId = window.setTimeout(async () => {
+          try {
+            await loadSearchResults(rawQuery, requestId);
+          } catch (error) {
+            if (error?.name === 'AbortError') return;
+            searchResultsDropdown.innerHTML = `
+              <div class="dropdown-no-results">
+                <p style="color: var(--color-status-error);">Search error. Please try again.</p>
+              </div>
+            `;
+          }
+        }, 300);
       };
 
       const onSearchKeydown = (event) => {
@@ -325,6 +390,10 @@ export default function HomeDashboardInteractions() {
       cleanup.push(() => homeSearchInput.removeEventListener('focus', onSearchFocus));
       cleanup.push(() => homeSearchInput.removeEventListener('keydown', onSearchKeydown));
       cleanup.push(() => document.removeEventListener('click', onClickOutside));
+      cleanup.push(() => {
+        if (searchTimeoutId) window.clearTimeout(searchTimeoutId);
+        if (activeController) activeController.abort();
+      });
     }
 
     return () => {

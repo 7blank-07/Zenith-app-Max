@@ -707,14 +707,13 @@ export default function PlayersDatabaseInteractions({
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       const params = new URLSearchParams({
+        q: toText(searchQuery),
         limit: String(SEARCH_PAGE_SIZE),
         offset: String(searchOffset),
         rank: '0',
         sort_by: sortQuery.sortBy,
         order: sortQuery.order
       });
-      const namePrefix = toText(searchQuery);
-      if (namePrefix) params.set('q', namePrefix);
       if (filters.position) params.set('position', filters.position);
       if (filters.league) params.set('league', filters.league);
       if (filters.club) params.set('team', filters.club);
