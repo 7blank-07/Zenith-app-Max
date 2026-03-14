@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+
 const DEFAULT_API_BASE_URL = 'https://zenithfcm.com/api';
+const LOCAL_API_BASE_URLS = ['http://127.0.0.1:8000', 'http://localhost:8000'];
 
 const ALLOWED_PARAMS = new Set([
   'name_starts_with',
@@ -21,9 +23,18 @@ const ALLOWED_PARAMS = new Set([
   'rank'
 ]);
 
-function getBackendBaseUrl() {
-  const baseUrl = String(process.env.ZENITH_API_BASE_URL || DEFAULT_API_BASE_URL).trim();
-  return baseUrl.replace(/\/+$/, '');
+function getConfiguredBackendBaseUrl() {
+  return String(process.env.ZENITH_API_BASE_URL || '')
+    .trim()
+    .replace(/\/+$/, '');
+}
+
+function getBackendCandidates() {
+  const configured = getConfiguredBackendBaseUrl();
+  const candidates = [configured, ...LOCAL_API_BASE_URLS, DEFAULT_API_BASE_URL]
+    .map((entry) => String(entry || '').trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+  return [...new Set(candidates)];
 }
 
 function buildPlayersApiUrl(baseUrl, searchParams) {
@@ -34,9 +45,56 @@ function buildPlayersApiUrl(baseUrl, searchParams) {
   return `${endpoint}?${searchParams.toString()}`;
 }
 
-export async function GET(request) {
-  const backendUrl = getBackendBaseUrl();
+function normalizePayload(payload, fallbackOffset = 0) {
+  if (payload && typeof payload === 'object' && Array.isArray(payload.players)) {
+    return payload;
+  }
 
+  if (payload && typeof payload === 'object' && Array.isArray(payload.results)) {
+    const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : payload.results.length;
+    const limit = Number.isFinite(Number(payload.limit)) ? Number(payload.limit) : 50;
+    const offset = Number.isFinite(Number(payload.offset)) ? Number(payload.offset) : fallbackOffset;
+    return {
+      players: payload.results,
+      pagination: {
+        total,
+        limit,
+        offset,
+        has_more: payload.has_more === true
+      }
+    };
+  }
+
+  return null;
+}
+
+function parseErrorReason(payload, fallbackText = '') {
+  if (payload?.error) return String(payload.error);
+  if (payload?.detail) return String(payload.detail);
+  return fallbackText;
+}
+
+async function fetchCandidate(targetUrl) {
+  const response = await fetch(targetUrl, {
+    method: 'GET',
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(7_000)
+  });
+
+  const text = await response.text();
+  if (!text) {
+    return { response, payload: null, details: '' };
+  }
+
+  try {
+    return { response, payload: JSON.parse(text), details: text.slice(0, 500) };
+  } catch {
+    return { response, payload: null, details: text.slice(0, 500) };
+  }
+}
+
+export async function GET(request) {
   const incomingUrl = new URL(request.url);
   const outgoingParams = new URLSearchParams();
   for (const [key, value] of incomingUrl.searchParams.entries()) {
@@ -49,36 +107,53 @@ export async function GET(request) {
     outgoingParams.set('limit', '50');
   }
 
-  const targetUrl = buildPlayersApiUrl(backendUrl, outgoingParams);
+  const fallbackOffset = Number.parseInt(String(incomingUrl.searchParams.get('offset') || '0'), 10) || 0;
+  const attempts = [];
 
-  let response;
-  try {
-    response = await fetch(targetUrl, {
-      method: 'GET',
-      cache: 'no-store',
-      headers: {
-        Accept: 'application/json'
+  for (const candidate of getBackendCandidates()) {
+    const targetUrl = buildPlayersApiUrl(candidate, outgoingParams);
+
+    try {
+      const { response, payload, details } = await fetchCandidate(targetUrl);
+      const normalized = normalizePayload(payload, fallbackOffset);
+
+      if (response.ok && normalized) {
+        return NextResponse.json(normalized, { status: response.status });
       }
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: `Failed to reach backend players API: ${error instanceof Error ? error.message : String(error)}` },
-      { status: 502 }
-    );
+
+      const reason = parseErrorReason(payload, details);
+      attempts.push({ url: targetUrl, status: response.status, reason });
+
+      // Keep trying other candidates for common routing/deployment errors.
+      if (response.status === 404 || response.status >= 500) {
+        continue;
+      }
+
+      return NextResponse.json(
+        {
+          error: reason || `Backend players API failed (${response.status})`,
+          attempts
+        },
+        { status: response.status || 502 }
+      );
+    } catch (error) {
+      attempts.push({
+        url: targetUrl,
+        status: 502,
+        reason: error instanceof Error ? error.message : String(error)
+      });
+    }
   }
 
-  const payloadText = await response.text();
-  if (!payloadText) {
-    return NextResponse.json({ players: [], pagination: { total: 0, limit: 50, offset: 0, has_more: false } }, { status: response.status });
-  }
+  const hint = getConfiguredBackendBaseUrl()
+    ? ''
+    : ' Set ZENITH_API_BASE_URL to your FastAPI origin (example: http://127.0.0.1:8000).';
 
-  try {
-    const payload = JSON.parse(payloadText);
-    return NextResponse.json(payload, { status: response.status });
-  } catch {
-    return NextResponse.json(
-      { error: 'Backend players API returned invalid JSON', details: payloadText.slice(0, 500) },
-      { status: 502 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: `Unable to reach a working players backend.${hint}`,
+      attempts
+    },
+    { status: 502 }
+  );
 }
