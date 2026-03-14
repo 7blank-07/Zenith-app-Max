@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
+import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
 
 const PAGE_SIZE = 70;
@@ -801,7 +802,7 @@ export default function PlayersDatabaseInteractions({
       router.push(squadPickContext.returnTo || '/tools?tool=squadbuilder');
       return;
     }
-    router.push(`/player/${encodeURIComponent(player.playerId)}`);
+    router.push(buildPlayerPath(player));
   };
 
   const closeMobileFilters = () => {

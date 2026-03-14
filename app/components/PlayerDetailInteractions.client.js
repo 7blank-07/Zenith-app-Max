@@ -77,6 +77,7 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
       if (!watchlistButton) return null;
       const parsed = parseUniqueId(uniqueId);
       const resolvedPlayerId = watchlistButton.getAttribute('data-player-id') || parsed.playerId || String(playerId || '');
+      const resolvedRecordId = watchlistButton.getAttribute('data-record-id') || '';
       if (!resolvedPlayerId) return null;
       const rankValue = toNumber(watchlistButton.getAttribute('data-rank'), parsed.rank);
       const isUntradable = String(watchlistButton.getAttribute('data-untradable') || '')
@@ -88,6 +89,7 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
       return {
         unique_id: resolvedUniqueId,
         player_id: resolvedPlayerId,
+        record_id: resolvedRecordId,
         playerid: resolvedPlayerId,
         id: resolvedPlayerId,
         name: watchlistButton.getAttribute('data-player-name') || 'Unknown',

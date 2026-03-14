@@ -124,7 +124,7 @@ function resolveViewKey(viewName) {
   const normalized = normalizeText(viewName).toLowerCase();
   if (normalized === 'home' || normalized === 'dashboard' || normalized === '/') return 'home';
   if (normalized === 'players' || normalized === 'database' || normalized === '/players') return 'players';
-  if (normalized === 'player' || normalized === 'playerdetail' || normalized === '/player/[id]') return 'playerDetail';
+  if (normalized === 'player' || normalized === 'playerdetail' || normalized === '/player/[id]' || normalized === '/player/[slug]') return 'playerDetail';
   if (normalized === 'watchlist' || normalized === '/watchlist') return 'watchlist';
   if (normalized === 'tools' || normalized === '/tools') return 'tools';
   return null;

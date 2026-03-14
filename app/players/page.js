@@ -1,5 +1,6 @@
 import PlayersDatabaseInteractions from '../components/PlayersDatabaseInteractions.client';
 import SiteChrome from '../components/SiteChrome';
+import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getPrerenderRolloutState } from '../../src/lib/server/prerender-rollout.mjs';
 import { fetchAllPlayerFilterMetadata, fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
@@ -44,7 +45,7 @@ function buildPlayersJsonLd(players) {
     itemListElement: players.map((player, index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      url: `${siteUrl}/player/${encodeURIComponent(player.playerId)}`,
+      url: `${siteUrl}${buildPlayerPath(player)}`,
       name: player.name
     }))
   };

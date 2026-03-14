@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
 
 function toNumber(value, fallback = 0) {
@@ -149,11 +150,13 @@ function getPlayerType(player) {
 function normalizeWatchlistPlayer(player) {
   const parsedPlayer = player && typeof player === 'object' ? player : {};
   const playerId = getPlayerId(parsedPlayer);
+  const recordId = toText(parsedPlayer.record_id || parsedPlayer.recordId);
   const uniqueId = getPlayerUniqueId(parsedPlayer);
   const parsedUnique = parseUniqueId(uniqueId);
   return {
     unique_id: uniqueId,
     player_id: playerId || parsedUnique.playerId,
+    record_id: recordId,
     playerid: playerId || parsedUnique.playerId,
     id: playerId || parsedUnique.playerId,
     name: toText(parsedPlayer.name) || `Player ${playerId || parsedUnique.playerId}`,
@@ -204,6 +207,12 @@ function uniqueSorted(values) {
 function renderPlayerRow(player) {
   const uniqueId = getPlayerUniqueId(player);
   const playerType = getPlayerType(player);
+  const playerPath = buildPlayerPath({
+    playerId: player.player_id,
+    recordId: player.record_id,
+    name: player.name,
+    ovr: player.ovr
+  });
   const metaParts = [toText(player.team), toText(player.league)].filter(Boolean);
   const metaText = metaParts.length ? metaParts.join(' • ') : toText(player.position || 'Unknown');
   const formattedPrice = formatPrice(player.price);
@@ -229,6 +238,8 @@ function renderPlayerRow(player) {
     <div
       class="player-row"
       data-player-id="${escapeHtml(player.player_id)}"
+      data-record-id="${escapeHtml(player.record_id || '')}"
+      data-player-path="${escapeHtml(playerPath)}"
       data-unique-id="${escapeHtml(uniqueId)}"
       data-name="${escapeHtml(player.name)}"
       data-position="${escapeHtml(player.position)}"
@@ -646,9 +657,21 @@ export default function WatchlistInteractions() {
 
       const row = event.target.closest('.player-row');
       if (!row) return;
+      const playerPath = toText(row.getAttribute('data-player-path'));
+      if (playerPath) {
+        router.push(playerPath);
+        return;
+      }
       const playerId = toText(row.getAttribute('data-player-id'));
       if (!playerId) return;
-      router.push(`/player/${encodeURIComponent(playerId)}`);
+      router.push(
+        buildPlayerPath({
+          playerId,
+          recordId: toText(row.getAttribute('data-record-id')),
+          name: toText(row.getAttribute('data-name')),
+          ovr: toNumber(row.getAttribute('data-ovr'), 0)
+        })
+      );
     };
 
     const bind = (element, eventName, handler) => {

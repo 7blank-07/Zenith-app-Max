@@ -20,10 +20,12 @@ import {
   renderStars
 } from './player-detail-utils';
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
+import { buildPlayerSlug } from '../../src/lib/player-slug.mjs';
 
-function buildRankPath(playerId, rank) {
-  const encodedPlayerId = encodeURIComponent(String(playerId || ''));
-  return rank > 0 ? `/player/${encodedPlayerId}?rank=${rank}` : `/player/${encodedPlayerId}`;
+function buildRankPath(playerSlug, playerId, rank) {
+  const pathSegment = String(playerSlug || playerId || '').trim();
+  const encodedPathSegment = encodeURIComponent(pathSegment);
+  return rank > 0 ? `/player/${encodedPathSegment}?rank=${rank}` : `/player/${encodedPathSegment}`;
 }
 
 async function fetchLocalPlayerRecord(playerId, rank, signal) {
@@ -70,6 +72,13 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   );
 
   const playerId = String(record?.playerId || initialRecord?.playerId || '').trim();
+  const recordId = String(record?.recordId || initialRecord?.recordId || '').trim();
+  const playerSlug = buildPlayerSlug({
+    playerId,
+    recordId,
+    name: initialRecord?.name || record?.name,
+    ovr: initialRecord?.ovr || record?.ovr
+  });
   const cardVariant = getPlayerCardVariant(record);
   const cardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_svg.svg';
   const cardImage = record?.playerImage || record?.image || '';
@@ -109,9 +118,9 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
 
   const updateBrowserPath = useCallback((nextRank) => {
     if (typeof window === 'undefined') return;
-    const nextPath = buildRankPath(playerId, nextRank);
+    const nextPath = buildRankPath(playerSlug, playerId, nextRank);
     window.history.replaceState(window.history.state, '', nextPath);
-  }, [playerId]);
+  }, [playerId, playerSlug]);
 
   const handleRankChange = useCallback(
     async (nextRankValue) => {
@@ -400,6 +409,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               data-watchlist-toggle
               data-unique-id={watchlistUniqueId}
               data-player-id={playerId}
+              data-record-id={recordId}
               data-player-name={record?.name}
               data-rank={selectedRank}
               data-untradable={record?.isUntradable ? '1' : '0'}

@@ -1,4 +1,5 @@
-import { readTopPlayerIds } from '../src/lib/server/top-players.mjs';
+import { buildPlayerPath } from '../src/lib/player-slug.mjs';
+import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
 import { getBlogSitemapEntries } from '../src/lib/server/blog/seo.mjs';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -13,6 +14,7 @@ export default async function sitemap() {
     readTopPlayerIds(10000),
     getBlogSitemapEntries()
   ]);
+  const players = await fetchPlayersByIds(topPlayerIds, { rank: 0 });
 
   const staticEntries = [
     {
@@ -35,8 +37,8 @@ export default async function sitemap() {
     }
   ];
 
-  const playerEntries = topPlayerIds.map((playerId) => ({
-    url: toAbsoluteUrl(`/player/${encodeURIComponent(playerId)}`),
+  const playerEntries = players.map((player) => ({
+    url: toAbsoluteUrl(buildPlayerPath(player)),
     lastModified,
     changeFrequency: 'weekly',
     priority: 0.8

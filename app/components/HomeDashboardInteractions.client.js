@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ROUTE_MAP = Object.freeze({
@@ -62,9 +63,21 @@ export default function HomeDashboardInteractions() {
     const handleCardClick = (event) => {
       const card = event.target?.closest?.('.dashboard-player-card[data-player-id]');
       if (!card) return;
+      const playerPath = card.getAttribute('data-player-link');
+      if (playerPath) {
+        navigate(playerPath);
+        return;
+      }
       const playerId = card.getAttribute('data-player-id');
       if (!playerId) return;
-      navigate(`/player/${encodeURIComponent(playerId)}`);
+      navigate(
+        buildPlayerPath({
+          playerId,
+          recordId: card.getAttribute('data-record-id') || '',
+          name: card.getAttribute('data-player-name') || '',
+          ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0
+        })
+      );
     };
     document.addEventListener('click', handleCardClick);
     cleanup.push(() => document.removeEventListener('click', handleCardClick));
@@ -161,12 +174,22 @@ export default function HomeDashboardInteractions() {
       let activeResults = [];
       const homePlayers = allCards.map((card) => ({
         playerId: card.getAttribute('data-player-id') || '',
+        recordId: card.getAttribute('data-record-id') || '',
         name: card.getAttribute('data-player-name') || '',
+        ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0,
         position: card.getAttribute('data-player-position') || '',
         searchableText: readCardText(card),
+        playerPath:
+          card.getAttribute('data-player-link') ||
+          buildPlayerPath({
+            playerId: card.getAttribute('data-player-id') || '',
+            recordId: card.getAttribute('data-record-id') || '',
+            name: card.getAttribute('data-player-name') || '',
+            ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0
+          }),
         cardBackground: card.querySelector('.card-background-img')?.getAttribute('src') || '',
         playerImage: card.querySelector('.player-image-img')?.getAttribute('src') || '',
-        ovr: String(card.querySelector('.card-ovr')?.textContent || '').trim() || 'N/A',
+        ovrText: String(card.querySelector('.card-ovr')?.textContent || '').trim() || 'N/A',
         isUntradable: !!card.querySelector('.card-untradable-badge')
       }));
 
@@ -192,14 +215,14 @@ export default function HomeDashboardInteractions() {
           row.innerHTML = `
             <div class="dropdown-player-card">
               <div class="squad-custom-mini-card dropdown-mini-card">
-                <img src="${escapeHtml(player.cardBackground || 'https://via.placeholder.com/120x160')}" alt="Card Background" class="squad-custom-card-bg">
-                ${
-                  player.playerImage
-                    ? `<img src="${escapeHtml(player.playerImage)}" alt="${escapeHtml(player.name)}" class="squad-custom-card-player-img">
-                       <span class="player-initials" style="display:none">${escapeHtml(getInitials(player.name))}</span>`
+                 <img src="${escapeHtml(player.cardBackground || 'https://via.placeholder.com/120x160')}" alt="Card Background" class="squad-custom-card-bg">
+                 ${
+                   player.playerImage
+                     ? `<img src="${escapeHtml(player.playerImage)}" alt="${escapeHtml(player.name)}" class="squad-custom-card-player-img">
+                        <span class="player-initials" style="display:none">${escapeHtml(getInitials(player.name))}</span>`
                     : `<span class="player-initials">${escapeHtml(getInitials(player.name))}</span>`
                 }
-                <div class="squad-custom-card-ovr">${escapeHtml(player.ovr)}</div>
+                <div class="squad-custom-card-ovr">${escapeHtml(player.ovrText)}</div>
                 <div class="squad-custom-card-position">${escapeHtml(player.position || 'N/A')}</div>
                 <div class="squad-custom-card-name">${escapeHtml(player.name || 'Unknown')}</div>
               </div>
@@ -210,17 +233,17 @@ export default function HomeDashboardInteractions() {
                 ${player.isUntradable ? '🔴 Non-auctionable' : '✅ Auctionable'}
               </span>
             </div>
-            <div class="dropdown-player-stats">
-              <div class="dropdown-player-ovr">${escapeHtml(player.ovr)}</div>
-              <div class="dropdown-player-position">${escapeHtml(player.position || 'N/A')}</div>
-            </div>
-          `;
+             <div class="dropdown-player-stats">
+               <div class="dropdown-player-ovr">${escapeHtml(player.ovrText)}</div>
+               <div class="dropdown-player-position">${escapeHtml(player.position || 'N/A')}</div>
+             </div>
+           `;
 
           row.addEventListener('click', () => {
-            if (!player.playerId) return;
+            if (!player.playerPath) return;
             closeDropdown();
             homeSearchInput.value = '';
-            navigate(`/player/${encodeURIComponent(player.playerId)}`);
+            navigate(player.playerPath);
           });
 
           searchResultsDropdown.appendChild(row);

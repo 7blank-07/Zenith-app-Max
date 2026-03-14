@@ -1,5 +1,16 @@
+import { createClient } from '@supabase/supabase-js';
+import pg from 'pg';
+import { buildPlayerSlug, parsePlayerSlug, slugifyPlayerName } from '../player-slug.mjs';
+
 const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
 const DEFAULT_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
+const FALLBACK_SUPABASE_URL = 'https://ugszalubwvartwalsejx.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnc3phbHVid3ZhcnR3YWxzZWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NTg4MzksImV4cCI6MjA3NDIzNDgzOX0.wHH6DctC6mtNcqZ4VeCdlPHk_Tg9xbfrY90EAUKvI8k';
+const PLAYER_SLUG_RESOLVER_CLIENT_KEY = '__zenithPlayerSlugResolverClient';
+const PLAYER_SLUG_RESOLVER_POOL_KEY = '__zenithPlayerSlugResolverPool';
+
+const { Pool } = pg;
 
 const ATTRIBUTE_FIELD_GROUPS = Object.freeze([
   {
@@ -71,6 +82,7 @@ export const PLAYER_PAGE_REVALIDATE_SECONDS = 60 * 60 * 24 * 50;
 
 export const PLAYER_STABLE_RECORD_FIELDS = Object.freeze([
   'playerId',
+  'recordId',
   'name',
   'fullName',
   'eventName',
@@ -130,6 +142,10 @@ function firstDefined(values, fallback) {
 function toText(value, fallback = '') {
   if (value === undefined || value === null) return fallback;
   return String(value).trim();
+}
+
+function rightDigits(value, size) {
+  return toText(value).replace(/\D+/g, '').slice(-size);
 }
 
 function toInteger(value, fallback = 0) {
@@ -601,6 +617,7 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     firstDefined([source.player_id, source.playerid, source.id, fallbackPlayerId], fallbackPlayerId),
     ''
   );
+  const recordId = toText(firstDefined([source.id, source.player_stats_id, source.record_id], ''), '');
   const name = toText(firstDefined([source.name, source.player_name], 'Unknown Player'));
   const fullName = toText(firstDefined([source.full_name, source.fullname, source.fullName, source.player_full_name, source.name], ''), '');
   const eventName = toText(firstDefined([source.event_name, source.event, source.program_name, source.eventName], ''), '');
@@ -679,6 +696,7 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
 
   return {
     playerId,
+    recordId,
     name,
     fullName: fullName || name,
     eventName,
@@ -788,7 +806,8 @@ export function buildPlayerSeoMetadata(playerRecord, options = {}) {
   const descriptionParagraphs = buildPlayerSeoDescriptionParagraphs(player);
   const fallbackDescription = `View ${player.name}${player.position ? ` (${player.position})` : ''} on ${siteName}.`;
   const description = player.summary || descriptionParagraphs[0] || fallbackDescription;
-  const canonicalPath = `/player/${encodeURIComponent(player.playerId)}`;
+  const canonicalSlug = buildPlayerSlug(player);
+  const canonicalPath = `/player/${encodeURIComponent(canonicalSlug || player.playerId)}`;
   const canonical = new URL(canonicalPath, siteUrl).toString();
 
   return {
@@ -832,6 +851,136 @@ export async function fetchPlayerStableRecord(playerId, options = {}) {
   const payload = await fetchApiJson(endpoint, options);
   const normalizedPayload = normalizeApiPayload(payload);
   return normalizePlayerStableRecord(normalizedPayload, playerId);
+}
+
+function getPlayerSlugResolverClient() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error('Supabase configuration is required for player slug resolution');
+  }
+
+  if (!globalThis[PLAYER_SLUG_RESOLVER_CLIENT_KEY]) {
+    globalThis[PLAYER_SLUG_RESOLVER_CLIENT_KEY] = createClient(url, key, {
+      auth: { persistSession: false }
+    });
+  }
+
+  return globalThis[PLAYER_SLUG_RESOLVER_CLIENT_KEY];
+}
+
+function getPlayerSlugResolverPool() {
+  const connectionString = toText(process.env.DATABASE_URL);
+  if (!connectionString) return null;
+
+  if (!globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY]) {
+    globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY] = new Pool({
+      connectionString,
+      max: 4,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000
+    });
+  }
+
+  return globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY];
+}
+
+async function queryPlayerSlugCandidates(parsedSlug) {
+  const pool = getPlayerSlugResolverPool();
+  if (!pool) return null;
+
+  const query = await pool.query(
+    `
+      SELECT
+        player_id::text AS player_id,
+        id::text AS id,
+        name,
+        ovr
+      FROM player_stats
+      WHERE RIGHT(player_id::text, 4) = $1
+        AND RIGHT(id::text, 3) = $2
+      LIMIT 20
+    `,
+    [parsedSlug.playerIdSuffix, parsedSlug.recordIdSuffix]
+  );
+
+  return Array.isArray(query.rows) ? query.rows : [];
+}
+
+function resolveBestPlayerSlugMatch(rows, parsedSlug) {
+  const normalizedRows = rows.map((row) => ({
+    playerId: toText(row?.player_id),
+    recordId: toText(row?.id),
+    name: toText(row?.name),
+    ovr: toInteger(row?.ovr, 0)
+  }));
+
+  const strictMatch = normalizedRows.find(
+    (row) => slugifyPlayerName(row.name) === parsedSlug.nameSlug && row.ovr === parsedSlug.ovr
+  );
+  if (strictMatch) return strictMatch;
+
+  const ovrMatch = normalizedRows.find((row) => row.ovr === parsedSlug.ovr);
+  if (ovrMatch) return ovrMatch;
+
+  return normalizedRows[0] || null;
+}
+
+export async function resolvePlayerIdentifiersFromSlug(slugValue) {
+  const parsedSlug = parsePlayerSlug(slugValue);
+  if (!parsedSlug) {
+    throw new Error('Invalid player slug');
+  }
+
+  if (parsedSlug.isLegacyId) {
+    return {
+      playerId: parsedSlug.playerId,
+      recordId: ''
+    };
+  }
+
+  let sourceRows = null;
+  try {
+    sourceRows = await queryPlayerSlugCandidates(parsedSlug);
+  } catch (error) {
+    console.warn('[player-slug] SQL lookup unavailable; falling back to Supabase REST lookup', {
+      code: error?.code || null,
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
+
+  if (!sourceRows) {
+    const client = getPlayerSlugResolverClient();
+    const lookup = await client
+      .from('player_stats')
+      .select('player_id, id, name, ovr')
+      .like('player_id', `%${parsedSlug.playerIdSuffix}`)
+      .like('id', `%${parsedSlug.recordIdSuffix}`)
+      .limit(20);
+
+    if (lookup.error) {
+      throw new Error(`Player slug lookup failed: ${lookup.error.message}`);
+    }
+
+    sourceRows = lookup.data || [];
+  }
+
+  const candidates = sourceRows.filter(
+    (row) => rightDigits(row?.player_id, 4) === parsedSlug.playerIdSuffix && rightDigits(row?.id, 3) === parsedSlug.recordIdSuffix
+  );
+  if (!candidates.length) {
+    throw new Error('Player slug could not be resolved');
+  }
+
+  const resolved = resolveBestPlayerSlugMatch(candidates, parsedSlug);
+  if (!resolved?.playerId) {
+    throw new Error('Player slug could not be resolved');
+  }
+
+  return {
+    playerId: resolved.playerId,
+    recordId: resolved.recordId
+  };
 }
 
 export async function fetchRelatedPlayers(playerRecord, options = {}) {

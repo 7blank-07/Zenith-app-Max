@@ -3,17 +3,24 @@ import PlayerDetailContent from '../../components/PlayerDetailContent.client';
 import SiteChrome from '../../components/SiteChrome';
 import {
   PLAYER_PAGE_REVALIDATE_SECONDS,
+  resolvePlayerIdentifiersFromSlug,
   resolvePlayerProfileContract,
   resolvePlayerSeoContract
 } from '../../../src/lib/server/player-seo-contract.mjs';
+import { buildPlayerPath, buildPlayerSlug } from '../../../src/lib/player-slug.mjs';
 import { getPlayerPrerenderLimit } from '../../../src/lib/server/prerender-rollout.mjs';
-import { readTopPlayerIds } from '../../../src/lib/server/top-players.mjs';
+import { fetchPlayersByIds, readTopPlayerIds } from '../../../src/lib/server/top-players.mjs';
 import { getPlayerCardVariant, parseRank } from '../../components/player-detail-utils';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
 function isNotFoundError(error) {
-  return typeof error?.message === 'string' && error.message.includes('Player fetch failed (404)');
+  const message = typeof error?.message === 'string' ? error.message : '';
+  return (
+    message.includes('Player fetch failed (404)') ||
+    message.includes('Player slug could not be resolved') ||
+    message.includes('Invalid player slug')
+  );
 }
 
 async function loadPlayerSeoContract(playerId, rank) {
@@ -39,16 +46,32 @@ async function loadPlayerProfileContract(playerId, rank) {
 
 export async function generateStaticParams() {
   const prerenderLimit = getPlayerPrerenderLimit();
-  const ids = await readTopPlayerIds();
-  console.info('[rollout] /player static params', { prerenderLimit, totalIds: ids.length });
-  return ids.slice(0, prerenderLimit).map((id) => ({ id }));
+  const topPlayerIds = await readTopPlayerIds(prerenderLimit);
+  const players = await fetchPlayersByIds(topPlayerIds.slice(0, prerenderLimit), { rank: 0 });
+  const seen = new Set();
+  const params = [];
+
+  for (const player of players) {
+    const slug = buildPlayerSlug(player) || String(player?.playerId || '').trim();
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    params.push({ slug });
+  }
+
+  console.info('[rollout] /player static params', {
+    prerenderLimit,
+    totalIds: topPlayerIds.length,
+    generated: params.length
+  });
+  return params;
 }
 
 export async function generateMetadata({ params, searchParams }) {
   const rank = parseRank(searchParams?.rank);
 
   try {
-    const { metadata } = await loadPlayerSeoContract(params.id, rank);
+    const identifiers = await resolvePlayerIdentifiersFromSlug(params.slug);
+    const { metadata } = await loadPlayerSeoContract(identifiers.playerId, rank);
     return {
       title: metadata.title,
       description: metadata.description,
@@ -78,7 +101,8 @@ export default async function PlayerDetailPage({ params, searchParams }) {
 
   let contract;
   try {
-    contract = await loadPlayerProfileContract(params.id, rank);
+    const identifiers = await resolvePlayerIdentifiersFromSlug(params.slug);
+    contract = await loadPlayerProfileContract(identifiers.playerId, rank);
   } catch (error) {
     if (isNotFoundError(error)) {
       notFound();
@@ -132,7 +156,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                       <article key={player.playerId} style={{ display: 'grid', gap: '8px', justifyItems: 'center' }}>
                         <div className="dashboard-player-card">
                           <a
-                            href={`/player/${player.playerId}`}
+                            href={buildPlayerPath(player)}
                             aria-label={`View ${player.name}`}
                             style={{ display: 'block', width: '100%', height: '100%' }}
                           >

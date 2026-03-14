@@ -5,6 +5,7 @@ import MobileNavigation from './components/MobileNavigation.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { buildPlayerPath } from '../src/lib/player-slug.mjs';
 import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
@@ -98,12 +99,16 @@ function renderDashboardPlayerCard(player, key) {
   const cardVariant = getHomeCardVariant(player);
   const cardBackground = player.cardBackground || 'https://via.placeholder.com/300x400';
   const cardImage = player.playerImage || 'https://via.placeholder.com/200x300';
+  const playerPath = buildPlayerPath(player);
 
   return (
     <div
       key={key}
       className="dashboard-player-card"
       data-player-id={player.playerId}
+      data-player-link={playerPath}
+      data-player-ovr={player.ovr || 0}
+      data-record-id={player.recordId || ''}
       data-player-name={player.name || ''}
       data-player-position={player.position || ''}
       data-player-club={player.club || ''}

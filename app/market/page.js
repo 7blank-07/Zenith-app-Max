@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import PlayerPriceWidget from '../components/PlayerPriceWidget.client';
+import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getPrerenderRolloutState } from '../../src/lib/server/prerender-rollout.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
@@ -30,7 +31,7 @@ function buildMarketJsonLd(players) {
       '@type': 'ListItem',
       position: index + 1,
       name: `${player.name} market snapshot`,
-      url: `${siteUrl}/player/${encodeURIComponent(player.playerId)}`
+      url: `${siteUrl}${buildPlayerPath(player)}`
     }))
   };
 }
@@ -58,7 +59,7 @@ export default async function MarketPage() {
         {featuredPlayers.map((player) => (
           <article key={player.playerId} style={{ border: '1px solid #d5d8dc', borderRadius: '10px', padding: '12px' }}>
             <h2 style={{ margin: '0 0 6px', fontSize: '18px' }}>
-              <Link href={`/player/${player.playerId}`} style={{ textDecoration: 'none' }}>
+              <Link href={buildPlayerPath(player)} style={{ textDecoration: 'none' }}>
                 {player.name}
               </Link>
             </h2>
