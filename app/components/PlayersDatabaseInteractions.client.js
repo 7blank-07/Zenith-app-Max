@@ -67,7 +67,7 @@ const DEFAULT_FILTERS = Object.freeze({
   event: '',
   skill: '',
   ratingMin: 40,
-  ratingMax: 150,
+  ratingMax: 120,
   auctionable: false
 });
 const SQUAD_BUILDER_PENDING_PICK_KEY = 'squad_builder_pending_pick';
@@ -238,6 +238,34 @@ function parseAlternatePositions(value) {
 function normalizeAttributes(attributes) {
   if (!attributes || typeof attributes !== 'object') return {};
   return attributes;
+}
+
+function extractApiErrorMessage(payload) {
+  const detail = payload?.detail;
+  if (typeof payload?.error === 'string' && payload.error.trim()) {
+    return payload.error.trim();
+  }
+
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail.trim();
+  }
+
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((entry) => {
+        if (typeof entry === 'string') return entry;
+        if (!entry || typeof entry !== 'object') return '';
+        const location = Array.isArray(entry.loc) ? entry.loc.join('.') : '';
+        const message = toText(entry.msg);
+        if (!message) return '';
+        return location ? `${location}: ${message}` : message;
+      })
+      .filter(Boolean);
+
+    if (messages.length) return messages.join('; ');
+  }
+
+  return '';
 }
 
 function normalizePlayer(player) {
@@ -631,16 +659,32 @@ export default function PlayersDatabaseInteractions({
     });
   }, [getResolvedPrice, playerByUniqueId, watchlistPlayers.length, watchedIds]);
 
-  const visiblePlayers = normalizedPlayers;
+  const visiblePlayers = useMemo(() => {
+    const next = [...normalizedPlayers];
+    if (sortBy === 'name') {
+      next.sort((a, b) => a.name.localeCompare(b.name));
+      return next;
+    }
+
+    if (sortBy === 'price') {
+      next.sort((a, b) => getResolvedPrice(b) - getResolvedPrice(a));
+      return next;
+    }
+
+    if (sortBy === 'rating') {
+      next.sort((a, b) => b.ovr - a.ovr || a.name.localeCompare(b.name));
+      return next;
+    }
+
+    next.sort((a, b) => b.dateAddedTimestamp - a.dateAddedTimestamp || b.ovr - a.ovr || a.name.localeCompare(b.name));
+    return next;
+  }, [getResolvedPrice, normalizedPlayers, sortBy]);
   const hasPreviousPage = serverPagination.offset > 0;
   const hasNextPage = serverPagination.hasMore;
 
   const sortQuery = useMemo(() => {
-    if (sortBy === 'name') return { sortBy: 'name', order: 'asc' };
-    if (sortBy === 'rating') return { sortBy: 'ovr', order: 'desc' };
-    if (sortBy === 'price') return { sortBy: 'price', order: 'desc' };
-    return { sortBy: 'date_added', order: 'desc' };
-  }, [sortBy]);
+    return { sortBy: 'ovr', order: 'desc' };
+  }, []);
 
   useEffect(() => {
     setSearchOffset(0);
@@ -670,7 +714,7 @@ export default function PlayersDatabaseInteractions({
         order: sortQuery.order
       });
       const namePrefix = toText(searchQuery);
-      if (namePrefix) params.set('name_starts_with', namePrefix);
+      if (namePrefix) params.set('q', namePrefix);
       if (filters.position) params.set('position', filters.position);
       if (filters.league) params.set('league', filters.league);
       if (filters.club) params.set('team', filters.club);
@@ -690,7 +734,8 @@ export default function PlayersDatabaseInteractions({
         });
         const payload = await response.json();
         if (!response.ok) {
-          throw new Error(payload?.error || `Player search failed (${response.status})`);
+          const message = extractApiErrorMessage(payload);
+          throw new Error(message || `Player search failed (${response.status})`);
         }
 
         const rows = Array.isArray(payload?.players)
@@ -763,7 +808,7 @@ export default function PlayersDatabaseInteractions({
     if (filters.event) chips.push({ key: 'event', label: 'Event', value: filters.event });
     if (filters.skill) chips.push({ key: 'skill', label: 'Skill', value: `${filters.skill}★` });
     if (filters.auctionable) chips.push({ key: 'auctionable', label: 'Auction', value: 'Only With Prices' });
-    if (filters.ratingMin !== 40 || filters.ratingMax !== 150) chips.push({ key: 'ovr', label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
+    if (filters.ratingMin !== 40 || filters.ratingMax !== 120) chips.push({ key: 'ovr', label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
     if (selectedStats.length) chips.push({ key: 'stats', label: 'Stats', value: `${selectedStats.length} selected` });
     return chips;
   }, [filters, selectedStats.length]);
@@ -1026,7 +1071,7 @@ export default function PlayersDatabaseInteractions({
                   id="rating-min"
                   value={filters.ratingMin}
                   min="40"
-                  max="150"
+                  max="120"
                   className="range-input"
                   onChange={(event) =>
                     setFilters((current) => ({
@@ -1041,12 +1086,12 @@ export default function PlayersDatabaseInteractions({
                   id="rating-max"
                   value={filters.ratingMax}
                   min="40"
-                  max="150"
+                  max="120"
                   className="range-input"
                   onChange={(event) =>
                     setFilters((current) => ({
                       ...current,
-                      ratingMax: clamp(toNumber(event.target.value, 150), current.ratingMin, 150)
+                      ratingMax: clamp(toNumber(event.target.value, 120), current.ratingMin, 120)
                     }))
                   }
                 />
@@ -1479,7 +1524,7 @@ export default function PlayersDatabaseInteractions({
                   id="mobile-rating-min"
                   value={mobileFilters.ratingMin}
                   min="40"
-                  max="150"
+                  max="120"
                   className="range-input"
                   onChange={(event) =>
                     setMobileFilters((current) => ({
@@ -1494,12 +1539,12 @@ export default function PlayersDatabaseInteractions({
                   id="mobile-rating-max"
                   value={mobileFilters.ratingMax}
                   min="40"
-                  max="150"
+                  max="120"
                   className="range-input"
                   onChange={(event) =>
                     setMobileFilters((current) => ({
                       ...current,
-                      ratingMax: clamp(toNumber(event.target.value, 150), current.ratingMin, 150)
+                      ratingMax: clamp(toNumber(event.target.value, 120), current.ratingMin, 120)
                     }))
                   }
                 />

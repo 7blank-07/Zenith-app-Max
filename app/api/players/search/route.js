@@ -23,44 +23,63 @@ const ALLOWED_PARAMS = new Set([
   'rank'
 ]);
 
-function getConfiguredBackendBaseUrl() {
+function configuredBaseUrl() {
   return String(process.env.ZENITH_API_BASE_URL || '')
     .trim()
     .replace(/\/+$/, '');
 }
 
-function getBackendCandidates() {
-  const configured = getConfiguredBackendBaseUrl();
-  const candidates = [configured, ...LOCAL_API_BASE_URLS, DEFAULT_API_BASE_URL]
-    .map((entry) => String(entry || '').trim().replace(/\/+$/, ''))
+function backendCandidates() {
+  const configured = configuredBaseUrl();
+  const values = [configured, ...LOCAL_API_BASE_URLS, DEFAULT_API_BASE_URL]
+    .map((value) => String(value || '').trim().replace(/\/+$/, ''))
     .filter(Boolean);
-  return [...new Set(candidates)];
+  return [...new Set(values)];
 }
 
-function buildPlayersApiUrl(baseUrl, searchParams) {
-  const normalizedBaseUrl = String(baseUrl || '').replace(/\/+$/, '');
-  const endpoint = normalizedBaseUrl.endsWith('/api')
-    ? `${normalizedBaseUrl}/players`
-    : `${normalizedBaseUrl}/api/players`;
-  return `${endpoint}?${searchParams.toString()}`;
+function buildEndpointUrl(baseUrl, pathname, query) {
+  const base = String(baseUrl || '').replace(/\/+$/, '');
+  const normalizedPath = base.endsWith('/api') ? pathname.replace(/^\/api/, '') : pathname;
+  return `${base}${normalizedPath}?${query.toString()}`;
 }
 
-function normalizePayload(payload, fallbackOffset = 0) {
+function toErrorReason(payload, details = '') {
+  if (payload?.error && typeof payload.error === 'string') return payload.error;
+  if (typeof payload?.detail === 'string') return payload.detail;
+  if (Array.isArray(payload?.detail)) {
+    const messages = payload.detail
+      .map((entry) => {
+        if (typeof entry === 'string') return entry;
+        if (entry && typeof entry === 'object') {
+          const location = Array.isArray(entry.loc) ? entry.loc.join('.') : '';
+          const message = String(entry.msg || '').trim();
+          return location ? `${location}: ${message}` : message;
+        }
+        return '';
+      })
+      .filter(Boolean);
+    if (messages.length) return messages.join('; ');
+  }
+  return details;
+}
+
+function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50) {
   if (payload && typeof payload === 'object' && Array.isArray(payload.players)) {
     return payload;
   }
 
   if (payload && typeof payload === 'object' && Array.isArray(payload.results)) {
     const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : payload.results.length;
-    const limit = Number.isFinite(Number(payload.limit)) ? Number(payload.limit) : 50;
+    const limit = Number.isFinite(Number(payload.limit)) ? Number(payload.limit) : fallbackLimit;
     const offset = Number.isFinite(Number(payload.offset)) ? Number(payload.offset) : fallbackOffset;
+    const hasMore = payload.has_more === true || offset + payload.results.length < total;
     return {
       players: payload.results,
       pagination: {
         total,
         limit,
         offset,
-        has_more: payload.has_more === true
+        has_more: hasMore
       }
     };
   }
@@ -68,24 +87,15 @@ function normalizePayload(payload, fallbackOffset = 0) {
   return null;
 }
 
-function parseErrorReason(payload, fallbackText = '') {
-  if (payload?.error) return String(payload.error);
-  if (payload?.detail) return String(payload.detail);
-  return fallbackText;
-}
-
-async function fetchCandidate(targetUrl) {
-  const response = await fetch(targetUrl, {
+async function fetchJson(url) {
+  const response = await fetch(url, {
     method: 'GET',
     cache: 'no-store',
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(7_000)
   });
-
   const text = await response.text();
-  if (!text) {
-    return { response, payload: null, details: '' };
-  }
+  if (!text) return { response, payload: null, details: '' };
 
   try {
     return { response, payload: JSON.parse(text), details: text.slice(0, 500) };
@@ -94,64 +104,100 @@ async function fetchCandidate(targetUrl) {
   }
 }
 
-export async function GET(request) {
-  const incomingUrl = new URL(request.url);
-  const outgoingParams = new URLSearchParams();
-  for (const [key, value] of incomingUrl.searchParams.entries()) {
+function pickSearchParams(incoming) {
+  const outgoing = new URLSearchParams();
+  for (const [key, value] of incoming.entries()) {
     if (!ALLOWED_PARAMS.has(key)) continue;
-    if (!String(value || '').trim()) continue;
-    outgoingParams.append(key, value);
+    const text = String(value || '').trim();
+    if (!text) continue;
+    outgoing.append(key, text);
   }
 
-  if (!outgoingParams.has('limit')) {
-    outgoingParams.set('limit', '50');
-  }
+  const limit = Math.min(50, Math.max(1, Number.parseInt(outgoing.get('limit') || '50', 10) || 50));
+  outgoing.set('limit', String(limit));
+  return outgoing;
+}
 
-  const fallbackOffset = Number.parseInt(String(incomingUrl.searchParams.get('offset') || '0'), 10) || 0;
+function buildLegacySearchQuery(outgoing) {
+  const q = String(outgoing.get('name_starts_with') || '').trim();
+  if (!q) return null;
+
+  const query = new URLSearchParams();
+  query.set('q', q);
+  query.set('limit', outgoing.get('limit') || '50');
+  query.set('offset', outgoing.get('offset') || '0');
+  query.set('rank', outgoing.get('rank') || '0');
+  return query;
+}
+
+export async function GET(request) {
+  const incoming = new URL(request.url).searchParams;
+  const outgoing = pickSearchParams(incoming);
+  const fallbackOffset = Number.parseInt(outgoing.get('offset') || '0', 10) || 0;
+  const fallbackLimit = Number.parseInt(outgoing.get('limit') || '50', 10) || 50;
   const attempts = [];
 
-  for (const candidate of getBackendCandidates()) {
-    const targetUrl = buildPlayersApiUrl(candidate, outgoingParams);
+  for (const base of backendCandidates()) {
+    const playersUrl = buildEndpointUrl(base, '/api/players', outgoing);
 
     try {
-      const { response, payload, details } = await fetchCandidate(targetUrl);
-      const normalized = normalizePayload(payload, fallbackOffset);
+      const result = await fetchJson(playersUrl);
+      const normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
 
-      if (response.ok && normalized) {
-        return NextResponse.json(normalized, { status: response.status });
+      if (result.response.ok && normalized) {
+        return NextResponse.json(normalized, { status: result.response.status });
       }
 
-      const reason = parseErrorReason(payload, details);
-      attempts.push({ url: targetUrl, status: response.status, reason });
+      const reason = toErrorReason(result.payload, result.details);
+      attempts.push({ url: playersUrl, status: result.response.status, reason });
 
-      // Keep trying other candidates for common routing/deployment errors.
-      if (response.status === 404 || response.status >= 500) {
+      // Some deployments only expose /api/players/search (q=...) and return 422 for /api/players.
+      if (result.response.status === 422) {
+        const legacyQuery = buildLegacySearchQuery(outgoing);
+        if (legacyQuery) {
+          const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
+          try {
+            const legacyResult = await fetchJson(legacyUrl);
+            const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit);
+            if (legacyResult.response.ok && normalizedLegacy) {
+              return NextResponse.json(normalizedLegacy, { status: legacyResult.response.status });
+            }
+
+            attempts.push({
+              url: legacyUrl,
+              status: legacyResult.response.status,
+              reason: toErrorReason(legacyResult.payload, legacyResult.details)
+            });
+          } catch (legacyError) {
+            attempts.push({
+              url: legacyUrl,
+              status: 502,
+              reason: legacyError instanceof Error ? legacyError.message : String(legacyError)
+            });
+          }
+        }
+      }
+
+      if (result.response.status >= 500 || result.response.status === 404 || result.response.status === 422) {
         continue;
       }
-
-      return NextResponse.json(
-        {
-          error: reason || `Backend players API failed (${response.status})`,
-          attempts
-        },
-        { status: response.status || 502 }
-      );
     } catch (error) {
       attempts.push({
-        url: targetUrl,
+        url: playersUrl,
         status: 502,
         reason: error instanceof Error ? error.message : String(error)
       });
+      continue;
     }
   }
 
-  const hint = getConfiguredBackendBaseUrl()
+  const configHint = configuredBaseUrl()
     ? ''
     : ' Set ZENITH_API_BASE_URL to your FastAPI origin (example: http://127.0.0.1:8000).';
 
   return NextResponse.json(
     {
-      error: `Unable to reach a working players backend.${hint}`,
+      error: `Player search backend is unreachable or rejected the request.${configHint}`,
       attempts
     },
     { status: 502 }
