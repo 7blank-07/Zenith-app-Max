@@ -955,7 +955,7 @@ export default function PlayersDatabaseInteractions({
       setIsSearching(true);
       setSearchError('');
       try {
-        const response = await fetch(`/api/players/search?${params.toString()}`, {
+        const response = await fetch(`/internal-api/players/search?${params.toString()}`, {
           cache: 'no-store',
           signal: controller.signal
         });

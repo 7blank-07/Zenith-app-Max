@@ -311,7 +311,7 @@ export default function HomeDashboardInteractions() {
           rank: '0'
         });
 
-        const response = await fetch(`/api/players/search?${params.toString()}`, {
+        const response = await fetch(`/internal-api/players/search?${params.toString()}`, {
           cache: 'no-store',
           signal: activeController.signal
         });

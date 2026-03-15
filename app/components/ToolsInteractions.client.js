@@ -1214,7 +1214,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     if (maxOvr > 0) searchParams.set('max_ovr', String(maxOvr));
     if (auctionable) searchParams.set('is_untradable', '0');
 
-    const endpoint = `/api/players/search?${searchParams.toString()}`;
+    const endpoint = `/internal-api/players/search?${searchParams.toString()}`;
     let response;
     try {
       response = await fetch(endpoint, {
