@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
+import { normalizePlayerStableRecord, preferPlayerStableRecord } from '../../../../src/lib/server/player-seo-contract.mjs';
 
 export const dynamic = 'force-dynamic';
 
 const DEFAULT_API_BASE_URL = 'https://zenithfcm.com/api';
 const LOCAL_API_BASE_URLS = ['http://127.0.0.1:8000', 'http://localhost:8000'];
 const DIACRITIC_MARKS_REGEX = /[\u0300-\u036f]/g;
+const DEFAULT_COLOR_FALLBACK_RANKS = 5;
 
 const ALLOWED_PARAMS = new Set([
   'q',
@@ -65,20 +67,166 @@ function toErrorReason(payload, details = '') {
   return details;
 }
 
+function resolvePlayerId(row) {
+  return String(row?.player_id ?? row?.playerId ?? row?.playerid ?? row?.id ?? '').trim();
+}
+
+function dedupePreferredPlayers(rows) {
+  if (!Array.isArray(rows) || !rows.length) return [];
+
+  const byId = new Map();
+  const fallbackRows = [];
+
+  for (const row of rows) {
+    const playerId = resolvePlayerId(row);
+    if (!playerId) {
+      fallbackRows.push(row);
+      continue;
+    }
+
+    const normalized = normalizePlayerStableRecord(row, playerId);
+    const existing = byId.get(playerId);
+    if (!existing) {
+      byId.set(playerId, { row, normalized });
+      continue;
+    }
+
+    const preferred = preferPlayerStableRecord(existing.normalized, normalized);
+    if (preferred === normalized) {
+      byId.set(playerId, { row, normalized });
+    }
+  }
+
+  return [...byId.values()].map((entry) => entry.row).concat(fallbackRows);
+}
+
+function readRowColorValue(row, keys) {
+  for (const key of keys) {
+    const value = String(row?.[key] ?? '').trim();
+    if (value) return value;
+  }
+  return '';
+}
+
+function hasRowColorData(row) {
+  return !!(
+    readRowColorValue(row, ['color_name', 'colorName', 'colorname']) ||
+    readRowColorValue(row, ['color_position', 'colorPosition', 'colorposition']) ||
+    readRowColorValue(row, ['color_rating', 'colorRating', 'colorrating'])
+  );
+}
+
+function mergeRowColorData(row, colorSource) {
+  const currentName = readRowColorValue(row, ['color_name', 'colorName', 'colorname']);
+  const currentPosition = readRowColorValue(row, ['color_position', 'colorPosition', 'colorposition']);
+  const currentRating = readRowColorValue(row, ['color_rating', 'colorRating', 'colorrating']);
+  const fallbackName = readRowColorValue(colorSource, ['color_name', 'colorName', 'colorname']);
+  const fallbackPosition = readRowColorValue(colorSource, ['color_position', 'colorPosition', 'colorposition']);
+  const fallbackRating = readRowColorValue(colorSource, ['color_rating', 'colorRating', 'colorrating']);
+  if (!fallbackName && !fallbackPosition && !fallbackRating) return row;
+
+  return {
+    ...row,
+    color_name: currentName || fallbackName,
+    color_position: currentPosition || fallbackPosition,
+    color_rating: currentRating || fallbackRating
+  };
+}
+
+async function fetchColorRowsByIdsAtRank(base, ids, rank, attempts) {
+  if (!ids.length) return [];
+  const query = new URLSearchParams({
+    ids: ids.join(','),
+    rank: String(rank)
+  });
+  const url = buildEndpointUrl(base, '/api/players/by-ids', query);
+
+  try {
+    const result = await fetchJson(url);
+    if (!result.response.ok) {
+      attempts.push({
+        url,
+        status: result.response.status,
+        reason: toErrorReason(result.payload, result.details)
+      });
+      return [];
+    }
+    const rows = Array.isArray(result.payload?.players) ? result.payload.players : [];
+    return dedupePreferredPlayers(rows);
+  } catch (error) {
+    attempts.push({
+      url,
+      status: 502,
+      reason: error instanceof Error ? error.message : String(error)
+    });
+    return [];
+  }
+}
+
+async function enrichPayloadColors(base, normalizedPayload, attempts) {
+  const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
+  if (!rows.length) return normalizedPayload;
+
+  const unresolvedIds = [...new Set(rows.map(resolvePlayerId).filter(Boolean))].filter((playerId) => {
+    const row = rows.find((entry) => resolvePlayerId(entry) === playerId);
+    return row ? !hasRowColorData(row) : false;
+  });
+  if (!unresolvedIds.length) return normalizedPayload;
+
+  const colorById = new Map();
+  let pendingIds = unresolvedIds;
+  for (let rank = 1; rank <= DEFAULT_COLOR_FALLBACK_RANKS && pendingIds.length; rank += 1) {
+    const fallbackRows = await fetchColorRowsByIdsAtRank(base, pendingIds, rank, attempts);
+    for (const fallbackRow of fallbackRows) {
+      const playerId = resolvePlayerId(fallbackRow);
+      if (!playerId || colorById.has(playerId) || !hasRowColorData(fallbackRow)) continue;
+      colorById.set(playerId, fallbackRow);
+    }
+    pendingIds = pendingIds.filter((playerId) => !colorById.has(playerId));
+  }
+
+  if (!colorById.size) return normalizedPayload;
+
+  return {
+    ...normalizedPayload,
+    players: rows.map((row) => {
+      const playerId = resolvePlayerId(row);
+      const fallbackRow = colorById.get(playerId);
+      if (!fallbackRow || hasRowColorData(row)) return row;
+      return mergeRowColorData(row, fallbackRow);
+    })
+  };
+}
+
 function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50) {
   if (payload && typeof payload === 'object' && Array.isArray(payload.players)) {
-    return payload;
+    const dedupedPlayers = dedupePreferredPlayers(payload.players);
+    const pagination = payload.pagination && typeof payload.pagination === 'object' ? payload.pagination : null;
+    const total = Number(pagination?.total);
+    return {
+      ...payload,
+      players: dedupedPlayers,
+      ...(pagination
+        ? {
+            pagination: {
+              ...pagination,
+              total: Number.isFinite(total) ? Math.max(total, dedupedPlayers.length) : dedupedPlayers.length
+            }
+          }
+        : {})
+    };
   }
 
   if (payload && typeof payload === 'object' && Array.isArray(payload.results)) {
+    const dedupedResults = dedupePreferredPlayers(payload.results);
     const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : payload.results.length;
     const limit = Number.isFinite(Number(payload.limit)) ? Number(payload.limit) : fallbackLimit;
     const offset = Number.isFinite(Number(payload.offset)) ? Number(payload.offset) : fallbackOffset;
-    const hasMore = payload.has_more === true || offset + payload.results.length < total;
+    const hasMore = payload.has_more === true || offset + dedupedResults.length < total;
     return {
-      players: payload.results,
+      players: dedupedResults,
       pagination: {
-        total,
+        total: Math.max(total, dedupedResults.length),
         limit,
         offset,
         has_more: hasMore
@@ -249,16 +397,20 @@ export async function GET(request) {
     try {
       const result = await fetchJson(playersUrl);
       const normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
+      const normalizedWithColors = result.response.ok && normalized
+        ? await enrichPayloadColors(base, normalized, attempts)
+        : normalized;
 
-      if (result.response.ok && normalized) {
-        if (searchQuery && playersQuery.has('q') && !payloadMatchesSearchFilter(normalized, searchQuery)) {
+      if (result.response.ok && normalizedWithColors) {
+        if (searchQuery && playersQuery.has('q') && !payloadMatchesSearchFilter(normalizedWithColors, searchQuery)) {
           const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
           if (compatibilityPayload) {
-            return NextResponse.json(compatibilityPayload.payload, { status: compatibilityPayload.status });
+            const compatibilityWithColors = await enrichPayloadColors(base, compatibilityPayload.payload, attempts);
+            return NextResponse.json(compatibilityWithColors, { status: compatibilityPayload.status });
           }
-          return NextResponse.json(filterPayloadBySearch(normalized, searchQuery), { status: result.response.status });
+          return NextResponse.json(filterPayloadBySearch(normalizedWithColors, searchQuery), { status: result.response.status });
         }
-        return NextResponse.json(normalized, { status: result.response.status });
+        return NextResponse.json(normalizedWithColors, { status: result.response.status });
       }
 
       const reason = toErrorReason(result.payload, result.details);
@@ -267,7 +419,8 @@ export async function GET(request) {
       if ((result.response.status === 400 || result.response.status === 422) && playersQuery.has('q')) {
         const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
         if (compatibilityPayload) {
-          return NextResponse.json(compatibilityPayload.payload, { status: compatibilityPayload.status });
+          const compatibilityWithColors = await enrichPayloadColors(base, compatibilityPayload.payload, attempts);
+          return NextResponse.json(compatibilityWithColors, { status: compatibilityPayload.status });
         }
       }
 
@@ -280,7 +433,8 @@ export async function GET(request) {
             const legacyResult = await fetchJson(legacyUrl);
             const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit);
             if (legacyResult.response.ok && normalizedLegacy) {
-              return NextResponse.json(normalizedLegacy, { status: legacyResult.response.status });
+              const legacyWithColors = await enrichPayloadColors(base, normalizedLegacy, attempts);
+              return NextResponse.json(legacyWithColors, { status: legacyResult.response.status });
             }
 
             attempts.push({

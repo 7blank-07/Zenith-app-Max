@@ -144,6 +144,108 @@ function toText(value, fallback = '') {
   return String(value).trim();
 }
 
+function firstNonEmptyText(source, keys) {
+  for (const key of keys) {
+    const value = toText(source?.[key]);
+    if (value) return value;
+  }
+  return '';
+}
+
+export function readPlayerColorFields(source) {
+  const player = source && typeof source === 'object' ? source : {};
+  return {
+    colorName: firstNonEmptyText(player, ['colorName', 'color_name', 'colorname']),
+    colorPosition: firstNonEmptyText(player, ['colorPosition', 'color_position', 'colorposition']),
+    colorRating: firstNonEmptyText(player, ['colorRating', 'color_rating', 'colorrating'])
+  };
+}
+
+export function hasPlayerColorData(source) {
+  const colors = readPlayerColorFields(source);
+  return !!(colors.colorName || colors.colorPosition || colors.colorRating);
+}
+
+export function mergePlayerColorData(playerRecord, colorSource) {
+  const sourceRecord = playerRecord && typeof playerRecord === 'object' ? playerRecord : {};
+  const fallbackColors = readPlayerColorFields(colorSource);
+  if (!fallbackColors.colorName && !fallbackColors.colorPosition && !fallbackColors.colorRating) {
+    return sourceRecord;
+  }
+  const currentColors = readPlayerColorFields(sourceRecord);
+  return {
+    ...sourceRecord,
+    colorName: currentColors.colorName || fallbackColors.colorName,
+    colorPosition: currentColors.colorPosition || fallbackColors.colorPosition,
+    colorRating: currentColors.colorRating || fallbackColors.colorRating
+  };
+}
+
+function countPresent(values) {
+  return values.reduce((count, value) => (toText(value) ? count + 1 : count), 0);
+}
+
+function playerRecordPreferenceScore(record) {
+  const source = record && typeof record === 'object' ? record : {};
+  const colorCompleteness = countPresent([
+    source.colorName,
+    source.color_name,
+    source.colorname,
+    source.colorPosition,
+    source.color_position,
+    source.colorposition,
+    source.colorRating,
+    source.color_rating,
+    source.colorrating
+  ]);
+  const visualCompleteness = countPresent([
+    source.cardBackground,
+    source.card_background,
+    source.cardbackground,
+    source.playerImage,
+    source.player_image,
+    source.playerimage,
+    source.image,
+    source.nationFlag,
+    source.nation_flag,
+    source.clubFlag,
+    source.club_flag,
+    source.leagueImage,
+    source.league_image
+  ]);
+  const profileCompleteness = countPresent([
+    source.name,
+    source.eventName,
+    source.event_name,
+    source.position,
+    source.nation,
+    source.club,
+    source.team,
+    source.league,
+    source.summary
+  ]);
+  return colorCompleteness * 100 + visualCompleteness * 10 + profileCompleteness;
+}
+
+export function preferPlayerStableRecord(currentRecord, candidateRecord) {
+  if (!currentRecord) return candidateRecord;
+  if (!candidateRecord) return currentRecord;
+
+  const currentScore = playerRecordPreferenceScore(currentRecord);
+  const candidateScore = playerRecordPreferenceScore(candidateRecord);
+  if (candidateScore !== currentScore) {
+    return candidateScore > currentScore ? candidateRecord : currentRecord;
+  }
+
+  const currentHasRecordId = !!toText(currentRecord.recordId || currentRecord.record_id || currentRecord.id);
+  const candidateHasRecordId = !!toText(candidateRecord.recordId || candidateRecord.record_id || candidateRecord.id);
+  if (candidateHasRecordId !== currentHasRecordId) {
+    return candidateHasRecordId ? candidateRecord : currentRecord;
+  }
+
+  return currentRecord;
+}
+
 function rightDigits(value, size) {
   return toText(value).replace(/\D+/g, '').slice(-size);
 }
@@ -850,7 +952,33 @@ export async function fetchPlayerStableRecord(playerId, options = {}) {
   const endpoint = `${baseUrl}/players/${encodeURIComponent(playerId)}?rank=${encodeURIComponent(rank)}`;
   const payload = await fetchApiJson(endpoint, options);
   const normalizedPayload = normalizeApiPayload(payload);
-  return normalizePlayerStableRecord(normalizedPayload, playerId);
+  const record = normalizePlayerStableRecord(normalizedPayload, playerId);
+  if (hasPlayerColorData(record) || rank !== 0 || options.colorFallbackRanks === 0) {
+    return record;
+  }
+
+  const maxFallbackRank = Number.isFinite(Number(options.colorFallbackRanks))
+    ? Math.max(1, Math.floor(Number(options.colorFallbackRanks)))
+    : 5;
+
+  for (let fallbackRank = 1; fallbackRank <= maxFallbackRank; fallbackRank += 1) {
+    try {
+      const fallbackEndpoint = `${baseUrl}/players/${encodeURIComponent(playerId)}?rank=${encodeURIComponent(fallbackRank)}`;
+      const fallbackPayload = await fetchApiJson(fallbackEndpoint, options);
+      const normalizedFallbackPayload = normalizeApiPayload(fallbackPayload);
+      const fallbackRecord = normalizePlayerStableRecord(normalizedFallbackPayload, playerId);
+      if (!hasPlayerColorData(fallbackRecord)) continue;
+      return mergePlayerColorData(record, fallbackRecord);
+    } catch (error) {
+      console.warn('[player-seo-contract] Failed color fallback rank fetch:', {
+        playerId: String(playerId),
+        fallbackRank,
+        reason: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+
+  return record;
 }
 
 function getPlayerSlugResolverClient() {

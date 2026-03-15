@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { normalizePlayerStableRecord } from './player-seo-contract.mjs';
+import { hasPlayerColorData, mergePlayerColorData, normalizePlayerStableRecord, preferPlayerStableRecord } from './player-seo-contract.mjs';
 
 const TOP_PLAYERS_PATH = path.join(process.cwd(), 'src', 'data', 'top-players.json');
 const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
@@ -101,6 +101,58 @@ function resolveEventText(row, normalizedRow) {
   return '';
 }
 
+async function fetchRowsByIdsAtRank(baseUrl, ids, rank, chunkSize) {
+  const chunks = splitIntoChunks(ids, chunkSize);
+  const rowsPerChunk = await Promise.all(
+    chunks.map(async (chunk) => {
+      const query = new URLSearchParams({
+        ids: chunk.join(','),
+        rank: String(rank)
+      });
+      const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
+      const response = await fetch(requestUrl, {
+        method: 'GET',
+        headers: { Accept: 'application/json' }
+      });
+
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(`Failed to fetch /players/by-ids (${response.status}): ${details || response.statusText}`);
+      }
+
+      const payload = await response.json();
+      return ensureList(payload);
+    })
+  );
+
+  return rowsPerChunk.flat();
+}
+
+async function fetchColorFallbackById(baseUrl, unresolvedIds, chunkSize, maxFallbackRank) {
+  const colorById = new Map();
+  let pendingIds = [...new Set(unresolvedIds.map((id) => String(id)).filter(Boolean))];
+
+  for (let fallbackRank = 1; fallbackRank <= maxFallbackRank && pendingIds.length; fallbackRank += 1) {
+    try {
+      const rows = await fetchRowsByIdsAtRank(baseUrl, pendingIds, fallbackRank, chunkSize);
+      for (const row of rows) {
+        const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
+        if (!normalized.playerId || colorById.has(normalized.playerId) || !hasPlayerColorData(normalized)) continue;
+        colorById.set(normalized.playerId, normalized);
+      }
+      pendingIds = pendingIds.filter((id) => !colorById.has(id));
+    } catch (error) {
+      console.warn('[top-players] Failed color fallback rank fetch:', {
+        fallbackRank,
+        unresolvedCount: pendingIds.length,
+        reason: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+
+  return colorById;
+}
+
 export async function readTopPlayerIds(limit = 10000) {
   const parsedLimit = Number(limit);
   const normalizedLimit = Number.isFinite(parsedLimit) ? Math.max(0, Math.floor(parsedLimit)) : 10000;
@@ -158,11 +210,13 @@ export async function fetchPlayersByIds(playerIds, options = {}) {
   if (!Array.isArray(playerIds) || !playerIds.length) return [];
 
   const rank = options.rank ?? 0;
+  const normalizedIds = playerIds.map((id) => String(id)).filter(Boolean);
   const chunkSize = ensurePositiveInteger(options.chunkSize, 100);
+  const maxColorFallbackRank = ensurePositiveInteger(options.colorFallbackRanks, 5);
+  const shouldEnrichColors = options.enrichColors !== false && normalizedIds.length <= 500;
   const cacheTtlMs = ensurePositiveInteger(options.cacheTtlMs, DEFAULT_BY_IDS_CACHE_TTL_MS);
   const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
-  const normalizedIds = playerIds.map((id) => String(id)).filter(Boolean);
-  const cacheKey = `${baseUrl}|${rank}|${chunkSize}|${normalizedIds.join(',')}`;
+  const cacheKey = `${baseUrl}|${rank}|${chunkSize}|${shouldEnrichColors ? `color-${maxColorFallbackRank}` : 'color-0'}|${normalizedIds.join(',')}`;
   const now = Date.now();
   const cached = playersByIdsCache.get(cacheKey);
 
@@ -175,35 +229,30 @@ export async function fetchPlayersByIds(playerIds, options = {}) {
   }
 
   const inFlight = (async () => {
-    const chunks = splitIntoChunks(normalizedIds, chunkSize);
-    const rowsPerChunk = await Promise.all(
-      chunks.map(async (chunk) => {
-        const query = new URLSearchParams({
-          ids: chunk.join(','),
-          rank: String(rank)
-        });
-        const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
-        const response = await fetch(requestUrl, {
-          method: 'GET',
-          headers: { Accept: 'application/json' }
-        });
-
-        if (!response.ok) {
-          const details = await response.text();
-          throw new Error(`Failed to fetch /players/by-ids (${response.status}): ${details || response.statusText}`);
-        }
-
-        const payload = await response.json();
-        return ensureList(payload);
-      })
-    );
+    const rows = await fetchRowsByIdsAtRank(baseUrl, normalizedIds, rank, chunkSize);
 
     const byId = new Map();
-    for (const rows of rowsPerChunk) {
-      for (const row of rows) {
-        const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
-        if (!normalized.playerId || byId.has(normalized.playerId)) continue;
-        byId.set(normalized.playerId, normalized);
+    for (const row of rows) {
+      const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
+      if (!normalized.playerId) continue;
+      const existing = byId.get(normalized.playerId);
+      byId.set(normalized.playerId, preferPlayerStableRecord(existing, normalized));
+    }
+
+    if (shouldEnrichColors) {
+      const missingColorIds = normalizedIds.filter((id) => {
+        const player = byId.get(id);
+        return !!player && !hasPlayerColorData(player);
+      });
+
+      if (missingColorIds.length) {
+        const colorFallbackById = await fetchColorFallbackById(baseUrl, missingColorIds, chunkSize, maxColorFallbackRank);
+        for (const id of missingColorIds) {
+          const player = byId.get(id);
+          const colorSource = colorFallbackById.get(id);
+          if (!player || !colorSource) continue;
+          byId.set(id, mergePlayerColorData(player, colorSource));
+        }
       }
     }
 
