@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 const DEFAULT_API_BASE_URL = 'https://zenithfcm.com/api';
 const LOCAL_API_BASE_URLS = ['http://127.0.0.1:8000', 'http://localhost:8000'];
+const DIACRITIC_MARKS_REGEX = /[\u0300-\u036f]/g;
 
 const ALLOWED_PARAMS = new Set([
   'q',
@@ -167,11 +168,78 @@ function buildLegacySearchQuery(outgoing) {
   return query;
 }
 
+function normalizeSearchValue(value) {
+  return String(value || '')
+    .trim()
+    .normalize('NFD')
+    .replace(DIACRITIC_MARKS_REGEX, '')
+    .toLowerCase();
+}
+
+function rowSearchSource(row) {
+  return normalizeSearchValue(`${row?.name || row?.player_name || ''} ${row?.card_name || row?.cardName || ''}`);
+}
+
+function payloadMatchesSearchFilter(normalizedPayload, query) {
+  const needle = normalizeSearchValue(query);
+  if (!needle) return true;
+  const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
+  if (!rows.length) return true;
+  return rows.every((row) => rowSearchSource(row).includes(needle));
+}
+
+function filterPayloadBySearch(normalizedPayload, query) {
+  const needle = normalizeSearchValue(query);
+  if (!needle) return normalizedPayload;
+  const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
+  const filteredRows = rows.filter((row) => rowSearchSource(row).includes(needle));
+  const fallbackPagination = normalizedPayload?.pagination && typeof normalizedPayload.pagination === 'object'
+    ? normalizedPayload.pagination
+    : {};
+  return {
+    players: filteredRows,
+    pagination: {
+      total: filteredRows.length,
+      limit: Number.isFinite(Number(fallbackPagination.limit)) ? Number(fallbackPagination.limit) : filteredRows.length,
+      offset: Number.isFinite(Number(fallbackPagination.offset)) ? Number(fallbackPagination.offset) : 0,
+      has_more: false
+    }
+  };
+}
+
+async function tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts) {
+  const compatibilityQuery = buildPlayersQuery(outgoing, { includeQ: false });
+  const compatibilityUrl = buildEndpointUrl(base, '/api/players', compatibilityQuery);
+  try {
+    const compatibilityResult = await fetchJson(compatibilityUrl);
+    const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit);
+    if (compatibilityResult.response.ok && normalizedCompatibility) {
+      return {
+        payload: normalizedCompatibility,
+        status: compatibilityResult.response.status
+      };
+    }
+    attempts.push({
+      url: compatibilityUrl,
+      status: compatibilityResult.response.status,
+      reason: toErrorReason(compatibilityResult.payload, compatibilityResult.details)
+    });
+  } catch (compatibilityError) {
+    attempts.push({
+      url: compatibilityUrl,
+      status: 502,
+      reason: compatibilityError instanceof Error ? compatibilityError.message : String(compatibilityError)
+    });
+  }
+  return null;
+}
+
 export async function GET(request) {
   const incoming = new URL(request.url).searchParams;
   const outgoing = pickSearchParams(incoming);
   const fallbackOffset = Number.parseInt(outgoing.get('offset') || '0', 10) || 0;
   const fallbackLimit = Number.parseInt(outgoing.get('limit') || '50', 10) || 50;
+  const searchQuery = String(outgoing.get('q') || '').trim();
   const attempts = [];
 
   for (const base of backendCandidates()) {
@@ -183,6 +251,13 @@ export async function GET(request) {
       const normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
 
       if (result.response.ok && normalized) {
+        if (searchQuery && playersQuery.has('q') && !payloadMatchesSearchFilter(normalized, searchQuery)) {
+          const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
+          if (compatibilityPayload) {
+            return NextResponse.json(compatibilityPayload.payload, { status: compatibilityPayload.status });
+          }
+          return NextResponse.json(filterPayloadBySearch(normalized, searchQuery), { status: result.response.status });
+        }
         return NextResponse.json(normalized, { status: result.response.status });
       }
 
@@ -190,25 +265,9 @@ export async function GET(request) {
       attempts.push({ url: playersUrl, status: result.response.status, reason });
 
       if ((result.response.status === 400 || result.response.status === 422) && playersQuery.has('q')) {
-        const compatibilityQuery = buildPlayersQuery(outgoing, { includeQ: false });
-        const compatibilityUrl = buildEndpointUrl(base, '/api/players', compatibilityQuery);
-        try {
-          const compatibilityResult = await fetchJson(compatibilityUrl);
-          const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit);
-          if (compatibilityResult.response.ok && normalizedCompatibility) {
-            return NextResponse.json(normalizedCompatibility, { status: compatibilityResult.response.status });
-          }
-          attempts.push({
-            url: compatibilityUrl,
-            status: compatibilityResult.response.status,
-            reason: toErrorReason(compatibilityResult.payload, compatibilityResult.details)
-          });
-        } catch (compatibilityError) {
-          attempts.push({
-            url: compatibilityUrl,
-            status: 502,
-            reason: compatibilityError instanceof Error ? compatibilityError.message : String(compatibilityError)
-          });
+        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
+        if (compatibilityPayload) {
+          return NextResponse.json(compatibilityPayload.payload, { status: compatibilityPayload.status });
         }
       }
 

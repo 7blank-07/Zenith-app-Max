@@ -59,6 +59,9 @@ const CUSTOM_STATS = Object.freeze([
   { id: 'totalStats', label: 'Total Stats', pillLabel: 'TOT', category: 'Other', valueType: 'totalStats' }
 ]);
 const CUSTOM_STATS_BY_ID = new Map(CUSTOM_STATS.map((entry) => [entry.id, entry]));
+const CUSTOM_ATTRIBUTE_KEYS = Object.freeze(
+  [...new Set(CUSTOM_STATS.flatMap((entry) => entry.attributeKeys || []))]
+);
 const DEFAULT_FILTERS = Object.freeze({
   position: '',
   league: '',
@@ -303,9 +306,39 @@ function parseAlternatePositions(value) {
     .filter((entry) => entry && entry !== '0');
 }
 
-function normalizeAttributes(attributes) {
-  if (!attributes || typeof attributes !== 'object') return {};
-  return attributes;
+function normalizeAttributes(attributes, fallbackSource = null) {
+  const normalized = {};
+  const sourceAttributes = (() => {
+    if (!attributes) return null;
+    if (typeof attributes === 'string') {
+      try {
+        const parsed = JSON.parse(attributes);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+    return typeof attributes === 'object' ? attributes : null;
+  })();
+
+  if (sourceAttributes) {
+    for (const [key, rawValue] of Object.entries(sourceAttributes)) {
+      const numeric = Number(rawValue);
+      if (Number.isFinite(numeric)) {
+        normalized[key] = numeric;
+      }
+    }
+  }
+
+  for (const key of CUSTOM_ATTRIBUTE_KEYS) {
+    if (Object.hasOwn(normalized, key)) continue;
+    const numeric = Number(fallbackSource?.[key]);
+    if (Number.isFinite(numeric)) {
+      normalized[key] = numeric;
+    }
+  }
+
+  return normalized;
 }
 
 function extractApiErrorMessage(payload) {
@@ -339,7 +372,7 @@ function extractApiErrorMessage(payload) {
 function normalizePlayer(player) {
   const playerId = toText(player?.playerId || player?.player_id || player?.playerid || player?.id);
   const recordId = toText(player?.recordId || player?.record_id || player?.id);
-  const attributes = normalizeAttributes(player?.attributes);
+  const attributes = normalizeAttributes(player?.attributes, player);
   const isUntradable =
     player?.isUntradable === true ||
     player?.is_untradable === true ||
@@ -365,8 +398,8 @@ function normalizePlayer(player) {
     event: resolvePlayerEvent(player),
     skillMoves: toNumber(player?.skillMoves || player?.skill_moves_stars || player?.skill_moves, 0),
     weakFoot: toNumber(player?.weakFoot || player?.weak_foot_stars, 0),
-    heightCm: toNumber(player?.heightCm, 0),
-    weightKg: toNumber(player?.weightKg, 0),
+    heightCm: toNumber(player?.heightCm ?? player?.height_cm, 0),
+    weightKg: toNumber(player?.weightKg ?? player?.weight_kg, 0),
     dateAdded,
     dateAddedTimestamp: toDateTimestamp(rawDateAdded),
     isUntradable,
@@ -458,7 +491,7 @@ function buildWatchlistSnapshot(player, resolvedPrice) {
 function readAttributeValue(player, keys) {
   const source = player?.attributes || {};
   for (const key of keys || []) {
-    const value = Number(source?.[key]);
+    const value = Number(source?.[key] ?? player?.[key]);
     if (Number.isFinite(value)) return value;
   }
   return Number.NaN;
