@@ -198,7 +198,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
         const remoteResults = await searchPlayers({
           query: normalizedQuery,
           filters: comparePositionMode === 'gk' ? { position: 'GK' } : {},
-          limit: 80,
+          limit: 20,
           signal: abortController.signal
         });
         if (cancelled) return;
@@ -215,8 +215,17 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
         setRemoteCompareSearchResults(filteredResults);
       } catch (error) {
         if (error?.name !== 'AbortError' && !cancelled) {
-          setCompareSearchError(error?.message || 'Failed to search players.');
-          setRemoteCompareSearchResults([]);
+          console.error('[compare] Remote search failed; falling back to local pool', {
+            query: normalizedQuery,
+            error
+          });
+          if (localCompareSearchResults.length) {
+            setRemoteCompareSearchResults(localCompareSearchResults);
+            setCompareSearchError('');
+          } else {
+            setRemoteCompareSearchResults([]);
+            setCompareSearchError('Unable to load players right now. Please try again.');
+          }
         }
       } finally {
         if (!cancelled) setIsCompareSearchLoading(false);
@@ -228,7 +237,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
       abortController.abort();
       window.clearTimeout(debounceTimer);
     };
-  }, [comparePositionMode, compareSearchOpen, compareSearchQuery, searchPlayers, selectedPlayerIdSet]);
+  }, [comparePositionMode, compareSearchOpen, compareSearchQuery, localCompareSearchResults, searchPlayers, selectedPlayerIdSet]);
 
   const compareSearchResults = useMemo(
     () => (searchPlayers ? remoteCompareSearchResults : localCompareSearchResults),

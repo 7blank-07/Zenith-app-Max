@@ -1187,12 +1187,11 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   }, [normalizedPlayers, supplementalPlayers]);
 
   const searchToolPlayers = useCallback(async ({ query = '', filters = {}, limit = 140, signal } = {}) => {
+    const safeLimit = Math.min(50, Math.max(1, toNumber(limit, 40) || 40));
     const searchParams = new URLSearchParams({
-      limit: String(limit),
+      limit: String(safeLimit),
       offset: '0',
-      rank: '0',
-      sort_by: 'ovr',
-      order: 'desc'
+      rank: '0'
     });
     const normalizedQuery = String(query || '').trim();
     if (normalizedQuery) searchParams.set('q', normalizedQuery);
@@ -1215,10 +1214,19 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     if (maxOvr > 0) searchParams.set('max_ovr', String(maxOvr));
     if (auctionable) searchParams.set('is_untradable', '0');
 
-    const response = await fetch(`/api/players/search?${searchParams.toString()}`, {
-      cache: 'no-store',
-      signal
-    });
+    const endpoint = `/api/players/search?${searchParams.toString()}`;
+    let response;
+    try {
+      response = await fetch(endpoint, {
+        cache: 'no-store',
+        signal
+      });
+    } catch (error) {
+      if (signal?.aborted || error?.name === 'AbortError') {
+        throw error;
+      }
+      response = await fetch(endpoint, { cache: 'no-store' });
+    }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(payload?.error || payload?.detail || 'Failed to fetch players.');
@@ -1231,7 +1239,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         : [];
     const normalizedRows = rows
       .map((player, index) => normalizePlayer(player, index))
-      .filter((player) => !!player?.playerId);
+      .filter((player) => !!player?.playerId)
+      .sort((first, second) => toNumber(second?.ovr, 0) - toNumber(first?.ovr, 0));
 
     if (normalizedRows.length) {
       setSupplementalPlayers((current) => {
