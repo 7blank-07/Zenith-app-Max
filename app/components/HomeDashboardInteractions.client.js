@@ -70,11 +70,14 @@ export default function HomeDashboardInteractions() {
     cleanup.push(() => document.removeEventListener('click', handleCardClick));
 
     const slides = Array.from(document.querySelectorAll('.hero-banner-slider .banner-slide'));
+    const bannerSlider = document.querySelector('.hero-banner-slider');
     const dots = Array.from(document.querySelectorAll('.banner-dot'));
     const prevButton = document.querySelector('.banner-prev');
     const nextButton = document.querySelector('.banner-next');
     let currentSlide = Math.max(0, slides.findIndex((slide) => slide.classList.contains('active')));
     let intervalId = null;
+    let suppressBannerClickUntil = 0;
+    let touchStartPoint = null;
 
     const showSlide = (index) => {
       if (!slides.length) return;
@@ -125,6 +128,7 @@ export default function HomeDashboardInteractions() {
 
     slides.forEach((slide) => {
       const handleSlideClick = () => {
+        if (Date.now() < suppressBannerClickUntil) return;
         const redirectType = slide.getAttribute('data-redirect');
         const target = slide.getAttribute('data-target');
         if (!redirectType || !target) return;
@@ -144,6 +148,47 @@ export default function HomeDashboardInteractions() {
       slide.addEventListener('click', handleSlideClick);
       cleanup.push(() => slide.removeEventListener('click', handleSlideClick));
     });
+
+    if (bannerSlider) {
+      const SWIPE_THRESHOLD = 35;
+
+      const handleTouchStart = (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        touchStartPoint = {
+          x: touch.clientX,
+          y: touch.clientY
+        };
+      };
+
+      const handleTouchEnd = (event) => {
+        const touch = event.changedTouches?.[0];
+        if (!touchStartPoint || !touch) {
+          touchStartPoint = null;
+          return;
+        }
+
+        const deltaX = touch.clientX - touchStartPoint.x;
+        const deltaY = touch.clientY - touchStartPoint.y;
+        const horizontalSwipe = Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY);
+
+        if (horizontalSwipe) {
+          if (deltaX < 0) {
+            handleNext();
+          } else {
+            handlePrev();
+          }
+          suppressBannerClickUntil = Date.now() + 250;
+        }
+
+        touchStartPoint = null;
+      };
+
+      bannerSlider.addEventListener('touchstart', handleTouchStart, { passive: true });
+      bannerSlider.addEventListener('touchend', handleTouchEnd, { passive: true });
+      cleanup.push(() => bannerSlider.removeEventListener('touchstart', handleTouchStart));
+      cleanup.push(() => bannerSlider.removeEventListener('touchend', handleTouchEnd));
+    }
 
     showSlide(currentSlide);
     restartAutoPlay();

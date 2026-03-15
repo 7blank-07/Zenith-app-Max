@@ -7364,6 +7364,9 @@ watchlist-view .view-content {
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border);
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .banner-slide {

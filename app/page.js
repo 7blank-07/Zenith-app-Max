@@ -15,8 +15,6 @@ export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 const HOME_PLAYER_LIMIT = 48;
 const HOME_SECTION_LIMIT = 12;
 const HOME_BLOG_LIMIT = 8;
-const RECENT_EVENT_GROUP_LIMIT = 3;
-const RECENT_EVENT_ROW_LIMIT = 7;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
@@ -34,42 +32,6 @@ export const metadata = {
 
 function getHomeCardVariant(player) {
   return player.leagueImage ? 'normal' : 'hero';
-}
-
-function buildRecentEventGroups(players) {
-  const groupedByLeague = new Map();
-  players.forEach((player) => {
-    const groupTitle = String(player.league || '').trim() || 'Featured Players';
-    const current = groupedByLeague.get(groupTitle) || [];
-    if (current.length < RECENT_EVENT_ROW_LIMIT) {
-      current.push(player);
-      groupedByLeague.set(groupTitle, current);
-    }
-  });
-
-  const groups = [...groupedByLeague.entries()]
-    .slice(0, RECENT_EVENT_GROUP_LIMIT)
-    .map(([title, groupPlayers]) => ({
-      title,
-      players: groupPlayers
-    }));
-
-  if (groups.length >= RECENT_EVENT_GROUP_LIMIT) return groups;
-
-  const usedIds = new Set(groups.flatMap((group) => group.players.map((player) => player.playerId)));
-  const fallbackPlayers = players.filter((player) => !usedIds.has(player.playerId));
-  const fallbackTitles = ['Featured Drops', 'Rising Cards', 'Editor Picks'];
-
-  while (groups.length < RECENT_EVENT_GROUP_LIMIT) {
-    const nextPlayers = fallbackPlayers.splice(0, RECENT_EVENT_ROW_LIMIT);
-    if (!nextPlayers.length) break;
-    groups.push({
-      title: fallbackTitles[groups.length] || `Featured ${groups.length + 1}`,
-      players: nextPlayers
-    });
-  }
-
-  return groups;
 }
 
 function getLatestBlogTimestamp(post) {
@@ -161,7 +123,6 @@ export default async function HomePage() {
   const topIds = await topIdsPromise;
   const [players, blogPageData] = await Promise.all([fetchPlayersByIds(topIds, { rank: 0 }), blogPageDataPromise]);
   const latestPlayers = players.slice(0, HOME_SECTION_LIMIT);
-  const recentEventGroups = buildRecentEventGroups(players);
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
 
@@ -169,7 +130,6 @@ export default async function HomePage() {
     elapsedMs: Date.now() - startedAt,
     cardCount: players.length,
     latestCount: latestPlayers.length,
-    recentEventGroups: recentEventGroups.length,
     latestBlogsCount: latestBlogPosts.length
   });
 
@@ -347,22 +307,6 @@ export default async function HomePage() {
               </Link>
             </div>
             <div id="latest-players-grid">{latestPlayers.map((player) => renderDashboardPlayerCard(player, `latest-${player.playerId}`))}</div>
-          </section>
-
-          <section className="dashboard-section" id="recent-events-section">
-            <div className="section-header">
-              <h2>🗓️ Recent Events</h2>
-            </div>
-            <div id="recent-events-container">
-              {recentEventGroups.map((group) => (
-                <div className="recent-event-block" key={`event-${group.title}`}>
-                  <div className="recent-event-title">{group.title}</div>
-                  <div className="recent-event-row">
-                    {group.players.map((player) => renderDashboardPlayerCard(player, `event-${group.title}-${player.playerId}`))}
-                  </div>
-                </div>
-              ))}
-            </div>
           </section>
 
           {shouldRenderLatestBlogs ? (
