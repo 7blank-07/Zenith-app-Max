@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import { normalizeSearchText } from './search-normalization';
@@ -934,6 +934,19 @@ function formatCoins(value) {
   return String(Math.round(safe));
 }
 
+function parsePlayerAttributes(value) {
+  if (!value) return {};
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof value === 'object' ? value : {};
+}
+
 function normalizePlayer(player, index) {
   const playerId = getPlayerId(player);
   const rank = clamp(
@@ -942,15 +955,24 @@ function normalizePlayer(player, index) {
     5
   );
   const trainingLevel = clamp(toNumber(player?.trainingLevel ?? player?.training_level, 0), 0, 30);
-  const ovr = toNumber(player?.ovr, 0);
+  const ovr = toNumber(player?.ovr ?? player?.overallrating ?? player?.rating, 0);
   const baseOvr = Math.max(0, toNumber(player?.baseOvr ?? player?.base_ovr, ovr));
   const trainingBonus = Math.max(0, toNumber(player?.trainingBonus ?? player?.training_bonus, Math.floor(trainingLevel / 5)));
   const selectedSkills = normalizeSelectedSkills(player?.selectedSkills ?? player?.selected_skills);
   const skillAllocations = normalizeSkillAllocations(player?.skillAllocations ?? player?.skill_allocations);
+  const parsedAttributes = parsePlayerAttributes(player?.attributes);
+  const isUntradableText = String(player?.is_untradable ?? player?.isuntradable ?? '').trim().toLowerCase();
+  const isUntradable =
+    player?.isUntradable === true ||
+    player?.is_untradable === true ||
+    isUntradableText === 'true' ||
+    isUntradableText === '1' ||
+    isUntradableText === 'yes';
   const alternatePositionRaw = player?.alternatePosition ?? player?.alternate_position ?? player?.alternateposition ?? '';
   return {
+    ...player,
     playerId: playerId || `player-${index}`,
-    name: String(player?.name || 'Unknown'),
+    name: String(player?.name || player?.player_name || 'Unknown'),
     ovr,
     baseOvr,
     boostedOvr: Math.max(0, toNumber(player?.boostedOvr ?? player?.boosted_ovr, ovr)),
@@ -959,21 +981,22 @@ function normalizePlayer(player, index) {
     trainingBonus,
     selectedSkills,
     skillAllocations,
-    position: String(player?.position || ''),
+    position: String(player?.position || player?.role || ''),
     alternatePosition: String(alternatePositionRaw),
-    nation: String(player?.nation || ''),
-    club: String(player?.club || ''),
+    nation: String(player?.nation || player?.nation_region || ''),
+    club: String(player?.club || player?.team || ''),
     league: String(player?.league || ''),
-    cardBackground: String(player?.cardBackground || ''),
-    playerImage: String(player?.playerImage || ''),
-    nationFlag: String(player?.nationFlag || ''),
-    clubFlag: String(player?.clubFlag || ''),
-    leagueImage: String(player?.leagueImage || ''),
-    colorRating: String(player?.colorRating || '#FFB86B'),
-    colorPosition: String(player?.colorPosition || '#FFFFFF'),
-    colorName: String(player?.colorName || '#FFFFFF'),
+    cardBackground: String(player?.cardBackground || player?.card_background || player?.cardbackground || ''),
+    playerImage: String(player?.playerImage || player?.player_image || player?.playerimage || player?.image || ''),
+    nationFlag: String(player?.nationFlag || player?.nation_flag || player?.nationflag || ''),
+    clubFlag: String(player?.clubFlag || player?.club_flag || player?.clubflag || ''),
+    leagueImage: String(player?.leagueImage || player?.league_image || player?.leagueimage || ''),
+    colorRating: String(player?.colorRating || player?.color_rating || '#FFB86B'),
+    colorPosition: String(player?.colorPosition || player?.color_position || '#FFFFFF'),
+    colorName: String(player?.colorName || player?.color_name || '#FFFFFF'),
     skillMoves: toNumber(
       player?.skillMoves ??
+      player?.skill_moves_stars ??
       player?.skill_moves ??
       player?.skillmoves ??
       player?.attributes?.skillMoves ??
@@ -982,8 +1005,8 @@ function normalizePlayer(player, index) {
       0
     ),
     price: resolvePlayerPrice(player),
-    isUntradable: !!player?.isUntradable,
-    attributes: player?.attributes && typeof player.attributes === 'object' ? player.attributes : {}
+    isUntradable,
+    attributes: parsedAttributes
   };
 }
 
@@ -1163,6 +1186,72 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     return map;
   }, [normalizedPlayers, supplementalPlayers]);
 
+  const searchToolPlayers = useCallback(async ({ query = '', filters = {}, limit = 140, signal } = {}) => {
+    const searchParams = new URLSearchParams({
+      limit: String(limit),
+      offset: '0',
+      rank: '0',
+      sort_by: 'ovr',
+      order: 'desc'
+    });
+    const normalizedQuery = String(query || '').trim();
+    if (normalizedQuery) searchParams.set('q', normalizedQuery);
+
+    const position = String(filters?.position || '').trim();
+    const league = String(filters?.league || '').trim();
+    const club = String(filters?.club || '').trim();
+    const nation = String(filters?.nation || '').trim();
+    const skillMoves = toNumber(filters?.skill, 0);
+    const minOvr = toNumber(filters?.ratingMin, 0);
+    const maxOvr = toNumber(filters?.ratingMax, 0);
+    const auctionable = !!filters?.auctionable;
+
+    if (position) searchParams.set('position', position);
+    if (league) searchParams.set('league', league);
+    if (club) searchParams.set('team', club);
+    if (nation) searchParams.set('nation', nation);
+    if (skillMoves > 0) searchParams.set('skill_moves', String(skillMoves));
+    if (minOvr > 0) searchParams.set('min_ovr', String(minOvr));
+    if (maxOvr > 0) searchParams.set('max_ovr', String(maxOvr));
+    if (auctionable) searchParams.set('is_untradable', '0');
+
+    const response = await fetch(`/api/players/search?${searchParams.toString()}`, {
+      cache: 'no-store',
+      signal
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload?.error || payload?.detail || 'Failed to fetch players.');
+    }
+
+    const rows = Array.isArray(payload?.players)
+      ? payload.players
+      : Array.isArray(payload?.results)
+        ? payload.results
+        : [];
+    const normalizedRows = rows
+      .map((player, index) => normalizePlayer(player, index))
+      .filter((player) => !!player?.playerId);
+
+    if (normalizedRows.length) {
+      setSupplementalPlayers((current) => {
+        let changed = false;
+        const next = { ...current };
+        normalizedRows.forEach((player) => {
+          if (!player?.playerId) return;
+          const existing = current[player.playerId];
+          if (!existing || existing.ovr !== player.ovr || existing.rank !== player.rank) {
+            next[player.playerId] = player;
+            changed = true;
+          }
+        });
+        return changed ? next : current;
+      });
+    }
+
+    return normalizedRows;
+  }, []);
+
   const [activeTool, setActiveTool] = useState(() => normalizeTool(initialTool));
 
   const [squadName, setSquadName] = useState('My Squad');
@@ -1173,6 +1262,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   const [squadFilterOpen, setSquadFilterOpen] = useState(false);
   const [squadFilters, setSquadFilters] = useState(() => ({ ...DEFAULT_SQUAD_FILTERS }));
   const [squadFilterDraft, setSquadFilterDraft] = useState(() => ({ ...DEFAULT_SQUAD_FILTERS }));
+  const [remoteSquadPickerPlayers, setRemoteSquadPickerPlayers] = useState(() => normalizedPlayers.slice(0, 140));
+  const [isSquadPickerLoading, setIsSquadPickerLoading] = useState(false);
   const [squadFilterPanelPosition, setSquadFilterPanelPosition] = useState({ top: 100, left: 16 });
   const [fieldThemeId, setFieldThemeId] = useState('camp-nou');
   const [fieldThemeDraft, setFieldThemeDraft] = useState('camp-nou');
@@ -1775,9 +1866,62 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     };
   }, [filterOptions, normalizedPlayers]);
 
+  useEffect(() => {
+    if (activeTool !== 'squadbuilder') return undefined;
+
+    let cancelled = false;
+    const abortController = new AbortController();
+    const debounceTimer = window.setTimeout(async () => {
+      setIsSquadPickerLoading(true);
+      try {
+        const remotePlayers = await searchToolPlayers({
+          query: squadSearchQuery,
+          filters: {
+            position: squadFilters.position,
+            league: squadFilters.league,
+            club: squadFilters.club,
+            nation: squadFilters.nation,
+            skill: squadFilters.skill,
+            ratingMin: squadFilters.ratingMin,
+            ratingMax: squadFilters.ratingMax,
+            auctionable: squadFilters.auctionable
+          },
+          limit: 220,
+          signal: abortController.signal
+        });
+        if (cancelled) return;
+        setRemoteSquadPickerPlayers(remotePlayers);
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          console.error('[tools] Failed to fetch squad picker players', error);
+        }
+      } finally {
+        if (!cancelled) setIsSquadPickerLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+      window.clearTimeout(debounceTimer);
+    };
+  }, [
+    activeTool,
+    searchToolPlayers,
+    squadFilters.auctionable,
+    squadFilters.club,
+    squadFilters.league,
+    squadFilters.nation,
+    squadFilters.position,
+    squadFilters.ratingMax,
+    squadFilters.ratingMin,
+    squadFilters.skill,
+    squadSearchQuery
+  ]);
+
   const squadPickerPlayers = useMemo(() => {
     const query = toText(squadSearchQuery);
-    return normalizedPlayers
+    return remoteSquadPickerPlayers
       .filter((player) => {
         if (assignedPlayerIds.has(player.playerId)) return false;
         if (squadFilters.position && !matchesSelectedPosition(player, squadFilters.position)) return false;
@@ -1789,11 +1933,11 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         const playerOvr = toNumber(player.ovr, 0);
         if (playerOvr < toNumber(squadFilters.ratingMin, 40) || playerOvr > toNumber(squadFilters.ratingMax, 150)) return false;
         if (!query) return true;
-        const searchable = toText(`${player.name} ${player.position} ${player.club} ${player.league} ${player.nation}`);
+        const searchable = toText(`${player.name} ${player.card_name || player.cardName || ''} ${player.position} ${player.club} ${player.league} ${player.nation}`);
         return searchable.includes(query);
       })
       .slice(0, 140);
-  }, [assignedPlayerIds, normalizedPlayers, squadFilters, squadSearchQuery]);
+  }, [assignedPlayerIds, remoteSquadPickerPlayers, squadFilters, squadSearchQuery]);
 
   const assignPlayerToSelectedSlot = (playerId) => {
     if (!playerId) return;
@@ -2962,7 +3106,12 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                       </div>
                     );
                   })}
-                  {!squadPickerPlayers.length && <p style={{ color: '#98A0A6', textAlign: 'center' }}>No available players match the current search.</p>}
+                  {isSquadPickerLoading && !squadPickerPlayers.length && (
+                    <p style={{ color: '#98A0A6', textAlign: 'center' }}>Loading players...</p>
+                  )}
+                  {!isSquadPickerLoading && !squadPickerPlayers.length && (
+                    <p style={{ color: '#98A0A6', textAlign: 'center' }}>No available players match the current search.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -3194,6 +3343,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         isActive={isCompareActive}
         normalizedPlayers={normalizedPlayers}
         playersById={playersById}
+        searchPlayers={searchToolPlayers}
         onClose={closeOpenTool}
         onUpdatePlayer={upsertCustomizedPlayer}
       />

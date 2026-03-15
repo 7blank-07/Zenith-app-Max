@@ -95,11 +95,14 @@ function activateWithKeyboard(event, callback) {
   callback();
 }
 
-export default function ComparePlayersTool({ isActive, normalizedPlayers = [], playersById, onClose, onUpdatePlayer }) {
+export default function ComparePlayersTool({ isActive, normalizedPlayers = [], playersById, searchPlayers, onClose, onUpdatePlayer }) {
   const [comparePlayerIds, setComparePlayerIds] = useState([]);
   const [compareView, setCompareView] = useState('basic');
   const [compareSearchOpen, setCompareSearchOpen] = useState(false);
   const [compareSearchQuery, setCompareSearchQuery] = useState('');
+  const [remoteCompareSearchResults, setRemoteCompareSearchResults] = useState([]);
+  const [isCompareSearchLoading, setIsCompareSearchLoading] = useState(false);
+  const [compareSearchError, setCompareSearchError] = useState('');
   const [selectedCustomizationPlayerId, setSelectedCustomizationPlayerId] = useState('');
 
   const comparePlayers = useMemo(
@@ -162,7 +165,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
 
   const selectedPlayerIdSet = useMemo(() => new Set(comparePlayerIds), [comparePlayerIds]);
 
-  const compareSearchResults = useMemo(() => {
+  const localCompareSearchResults = useMemo(() => {
     const query = toText(compareSearchQuery);
     if (query.length < 2) return [];
     return normalizedPlayers
@@ -176,12 +179,71 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
       .slice(0, 40);
   }, [comparePositionMode, compareSearchQuery, normalizedPlayers, selectedPlayerIdSet]);
 
+  useEffect(() => {
+    if (!searchPlayers || !compareSearchOpen) return undefined;
+    const normalizedQuery = String(compareSearchQuery || '').trim();
+    if (toText(normalizedQuery).length < 2) {
+      setRemoteCompareSearchResults([]);
+      setCompareSearchError('');
+      setIsCompareSearchLoading(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const abortController = new AbortController();
+    const debounceTimer = window.setTimeout(async () => {
+      setIsCompareSearchLoading(true);
+      setCompareSearchError('');
+      try {
+        const remoteResults = await searchPlayers({
+          query: normalizedQuery,
+          filters: comparePositionMode === 'gk' ? { position: 'GK' } : {},
+          limit: 80,
+          signal: abortController.signal
+        });
+        if (cancelled) return;
+        const filteredResults = remoteResults
+          .filter((player) => {
+            if (!player?.playerId) return false;
+            if (selectedPlayerIdSet.has(player.playerId)) return false;
+            if (comparePositionMode === 'gk' && player.position !== 'GK') return false;
+            if (comparePositionMode === 'outfield' && player.position === 'GK') return false;
+            const searchable = toText(`${player.name} ${player.card_name || player.cardName || ''} ${player.position} ${player.club} ${player.league} ${player.nation}`);
+            return searchable.includes(toText(normalizedQuery));
+          })
+          .slice(0, 40);
+        setRemoteCompareSearchResults(filteredResults);
+      } catch (error) {
+        if (error?.name !== 'AbortError' && !cancelled) {
+          setCompareSearchError(error?.message || 'Failed to search players.');
+          setRemoteCompareSearchResults([]);
+        }
+      } finally {
+        if (!cancelled) setIsCompareSearchLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+      window.clearTimeout(debounceTimer);
+    };
+  }, [comparePositionMode, compareSearchOpen, compareSearchQuery, searchPlayers, selectedPlayerIdSet]);
+
+  const compareSearchResults = useMemo(
+    () => (searchPlayers ? remoteCompareSearchResults : localCompareSearchResults),
+    [localCompareSearchResults, remoteCompareSearchResults, searchPlayers]
+  );
+
   const selectedCustomizationPlayer = selectedCustomizationPlayerId ? playersById.get(selectedCustomizationPlayerId) || null : null;
 
   useEffect(() => {
     if (isActive) return;
     setCompareSearchOpen(false);
     setCompareSearchQuery('');
+    setRemoteCompareSearchResults([]);
+    setIsCompareSearchLoading(false);
+    setCompareSearchError('');
     setSelectedCustomizationPlayerId('');
   }, [isActive]);
 
@@ -211,6 +273,8 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
   const openCompareSearch = () => {
     if (comparePlayers.length >= 5) return;
     setCompareSearchQuery('');
+    setRemoteCompareSearchResults([]);
+    setCompareSearchError('');
     setCompareSearchOpen(true);
   };
 
@@ -239,6 +303,9 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
     setCompareView('basic');
     setCompareSearchOpen(false);
     setCompareSearchQuery('');
+    setRemoteCompareSearchResults([]);
+    setIsCompareSearchLoading(false);
+    setCompareSearchError('');
     setSelectedCustomizationPlayerId('');
   };
 
@@ -485,7 +552,15 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                 </p>
               )}
 
-              {toText(compareSearchQuery).length >= 2 && !compareSearchResults.length && (
+              {toText(compareSearchQuery).length >= 2 && isCompareSearchLoading && (
+                <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '20px' }}>Searching players...</p>
+              )}
+
+              {toText(compareSearchQuery).length >= 2 && !isCompareSearchLoading && !!compareSearchError && (
+                <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '20px' }}>{compareSearchError}</p>
+              )}
+
+              {toText(compareSearchQuery).length >= 2 && !isCompareSearchLoading && !compareSearchError && !compareSearchResults.length && (
                 <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '20px' }}>No players found.</p>
               )}
 

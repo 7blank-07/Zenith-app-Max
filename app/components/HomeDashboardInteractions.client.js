@@ -262,7 +262,8 @@ export default function HomeDashboardInteractions() {
         const params = new URLSearchParams({
           q: rawQuery,
           limit: '20',
-          offset: '0'
+          offset: '0',
+          rank: '0'
         });
 
         const response = await fetch(`/api/players/search?${params.toString()}`, {
