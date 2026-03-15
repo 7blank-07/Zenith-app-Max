@@ -67,8 +67,13 @@ const DEFAULT_FILTERS = Object.freeze({
   event: '',
   skill: '',
   ratingMin: 40,
-  ratingMax: 120,
+  ratingMax: 150,
   auctionable: false
+});
+const DEFAULT_QUERY_PARAMS = Object.freeze({
+  search: '',
+  page: 0,
+  ...DEFAULT_FILTERS
 });
 const SQUAD_BUILDER_PENDING_PICK_KEY = 'squad_builder_pending_pick';
 const DEFAULT_SQUAD_PICK_CONTEXT = Object.freeze({
@@ -110,6 +115,69 @@ function toNumber(value, fallback = 0) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function parseIntegerInput(value) {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function sanitizeRatingInput(value) {
+  return String(value ?? '')
+    .replace(/[^0-9]/g, '')
+    .slice(0, 3);
+}
+
+function normalizeRatingRange(minValue, maxValue) {
+  const minBound = DEFAULT_FILTERS.ratingMin;
+  const maxBound = DEFAULT_FILTERS.ratingMax;
+  const boundedMin = clamp(toNumber(minValue, minBound), minBound, maxBound);
+  const boundedMax = clamp(toNumber(maxValue, maxBound), minBound, maxBound);
+  return {
+    ratingMin: Math.min(boundedMin, boundedMax),
+    ratingMax: Math.max(boundedMin, boundedMax)
+  };
+}
+
+function extractFilterParams(queryParams) {
+  const normalizedRating = normalizeRatingRange(queryParams?.ratingMin, queryParams?.ratingMax);
+  return {
+    position: toText(queryParams?.position),
+    league: toText(queryParams?.league),
+    club: toText(queryParams?.club),
+    nation: toText(queryParams?.nation),
+    event: toText(queryParams?.event),
+    skill: toText(queryParams?.skill),
+    ratingMin: normalizedRating.ratingMin,
+    ratingMax: normalizedRating.ratingMax,
+    auctionable: queryParams?.auctionable === true
+  };
+}
+
+function buildPlayersQueryParams(queryParams, sortQuery) {
+  const filters = extractFilterParams(queryParams);
+  const parsedPage = Number.parseInt(String(queryParams?.page ?? 0), 10);
+  const safePage = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 0;
+  const params = new URLSearchParams({
+    limit: String(SEARCH_PAGE_SIZE),
+    offset: String(safePage),
+    rank: '0',
+    sort_by: sortQuery.sortBy,
+    order: sortQuery.order
+  });
+
+  const searchValue = toText(queryParams?.search);
+  if (searchValue) params.set('q', searchValue);
+  if (filters.position) params.set('position', filters.position);
+  if (filters.league) params.set('league', filters.league);
+  if (filters.club) params.set('team', filters.club);
+  if (filters.nation) params.set('nation', filters.nation);
+  if (filters.event) params.set('event', filters.event);
+  if (filters.skill) params.set('skill_moves', String(filters.skill));
+  if (filters.ratingMin > DEFAULT_FILTERS.ratingMin) params.set('min_ovr', String(filters.ratingMin));
+  if (filters.ratingMax < DEFAULT_FILTERS.ratingMax) params.set('max_ovr', String(filters.ratingMax));
+  if (filters.auctionable) params.set('is_untradable', '0');
+  return params;
 }
 
 function uniqueSorted(values) {
@@ -492,7 +560,7 @@ export default function PlayersDatabaseInteractions({
 }) {
   const router = useRouter();
   const [queriedPlayers, setQueriedPlayers] = useState(() => players);
-  const [searchOffset, setSearchOffset] = useState(0);
+  const [queryParams, setQueryParams] = useState(() => ({ ...DEFAULT_QUERY_PARAMS }));
   const [serverPagination, setServerPagination] = useState({
     total: 0,
     limit: SEARCH_PAGE_SIZE,
@@ -508,10 +576,72 @@ export default function PlayersDatabaseInteractions({
     () => uniqueSorted([...events, ...normalizedPlayers.map((player) => player.event)]),
     [events, normalizedPlayers]
   );
-  const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
+  const filters = useMemo(
+    () => extractFilterParams(queryParams),
+    [
+      queryParams.position,
+      queryParams.league,
+      queryParams.club,
+      queryParams.nation,
+      queryParams.event,
+      queryParams.skill,
+      queryParams.ratingMin,
+      queryParams.ratingMax,
+      queryParams.auctionable
+    ]
+  );
+  const searchQuery = queryParams.search;
+  const searchOffset = queryParams.page;
   const [mobileFilters, setMobileFilters] = useState({ ...DEFAULT_FILTERS });
-  const [searchQuery, setSearchQuery] = useState('');
+  const [ratingDraft, setRatingDraft] = useState(() => ({
+    ratingMin: String(DEFAULT_FILTERS.ratingMin),
+    ratingMax: String(DEFAULT_FILTERS.ratingMax)
+  }));
+  const [mobileRatingDraft, setMobileRatingDraft] = useState(() => ({
+    ratingMin: String(DEFAULT_FILTERS.ratingMin),
+    ratingMax: String(DEFAULT_FILTERS.ratingMax)
+  }));
   const [sortBy, setSortBy] = useState('latest');
+  const setSearchQuery = useCallback((nextSearch) => {
+    setQueryParams((current) => {
+      const resolved = typeof nextSearch === 'function' ? nextSearch(current.search) : nextSearch;
+      const normalized = String(resolved ?? '');
+      return current.search === normalized ? current : { ...current, search: normalized };
+    });
+  }, []);
+  const setSearchOffset = useCallback((nextPage) => {
+    setQueryParams((current) => {
+      const resolved = typeof nextPage === 'function' ? nextPage(current.page) : nextPage;
+      const parsed = Number.parseInt(String(resolved ?? 0), 10);
+      const normalized = Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+      return current.page === normalized ? current : { ...current, page: normalized };
+    });
+  }, []);
+  const setFilters = useCallback((nextFilters) => {
+    setQueryParams((current) => {
+      const currentFilters = extractFilterParams(current);
+      const resolved = typeof nextFilters === 'function' ? nextFilters(currentFilters) : nextFilters;
+      if (!resolved || typeof resolved !== 'object') return current;
+      const merged = extractFilterParams({ ...currentFilters, ...resolved });
+      if (
+        currentFilters.position === merged.position &&
+        currentFilters.league === merged.league &&
+        currentFilters.club === merged.club &&
+        currentFilters.nation === merged.nation &&
+        currentFilters.event === merged.event &&
+        currentFilters.skill === merged.skill &&
+        currentFilters.ratingMin === merged.ratingMin &&
+        currentFilters.ratingMax === merged.ratingMax &&
+        currentFilters.auctionable === merged.auctionable
+      ) {
+        return current;
+      }
+      return {
+        ...current,
+        ...merged
+      };
+    });
+  }, []);
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [selectedStats, setSelectedStats] = useState([]);
   const [statsDraftSelected, setStatsDraftSelected] = useState([]);
@@ -578,6 +708,20 @@ export default function PlayersDatabaseInteractions({
   useEffect(() => {
     setQueriedPlayers(players);
   }, [players]);
+
+  useEffect(() => {
+    setRatingDraft({
+      ratingMin: String(filters.ratingMin),
+      ratingMax: String(filters.ratingMax)
+    });
+  }, [filters.ratingMin, filters.ratingMax]);
+
+  useEffect(() => {
+    setMobileRatingDraft({
+      ratingMin: String(mobileFilters.ratingMin),
+      ratingMax: String(mobileFilters.ratingMax)
+    });
+  }, [mobileFilters.ratingMin, mobileFilters.ratingMax]);
 
   useEffect(() => {
     if (!storageHydrated) return;
@@ -659,6 +803,54 @@ export default function PlayersDatabaseInteractions({
     });
   }, [getResolvedPrice, playerByUniqueId, watchlistPlayers.length, watchedIds]);
 
+  const updateDesktopRatingDraft = useCallback((field, rawValue) => {
+    const normalized = sanitizeRatingInput(rawValue);
+    setRatingDraft((current) => ({
+      ...current,
+      [field]: normalized
+    }));
+  }, []);
+
+  const updateMobileRatingDraft = useCallback((field, rawValue) => {
+    const normalized = sanitizeRatingInput(rawValue);
+    setMobileRatingDraft((current) => ({
+      ...current,
+      [field]: normalized
+    }));
+  }, []);
+
+  const commitDesktopRatingDraft = useCallback(() => {
+    const normalized = normalizeRatingRange(
+      parseIntegerInput(ratingDraft.ratingMin) ?? DEFAULT_FILTERS.ratingMin,
+      parseIntegerInput(ratingDraft.ratingMax) ?? DEFAULT_FILTERS.ratingMax
+    );
+    setFilters((current) => ({
+      ...current,
+      ratingMin: normalized.ratingMin,
+      ratingMax: normalized.ratingMax
+    }));
+    setRatingDraft({
+      ratingMin: String(normalized.ratingMin),
+      ratingMax: String(normalized.ratingMax)
+    });
+  }, [ratingDraft.ratingMax, ratingDraft.ratingMin]);
+
+  const commitMobileRatingDraft = useCallback(() => {
+    const normalized = normalizeRatingRange(
+      parseIntegerInput(mobileRatingDraft.ratingMin) ?? DEFAULT_FILTERS.ratingMin,
+      parseIntegerInput(mobileRatingDraft.ratingMax) ?? DEFAULT_FILTERS.ratingMax
+    );
+    setMobileFilters((current) => ({
+      ...current,
+      ratingMin: normalized.ratingMin,
+      ratingMax: normalized.ratingMax
+    }));
+    setMobileRatingDraft({
+      ratingMin: String(normalized.ratingMin),
+      ratingMax: String(normalized.ratingMax)
+    });
+  }, [mobileRatingDraft.ratingMax, mobileRatingDraft.ratingMin]);
+
   const visiblePlayers = useMemo(() => {
     const next = [...normalizedPlayers];
     if (sortBy === 'name') {
@@ -685,44 +877,47 @@ export default function PlayersDatabaseInteractions({
   const sortQuery = useMemo(() => {
     return { sortBy: 'ovr', order: 'desc' };
   }, []);
+  const searchRequestParams = useMemo(
+    () => buildPlayersQueryParams(queryParams, sortQuery),
+    [
+      queryParams.search,
+      queryParams.page,
+      queryParams.position,
+      queryParams.league,
+      queryParams.club,
+      queryParams.nation,
+      queryParams.event,
+      queryParams.skill,
+      queryParams.ratingMin,
+      queryParams.ratingMax,
+      queryParams.auctionable,
+      sortQuery.order,
+      sortQuery.sortBy
+    ]
+  );
 
   useEffect(() => {
     setSearchOffset(0);
   }, [
-    searchQuery,
+    queryParams.search,
     sortBy,
-    filters.auctionable,
-    filters.position,
-    filters.league,
-    filters.club,
-    filters.nation,
-    filters.event,
-    filters.skill,
-    filters.ratingMin,
-    filters.ratingMax
+    queryParams.auctionable,
+    queryParams.position,
+    queryParams.league,
+    queryParams.club,
+    queryParams.nation,
+    queryParams.event,
+    queryParams.skill,
+    queryParams.ratingMin,
+    queryParams.ratingMax
   ]);
 
   useEffect(() => {
     let disposed = false;
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
-      const params = new URLSearchParams({
-        q: toText(searchQuery),
-        limit: String(SEARCH_PAGE_SIZE),
-        offset: String(searchOffset),
-        rank: '0',
-        sort_by: sortQuery.sortBy,
-        order: sortQuery.order
-      });
-      if (filters.position) params.set('position', filters.position);
-      if (filters.league) params.set('league', filters.league);
-      if (filters.club) params.set('team', filters.club);
-      if (filters.nation) params.set('nation', filters.nation);
-      if (filters.event) params.set('event', filters.event);
-      if (filters.skill) params.set('skill_moves', String(filters.skill));
-      if (filters.ratingMin > DEFAULT_FILTERS.ratingMin) params.set('min_ovr', String(filters.ratingMin));
-      if (filters.ratingMax < DEFAULT_FILTERS.ratingMax) params.set('max_ovr', String(filters.ratingMax));
-      if (filters.auctionable) params.set('is_untradable', '0');
+      const params = new URLSearchParams(searchRequestParams);
+      const requestOffset = Number.parseInt(params.get('offset') || '0', 10) || 0;
 
       setIsSearching(true);
       setSearchError('');
@@ -747,7 +942,7 @@ export default function PlayersDatabaseInteractions({
           : {
               total: toNumber(payload?.total, rows.length),
               limit: SEARCH_PAGE_SIZE,
-              offset: searchOffset,
+              offset: requestOffset,
               has_more: payload?.has_more === true
             };
 
@@ -757,7 +952,7 @@ export default function PlayersDatabaseInteractions({
         setServerPagination({
           total: toNumber(pagination.total, rows.length),
           limit: toNumber(pagination.limit, SEARCH_PAGE_SIZE),
-          offset: toNumber(pagination.offset, searchOffset),
+          offset: toNumber(pagination.offset, requestOffset),
           hasMore: pagination.has_more === true
         });
       } catch (error) {
@@ -767,7 +962,7 @@ export default function PlayersDatabaseInteractions({
         setServerPagination({
           total: 0,
           limit: SEARCH_PAGE_SIZE,
-          offset: searchOffset,
+          offset: requestOffset,
           hasMore: false
         });
         setSearchError(error instanceof Error ? error.message : 'Player search request failed');
@@ -775,28 +970,14 @@ export default function PlayersDatabaseInteractions({
         if (disposed) return;
         setIsSearching(false);
       }
-    }, 300);
+    }, 350);
 
     return () => {
       disposed = true;
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [
-    searchOffset,
-    searchQuery,
-    sortQuery.order,
-    sortQuery.sortBy,
-    filters.auctionable,
-    filters.position,
-    filters.league,
-    filters.club,
-    filters.nation,
-    filters.event,
-    filters.skill,
-    filters.ratingMin,
-    filters.ratingMax
-  ]);
+  }, [searchRequestParams]);
 
   const activeFilterChips = useMemo(() => {
     const chips = [];
@@ -807,7 +988,7 @@ export default function PlayersDatabaseInteractions({
     if (filters.event) chips.push({ key: 'event', label: 'Event', value: filters.event });
     if (filters.skill) chips.push({ key: 'skill', label: 'Skill', value: `${filters.skill}★` });
     if (filters.auctionable) chips.push({ key: 'auctionable', label: 'Auction', value: 'Only With Prices' });
-    if (filters.ratingMin !== 40 || filters.ratingMax !== 120) chips.push({ key: 'ovr', label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
+    if (filters.ratingMin !== 40 || filters.ratingMax !== 150) chips.push({ key: 'ovr', label: 'OVR', value: `${filters.ratingMin}-${filters.ratingMax}` });
     if (selectedStats.length) chips.push({ key: 'stats', label: 'Stats', value: `${selectedStats.length} selected` });
     return chips;
   }, [filters, selectedStats.length]);
@@ -822,6 +1003,14 @@ export default function PlayersDatabaseInteractions({
     if (chipKey === 'ovr') {
       setFilters((current) => ({ ...current, ratingMin: DEFAULT_FILTERS.ratingMin, ratingMax: DEFAULT_FILTERS.ratingMax }));
       setMobileFilters((current) => ({ ...current, ratingMin: DEFAULT_FILTERS.ratingMin, ratingMax: DEFAULT_FILTERS.ratingMax }));
+      setRatingDraft({
+        ratingMin: String(DEFAULT_FILTERS.ratingMin),
+        ratingMax: String(DEFAULT_FILTERS.ratingMax)
+      });
+      setMobileRatingDraft({
+        ratingMin: String(DEFAULT_FILTERS.ratingMin),
+        ratingMax: String(DEFAULT_FILTERS.ratingMax)
+      });
       return;
     }
 
@@ -857,11 +1046,17 @@ export default function PlayersDatabaseInteractions({
   }, [filteredModalStats]);
 
   const resetAllFilters = () => {
-    setSearchQuery('');
     setSortBy('latest');
-    setFilters({ ...DEFAULT_FILTERS });
+    setQueryParams({ ...DEFAULT_QUERY_PARAMS });
     setMobileFilters({ ...DEFAULT_FILTERS });
-    setSearchOffset(0);
+    setRatingDraft({
+      ratingMin: String(DEFAULT_FILTERS.ratingMin),
+      ratingMax: String(DEFAULT_FILTERS.ratingMax)
+    });
+    setMobileRatingDraft({
+      ratingMin: String(DEFAULT_FILTERS.ratingMin),
+      ratingMax: String(DEFAULT_FILTERS.ratingMax)
+    });
   };
 
   const persistWatchlistState = useCallback((nextWatchlist, nextWatchlistPlayers) => {
@@ -896,12 +1091,35 @@ export default function PlayersDatabaseInteractions({
   };
 
   const openMobileFilters = () => {
-    setMobileFilters(filters);
+    setMobileFilters({ ...filters });
+    setMobileRatingDraft({
+      ratingMin: String(filters.ratingMin),
+      ratingMax: String(filters.ratingMax)
+    });
     setMobileFilterOpen(true);
   };
 
   const applyMobileFilters = () => {
-    setFilters(mobileFilters);
+    const normalizedRating = normalizeRatingRange(
+      parseIntegerInput(mobileRatingDraft.ratingMin) ?? DEFAULT_FILTERS.ratingMin,
+      parseIntegerInput(mobileRatingDraft.ratingMax) ?? DEFAULT_FILTERS.ratingMax
+    );
+    const nextMobileFilters = {
+      ...mobileFilters,
+      ratingMin: normalizedRating.ratingMin,
+      ratingMax: normalizedRating.ratingMax
+    };
+    setMobileFilters(nextMobileFilters);
+    setFilters((current) => ({
+      ...current,
+      ...nextMobileFilters,
+      ratingMin: normalizedRating.ratingMin,
+      ratingMax: normalizedRating.ratingMax
+    }));
+    setMobileRatingDraft({
+      ratingMin: String(normalizedRating.ratingMin),
+      ratingMax: String(normalizedRating.ratingMax)
+    });
     setMobileFilterOpen(false);
   };
 
@@ -1062,37 +1280,36 @@ export default function PlayersDatabaseInteractions({
 
             <div className="filter-group">
               <label className="filter-label">
-                Overall Rating: <span id="rating-value">{`${filters.ratingMin}-${filters.ratingMax}`}</span>
+                Overall Rating:{' '}
+                <span id="rating-value">
+                  {`${clamp(toNumber(ratingDraft.ratingMin, DEFAULT_FILTERS.ratingMin), DEFAULT_FILTERS.ratingMin, DEFAULT_FILTERS.ratingMax)}-${clamp(
+                    toNumber(ratingDraft.ratingMax, DEFAULT_FILTERS.ratingMax),
+                    DEFAULT_FILTERS.ratingMin,
+                    DEFAULT_FILTERS.ratingMax
+                  )}`}
+                </span>
               </label>
               <div className="range-inputs">
                 <input
                   type="number"
                   id="rating-min"
-                  value={filters.ratingMin}
+                  value={ratingDraft.ratingMin}
                   min="40"
-                  max="120"
+                  max="150"
                   className="range-input"
-                  onChange={(event) =>
-                    setFilters((current) => ({
-                      ...current,
-                      ratingMin: clamp(toNumber(event.target.value, 40), 40, current.ratingMax)
-                    }))
-                  }
+                  onChange={(event) => updateDesktopRatingDraft('ratingMin', event.target.value)}
+                  onBlur={commitDesktopRatingDraft}
                 />
                 <span>-</span>
                 <input
                   type="number"
                   id="rating-max"
-                  value={filters.ratingMax}
+                  value={ratingDraft.ratingMax}
                   min="40"
-                  max="120"
+                  max="150"
                   className="range-input"
-                  onChange={(event) =>
-                    setFilters((current) => ({
-                      ...current,
-                      ratingMax: clamp(toNumber(event.target.value, 120), current.ratingMin, 120)
-                    }))
-                  }
+                  onChange={(event) => updateDesktopRatingDraft('ratingMax', event.target.value)}
+                  onBlur={commitDesktopRatingDraft}
                 />
               </div>
             </div>
@@ -1515,37 +1732,36 @@ export default function PlayersDatabaseInteractions({
 
             <div className="filter-group">
               <label className="filter-label">
-                Overall Rating <span id="mobile-rating-value">{`${mobileFilters.ratingMin}-${mobileFilters.ratingMax}`}</span>
+                Overall Rating{' '}
+                <span id="mobile-rating-value">
+                  {`${clamp(toNumber(mobileRatingDraft.ratingMin, DEFAULT_FILTERS.ratingMin), DEFAULT_FILTERS.ratingMin, DEFAULT_FILTERS.ratingMax)}-${clamp(
+                    toNumber(mobileRatingDraft.ratingMax, DEFAULT_FILTERS.ratingMax),
+                    DEFAULT_FILTERS.ratingMin,
+                    DEFAULT_FILTERS.ratingMax
+                  )}`}
+                </span>
               </label>
               <div className="range-inputs">
                 <input
                   type="number"
                   id="mobile-rating-min"
-                  value={mobileFilters.ratingMin}
+                  value={mobileRatingDraft.ratingMin}
                   min="40"
-                  max="120"
+                  max="150"
                   className="range-input"
-                  onChange={(event) =>
-                    setMobileFilters((current) => ({
-                      ...current,
-                      ratingMin: clamp(toNumber(event.target.value, 40), 40, current.ratingMax)
-                    }))
-                  }
+                  onChange={(event) => updateMobileRatingDraft('ratingMin', event.target.value)}
+                  onBlur={commitMobileRatingDraft}
                 />
                 <span>-</span>
                 <input
                   type="number"
                   id="mobile-rating-max"
-                  value={mobileFilters.ratingMax}
+                  value={mobileRatingDraft.ratingMax}
                   min="40"
-                  max="120"
+                  max="150"
                   className="range-input"
-                  onChange={(event) =>
-                    setMobileFilters((current) => ({
-                      ...current,
-                      ratingMax: clamp(toNumber(event.target.value, 120), current.ratingMin, 120)
-                    }))
-                  }
+                  onChange={(event) => updateMobileRatingDraft('ratingMax', event.target.value)}
+                  onBlur={commitMobileRatingDraft}
                 />
               </div>
             </div>

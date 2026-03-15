@@ -6,6 +6,7 @@ const DEFAULT_API_BASE_URL = 'https://zenithfcm.com/api';
 const LOCAL_API_BASE_URLS = ['http://127.0.0.1:8000', 'http://localhost:8000'];
 
 const ALLOWED_PARAMS = new Set([
+  'q',
   'name_starts_with',
   'position',
   'league',
@@ -115,11 +116,47 @@ function pickSearchParams(incoming) {
 
   const limit = Math.min(50, Math.max(1, Number.parseInt(outgoing.get('limit') || '50', 10) || 50));
   outgoing.set('limit', String(limit));
+  const directQuery = String(outgoing.get('q') || '').trim();
+  const legacyQuery = String(outgoing.get('name_starts_with') || '').trim();
+  const normalizedQuery = directQuery || legacyQuery;
+  if (normalizedQuery) {
+    outgoing.set('q', normalizedQuery);
+  } else {
+    outgoing.delete('q');
+  }
+  if (legacyQuery) {
+    outgoing.set('name_starts_with', legacyQuery);
+  } else {
+    outgoing.delete('name_starts_with');
+  }
   return outgoing;
 }
 
+function buildPlayersQuery(outgoing, { includeQ } = { includeQ: true }) {
+  const query = new URLSearchParams(outgoing);
+  const normalizedSearch = String(query.get('q') || query.get('name_starts_with') || '').trim();
+  if (includeQ) {
+    if (normalizedSearch) {
+      query.set('q', normalizedSearch);
+    } else {
+      query.delete('q');
+    }
+    if (!String(query.get('name_starts_with') || '').trim()) {
+      query.delete('name_starts_with');
+    }
+    return query;
+  }
+  if (normalizedSearch) {
+    query.set('name_starts_with', normalizedSearch);
+  } else {
+    query.delete('name_starts_with');
+  }
+  query.delete('q');
+  return query;
+}
+
 function buildLegacySearchQuery(outgoing) {
-  const q = String(outgoing.get('name_starts_with') || '').trim();
+  const q = String(outgoing.get('q') || outgoing.get('name_starts_with') || '').trim();
   if (!q) return null;
 
   const query = new URLSearchParams();
@@ -138,7 +175,8 @@ export async function GET(request) {
   const attempts = [];
 
   for (const base of backendCandidates()) {
-    const playersUrl = buildEndpointUrl(base, '/api/players', outgoing);
+    const playersQuery = buildPlayersQuery(outgoing, { includeQ: true });
+    const playersUrl = buildEndpointUrl(base, '/api/players', playersQuery);
 
     try {
       const result = await fetchJson(playersUrl);
@@ -150,6 +188,29 @@ export async function GET(request) {
 
       const reason = toErrorReason(result.payload, result.details);
       attempts.push({ url: playersUrl, status: result.response.status, reason });
+
+      if ((result.response.status === 400 || result.response.status === 422) && playersQuery.has('q')) {
+        const compatibilityQuery = buildPlayersQuery(outgoing, { includeQ: false });
+        const compatibilityUrl = buildEndpointUrl(base, '/api/players', compatibilityQuery);
+        try {
+          const compatibilityResult = await fetchJson(compatibilityUrl);
+          const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit);
+          if (compatibilityResult.response.ok && normalizedCompatibility) {
+            return NextResponse.json(normalizedCompatibility, { status: compatibilityResult.response.status });
+          }
+          attempts.push({
+            url: compatibilityUrl,
+            status: compatibilityResult.response.status,
+            reason: toErrorReason(compatibilityResult.payload, compatibilityResult.details)
+          });
+        } catch (compatibilityError) {
+          attempts.push({
+            url: compatibilityUrl,
+            status: 502,
+            reason: compatibilityError instanceof Error ? compatibilityError.message : String(compatibilityError)
+          });
+        }
+      }
 
       // Some deployments only expose /api/players/search (q=...) and return 422 for /api/players.
       if (result.response.status === 422) {

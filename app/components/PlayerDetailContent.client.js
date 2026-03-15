@@ -466,7 +466,10 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
         </div>
 
         <div className="player-detail-main-flow">
-          <div className="player-rank-refresh-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          <div
+            className="player-rank-refresh-grid"
+            style={{ display: 'grid', gridTemplateColumns: isAuctionable ? '1fr 1fr' : '1fr', gap: '20px' }}
+          >
             <div
               className="player-rank-panel"
               style={{
@@ -571,7 +574,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               <PlayerTrainingLevelPanel playerId={playerId} position={record?.position} rank={selectedRank} />
             </div>
 
-            <PlayerRefreshTimePanel playerId={playerId} />
+            {isAuctionable ? <PlayerRefreshTimePanel playerId={playerId} /> : null}
           </div>
 
           <PlayerSkillsAbilitiesSection playerId={playerId} currentRank={selectedRank} />
