@@ -37,9 +37,6 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <MarketNavLink href="/market" data-link="" data-nav-link="" className={getNavClass(activeView, 'market')}>
               Market
             </MarketNavLink>
-            <Link href="/watchlist" data-link="" data-nav-link="" className={getNavClass(activeView, 'watchlist')}>
-              Watchlist
-            </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
               Blogs
             </Link>
@@ -61,6 +58,9 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 </Link>
                 <Link href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ⚖️ Compare Players
+                </Link>
+                <Link href="/tools?tool=watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
+                  ❤️ Watchlist
                 </Link>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
             </MarketNavLink>
-            <Link href="/watchlist" data-link="" data-nav-link="">
+            <Link href="/tools?tool=watchlist" data-link="" data-nav-link="">
               Watchlist
             </Link>
             <Link href="/blogs" data-link="" data-nav-link="">

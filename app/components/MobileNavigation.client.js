@@ -29,6 +29,16 @@ const MOBILE_TOOL_ITEMS = [
         <path d="m17 16-3 5h6l-3-5Z" />
       </svg>
     )
+  },
+  {
+    key: 'watchlist',
+    label: 'Watchlist',
+    href: '/tools?tool=watchlist',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    )
   }
 ];
 
@@ -38,8 +48,8 @@ const MOBILE_PREFETCH_ROUTES = Object.freeze([
   '/tools',
   '/tools?tool=squadbuilder',
   '/tools?tool=compare',
+  '/tools?tool=watchlist',
   '/market',
-  '/watchlist',
   '/blogs'
 ]);
 
@@ -148,17 +158,6 @@ export default function MobileNavigation({ activeView = '' }) {
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
           </svg>
           <span>Market</span>
-        </button>
-        <button
-          className={getButtonClassName(activeView === 'watchlist')}
-          data-view="watchlist"
-          type="button"
-          onClick={() => navigateTo('/watchlist')}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-          <span>Watchlist</span>
         </button>
         <button
           className={getButtonClassName(activeView === 'blogs')}

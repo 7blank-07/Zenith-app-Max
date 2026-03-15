@@ -163,9 +163,6 @@ export default async function HomePage() {
             <MarketNavLink href="/market" data-link="" data-nav-link="" className="nav-link">
               Market
             </MarketNavLink>
-            <Link href="/watchlist" data-link="" data-nav-link="" className="nav-link">
-              Watchlist
-            </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className="nav-link">
               Blogs
             </Link>
@@ -180,6 +177,9 @@ export default async function HomePage() {
                 </Link>
                 <Link href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ⚖️ Compare Players
+                </Link>
+                <Link href="/tools?tool=watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
+                  ❤️ Watchlist
                 </Link>
               </div>
             </div>
@@ -345,7 +345,7 @@ export default async function HomePage() {
             <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
             </MarketNavLink>
-            <Link href="/watchlist" data-link="" data-nav-link="">
+            <Link href="/tools?tool=watchlist" data-link="" data-nav-link="">
               Watchlist
             </Link>
             <Link href="/blogs" data-link="" data-nav-link="">

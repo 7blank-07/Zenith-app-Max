@@ -15,7 +15,7 @@ const VIEW_ROUTE_MAP = Object.freeze({
   database: '/players',
   players: '/players',
   market: '/market',
-  watchlist: '/watchlist'
+  watchlist: '/tools?tool=watchlist'
 });
 
 function escapeHtml(value) {

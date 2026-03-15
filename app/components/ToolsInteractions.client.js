@@ -2648,6 +2648,16 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
               <h3>Compare Players</h3>
               <p>Head-to-head stat comparison</p>
             </button>
+
+            <button className="tool-card" onClick={() => router.push('/tools?tool=watchlist')} type="button">
+              <div className="tool-card-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </div>
+              <h3>Watchlist</h3>
+              <p>Track saved players with live filters and updates</p>
+            </button>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import nextDynamic from 'next/dynamic';
 import SiteChrome from '../components/SiteChrome';
+import WatchlistView from '../components/WatchlistView';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { fetchAllPlayerFilterMetadata, fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
 
@@ -13,11 +14,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
   title: 'Tools | Zenith',
-  description: 'Squad Builder, Compare Players, and Profit Calculator tools for Zenith.',
+  description: 'Squad Builder, Compare Players, Watchlist, and Profit Calculator tools for Zenith.',
   alternates: { canonical: '/tools' },
   openGraph: {
     title: 'Tools | Zenith',
-    description: 'Squad Builder, Compare Players, and Profit Calculator tools for Zenith.',
+    description: 'Squad Builder, Compare Players, Watchlist, and Profit Calculator tools for Zenith.',
     url: `${siteUrl}/tools`,
     siteName: 'Zenith',
     type: 'website'
@@ -62,20 +63,32 @@ function serializeToolPlayer(player) {
 
 export default async function ToolsPage({ searchParams }) {
   const startedAt = Date.now();
-  const topIds = await readTopPlayerIds(TOOLS_PLAYER_POOL_LIMIT);
-  const [players, filterMetadata] = await Promise.all([
-    fetchPlayersByIds(topIds, { rank: 0 }),
-    fetchAllPlayerFilterMetadata({ rank: 0 })
-  ]);
   const initialTool = normalizeToolParam(searchParams?.tool);
-  const toolPlayers = players.map(serializeToolPlayer);
-  const squadFilterOptions = {
-    positions: filterMetadata.positions,
-    leagues: filterMetadata.leagues,
-    clubs: filterMetadata.clubs,
-    nations: filterMetadata.nations,
-    skillMoves: filterMetadata.skillMoves
+  const isWatchlistTool = initialTool === 'watchlist';
+  let toolPlayers = [];
+  let squadFilterOptions = {
+    positions: [],
+    leagues: [],
+    clubs: [],
+    nations: [],
+    skillMoves: []
   };
+
+  if (!isWatchlistTool) {
+    const topIds = await readTopPlayerIds(TOOLS_PLAYER_POOL_LIMIT);
+    const [players, filterMetadata] = await Promise.all([
+      fetchPlayersByIds(topIds, { rank: 0 }),
+      fetchAllPlayerFilterMetadata({ rank: 0 })
+    ]);
+    toolPlayers = players.map(serializeToolPlayer);
+    squadFilterOptions = {
+      positions: filterMetadata.positions,
+      leagues: filterMetadata.leagues,
+      clubs: filterMetadata.clubs,
+      nations: filterMetadata.nations,
+      skillMoves: filterMetadata.skillMoves
+    };
+  }
   const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}${
     initialTool === 'compare' ? ' main-content--compare' : ''
   }`;
@@ -83,13 +96,18 @@ export default async function ToolsPage({ searchParams }) {
   console.info('[metrics] /tools render', {
     elapsedMs: Date.now() - startedAt,
     playerPool: toolPlayers.length,
-    initialTool
+    initialTool,
+    isWatchlistTool
   });
 
   return (
     <SiteChrome activeView="tools">
       <main className={mainContentClassName}>
-        <ToolsInteractions players={toolPlayers} initialTool={initialTool} filterOptions={squadFilterOptions} />
+        {isWatchlistTool ? (
+          <WatchlistView />
+        ) : (
+          <ToolsInteractions players={toolPlayers} initialTool={initialTool} filterOptions={squadFilterOptions} />
+        )}
       </main>
     </SiteChrome>
   );
