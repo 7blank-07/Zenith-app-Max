@@ -7915,11 +7915,9 @@ watchlist-view .view-content {
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: "CruyffSans", sans-serif;
-    letter-spacing: -0.1px;
     line-height: 0.9;
-    transform: scaleY(1.1);
-}
 
+}
 
 
 .card-nation-flag-home.hero-icon-nation-flag-home{
