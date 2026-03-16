@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import { normalizeSearchText } from './search-normalization';
 import SquadExportCapture from './SquadExportCapture.client';
+import { buildExportFallbackPlayers, buildExportMediaMap, clearExportMediaCache, waitForExportLoadState } from './squad-export-media';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -1024,9 +1025,27 @@ function normalizeSupplementalPlayers(value) {
   return normalized;
 }
 
+function normalizePlayerIdValue(value) {
+  const normalized = String(value || '').trim();
+  return normalized || '';
+}
+
+function normalizeStarters(value) {
+  if (!value || typeof value !== 'object') return {};
+  const normalized = {};
+  Object.entries(value).forEach(([slotId, playerId]) => {
+    const normalizedSlotId = String(slotId || '').trim();
+    if (!normalizedSlotId) return;
+    const normalizedPlayerId = normalizePlayerIdValue(playerId);
+    normalized[normalizedSlotId] = normalizedPlayerId;
+  });
+  return normalized;
+}
+
 function normalizeBench(value) {
   if (!Array.isArray(value)) return Array.from({ length: 7 }, () => '');
-  return value.slice(0, 7).concat(Array.from({ length: Math.max(0, 7 - value.length) }, () => ''));
+  const normalizedEntries = value.slice(0, 7).map((entry) => normalizePlayerIdValue(entry));
+  return normalizedEntries.concat(Array.from({ length: Math.max(0, 7 - normalizedEntries.length) }, () => ''));
 }
 
 function parseAlternatePositions(value) {
@@ -1128,6 +1147,11 @@ function waitForExportRenderCycle() {
 
 function waitForSingleImage(imageElement, timeoutMs = 6000) {
   if (!imageElement) return Promise.resolve();
+  imageElement.loading = 'eager';
+  imageElement.decoding = 'sync';
+  if ('fetchPriority' in imageElement) {
+    imageElement.fetchPriority = 'high';
+  }
   if (imageElement.complete && imageElement.naturalWidth > 0) return Promise.resolve();
 
   return new Promise((resolve) => {
@@ -1284,6 +1308,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   const [squadLivePrices, setSquadLivePrices] = useState({});
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
   const [isExportingSquad, setIsExportingSquad] = useState(false);
+  const [exportMediaByPlayer, setExportMediaByPlayer] = useState({});
+  const [exportPlayerFallbacks, setExportPlayerFallbacks] = useState({});
   const [selectedPlayerForCustomization, setSelectedPlayerForCustomization] = useState(null);
   const dragPayloadRef = useRef(null);
   const dragPreviewNodeRef = useRef(null);
@@ -1324,7 +1350,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
           setSelectedSlotId(String(parsedRoundtrip.selectedSlotId));
         }
         if (parsedRoundtrip?.starters && typeof parsedRoundtrip.starters === 'object') {
-          setStarters(parsedRoundtrip.starters);
+          setStarters(normalizeStarters(parsedRoundtrip.starters));
         }
         setBench(normalizeBench(parsedRoundtrip?.bench));
         if (parsedRoundtrip?.badges && typeof parsedRoundtrip.badges === 'object') {
@@ -1355,7 +1381,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
           const parsed = JSON.parse(savedSquad);
           if (parsed?.squadName) setSquadName(String(parsed.squadName));
           if (parsed?.formationId && SQUAD_FORMATIONS[parsed.formationId]) setFormationId(parsed.formationId);
-          if (parsed?.starters && typeof parsed.starters === 'object') setStarters(parsed.starters);
+          if (parsed?.starters && typeof parsed.starters === 'object') setStarters(normalizeStarters(parsed.starters));
           setBench(normalizeBench(parsed?.bench));
           if (parsed?.badges && typeof parsed.badges === 'object') {
             setBadges(normalizeBadges(parsed.badges));
@@ -2488,8 +2514,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     timestamp: new Date().toISOString(),
     name: String(squadName || 'My Squad').trim() || 'My Squad',
     formationId,
-    starters: { ...starters },
-    bench: [...bench],
+    starters: normalizeStarters(starters),
+    bench: normalizeBench(bench),
     badges: normalizeBadges(badges),
     fieldTheme: fieldThemeId,
     teamOvr: squadOvr,
@@ -2514,12 +2540,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         setFormationId(nextFormation);
       }
       setSquadName(String(parsed?.name || 'My Squad'));
-      setStarters(parsed?.starters && typeof parsed.starters === 'object' ? parsed.starters : {});
-      if (Array.isArray(parsed?.bench)) {
-        setBench(parsed.bench.slice(0, 7).concat(Array.from({ length: Math.max(0, 7 - parsed.bench.length) }, () => '')));
-      } else {
-        setBench(Array.from({ length: 7 }, () => ''));
-      }
+      setStarters(parsed?.starters && typeof parsed.starters === 'object' ? normalizeStarters(parsed.starters) : {});
+      setBench(normalizeBench(parsed?.bench));
       setBadges(normalizeBadges(parsed?.badges));
       const nextThemeId = String(parsed?.fieldTheme || '');
       if (FIELD_THEMES[nextThemeId]) {
@@ -2540,6 +2562,15 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
       if (!exportRoot) {
         throw new Error('Squad export view is not ready yet.');
       }
+      const loadState = await waitForExportLoadState({ starters, bench, playersById });
+      if (!loadState.playersLoaded || !loadState.subsLoaded) {
+        console.warn('[tools] Export proceeding with unresolved squad players', loadState);
+      }
+      clearExportMediaCache();
+      const nextExportMediaByPlayer = buildExportMediaMap({ starters, bench, playersById });
+      const nextExportPlayerFallbacks = buildExportFallbackPlayers({ starters, bench, playersById });
+      setExportMediaByPlayer(nextExportMediaByPlayer);
+      setExportPlayerFallbacks(nextExportPlayerFallbacks);
       await waitForExportRenderCycle();
       await waitForExportImages(exportRoot);
       const captureWidth = exportRoot.scrollWidth || exportRoot.offsetWidth;
@@ -3238,6 +3269,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
           starters={starters}
           bench={bench}
           playersById={playersById}
+          exportMediaByPlayer={exportMediaByPlayer}
+          exportPlayerFallbacks={exportPlayerFallbacks}
           starterAdjustedOvrBySlot={starterAdjustedOvrBySlot}
           fieldBackground={activeFieldTheme.background}
         />

@@ -1,37 +1,14 @@
 'use client';
 
-const EXPORT_CORS_SAFE_HOST = 'images.zenithfcm.com';
-const EXPORT_REWRITEABLE_RENDERZ_PATH = /^(flags_|club_|league_|bg_23_|player_)/i;
-const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fzenithfcm.com';
-const EXPORT_FALLBACK_CARD_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1E293B"/><stop offset="100%" stop-color="#334155"/></linearGradient></defs><rect width="300" height="400" rx="26" fill="url(#g)"/><rect x="18" y="18" width="264" height="364" rx="20" fill="none" stroke="#64748B" stroke-opacity="0.45" stroke-width="3"/><text x="150" y="208" text-anchor="middle" fill="#CBD5E1" font-size="24" font-family="Segoe UI, Arial">ZENITH</text></svg>'
-)}`;
-const EXPORT_FALLBACK_PLAYER_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300"><defs><linearGradient id="p" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A5B4FC"/><stop offset="100%" stop-color="#60A5FA"/></linearGradient></defs><rect width="200" height="300" fill="none"/><circle cx="100" cy="88" r="42" fill="url(#p)" opacity="0.92"/><rect x="48" y="136" width="104" height="122" rx="52" fill="url(#p)" opacity="0.92"/></svg>'
-)}`;
-const EXPORT_FALLBACK_FLAG_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="16"><rect width="24" height="16" rx="2" fill="#0F172A"/><rect x="1" y="1" width="22" height="14" rx="1.5" fill="#1E293B"/><rect x="1" y="1" width="7.3" height="14" fill="#1D4ED8"/><rect x="8.3" y="1" width="7.3" height="14" fill="#E2E8F0"/><rect x="15.6" y="1" width="7.4" height="14" fill="#DC2626"/></svg>'
-)}`;
+import {
+  EXPORT_FALLBACK_CARD_URL,
+  EXPORT_FALLBACK_FLAG_URL,
+  EXPORT_FALLBACK_PLAYER_URL,
+  normalizeExportAssetUrl,
+  resolvePlayerFromMap
+} from './squad-export-media';
 
-function normalizeExportAssetUrl(value) {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
-  if (raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
-  try {
-    const baseUrl = typeof window !== 'undefined' ? window.location.href : 'https://zenithfcm.com';
-    const parsed = new URL(raw, baseUrl);
-    if (/renderz\.app$/i.test(parsed.hostname)) {
-      const assetPath = parsed.pathname.replace(/^\/+/, '');
-      if (!assetPath || !EXPORT_REWRITEABLE_RENDERZ_PATH.test(assetPath)) {
-        return '';
-      }
-      return `https://${EXPORT_CORS_SAFE_HOST}/${assetPath}${parsed.search || ''}`;
-    }
-    return parsed.href;
-  } catch (_) {
-    return raw;
-  }
-}
+const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fzenithfcm.com';
 
 function formatExportCoins(value) {
   const safeValue = Number(value);
@@ -53,12 +30,20 @@ function getStarterVariant(player) {
   return player?.leagueImage ? 'normal' : 'hero';
 }
 
-function resolveCardBackground(player) {
-  return normalizeExportAssetUrl(player?.cardBackground) || EXPORT_FALLBACK_CARD_URL;
+function getPlayerExportMedia(player, exportMediaByPlayer = {}) {
+  const playerId = String(player?.playerId || '').trim();
+  if (!playerId) return null;
+  return exportMediaByPlayer?.[playerId] || null;
 }
 
-function resolvePlayerFace(player) {
-  const direct = normalizeExportAssetUrl(player?.playerImage);
+function resolveCardBackground(player, exportMediaByPlayer) {
+  const preferredCardBackground = getPlayerExportMedia(player, exportMediaByPlayer)?.cardBackground;
+  return normalizeExportAssetUrl(preferredCardBackground || player?.cardBackground) || EXPORT_FALLBACK_CARD_URL;
+}
+
+function resolvePlayerFace(player, exportMediaByPlayer) {
+  const preferredPlayerFace = getPlayerExportMedia(player, exportMediaByPlayer)?.playerImage;
+  const direct = normalizeExportAssetUrl(preferredPlayerFace || player?.playerImage);
   if (direct) return direct;
   const playerId = String(player?.playerId || '').trim();
   if (playerId) {
@@ -79,7 +64,25 @@ function getBadgeContent(badges) {
   return <div className="squad-export-stars">{'★'.repeat(clamped)}</div>;
 }
 
-function ExportStarterSlot({ slot, player, adjustedOvr }) {
+function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer }) {
+  const variant = getStarterVariant(player);
+  const exportMedia = getPlayerExportMedia(player, exportMediaByPlayer);
+  const nationFlag = exportMedia?.nationFlag
+    ? resolveFlag(exportMedia.nationFlag)
+    : player?.nationFlag
+      ? resolveFlag(player.nationFlag)
+      : '';
+  const clubFlag = exportMedia?.clubFlag
+    ? resolveFlag(exportMedia.clubFlag)
+    : player?.clubFlag
+      ? resolveFlag(player.clubFlag)
+      : '';
+  const leagueFlag = exportMedia?.leagueImage
+    ? resolveFlag(exportMedia.leagueImage)
+    : player?.leagueImage
+      ? resolveFlag(player.leagueImage)
+      : '';
+
   return (
     <div className="squad-slot squad-export-slot" style={{ left: `${slot.x}%`, top: `${slot.y}%` }}>
       <div className="position-dot">
@@ -88,8 +91,8 @@ function ExportStarterSlot({ slot, player, adjustedOvr }) {
       {!!player && (
         <div className={`player-preview-card squad-export-player-card ${getStarterTypeClass(player)}`} data-player-id={player.playerId}>
           <div className="preview-card-inner">
-            <img src={resolveCardBackground(player)} alt="Card" className="preview-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" />
-            <img src={resolvePlayerFace(player)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+            <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="preview-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
               {Number(adjustedOvr) > 0 ? Number(adjustedOvr) : 'NA'}
             </div>
@@ -99,26 +102,30 @@ function ExportStarterSlot({ slot, player, adjustedOvr }) {
             <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
               {player.name || 'Unknown'}
             </div>
-            {!!player.nationFlag && (
+            {!!nationFlag && (
               <img
-                src={resolveFlag(player.nationFlag)}
+                src={nationFlag}
                 alt="Nation"
-                className={`card-nation-flag ${getStarterVariant(player) === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
+                className={`card-nation-flag ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
+                loading="eager"
+                decoding="sync"
               />
             )}
-            {!!player.clubFlag && (
+            {!!clubFlag && (
               <img
-                src={resolveFlag(player.clubFlag)}
+                src={clubFlag}
                 alt="Club"
-                className={`card-club-flag ${getStarterVariant(player) === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
+                className={`card-club-flag ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
+                loading="eager"
+                decoding="sync"
               />
             )}
-            {!!player.leagueImage && (
-              <img src={resolveFlag(player.leagueImage)} alt="League" className="card-league-flag normal-league-flag" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+            {!!leagueFlag && variant === 'normal' && (
+              <img src={leagueFlag} alt="League" className="card-league-flag normal-league-flag" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             )}
             {player.isUntradable && (
               <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch">
@@ -132,8 +139,25 @@ function ExportStarterSlot({ slot, player, adjustedOvr }) {
   );
 }
 
-function ExportBenchCell({ player, index }) {
+function ExportBenchCell({ player, index, exportMediaByPlayer }) {
   const variant = getStarterVariant(player);
+  const exportMedia = getPlayerExportMedia(player, exportMediaByPlayer);
+  const nationFlag = exportMedia?.nationFlag
+    ? resolveFlag(exportMedia.nationFlag)
+    : player?.nationFlag
+      ? resolveFlag(player.nationFlag)
+      : '';
+  const clubFlag = exportMedia?.clubFlag
+    ? resolveFlag(exportMedia.clubFlag)
+    : player?.clubFlag
+      ? resolveFlag(player.clubFlag)
+      : '';
+  const leagueFlag = exportMedia?.leagueImage
+    ? resolveFlag(exportMedia.leagueImage)
+    : player?.leagueImage
+      ? resolveFlag(player.leagueImage)
+      : '';
+
   return (
     <div className="bench-cell">
       <div className="bench-empty-slot">
@@ -142,8 +166,8 @@ function ExportBenchCell({ player, index }) {
       {!!player && (
         <div className={`bench-preview-card squad-export-bench-card ${getBenchTypeClass(player)}`} data-player-id={player.playerId}>
           <div className="bench-card-inner">
-            <img src={resolveCardBackground(player)} alt="Card" className="bench-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" />
-            <img src={resolvePlayerFace(player)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+            <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="bench-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
               {player.ovr > 0 ? player.ovr : 'NA'}
             </div>
@@ -153,22 +177,37 @@ function ExportBenchCell({ player, index }) {
             <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
               {player.name || 'Unknown'}
             </div>
-            {!!player.nationFlag && (
+            {!!nationFlag && (
               <img
-                src={resolveFlag(player.nationFlag)}
+                src={nationFlag}
                 alt="Nation"
                 className={`bench-card-flag-nation ${variant === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
+                loading="eager"
+                decoding="sync"
               />
             )}
-            {!!player.clubFlag && (
+            {!!clubFlag && (
               <img
-                src={resolveFlag(player.clubFlag)}
+                src={clubFlag}
                 alt="Club"
                 className={`bench-card-flag-club ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
+                loading="eager"
+                decoding="sync"
+              />
+            )}
+            {!!leagueFlag && variant === 'normal' && (
+              <img
+                src={leagueFlag}
+                alt="League"
+                className="bench-card-flag-league normal-bench-league-flag"
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+                loading="eager"
+                decoding="sync"
               />
             )}
             {player.isUntradable && (
@@ -194,6 +233,8 @@ export default function SquadExportCapture({
   starters,
   bench,
   playersById,
+  exportMediaByPlayer,
+  exportPlayerFallbacks,
   starterAdjustedOvrBySlot,
   fieldBackground
 }) {
@@ -219,8 +260,11 @@ export default function SquadExportCapture({
               <div className="squad-export-slots">
                 {formationSlots.map((slot) => {
                   const playerId = starters?.[slot.id] || '';
-                  const player = playerId ? playersById.get(playerId) : null;
-                  return <ExportStarterSlot key={`export-${formationId}-${slot.id}`} slot={slot} player={player} adjustedOvr={starterAdjustedOvrBySlot?.[slot.id]} />;
+                  const normalizedPlayerId = String(playerId || '').trim();
+                  const player = normalizedPlayerId
+                    ? resolvePlayerFromMap(playersById, normalizedPlayerId) || exportPlayerFallbacks?.[normalizedPlayerId] || null
+                    : null;
+                  return <ExportStarterSlot key={`export-${formationId}-${slot.id}`} slot={slot} player={player} adjustedOvr={starterAdjustedOvrBySlot?.[slot.id]} exportMediaByPlayer={exportMediaByPlayer} />;
                 })}
               </div>
             </div>
@@ -229,8 +273,11 @@ export default function SquadExportCapture({
               <div className="squad-bench squad-export-bench-grid">
                 {Array.from({ length: 7 }, (_, index) => {
                   const playerId = bench?.[index] || '';
-                  const player = playerId ? playersById.get(playerId) : null;
-                  return <ExportBenchCell key={`export-bench-${index}`} player={player} index={index} />;
+                  const normalizedPlayerId = String(playerId || '').trim();
+                  const player = normalizedPlayerId
+                    ? resolvePlayerFromMap(playersById, normalizedPlayerId) || exportPlayerFallbacks?.[normalizedPlayerId] || null
+                    : null;
+                  return <ExportBenchCell key={`export-bench-${index}`} player={player} index={index} exportMediaByPlayer={exportMediaByPlayer} />;
                 })}
               </div>
             </div>
@@ -259,7 +306,7 @@ export default function SquadExportCapture({
 
             <div className="squad-export-card-section squad-export-qr-card">
               <div className="squad-export-card-title">QR Access</div>
-              <img className="squad-export-qr" src={QR_IMAGE_URL} alt="QR code linking to zenithfcm.com" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+              <img className="squad-export-qr" src={QR_IMAGE_URL} alt="QR code linking to zenithfcm.com" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
               <div className="squad-export-qr-text">CHECK SQUAD</div>
             </div>
 

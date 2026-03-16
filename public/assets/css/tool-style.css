@@ -1150,6 +1150,7 @@ main.main-content.main-content--compare {
   border-radius: 0 0 14px 14px;
   border: none;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -1171,6 +1172,23 @@ main.main-content.main-content--compare {
   border-radius: 10px;
   overflow: hidden;
   position: relative;
+}
+
+#squad-export-root .squad-export-bench {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  visibility: visible !important;
+}
+
+#squad-export-root .squad-export-bench-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  justify-self: stretch !important;
+}
+
+#squad-export-root .squad-export-bench-grid .bench-empty-slot {
+  transform: translate(-50%, -50%);
 }
 
 .squad-export-right {
