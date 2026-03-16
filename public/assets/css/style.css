@@ -3743,6 +3743,17 @@ h1, h3, h4, h5, h6 {
   border: 1px solid rgba(148, 163, 184, 0.28);
 }
 
+/* Keep player card visuals clean only in Next Players DB grid */
+.players-grid--database .players-db-row-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.players-grid--database .players-db-row-card .player-card-image-placeholder {
+  background: transparent;
+}
+
 /* Card image placeholder - universal fix */
 .player-card-image-placeholder {
   width: 100% !important;
@@ -7880,7 +7891,6 @@ watchlist-view .view-content {
     z-index: 3;
     font-family: "CruyffSans", sans-serif;
 
-
     line-height: 1.1;
 }
 
@@ -7918,8 +7928,8 @@ watchlist-view .view-content {
     letter-spacing: -0.1px;
     line-height: 0.9;
     transform: scaleY(1.1);
-}
 
+}
 
 
 .card-nation-flag-home.hero-icon-nation-flag-home{

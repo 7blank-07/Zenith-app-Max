@@ -531,7 +531,7 @@ function renderPlayerCard(player) {
   const playerType = player.leagueImage ? 'normal' : 'hero';
   const hasPlayerImage = !!player.playerImage;
   return (
-    <div className="player-row-card">
+    <div className="player-row-card players-db-row-card">
       <div className="player-card-image-placeholder">
         {player.cardBackground ? <img src={player.cardBackground} alt="Card Background" className="player-row-card-bg" /> : null}
         {hasPlayerImage ? (
@@ -1515,7 +1515,7 @@ export default function PlayersDatabaseInteractions({
               </div>
             ) : null}
 
-            <div className="players-grid" id="players-grid" style={{ background: 'transparent', minHeight: '60vh' }}>
+            <div className="players-grid players-grid--database" id="players-grid" style={{ background: 'transparent', minHeight: '60vh' }}>
               {visiblePlayers.map((player) => {
                 const resolvedPrice = getResolvedPrice(player);
                 const hasPrice = resolvedPrice > 0;
