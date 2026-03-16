@@ -12591,3 +12591,165 @@ body {
   border-radius: 3px;
   z-index: 3;
 }
+
+/* =====================================================
+   Player-card parity overrides (homepage reference)
+   ===================================================== */
+
+.dropdown-player-card .dropdown-mini-card {
+  width: 100%;
+  height: 100%;
+  margin-left: 0;
+}
+
+.dropdown-player-card .dropdown-mini-card .squad-custom-card-player-img {
+  top: 50%;
+  left: 50%;
+  width: 124%;
+  height: 124%;
+  transform: translate(-50%, -50%) scale(1.02);
+}
+
+.dropdown-player-card .dropdown-mini-card .squad-custom-card-ovr {
+  top: 11%;
+  left: 22%;
+  margin-left: 0;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.dropdown-player-card .dropdown-mini-card .squad-custom-card-position {
+  top: 24%;
+  left: 22%;
+  margin-left: 0;
+  transform: translateX(-50%);
+  font-size: 0.56rem;
+  line-height: 0.9;
+}
+
+.dropdown-player-card .dropdown-mini-card .squad-custom-card-name {
+  top: auto;
+  bottom: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 92%;
+  font-size: 0.58rem;
+  letter-spacing: -0.35px;
+  line-height: 0.95;
+}
+
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-nation,
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-club,
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-league {
+  position: absolute;
+  z-index: 3;
+  border-radius: 2px;
+}
+
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-nation.hero-icon-dropdown-nation-flag {
+  bottom: 15%;
+  left: 25%;
+  width: 12px;
+  height: 12px;
+  object-fit: cover;
+}
+
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-club.hero-icon-dropdown-club-flag {
+  bottom: 15%;
+  left: 60%;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-nation.normal-dropdown-nation-flag {
+  bottom: 16%;
+  left: 20%;
+  width: 11px;
+  height: 11px;
+  object-fit: cover;
+}
+
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-club.normal-dropdown-club-flag {
+  bottom: 16%;
+  left: 70%;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+}
+
+.dropdown-player-card .dropdown-mini-card .dropdown-card-flag-league.normal-dropdown-league-flag {
+  bottom: 16%;
+  left: 44%;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+}
+
+.player-detail-mini-card .player-image-img-inside {
+  width: 122%;
+  height: 122%;
+}
+
+.player-detail-mini-card .card-ovr-inside {
+  top: 11%;
+  left: 22%;
+  transform: translateX(-50%);
+  font-size: 1.72rem;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.player-detail-mini-card .card-position-inside {
+  top: 24%;
+  left: 22%;
+  transform: translateX(-50%);
+  font-size: 1.08rem;
+  letter-spacing: -0.4px;
+  line-height: 0.9;
+}
+
+.player-detail-mini-card .card-player-name-inside {
+  left: 50%;
+  bottom: 28%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  font-size: 1.24rem;
+  line-height: 0.95;
+}
+
+.player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail {
+  bottom: 15%;
+  left: 25%;
+  width: 22px;
+  height: 22px;
+}
+
+.player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+  bottom: 15%;
+  left: 60%;
+  width: 22px;
+  height: 22px;
+}
+
+.player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail {
+  bottom: 15%;
+  left: 20%;
+  width: 21px;
+  height: 21px;
+}
+
+.player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail {
+  bottom: 15%;
+  left: 70%;
+  width: 21px;
+  height: 21px;
+}
+
+.player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+  bottom: 15%;
+  left: 44%;
+  width: 21px;
+  height: 21px;
+}

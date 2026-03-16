@@ -3199,6 +3199,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                               className={`bench-card-flag-club ${variant === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
                             />
                           )}
+                          {variant === 'normal' && !!player.leagueImage && (
+                            <img src={player.leagueImage} alt="League" className="bench-card-flag-league normal-bench-league-flag" />
+                          )}
                           {player.isUntradable && (
                             <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
                               <img src="/assets/images/untradable_img.png" alt="Untradable" />

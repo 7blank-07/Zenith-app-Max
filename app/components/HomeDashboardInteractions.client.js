@@ -222,6 +222,7 @@ export default function HomeDashboardInteractions() {
       const renderDropdownResults = (results) => {
         searchResultsDropdown.innerHTML = '';
         results.forEach((player) => {
+          const variant = player.leagueImage ? 'normal' : 'hero';
           const row = document.createElement('div');
           row.className = 'dropdown-player-row';
           row.setAttribute('data-player-id', player.playerId);
@@ -235,9 +236,24 @@ export default function HomeDashboardInteractions() {
                         <span class="player-initials" style="display:none">${escapeHtml(getInitials(player.name))}</span>`
                     : `<span class="player-initials">${escapeHtml(getInitials(player.name))}</span>`
                 }
-                <div class="squad-custom-card-ovr">${escapeHtml(player.ovrText)}</div>
-                <div class="squad-custom-card-position">${escapeHtml(player.position || 'N/A')}</div>
-                <div class="squad-custom-card-name">${escapeHtml(player.name || 'Unknown')}</div>
+                <div class="squad-custom-card-ovr" style="color: ${escapeHtml(player.colorRating || '#FFFFFF')}">${escapeHtml(player.ovrText)}</div>
+                <div class="squad-custom-card-position" style="color: ${escapeHtml(player.colorPosition || '#FFFFFF')}">${escapeHtml(player.position || 'N/A')}</div>
+                <div class="squad-custom-card-name" style="color: ${escapeHtml(player.colorName || '#FFFFFF')}">${escapeHtml(player.name || 'Unknown')}</div>
+                ${
+                  player.nationFlag
+                    ? `<img src="${escapeHtml(player.nationFlag)}" alt="Nation" class="dropdown-card-flag-nation ${variant === 'normal' ? 'normal-dropdown-nation-flag' : 'hero-icon-dropdown-nation-flag'}">`
+                    : ''
+                }
+                ${
+                  player.clubFlag
+                    ? `<img src="${escapeHtml(player.clubFlag)}" alt="Club" class="dropdown-card-flag-club ${variant === 'normal' ? 'normal-dropdown-club-flag' : 'hero-icon-dropdown-club-flag'}">`
+                    : ''
+                }
+                ${
+                  variant === 'normal' && player.leagueImage
+                    ? `<img src="${escapeHtml(player.leagueImage)}" alt="League" class="dropdown-card-flag-league normal-dropdown-league-flag">`
+                    : ''
+                }
               </div>
             </div>
             <div class="dropdown-player-info">
@@ -295,6 +311,12 @@ export default function HomeDashboardInteractions() {
           playerPath: buildPlayerPath({ playerId, recordId, name, ovr }),
           cardBackground: toText(player?.card_background || player?.cardBackground || player?.cardbackground),
           playerImage: toText(player?.player_image || player?.playerImage || player?.playerimage || player?.image),
+          nationFlag: toText(player?.nation_flag || player?.nationFlag),
+          clubFlag: toText(player?.club_flag || player?.clubFlag),
+          leagueImage: toText(player?.league_image || player?.leagueImage),
+          colorRating: toText(player?.color_rating || player?.colorRating || '#FFFFFF', '#FFFFFF'),
+          colorPosition: toText(player?.color_position || player?.colorPosition || '#FFFFFF', '#FFFFFF'),
+          colorName: toText(player?.color_name || player?.colorName || '#FFFFFF', '#FFFFFF'),
           ovrText,
           isUntradable
         };
