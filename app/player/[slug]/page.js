@@ -23,23 +23,25 @@ function isNotFoundError(error) {
   );
 }
 
-async function loadPlayerSeoContract(playerId, rank) {
+async function loadPlayerSeoContract(playerId, rank, fallbackRecordId = '') {
   return resolvePlayerSeoContract(playerId, {
     rank,
     metadataOptions: {
       siteName: 'Zenith',
-      siteUrl: process.env.NEXT_PUBLIC_SITE_URL
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+      fallbackRecordId
     }
   });
 }
 
-async function loadPlayerProfileContract(playerId, rank) {
+async function loadPlayerProfileContract(playerId, rank, fallbackRecordId = '') {
   return resolvePlayerProfileContract(playerId, {
     rank,
     relatedLimit: 8,
     metadataOptions: {
       siteName: 'Zenith',
-      siteUrl: process.env.NEXT_PUBLIC_SITE_URL
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+      fallbackRecordId
     }
   });
 }
@@ -71,7 +73,7 @@ export async function generateMetadata({ params, searchParams }) {
 
   try {
     const identifiers = await resolvePlayerIdentifiersFromSlug(params.slug);
-    const { metadata } = await loadPlayerSeoContract(identifiers.playerId, rank);
+    const { metadata } = await loadPlayerSeoContract(identifiers.playerId, rank, identifiers.recordId);
     return {
       title: metadata.title,
       description: metadata.description,
@@ -102,7 +104,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
   let contract;
   try {
     const identifiers = await resolvePlayerIdentifiersFromSlug(params.slug);
-    contract = await loadPlayerProfileContract(identifiers.playerId, rank);
+    contract = await loadPlayerProfileContract(identifiers.playerId, rank, identifiers.recordId);
   } catch (error) {
     if (isNotFoundError(error)) {
       notFound();

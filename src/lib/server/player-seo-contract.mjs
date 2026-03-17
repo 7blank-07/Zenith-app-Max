@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
-import { buildPlayerSlug, parsePlayerSlug, slugifyPlayerName } from '../player-slug.mjs';
+import { buildPlayerPath, parsePlayerSlug, slugifyPlayerName } from '../player-slug.mjs';
 
 const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
 const DEFAULT_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -902,15 +902,39 @@ export function buildPlayerSeoDescriptionParagraphs(playerRecord) {
 export function buildPlayerSeoMetadata(playerRecord, options = {}) {
   const siteName = options.siteName || 'Zenith';
   const siteUrl = options.siteUrl || DEFAULT_SITE_URL;
-  const player = normalizePlayerStableRecord(playerRecord, playerRecord?.playerId || '');
+  const source = playerRecord && typeof playerRecord === 'object' ? playerRecord : {};
+  const player = normalizePlayerStableRecord(source, source?.playerId || source?.player_id || source?.id || '');
+  const playerName = toText(player.name, 'Unknown Player');
+  const ovrValue = toInteger(firstDefined([player.ovr, source.ovr, source.overall, source.rating], 0), 0);
+  const positionValue = toText(firstDefined([player.position, source.position], ''), 'Unknown');
+  const clubValue = toText(firstDefined([player.club, source.team, source.club], ''), 'Unknown Club');
+  const leagueValue = toText(firstDefined([player.league, source.league], ''), 'Unknown League');
+  const nationValue = toText(firstDefined([player.nation, source.nation_region, source.nation], ''), 'Unknown Nation');
+  const eventValue = toText(firstDefined([player.eventName, source.event_name, source.event, source.program_name], ''), 'Unknown Event');
+  const skillMovesValue = toInteger(
+    firstDefined(
+      [source.skill_moves, source.skill_moves_stars, source.skillmovesstars, source.skillMoves, player.skillMoves],
+      player.skillMoves
+    ),
+    0
+  );
+  const weakFootValue = toInteger(
+    firstDefined([source.weak_foot, source.weak_foot_stars, source.weakfootstars, source.weakFoot, player.weakFoot], player.weakFoot),
+    0
+  );
+  const canonicalRecordId = toText(firstDefined([player.recordId, source.recordId, source.record_id, source.id, options.fallbackRecordId], ''), '');
+  const canonicalPath = buildPlayerPath({
+    ...player,
+    recordId: canonicalRecordId
+  });
+  const canonical = new URL(canonicalPath, siteUrl).toString();
   const label = player.ovr > 0 ? `${player.name} (${player.ovr} OVR)` : player.name;
   const title = `${label} | ${siteName}`;
   const descriptionParagraphs = buildPlayerSeoDescriptionParagraphs(player);
   const fallbackDescription = `View ${player.name}${player.position ? ` (${player.position})` : ''} on ${siteName}.`;
   const description = player.summary || descriptionParagraphs[0] || fallbackDescription;
-  const canonicalSlug = buildPlayerSlug(player);
-  const canonicalPath = `/player/${encodeURIComponent(canonicalSlug || player.playerId)}`;
-  const canonical = new URL(canonicalPath, siteUrl).toString();
+  const jsonLdName = `${playerName} ${ovrValue} OVR ${eventValue} Card`;
+  const jsonLdDescription = `${playerName} is a ${ovrValue} OVR ${positionValue} card from ${clubValue} (${nationValue}).`;
 
   return {
     title,
@@ -926,17 +950,20 @@ export function buildPlayerSeoMetadata(playerRecord, options = {}) {
     },
     jsonLd: {
       '@context': 'https://schema.org',
-      '@type': 'Person',
-      name: player.name,
-      description,
+      '@type': 'Thing',
+      name: jsonLdName,
+      description: jsonLdDescription,
       url: canonical,
       image: player.image || undefined,
       additionalProperty: [
-        { '@type': 'PropertyValue', name: 'OVR', value: String(player.ovr) },
-        { '@type': 'PropertyValue', name: 'Position', value: player.position || 'Unknown' },
-        { '@type': 'PropertyValue', name: 'Rank', value: String(player.rank) },
-        { '@type': 'PropertyValue', name: 'Skill Moves', value: String(player.skillMoves || 0) },
-        { '@type': 'PropertyValue', name: 'Weak Foot', value: String(player.weakFoot || 0) }
+        { '@type': 'PropertyValue', name: 'OVR', value: String(ovrValue) },
+        { '@type': 'PropertyValue', name: 'Position', value: positionValue },
+        { '@type': 'PropertyValue', name: 'Club', value: clubValue },
+        { '@type': 'PropertyValue', name: 'League', value: leagueValue },
+        { '@type': 'PropertyValue', name: 'Nation', value: nationValue },
+        { '@type': 'PropertyValue', name: 'Event', value: eventValue },
+        { '@type': 'PropertyValue', name: 'Skill Moves', value: String(skillMovesValue) },
+        { '@type': 'PropertyValue', name: 'Weak Foot', value: String(weakFootValue) }
       ]
     }
   };
