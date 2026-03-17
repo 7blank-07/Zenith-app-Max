@@ -7436,17 +7436,16 @@ watchlist-view .view-content {
 .banner-title {
   font-size: 1.75rem;
   color: #ffffff;
-  font-weight: 900;              /* make text properly bold */
-  -webkit-text-stroke: 1.7px #000;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.6); /* slight depth */
-
+  font-weight: 900;
+  -webkit-text-stroke: 1.1px #000;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.62);
 }
 
 
 .banner-subtitle {
   font-size: 1rem;
   font-weight: 500;
-  color: #FFFFFF; /* solid black */
+  color: #FFFFFF;
   letter-spacing: 0.01em;
   border: 1.5px solid rgba(255, 255, 255, 0.6);
   border-radius: 6px;
@@ -7616,7 +7615,7 @@ watchlist-view .view-content {
   .banner-subtitle {
     font-size: 1rem;
     font-weight: 500;
-    color: #FFFFFF; /* solid black */
+    color: #FFFFFF;
     letter-spacing: 0.01em;
     border: 1.5px solid rgba(255, 255, 255, 0.6);
     border-radius: 6px;
@@ -7663,7 +7662,7 @@ watchlist-view .view-content {
   .banner-subtitle {
     font-size: 1rem;
     font-weight: 500;
-    color: #FFFFFF; /* solid black */
+    color: #FFFFFF;
     letter-spacing: 0.01em;
     border: 1.5px solid rgba(255, 255, 255, 0.6);
     border-radius: 6px;
