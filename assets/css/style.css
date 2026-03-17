@@ -12719,9 +12719,8 @@ body {
   bottom: 28%;
   left: 50%;
   transform: translateX(-50%);
-  max-width: 92%;
-  font-size: 0.58rem;
-  letter-spacing: -0.35px;
+  max-width: 100%;
+  font-size: 0.68rem;
   line-height: 0.95;
   padding: 0;
 }

@@ -418,11 +418,10 @@
     font-family: "CruyffSans", sans-serif;
     color: var(--player-name-color, #FFFFFF);
     z-index: 10;
-    letter-spacing: -0.7px;
     line-height: 1;
     text-transform: uppercase;
     white-space: nowrap;
-    overflow: hidden; 
+    overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
 }
@@ -538,7 +537,7 @@
 
 
     .player-row-main-img{
-        padding-top: 15px;  
+        padding-top: 15px;
         padding-left: 28px;
         width: 140px;
         height: 140px;
@@ -575,7 +574,7 @@
         letter-spacing: -0.5px;
         line-height: 1.1;
     }
-    
+
     .player-row-position {
         position: absolute;
         top: 28px;
@@ -695,7 +694,7 @@
         margin-top: 7px;
         font-weight: 800;
     }
-    
+
     .player-row-ovr {
         position: absolute;
         top: 6px;
@@ -707,7 +706,7 @@
         letter-spacing: -1px;
         line-height: 1.1;
     }
-    
+
     .player-row-position {
         position: absolute;
         top: 21.6px;
@@ -719,8 +718,8 @@
         letter-spacing: -0.8px;
         line-height: 1.1;
     }
-   
-    
+
+
     .player-card-nation-flag.hero-icon-nation-flag {
       position: absolute;
       bottom: 2px;
@@ -790,7 +789,7 @@
     .player-row-main-img{
         margin-top: -10px;
         margin-right: 5px;
-        width: 150px;  
+        width: 150px;
         height: 160px;
         margin-left: -8px;
 
@@ -829,7 +828,7 @@
         letter-spacing: -0.3px;
         line-height: 1.1;
     }
-    
+
     .player-row-position {
         position: absolute;
         top: 26px;
@@ -841,7 +840,7 @@
         letter-spacing: -0.8px;
         line-height: 1.1;
     }
-    
+
     .player-card-nation-flag.hero-icon-nation-flag {
       position: absolute;
       bottom: 22px;
@@ -961,7 +960,7 @@
         letter-spacing: -1px;
         line-height: 1.1;
     }
-    
+
     .player-row-position {
         position: absolute;
         top: 25px;
@@ -973,7 +972,7 @@
         letter-spacing: -0.8px;
         line-height: 1.1;
     }
-    
+
     .player-card-nation-flag.hero-icon-nation-flag {
       position: absolute;
       bottom: 22px;

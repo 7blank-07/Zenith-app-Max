@@ -11221,38 +11221,42 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-player-img {
   top: auto;
-  bottom: 2%;
+  bottom: -9%;
   left: 50%;
-  width: 124%;
-  height: 124%;
+  width: 115%;
+  height: 115%;
   transform: translateX(-50%);
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
-  top: 11%;
-  left: 22%;
+  top: 13%;
+  left: 18%;
   transform: translateX(-50%);
-  font-size: clamp(0.78rem, 1.25vw, 1.08rem);
+  font-size: clamp(0.85rem, 1.55vw, 1.25rem);
   line-height: 1;
+  letter-spacing: 0.5px;
+  transform: scaleY(1);
+  font-family: "CruyffSans", sans-serif;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-position {
   top: 24%;
-  left: 22%;
+  left: 27%;
   transform: translateX(-50%);
-  font-size: clamp(0.5rem, 0.82vw, 0.7rem);
+  font-size: clamp(0.55rem, 0.95vw, 0.80rem);
   line-height: 0.9;
+  font-family: "CruyffSans", sans-serif;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-name {
-  bottom: 28%;
+  bottom: 24%;
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  max-width: 90%;
+  max-width: 100%;
+  font-weight: 799;
+  font-family: "CruyffSans", sans-serif;
   font-size: clamp(0.52rem, 0.86vw, 0.78rem);
-  line-height: 0.95;
-  letter-spacing: -0.2px;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.hero-icon-nation-flag {

@@ -77,7 +77,8 @@ export default function HomeDashboardInteractions() {
     let currentSlide = Math.max(0, slides.findIndex((slide) => slide.classList.contains('active')));
     let intervalId = null;
     let suppressBannerClickUntil = 0;
-    let touchStartPoint = null;
+    let swipeStartPoint = null;
+    let swipeCurrentPoint = null;
 
     const showSlide = (index) => {
       if (!slides.length) return;
@@ -152,42 +153,106 @@ export default function HomeDashboardInteractions() {
     if (bannerSlider) {
       const SWIPE_THRESHOLD = 35;
 
-      const handleTouchStart = (event) => {
-        const touch = event.touches?.[0];
-        if (!touch) return;
-        touchStartPoint = {
-          x: touch.clientX,
-          y: touch.clientY
-        };
-      };
-
-      const handleTouchEnd = (event) => {
-        const touch = event.changedTouches?.[0];
-        if (!touchStartPoint || !touch) {
-          touchStartPoint = null;
-          return;
-        }
-
-        const deltaX = touch.clientX - touchStartPoint.x;
-        const deltaY = touch.clientY - touchStartPoint.y;
+      const handleSwipe = (deltaX, deltaY) => {
         const horizontalSwipe = Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY);
-
-        if (horizontalSwipe) {
-          if (deltaX < 0) {
-            handleNext();
-          } else {
-            handlePrev();
-          }
-          suppressBannerClickUntil = Date.now() + 250;
+        if (!horizontalSwipe) return;
+        if (deltaX < 0) {
+          handleNext();
+        } else {
+          handlePrev();
         }
-
-        touchStartPoint = null;
+        suppressBannerClickUntil = Date.now() + 250;
       };
 
-      bannerSlider.addEventListener('touchstart', handleTouchStart, { passive: true });
-      bannerSlider.addEventListener('touchend', handleTouchEnd, { passive: true });
-      cleanup.push(() => bannerSlider.removeEventListener('touchstart', handleTouchStart));
-      cleanup.push(() => bannerSlider.removeEventListener('touchend', handleTouchEnd));
+      if ('PointerEvent' in window) {
+        const handlePointerDown = (event) => {
+          if (event.pointerType === 'mouse' && event.button !== 0) return;
+          swipeStartPoint = { x: event.clientX, y: event.clientY };
+          swipeCurrentPoint = { x: event.clientX, y: event.clientY };
+          if (typeof bannerSlider.setPointerCapture === 'function') {
+            bannerSlider.setPointerCapture(event.pointerId);
+          }
+        };
+
+        const handlePointerMove = (event) => {
+          if (!swipeStartPoint) return;
+          swipeCurrentPoint = { x: event.clientX, y: event.clientY };
+        };
+
+        const handlePointerEnd = (event) => {
+          if (!swipeStartPoint) return;
+          const endPoint = swipeCurrentPoint || { x: event.clientX, y: event.clientY };
+          const deltaX = endPoint.x - swipeStartPoint.x;
+          const deltaY = endPoint.y - swipeStartPoint.y;
+          handleSwipe(deltaX, deltaY);
+          swipeStartPoint = null;
+          swipeCurrentPoint = null;
+          if (typeof bannerSlider.releasePointerCapture === 'function') {
+            bannerSlider.releasePointerCapture(event.pointerId);
+          }
+        };
+
+        const handlePointerCancel = (event) => {
+          swipeStartPoint = null;
+          swipeCurrentPoint = null;
+          if (typeof bannerSlider.releasePointerCapture === 'function' && bannerSlider.hasPointerCapture?.(event.pointerId)) {
+            bannerSlider.releasePointerCapture(event.pointerId);
+          }
+        };
+
+        bannerSlider.addEventListener('pointerdown', handlePointerDown, { passive: true });
+        bannerSlider.addEventListener('pointermove', handlePointerMove, { passive: true });
+        bannerSlider.addEventListener('pointerup', handlePointerEnd, { passive: true });
+        bannerSlider.addEventListener('pointercancel', handlePointerCancel, { passive: true });
+        cleanup.push(() => bannerSlider.removeEventListener('pointerdown', handlePointerDown));
+        cleanup.push(() => bannerSlider.removeEventListener('pointermove', handlePointerMove));
+        cleanup.push(() => bannerSlider.removeEventListener('pointerup', handlePointerEnd));
+        cleanup.push(() => bannerSlider.removeEventListener('pointercancel', handlePointerCancel));
+      } else {
+        const handleTouchStart = (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          swipeStartPoint = { x: touch.clientX, y: touch.clientY };
+          swipeCurrentPoint = { x: touch.clientX, y: touch.clientY };
+        };
+
+        const handleTouchMove = (event) => {
+          const touch = event.touches?.[0];
+          if (!swipeStartPoint || !touch) return;
+          swipeCurrentPoint = { x: touch.clientX, y: touch.clientY };
+        };
+
+        const handleTouchEnd = (event) => {
+          const touch = event.changedTouches?.[0];
+          const endPoint = touch
+            ? { x: touch.clientX, y: touch.clientY }
+            : swipeCurrentPoint;
+          if (!swipeStartPoint || !endPoint) {
+            swipeStartPoint = null;
+            swipeCurrentPoint = null;
+            return;
+          }
+          const deltaX = endPoint.x - swipeStartPoint.x;
+          const deltaY = endPoint.y - swipeStartPoint.y;
+          handleSwipe(deltaX, deltaY);
+          swipeStartPoint = null;
+          swipeCurrentPoint = null;
+        };
+
+        const handleTouchCancel = () => {
+          swipeStartPoint = null;
+          swipeCurrentPoint = null;
+        };
+
+        bannerSlider.addEventListener('touchstart', handleTouchStart, { passive: true });
+        bannerSlider.addEventListener('touchmove', handleTouchMove, { passive: true });
+        bannerSlider.addEventListener('touchend', handleTouchEnd, { passive: true });
+        bannerSlider.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+        cleanup.push(() => bannerSlider.removeEventListener('touchstart', handleTouchStart));
+        cleanup.push(() => bannerSlider.removeEventListener('touchmove', handleTouchMove));
+        cleanup.push(() => bannerSlider.removeEventListener('touchend', handleTouchEnd));
+        cleanup.push(() => bannerSlider.removeEventListener('touchcancel', handleTouchCancel));
+      }
     }
 
     showSlide(currentSlide);
