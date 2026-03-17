@@ -219,9 +219,9 @@ export default async function HomePage() {
             <div className="hero-banner-slider">
               <div className="banner-slide active" data-redirect="view" data-target="database">
                 <Image
-                  src="/assets/images/banner2.webp"
-                  alt="Market Update"
-                  className="banner-image"
+                  src="/assets/images/capped_legends_banner.webp"
+                  alt="Capped Legends Event"
+                  className="banner-image banner-image--capped-legends"
                   width={1600}
                   height={400}
                   sizes="(max-width: 1400px) 100vw, 1400px"

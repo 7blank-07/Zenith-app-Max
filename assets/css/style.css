@@ -7412,6 +7412,11 @@ watchlist-view .view-content {
   object-position: center;
 }
 
+.banner-image--capped-legends {
+  object-fit: contain;
+  background: #0E1114;
+}
+
 /* FIRST BADGE FOR TEAL PRO 13 */
 /* Gradient overlay for better text readability */
 .banner-overlay {
@@ -7585,6 +7590,10 @@ watchlist-view .view-content {
 
   .banner-image {
     object-fit: cover;
+  }
+
+  .banner-image--capped-legends {
+    object-fit: contain;
   }
 }
 
