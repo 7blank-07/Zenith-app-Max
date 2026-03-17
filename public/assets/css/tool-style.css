@@ -6570,7 +6570,7 @@ body.stats-open #squad-builder-modal {
     left: 50%;
     transform: translateX(-50%) scale(1.1)  ;
     width: 120px;
-    height: 120px;
+    height: 125px;
     object-fit: contain;
     z-index: 2;
 }
@@ -6912,25 +6912,23 @@ body.stats-open #squad-builder-modal {
 
   .preview-card-player-img {
     position: absolute;
-    bottom: 0px;
+    bottom: 4px;
     left: 50%;
     transform: translateX(-50%) scale(1.1);
     /* Scaled proportionally for 88px width */
     width: 92px;
-    height: 92px;
+    height: 98px;
     object-fit: contain;
     z-index: 2;
-    margin-bottom: 6px;
   }
 
   .preview-card-ovr {
     position: absolute;
     top: 8px;
-    left: 22px;
-    font-size: 0.855rem;
+    left: 15px;
+    font-size: 0.875rem;
     font-weight: 900;
     z-index: 3;
-    margin-left: 7%;
     font-family: var(--font-family-base, CruyffSans, sans-serif);
     letter-spacing: -0.5px;
 
@@ -6941,12 +6939,11 @@ body.stats-open #squad-builder-modal {
 
   .preview-card-position {
     position: absolute;
-    top: 19px;
+    top: 21px;
     left: 16px;
     font-size: 0.5rem;
     font-weight: 850;
     z-index: 3;
-    margin-left: 7%;
     font-family: var(--font-family-base, CruyffSans, sans-serif);
 
     transform: scaleY(1.15);   /* increase height only */
@@ -11224,38 +11221,38 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-player-img {
   top: auto;
-  bottom: -8%;
+  bottom: 2%;
   left: 50%;
-  width: 116%;
-  height: 115%;
+  width: 124%;
+  height: 124%;
   transform: translateX(-50%);
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
-  top: 12.5%;
-  left: 26%;
+  top: 11%;
+  left: 22%;
   transform: translateX(-50%);
   font-size: clamp(0.78rem, 1.25vw, 1.08rem);
   line-height: 1;
-  font-weight: 799;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-position {
   top: 24%;
-  left: 26.8%;
+  left: 22%;
   transform: translateX(-50%);
   font-size: clamp(0.5rem, 0.82vw, 0.7rem);
   line-height: 0.9;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-name {
-  bottom: 24%;
+  bottom: 28%;
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  max-width: 100%;
-  font-size: clamp(0.50rem, 0.84vw, 0.76rem);
-  font-weight: 799;
+  max-width: 90%;
+  font-size: clamp(0.52rem, 0.86vw, 0.78rem);
+  line-height: 0.95;
+  letter-spacing: -0.2px;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.hero-icon-nation-flag {

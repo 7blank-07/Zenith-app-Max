@@ -7924,7 +7924,7 @@ watchlist-view .view-content {
 /* Player Name */
 .card-player-name {
     position: absolute;
-    bottom: 25%;
+    bottom: 28%;
     font-size: 0.88rem;
     font-weight: 799;
     text-transform: uppercase;
@@ -7936,7 +7936,8 @@ watchlist-view .view-content {
     text-overflow: ellipsis;
     font-family: "CruyffSans", sans-serif;
     letter-spacing: -0.1px;
-    transform: scaleY(1.07);
+    line-height: 0.9;
+    transform: scaleY(1.1);
 
 }
 
@@ -8270,7 +8271,7 @@ watchlist-view .view-content {
         font-size: 0.97rem;
         font-weight: 800;
         letter-spacing: 0.6px;
-        max-width: 100%;
+        max-width: 90%;
     }
 
   .card-nation-flag-home.hero-icon-nation-flag-home{
@@ -8360,21 +8361,21 @@ watchlist-view .view-content {
     .card-ovr {
         top: 12%;
         left: 23%;
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         font-weight: 799;
     }
 
     .card-position {
         top: 23.8%;
         left: 23%;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 800;
         letter-spacing: -0.3px;
     }
 
     .card-player-name {
         bottom: 28%;
-        font-size: 0.92rem;
+        font-size: 0.6rem;
         font-weight: 800;
         letter-spacing: 0.6px;
         max-width: 100%;
@@ -8384,8 +8385,8 @@ watchlist-view .view-content {
     position: absolute;
     bottom: 19%;
     left: 26%;
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
     object-fit: cover;
     border-radius: 2px;
     z-index: 3;
@@ -8395,8 +8396,8 @@ watchlist-view .view-content {
     position: absolute;
     bottom: 19%;
     left: 61%;
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
     object-fit: cover;
     border-radius: 2px;
     z-index: 3;
@@ -8406,8 +8407,8 @@ watchlist-view .view-content {
     position: absolute;
     bottom: 20%;
     left: 19%;
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
     object-fit: cover;
     border-radius: 2px;
     z-index: 3;
@@ -8417,8 +8418,8 @@ watchlist-view .view-content {
     position: absolute;
     bottom: 20%;
     left: 68%;
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
     object-fit: cover;
     border-radius: 2px;
     z-index: 3;
@@ -8428,8 +8429,8 @@ watchlist-view .view-content {
     position: absolute;
     bottom: 20%;
     left: 44%;
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
     object-fit: cover;
     border-radius: 2px;
     z-index: 3;

@@ -6,10 +6,19 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/admin/*']
+        disallow: [
+          '/admin/',
+          '/api/',
+          '/internal-api/',
+          '/legacy/'
+        ]
       }
     ],
-    sitemap: `${siteUrl.replace(/\/+$/g, '')}/sitemap.xml`,
-    host: siteUrl
+    sitemap: [
+      `${siteUrl}/sitemap/0.xml`,
+      `${siteUrl}/sitemap/1.xml`,
+      `${siteUrl}/sitemap/2.xml`
+    ]
+    // removed host — not a valid Google directive
   };
 }
