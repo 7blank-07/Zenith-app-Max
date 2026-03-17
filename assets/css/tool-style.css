@@ -11384,6 +11384,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   border-radius: 2px;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-player-img,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-player-img {
   top: 50%;
   left: 50%;
@@ -11392,6 +11393,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   transform: translate(-50%, -50%) scale(1.02);
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-ovr,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-ovr {
   top: 11%;
   left: 22%;
@@ -11401,6 +11403,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   line-height: 1;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-position,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-position {
   top: 24%;
   left: 22%;
@@ -11410,24 +11413,29 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   line-height: 0.9;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-name,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-name {
   top: auto;
   bottom: 28%;
   left: 50%;
   transform: translateX(-50%);
-  max-width: 90%;
+  max-width: 92%;
   font-size: clamp(0.92rem, 1.7vw, 1.2rem);
   letter-spacing: -0.5px;
   line-height: 0.95;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags {
   bottom: 15%;
   left: 50%;
   transform: translateX(-50%);
-  gap: 7px;
+  gap: 6px;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag,
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club,
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league {
@@ -11435,19 +11443,32 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   bottom: auto;
   left: auto;
   transform: none;
-  width: 15px;
-  height: 15px;
+  width: 12px;
+  height: 12px;
   margin: 0;
   z-index: 3;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag {
   object-fit: cover;
 }
 
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club,
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league {
   object-fit: contain;
+}
+
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag.normal-modal-nation-flag,
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club.normal-modal-club-flag,
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league.normal-modal-league-flag,
+#squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag.normal-modal-nation-flag,
+#squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club.normal-modal-club-flag,
+#squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league.normal-modal-league-flag {
+  width: 11px;
+  height: 11px;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-player-image {
