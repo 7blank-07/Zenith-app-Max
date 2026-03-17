@@ -7434,21 +7434,11 @@ watchlist-view .view-content {
 
 
 .banner-title {
-  text-shadow:
-    /* 1px + 2px (same as above) */
-    -1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000,
-    -1px  0   0 #000,               1px  0   0 #000,
-    -1px  1px 0 #000, 0  1px 0 #000, 1px  1px 0 #000,
-
-    -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000,
-    -2px  0   0 #000,               2px  0   0 #000,
-    -2px  2px 0 #000, 0  2px 0 #000, 2px  2px 0 #000,
-
-    /* 3px outer ring */
-    -3px  0px 0 #000,
-     3px  0px 0 #000,
-     0px -3px 0 #000,
-     0px  3px 0 #000;
+  font-size: 1.75rem;
+  color: #ffffff;
+  font-weight: 900;
+  -webkit-text-stroke: 1.1px #000;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.62);
 }
 
 
@@ -12707,18 +12697,12 @@ body {
 }
 
 .players-grid--database .players-db-row-card .player-row-ovr {
-    position: absolute;
-    top: 8px;
-    left: 5px;
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 15px;
-    font-weight: 800;
-    font-family: "CruyffSans", sans-serif;
-    color: var(--player-ovr-color, #FFB86B);
-    z-index: 10;
-    line-height: 1.1;
-    transform: scaleY(1);
+  top: 11%;
+  left: 22%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  letter-spacing: -0.8px;
+  line-height: 1;
 }
 
 .players-grid--database .players-db-row-card .player-row-position {
@@ -12726,28 +12710,19 @@ body {
   left: 22%;
   transform: translateX(-50%);
   font-size: 0.56rem;
+  letter-spacing: -0.35px;
   line-height: 0.9;
 }
 
 .players-grid--database .players-db-row-card .player-row-name {
-    position: absolute;
-    top: 66px;
-    left: 50%;
-    transform: translateX(-50%) scaleY(1);
-    text-align: center;
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 0.625rem;
-    font-weight: 800;
-    font-family: "CruyffSans", sans-serif;
-    color: var(--player-name-color, #FFFFFF);
-    z-index: 10;
-    line-height: 1;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+  top: auto;
+  bottom: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 100%;
+  font-size: 0.68rem;
+  line-height: 0.95;
+  padding: 0;
 }
 
 .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag {

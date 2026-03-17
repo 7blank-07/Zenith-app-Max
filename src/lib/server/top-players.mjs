@@ -9,6 +9,7 @@ const DEFAULT_FILTER_MAX_PAGES = 100;
 const DEFAULT_FILTER_FETCH_CONCURRENCY = 6;
 const DEFAULT_FILTER_CACHE_TTL_MS = 1000 * 60 * 60;
 const DEFAULT_BY_IDS_CACHE_TTL_MS = 1000 * 60 * 5;
+const DEFAULT_LATEST_PLAYERS_CACHE_TTL_MS = 1000 * 60 * 5;
 const DEFAULT_TOP_IDS_CACHE_TTL_MS = 1000 * 60 * 10;
 const DEFAULT_CACHE_MAX_ENTRIES = 20;
 
@@ -20,6 +21,7 @@ let playerFilterMetadataCache = {
 };
 
 const playersByIdsCache = new Map();
+const latestPlayersCache = new Map();
 
 let topPlayerIdsCache = {
   expiresAt: 0,
@@ -64,6 +66,25 @@ function splitIntoChunks(items, size) {
 function toText(value) {
   if (value === undefined || value === null) return '';
   return String(value).trim();
+}
+
+function toDateTimestamp(value) {
+  const text = toText(value);
+  if (!text) return 0;
+  const parsed = Date.parse(text);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function compareLatestPlayers(left, right) {
+  const leftDate = toDateTimestamp(left?.dateAdded);
+  const rightDate = toDateTimestamp(right?.dateAdded);
+  if (leftDate !== rightDate) return rightDate - leftDate;
+
+  const leftOvr = Number(left?.ovr) || 0;
+  const rightOvr = Number(right?.ovr) || 0;
+  if (leftOvr !== rightOvr) return rightOvr - leftOvr;
+
+  return toText(left?.name).localeCompare(toText(right?.name));
 }
 
 function addIfPresent(targetSet, value) {
@@ -277,6 +298,102 @@ export async function fetchPlayersByIds(playerIds, options = {}) {
     return value;
   } catch (error) {
     playersByIdsCache.delete(cacheKey);
+    throw error;
+  }
+}
+
+export async function fetchLatestPlayers(options = {}) {
+  const requestedLimit = ensurePositiveInteger(options.limit, 12);
+  const rank = options.rank ?? 0;
+  const candidateLimit = ensurePositiveInteger(options.candidateLimit, Math.max(requestedLimit * 12, 180));
+  const maxCandidateLimit = Math.min(candidateLimit, 1000);
+  const chunkSize = ensurePositiveInteger(options.chunkSize, 100);
+  const maxColorFallbackRank = ensurePositiveInteger(options.colorFallbackRanks, 5);
+  const shouldEnrichColors = options.enrichColors !== false && maxCandidateLimit <= 500;
+  const cacheTtlMs = ensurePositiveInteger(options.cacheTtlMs, DEFAULT_LATEST_PLAYERS_CACHE_TTL_MS);
+  const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
+  const cacheKey =
+    `${baseUrl}|rank-${rank}|limit-${requestedLimit}|candidates-${maxCandidateLimit}|` +
+    `${shouldEnrichColors ? `color-${maxColorFallbackRank}` : 'color-0'}`;
+  const now = Date.now();
+  const cached = latestPlayersCache.get(cacheKey);
+
+  if (cached?.value && cached.expiresAt > now) {
+    return cached.value.slice(0, requestedLimit);
+  }
+
+  if (cached?.inFlight) {
+    const resolved = await cached.inFlight;
+    return resolved.slice(0, requestedLimit);
+  }
+
+  const inFlight = (async () => {
+    const query = new URLSearchParams({
+      limit: String(maxCandidateLimit),
+      offset: '0',
+      rank: String(rank),
+      sort_by: 'date_added',
+      order: 'desc'
+    });
+    const requestUrl = `${baseUrl}/players?${query.toString()}`;
+    const response = await fetch(requestUrl, {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    });
+
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(`Failed to fetch latest /players (${response.status}): ${details || response.statusText}`);
+    }
+
+    const payload = await response.json();
+    const rows = ensureList(payload);
+    const byId = new Map();
+    for (const row of rows) {
+      const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);
+      if (!normalized.playerId) continue;
+      const existing = byId.get(normalized.playerId);
+      byId.set(normalized.playerId, preferPlayerStableRecord(existing, normalized));
+    }
+
+    const latestPlayers = [...byId.values()];
+    if (shouldEnrichColors) {
+      const missingColorIds = latestPlayers
+        .filter((player) => player && !hasPlayerColorData(player))
+        .map((player) => player.playerId)
+        .filter(Boolean);
+
+      if (missingColorIds.length) {
+        const colorFallbackById = await fetchColorFallbackById(baseUrl, missingColorIds, chunkSize, maxColorFallbackRank);
+        for (const [index, player] of latestPlayers.entries()) {
+          if (!player) continue;
+          const colorSource = colorFallbackById.get(player.playerId);
+          if (!colorSource || hasPlayerColorData(player)) continue;
+          latestPlayers[index] = mergePlayerColorData(player, colorSource);
+        }
+      }
+    }
+
+    latestPlayers.sort(compareLatestPlayers);
+    return latestPlayers.slice(0, requestedLimit);
+  })();
+
+  setBoundedCacheEntry(latestPlayersCache, cacheKey, {
+    value: cached?.value || null,
+    expiresAt: 0,
+    inFlight
+  });
+
+  try {
+    const value = await inFlight;
+    setBoundedCacheEntry(latestPlayersCache, cacheKey, {
+      value,
+      expiresAt: Date.now() + cacheTtlMs,
+      inFlight: null
+    });
+    return value;
+  } catch (error) {
+    latestPlayersCache.delete(cacheKey);
     throw error;
   }
 }

@@ -8,11 +8,10 @@ import Link from 'next/link';
 import { buildPlayerPath } from '../src/lib/player-slug.mjs';
 import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
-import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-players.mjs';
+import { fetchLatestPlayers } from '../src/lib/server/top-players.mjs';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
-const HOME_PLAYER_LIMIT = 48;
 const HOME_SECTION_LIMIT = 12;
 const HOME_BLOG_LIMIT = 8;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
@@ -118,17 +117,19 @@ function renderDashboardPlayerCard(player, key) {
 
 export default async function HomePage() {
   const startedAt = Date.now();
-  const topIdsPromise = readTopPlayerIds(HOME_PLAYER_LIMIT);
+  const latestPlayersPromise = fetchLatestPlayers({
+    rank: 0,
+    limit: HOME_SECTION_LIMIT,
+    candidateLimit: 240
+  });
   const blogPageDataPromise = getBlogIndexPageData();
-  const topIds = await topIdsPromise;
-  const [players, blogPageData] = await Promise.all([fetchPlayersByIds(topIds, { rank: 0 }), blogPageDataPromise]);
-  const latestPlayers = players.slice(0, HOME_SECTION_LIMIT);
+  const [latestPlayers, blogPageData] = await Promise.all([latestPlayersPromise, blogPageDataPromise]);
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
 
   console.info('[metrics] / render', {
     elapsedMs: Date.now() - startedAt,
-    cardCount: players.length,
+    cardCount: latestPlayers.length,
     latestCount: latestPlayers.length,
     latestBlogsCount: latestBlogPosts.length
   });
