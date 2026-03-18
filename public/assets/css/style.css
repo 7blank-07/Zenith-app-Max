@@ -12798,44 +12798,48 @@ body {
 }
 
 .player-detail-mini-card .player-image-img-inside {
-  top: 50%;
+  top: 53%;
   left: 50%;
-  width: 124%;
-  height: 124%;
+  width: 106%;
+  height: 106%;
   transform: translate(-50%, -50%) scale(1.02);
 }
 
 .player-detail-mini-card .card-ovr-inside {
   top: 11%;
-  left: 22%;
+  left: 29%;
   transform: translateX(-50%);
-  font-size: 1.72rem;
-  letter-spacing: -0.8px;
+  font-size: 2.60rem;
+  letter-spacing: 0.6%;
   line-height: 1;
+  font-family: "CruyffSans", sans-serif;
 }
 
 .player-detail-mini-card .card-position-inside {
   top: 24%;
-  left: 22%;
+  left: 28.5%;
   transform: translateX(-50%);
-  font-size: 1.08rem;
-  letter-spacing: -0.4px;
+  font-size: 1.60rem;
+  letter-spacing: 0.3%px;
   line-height: 0.9;
+  font-family: "CruyffSans", sans-serif;
+
 }
 
 .player-detail-mini-card .card-player-name-inside {
   left: 50%;
-  bottom: 28%;
+  bottom: 24%;
   transform: translateX(-50%);
-  max-width: 92%;
-  font-size: 1.24rem;
-  letter-spacing: -0.5px;
+  max-width: 100%;
+  font-size: 1.50rem;
   line-height: 0.95;
+  font-family: "CruyffSans", sans-serif;
+
 }
 
 .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail {
   bottom: 15%;
-  left: 25%;
+  left: 33%;
   width: 22px;
   height: 22px;
 }
@@ -12848,21 +12852,21 @@ body {
 }
 
 .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail {
-  bottom: 15%;
-  left: 20%;
+  bottom: 17%;
+  left: 24%;
   width: 21px;
   height: 21px;
 }
 
 .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail {
-  bottom: 15%;
-  left: 70%;
+  bottom: 17%;
+  left: 65%;
   width: 21px;
   height: 21px;
 }
 
 .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
-  bottom: 15%;
+  bottom: 17%;
   left: 44%;
   width: 21px;
   height: 21px;
