@@ -219,7 +219,7 @@ export default async function HomePage() {
             <div className="hero-banner-slider">
               <div className="banner-slide active" data-redirect="view" data-target="database">
                 <picture>
-                  <source media="(min-width: 1024px)" srcSet="/assets/images/banner_desktop.webp" />
+                  <source media="(min-width: 1024px)" srcSet="/assets/images/last_banner_desktop.webp" />
                   <img
                     src="/assets/images/capped_legends_banner.webp"
                     alt="Capped Legends Event"
