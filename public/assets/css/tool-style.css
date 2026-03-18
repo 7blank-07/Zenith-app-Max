@@ -6916,8 +6916,8 @@ body.stats-open #squad-builder-modal {
     left: 50%;
     transform: translateX(-50%) scale(1.1);
     /* Scaled proportionally for 88px width */
-    width: 92px;
-    height: 98px;
+    width: 96px;
+    height: 104px;
     object-fit: contain;
     z-index: 2;
   }
@@ -6925,13 +6925,13 @@ body.stats-open #squad-builder-modal {
   .preview-card-ovr {
     position: absolute;
     top: 8px;
-    left: 15px;
+    left: 19px;
     font-size: 0.875rem;
     font-weight: 900;
     z-index: 3;
     font-family: var(--font-family-base, CruyffSans, sans-serif);
     letter-spacing: -0.5px;
-
+    margin-left: 5%;
     transform: scaleY(1);      /* increases height only */
     transform-origin: top;        /* prevents downward shift */
 
@@ -6940,12 +6940,12 @@ body.stats-open #squad-builder-modal {
   .preview-card-position {
     position: absolute;
     top: 21px;
-    left: 16px;
+    left: 20px;
     font-size: 0.5rem;
     font-weight: 850;
     z-index: 3;
     font-family: var(--font-family-base, CruyffSans, sans-serif);
-
+    margin-left: 5%;
     transform: scaleY(1.15);   /* increase height only */
     transform-origin: top;     /* prevents downward shifting */
 
@@ -7419,6 +7419,93 @@ body.stats-open #squad-builder-modal {
 }
 
 
+#squad-builder-modal .bench-card-inner .bench-card-player-img {
+  top: auto;
+  bottom: -7%;
+  left: 50%;
+  width: 115%;
+  height: 115%;
+  transform: translateX(-50%);
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-ovr {
+  top: 11.8%;
+  left: 24%;
+  transform: translateX(-50%);
+  font-size: clamp(0.75rem, 1.13vw, 0.99rem);
+  line-height: 1;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-position {
+  top: 24%;
+  left: 24%;
+  transform: translateX(-50%);
+  font-size: clamp(0.44rem, 0.72vw, 0.62rem);
+  line-height: 0.9;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-name {
+  top: auto;
+  bottom: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  font-size: clamp(0.52rem, 0.80vw, 0.67rem);
+  line-height: 0.95;
+  letter-spacing: -0.2px;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag {
+  top: 76%;
+  left: 25%;
+  width: min(12%, 12px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  margin-bottom: 20%;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-flag-club.hero-icon-club-flag {
+  top: 76%;
+  left: 60%;
+  width: min(12%, 12px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag {
+  top: 76%;
+  left: 20%;
+  width: min(11%, 11px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  margin-bottom: 10%;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-flag-club.normal-club-flag {
+  top: 76%;
+  left: 70%;
+  width: min(11%, 11px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+#squad-builder-modal .bench-card-inner .bench-card-flag-league.normal-bench-league-flag {
+  position: absolute;
+  bottom: 16%;
+  left: 44%;
+  width: min(11%, 11px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  z-index: 3;
+  border-radius: 2px;
+}
+
+
 
 @media (max-width: 1024px) {
     /* Empty Bench Slot Scaling */
@@ -7446,20 +7533,20 @@ body.stats-open #squad-builder-modal {
         transform: translateX(-50%) scale(1.1);
     }
 
-    .bench-card-ovr {
-        top: 9px;
-        left: 15px;
-        font-size: 0.9375rem;
-        letter-spacing: -0.4px;
+    #squad-builder-modal .bench-card-inner .bench-card-ovr {
+      top: 9px;
+      left: 15px;
+      font-size: 0.9375rem;
+      letter-spacing: -0.4px;
     }
 
-    .bench-card-position {
+    #squad-builder-modal .bench-card-inner .bench-card-position {
         top: 24px;
         left: 16px;
         font-size: 0.5625rem;
     }
 
-    .bench-card-name {
+    #squad-builder-modal .bench-card-inner .bench-card-name {
         top: auto;   /* Overriding the fixed top from desktop */
         bottom: 28px;
         font-size: 9px;
@@ -11052,20 +11139,20 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-player-img {
-    width: 80px;
-    height: 86px;
+    width: 86px;
+    height: 92px;
     bottom: 3px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-ovr {
     top: 10px;
-    left: 14px;
-    font-size: 0.875rem;
+    left: 18%;
+    font-size: 0.805rem;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .preview-card-position {
     top: 24px;
-    left: 14px;
+    left: 19%;
     font-size: 0.56rem;
   }
 
@@ -11221,16 +11308,16 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-player-img {
   top: auto;
-  bottom: 2%;
+  bottom: -5%;
   left: 50%;
-  width: 124%;
-  height: 124%;
+  width: 115%;
+  height: 115%;
   transform: translateX(-50%);
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
-  top: 11%;
-  left: 22%;
+  top: 13%;
+  left: 25%;
   transform: translateX(-50%);
   font-size: clamp(0.78rem, 1.25vw, 1.08rem);
   line-height: 1;
@@ -11238,7 +11325,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-position {
   top: 24%;
-  left: 22%;
+  left: 26%;
   transform: translateX(-50%);
   font-size: clamp(0.5rem, 0.82vw, 0.7rem);
   line-height: 0.9;
@@ -11300,89 +11387,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   object-fit: contain;
 }
 
-#squad-builder-modal .bench-card-inner .bench-card-player-img {
-  top: auto;
-  bottom: 2%;
-  left: 50%;
-  width: 122%;
-  height: 122%;
-  transform: translateX(-50%);
-}
 
-#squad-builder-modal .bench-card-inner .bench-card-ovr {
-  top: 11%;
-  left: 22%;
-  transform: translateX(-50%);
-  font-size: clamp(0.72rem, 1.08vw, 0.95rem);
-  line-height: 1;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-position {
-  top: 24%;
-  left: 22%;
-  transform: translateX(-50%);
-  font-size: clamp(0.44rem, 0.72vw, 0.62rem);
-  line-height: 0.9;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-name {
-  top: auto;
-  bottom: 28%;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 90%;
-  font-size: clamp(0.46rem, 0.75vw, 0.62rem);
-  line-height: 0.95;
-  letter-spacing: -0.2px;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag {
-  bottom: 15%;
-  left: 25%;
-  width: min(12%, 12px);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-flag-club.hero-icon-club-flag {
-  bottom: 15%;
-  left: 60%;
-  width: min(12%, 12px);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag {
-  bottom: 16%;
-  left: 20%;
-  width: min(11%, 11px);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-flag-club.normal-club-flag {
-  bottom: 16%;
-  left: 70%;
-  width: min(11%, 11px);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-}
-
-#squad-builder-modal .bench-card-inner .bench-card-flag-league.normal-bench-league-flag {
-  position: absolute;
-  bottom: 16%;
-  left: 44%;
-  width: min(11%, 11px);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-  z-index: 3;
-  border-radius: 2px;
-}
 
 #squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-player-img,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-player-img {
