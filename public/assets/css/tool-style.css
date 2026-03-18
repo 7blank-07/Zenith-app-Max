@@ -11484,32 +11484,38 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   left: 22%;
   margin-left: 0;
   transform: translateX(-50%);
-  font-size: clamp(0.92rem, 1.3vw, 1.26rem);
+  font-size: clamp(1.5rem, 1.8vw, 1.75rem);
   line-height: 1;
+  letter-spacing: 0.5%;
+  font-family: "CruyffSans", sans-serif;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-card-pos {
   top: 24%;
-  left: 22%;
+  left: 22.9%;
   transform: translateX(-50%);
-  font-size: clamp(0.58rem, 0.84vw, 0.84rem);
+  font-size: clamp(0.80rem, 1vw, 1.1rem);
   line-height: 0.9;
+  letter-spacing: 0.5%;
+  font-family: "CruyffSans", sans-serif;
+
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-card-name {
-  bottom: 28%;
+  bottom: 26%;
   left: 50%;
   transform: translateX(-50%);
   max-width: 90%;
-  font-size: clamp(0.66rem, 1vw, 0.94rem);
+  font-size: clamp(0.80rem, 1.4vw, 1.1rem);
   line-height: 0.95;
-  letter-spacing: -0.2px;
+  letter-spacing: 0.5%;
+  font-family: "CruyffSans", sans-serif;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-nation-flag.hero-icon-nation-flag {
   bottom: 15%;
-  left: 25%;
-  width: min(12%, 14px);
+  left: 27%;
+  width: min(18%, 22px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -11518,7 +11524,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .compare-player-card.filled-state .compare-card-container .compare-club-flag.hero-icon-club-flag {
   bottom: 15%;
   left: 60%;
-  width: min(12%, 14px);
+  width: min(18%, 22px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
@@ -11527,7 +11533,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .compare-player-card.filled-state .compare-card-container .compare-nation-flag.normal-nation-flag {
   bottom: 16%;
   left: 20%;
-  width: min(11%, 13px);
+  width: min(16%, 20px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -11536,7 +11542,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .compare-player-card.filled-state .compare-card-container .compare-club-flag.normal-club-flag {
   bottom: 16%;
   left: 70%;
-  width: min(11%, 13px);
+  width: min(16%, 20px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
@@ -11545,7 +11551,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .compare-player-card.filled-state .compare-card-container .compare-league-flag.normal-league-flag {
   bottom: 16%;
   left: 44%;
-  width: min(11%, 13px);
+  width: min(16%, 20px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
