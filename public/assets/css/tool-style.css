@@ -11226,7 +11226,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 .picker-card-mini .picker-card-ovr {
   top: 11%;
-  left: 22%;
+  left: 27%;
   transform: translateX(-50%);
   font-size: clamp(0.74rem, 1.1vw, 0.92rem);
   line-height: 1;
@@ -11234,7 +11234,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 .picker-card-mini .picker-card-position {
   top: 24%;
-  left: 22%;
+  left: 27%;
   transform: translateX(-50%);
   font-size: clamp(0.46rem, 0.72vw, 0.62rem);
   line-height: 0.9;
@@ -11400,8 +11400,8 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-ovr,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-ovr {
-  top: 11%;
-  left: 22%;
+  top: 9%;
+  left: 24%;
   margin-left: 0;
   transform: translateX(-50%);
   font-size: clamp(1.3rem, 2.8vw, 1.8rem);
@@ -11410,18 +11410,18 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-position,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-position {
-  top: 24%;
-  left: 22%;
+  top: 22%;
+  left: 24%;
   margin-left: 0;
   transform: translateX(-50%);
-  font-size: clamp(0.82rem, 1.7vw, 1.12rem);
+  font-size: clamp(0.72rem, 1.3vw, 1.02rem);
   line-height: 0.9;
 }
 
 #squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-name,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-name {
   top: auto;
-  bottom: 28%;
+  bottom: 26%;
   left: 50%;
   transform: translateX(-50%);
   max-width: 92%;
@@ -11454,9 +11454,17 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   z-index: 3;
 }
 
-#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag,
+#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag{
+  object-fit: cover;
+  width: 30%;
+  height: 30%;
+  margin-top: 3%;
+}
+
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag {
   object-fit: cover;
+  width: 30%;
+  height: 30%;
 }
 
 #squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club,
@@ -11464,17 +11472,76 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club,
 #squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league {
   object-fit: contain;
+  width: 30%;
+  height: 30%;
+  margin-left: 30%;
 }
 
-#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag.normal-modal-nation-flag,
-#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club.normal-modal-club-flag,
-#squad-player-customization-modal .modal-content.squad-customization-content .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league.normal-modal-league-flag,
-#squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-flag.normal-modal-nation-flag,
-#squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-club.normal-modal-club-flag,
-#squad-player-customization-modal .squad-custom-mini-card .squad-custom-card-flags .squad-modal-custom-card-league.normal-modal-league-flag {
-  width: 11px;
-  height: 11px;
+
+
+#squad-player-customization-modal .modal-content.squad-customization-content
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-flag.hero-modal-nation-flag,
+
+#squad-player-customization-modal
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-flag hero-icon-modal-nation-flag {
+  width: 20px;
+  height: 22px;
 }
+
+
+#squad-player-customization-modal .modal-content.squad-customization-content
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-club.icon-hero-modal-club-flag,
+
+#squad-player-customization-modal
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-club.hero-modal-club-flag {
+  width: 20px;
+  height: 22px;
+}
+
+
+#squad-player-customization-modal .modal-content.squad-customization-content
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-flag.normal-modal-nation-flag,
+
+#squad-player-customization-modal
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-flag.normal-modal-nation-flag {
+  width: 18px;
+  height: 20px;
+  margin-right: 5%;
+}
+
+
+#squad-player-customization-modal .modal-content.squad-customization-content
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-club.normal-modal-club-flag,
+
+#squad-player-customization-modal
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-club.normal-modal-club-flag {
+  width: 18px;
+  height: 20px;
+}
+
+
+#squad-player-customization-modal .modal-content.squad-customization-content
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-league.normal-modal-league-flag,
+
+#squad-player-customization-modal
+.squad-custom-mini-card .squad-custom-card-flags
+.squad-modal-custom-card-league.normal-modal-league-flag {
+  width: 18px;
+  height: 20px;
+  margin-right: 5%;
+}
+
+
+
 
 .compare-player-card.filled-state .compare-card-container .compare-player-image {
   top: 50%;
