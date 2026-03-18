@@ -218,16 +218,19 @@ export default async function HomePage() {
           <section className="hero-banner-section">
             <div className="hero-banner-slider">
               <div className="banner-slide active" data-redirect="view" data-target="database">
-                <Image
-                  src="/assets/images/capped_legends_banner.webp"
-                  alt="Capped Legends Event"
-                  className="banner-image banner-image--capped-legends"
-                  width={1600}
-                  height={400}
-                  sizes="(max-width: 1400px) 100vw, 1400px"
-                  priority
-                  fetchPriority="high"
-                />
+                <picture>
+                  <source media="(min-width: 1024px)" srcSet="/assets/images/banner_desktop.webp" />
+                  <img
+                    src="/assets/images/capped_legends_banner.webp"
+                    alt="Capped Legends Event"
+                    className="banner-image banner-image--capped-legends"
+                    width="1721"
+                    height="721"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </picture>
                 <div className="banner-overlay">
                   <div className="banner-content">
                     <h2 className="banner-title">Explore Players</h2>

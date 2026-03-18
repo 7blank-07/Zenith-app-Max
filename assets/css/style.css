@@ -7413,7 +7413,8 @@ watchlist-view .view-content {
 }
 
 .banner-image--capped-legends {
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center;
   background: #0E1114;
 }
 
@@ -7541,6 +7542,15 @@ watchlist-view .view-content {
   }
 }
 
+/* Desktop capped-legends framing */
+@media (min-width: 1024px) {
+  .banner-image--capped-legends {
+    object-position: center 42%;
+    transform: scale(1.04);
+    transform-origin: center;
+  }
+}
+
 /* Tablet & Medium Desktop */
 @media (min-width: 769px) and (max-width: 1280px) {
   .hero-banner-slider {
@@ -7579,7 +7589,7 @@ watchlist-view .view-content {
   }
 }
 
-/* Mobile & Tablet - show full banner image */
+/* Mobile & Tablet - tighten capped-legends fit */
 @media (max-width: 1023px) {
   .hero-banner-slider {
     height: auto;
@@ -7593,7 +7603,17 @@ watchlist-view .view-content {
   }
 
   .banner-image--capped-legends {
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
+    background: transparent;
+    transform: none;
+  }
+}
+
+/* Tablet capped-legends framing */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .banner-image--capped-legends {
+    object-position: center 38%;
   }
 }
 
