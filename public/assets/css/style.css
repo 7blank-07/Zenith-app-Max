@@ -12633,43 +12633,40 @@ body {
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-player-img {
-  top: 38%;
-  left: 48%;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  width: 124%;
+  height: 124%;
   transform: translate(-50%, -50%) scale(1.02);
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-ovr {
-  top: 8%;
-  left: 26%;
+  top: 11%;
+  left: 22%;
   margin-left: 0;
   transform: translateX(-50%);
   font-size: 0.85rem;
-  letter-spacing: 0.5%;
   line-height: 1;
-  font-family: "CruyffSans", sans-serif;
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-position {
-  top: 20%;
-  left: 24.8%;
+  top: 24%;
+  left: 22%;
   margin-left: 0;
   transform: translateX(-50%);
   font-size: 0.56rem;
   line-height: 0.9;
-  font-family: "CruyffSans", sans-serif;
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-name {
   top: auto;
-  bottom: 26%;
+  bottom: 28%;
   left: 50%;
   transform: translateX(-50%);
   max-width: 92%;
   font-size: 0.58rem;
+  letter-spacing: -0.35px;
   line-height: 0.95;
-  font-family: "CruyffSans", sans-serif;
 }
 
 .dropdown-player-card .dropdown-mini-card .dropdown-card-flag-nation,
@@ -12722,30 +12719,28 @@ body {
 
 .players-grid--database .players-db-row-card .player-row-main-img {
   top: 50%;
-  left: 50%;
+  left: 38%;
   width: 124%;
   height: 124%;
   transform: translate(-50%, -50%) scale(1.02);
 }
 
 .players-grid--database .players-db-row-card .player-row-ovr {
-  top: 10%;
-  left: 26%;
+  top: 11%;
+  left: 22%;
   transform: translateX(-50%);
-  font-size: 1rem;
-  letter-spacing: 0.5%;
+  font-size: 0.85rem;
+  letter-spacing: -0.8px;
   line-height: 1;
-  font-family: "CruyffSans", sans-serif;
 }
 
 .players-grid--database .players-db-row-card .player-row-position {
   top: 24%;
-  left: 25%;
+  left: 22%;
   transform: translateX(-50%);
-  font-size: 0.66rem;
+  font-size: 0.56rem;
+  letter-spacing: -0.35px;
   line-height: 0.9;
-  letter-spacing: 0.5%;
-  font-family: "CruyffSans", sans-serif;
 }
 
 .players-grid--database .players-db-row-card .player-row-name {
@@ -12755,14 +12750,12 @@ body {
   transform: translateX(-50%);
   max-width: 100%;
   font-size: 0.68rem;
-  font-family: "CruyffSans", sans-serif;
   line-height: 0.95;
-  letter-spacing: 0.5%;
   padding: 0;
 }
 
 .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag {
-  bottom: 17.5%;
+  bottom: 15%;
   left: 25%;
   width: 12px;
   height: 12px;
@@ -12770,16 +12763,16 @@ body {
 }
 
 .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
-  bottom: 10%;
+  bottom: 15%;
   left: 60%;
   width: 12px;
   height: 12px;
   object-fit: contain;
-  margin-top: 27%;
+  margin-top: 0;
 }
 
 .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag {
-  bottom: 18%;
+  bottom: 16%;
   left: 20%;
   width: 11px;
   height: 11px;
@@ -12787,16 +12780,16 @@ body {
 }
 
 .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag {
-  bottom: 18%;
+  bottom: 16%;
   left: 70%;
   width: 11px;
   height: 11px;
   object-fit: contain;
-  margin-top: 26%;
+  margin-top: 0;
 }
 
 .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
-  bottom: 18%;
+  bottom: 16%;
   left: 44%;
   width: 11px;
   height: 11px;
@@ -12805,48 +12798,44 @@ body {
 }
 
 .player-detail-mini-card .player-image-img-inside {
-  top: 53%;
+  top: 50%;
   left: 50%;
-  width: 106%;
-  height: 106%;
+  width: 124%;
+  height: 124%;
   transform: translate(-50%, -50%) scale(1.02);
 }
 
 .player-detail-mini-card .card-ovr-inside {
   top: 11%;
-  left: 29%;
+  left: 22%;
   transform: translateX(-50%);
-  font-size: 2.60rem;
-  letter-spacing: 0.6%;
+  font-size: 1.72rem;
+  letter-spacing: -0.8px;
   line-height: 1;
-  font-family: "CruyffSans", sans-serif;
 }
 
 .player-detail-mini-card .card-position-inside {
   top: 24%;
-  left: 28.5%;
+  left: 22%;
   transform: translateX(-50%);
-  font-size: 1.60rem;
-  letter-spacing: 0.3%px;
+  font-size: 1.08rem;
+  letter-spacing: -0.4px;
   line-height: 0.9;
-  font-family: "CruyffSans", sans-serif;
-
 }
 
 .player-detail-mini-card .card-player-name-inside {
   left: 50%;
-  bottom: 24%;
+  bottom: 28%;
   transform: translateX(-50%);
-  max-width: 100%;
-  font-size: 1.50rem;
+  max-width: 92%;
+  font-size: 1.24rem;
+  letter-spacing: -0.5px;
   line-height: 0.95;
-  font-family: "CruyffSans", sans-serif;
-
 }
 
 .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail {
   bottom: 15%;
-  left: 33%;
+  left: 25%;
   width: 22px;
   height: 22px;
 }
@@ -12859,22 +12848,656 @@ body {
 }
 
 .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail {
-  bottom: 17%;
-  left: 24%;
+  bottom: 15%;
+  left: 20%;
   width: 21px;
   height: 21px;
 }
 
 .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail {
-  bottom: 17%;
-  left: 65%;
+  bottom: 15%;
+  left: 70%;
   width: 21px;
   height: 21px;
 }
 
 .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
-  bottom: 17%;
+  bottom: 15%;
   left: 44%;
   width: 21px;
   height: 21px;
+}
+
+/* =====================================================
+   Homepage-style breakpoint control (Players + Detail)
+   ===================================================== */
+
+.players-grid--database .players-db-row-card .player-row-card-bg {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.players-grid--database .players-db-row-card .player-row-main-img {
+  top: 50%;
+  left: 50%;
+  width: 124%;
+  height: 124%;
+  transform: translate(-50%, -50%) scale(1.02);
+}
+
+.players-grid--database .players-db-row-card .player-row-ovr {
+  top: 9.8%;
+  left: 23%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0.4px;
+  font-family: "CruyffSans", sans-serif;
+}
+
+.players-grid--database .players-db-row-card .player-row-position {
+  top: 22%;
+  left: 23%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  line-height: 0.9;
+  font-family: "CruyffSans", sans-serif;
+}
+
+.players-grid--database .players-db-row-card .player-row-name {
+  top: auto;
+  bottom: 26%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 92%;
+  font-size: 0.68rem;
+  line-height: 0.95;
+  padding: 0;
+  font-family: "CruyffSans", sans-serif;
+}
+
+.players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag {
+  bottom: 15%;
+  left: 25%;
+  width: 12px;
+  height: 12px;
+  object-fit: cover;
+}
+
+.players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
+  bottom: 15%;
+  left: 60%;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  margin-top: 30%;
+}
+
+.players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag {
+  bottom: 16%;
+  left: 20%;
+  width: 11px;
+  height: 11px;
+  object-fit: cover;
+}
+
+.players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag {
+  bottom: 40%;
+  left: 70%;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+  margin-top: 28.3%;
+}
+
+.players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
+  bottom: 16%;
+  left: 44%;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+  margin-top: 0;
+}
+
+.player-detail-mini-card .player-image-img-inside {
+  top: 50%;
+  left: 50%;
+  width: 124%;
+  height: 124%;
+  transform: translate(-50%, -50%) scale(1.02);
+}
+
+.player-detail-mini-card .card-ovr-inside {
+  top: 11%;
+  left: 22%;
+  transform: translateX(-50%);
+  font-size: 1.72rem;
+  letter-spacing: -0.8px;
+  line-height: 1;
+}
+
+.player-detail-mini-card .card-position-inside {
+  top: 24%;
+  left: 22%;
+  transform: translateX(-50%);
+  font-size: 1.08rem;
+  letter-spacing: -0.4px;
+  line-height: 0.9;
+}
+
+.player-detail-mini-card .card-player-name-inside {
+  left: 50%;
+  bottom: 28%;
+  transform: translateX(-50%);
+  max-width: 92%;
+  font-size: 1.24rem;
+  letter-spacing: -0.5px;
+  line-height: 0.95;
+}
+
+.player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
+.player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+  bottom: 15%;
+  width: 22px;
+  height: 22px;
+}
+
+.player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail {
+  left: 25%;
+}
+
+.player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+  left: 60%;
+}
+
+.player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail,
+.player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail,
+.player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+  bottom: 15%;
+  width: 21px;
+  height: 21px;
+}
+
+.player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail {
+  left: 20%;
+}
+
+.player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail {
+  left: 70%;
+}
+
+.player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+  left: 44%;
+}
+
+@media (max-width: 1024px) {
+  .players-grid--database .players-db-row-card .player-row-main-img {
+    position: relative;
+    width: 145%;
+    height: 145%;
+    left: 54%;
+    margin-bottom: 1%;
+    margin-top: 36%;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-ovr {
+    font-size: 1.05rem;
+    position: absolute;
+    top: 8px;
+    left: 9px;
+    padding: 2px 5px;
+    font-weight: 800;
+    font-family: "CruyffSans", sans-serif;
+    color: var(--player-ovr-color, #FFB86B);
+    z-index: 10;
+    letter-spacing: 0.5%;
+    line-height: 1.1;
+    transform: scaleY(1);
+  }
+
+  .players-grid--database .players-db-row-card .player-row-position {
+    font-size: 0.67rem;
+    position: absolute;
+    top: 23px;
+    left: 11.5px;
+    font-weight: 800;
+    font-family: "CruyffSans", sans-serif;
+    color: var(--player-ovr-color, #FFB86B);
+    z-index: 10;
+    line-height: 1.1;
+    transform: scaleY(1);
+    margin-bottom: 20%;
+    margin-right: 20%;
+  }
+
+.players-grid--database .players-db-row-card .player-row-name {
+  position: absolute;
+  top: 65px;
+  left: 40%;
+  transform: translate(-60%, 10px);
+
+  font-size: 0.72rem;
+  font-family: "CruyffSans", sans-serif;
+  letter-spacing: 0.5px;
+
+  z-index: 10000; /* 🔥 push above gradient */
+}
+  .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
+    width: 13px;
+    height: 13px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag,
+  .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
+    width: 12px;
+    height: 12px;
+  }
+
+  .player-detail-mini-card {
+    width: 230px !important;
+    height: 230px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .player-detail-mini-card .card-ovr-inside {
+    font-size: 1.52rem;
+  }
+
+  .player-detail-mini-card .card-position-inside {
+    font-size: 0.96rem;
+  }
+
+  .player-detail-mini-card .card-player-name-inside {
+    font-size: 1.08rem;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+    width: 19px;
+    height: 19px;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail,
+  .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+
+
+@media (max-width: 968px) {
+  .players-grid--database .players-db-row-card .player-row-main-img {
+    position: relative;
+    width: 120%;
+    height: 120%;
+    left: 50%;
+    margin-bottom: 1%;
+    margin-top: 8%;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-ovr {
+    font-size: 1.05rem;
+    position: absolute;
+    top: 8px;
+    left: 17px;
+    padding: 2px 5px;
+    font-weight: 800;
+    font-family: "CruyffSans", sans-serif;
+    color: var(--player-ovr-color, #FFB86B);
+    z-index: 10;
+    letter-spacing: 0.5%;
+    line-height: 1.1;
+    transform: scaleY(1);
+  }
+
+  .players-grid--database .players-db-row-card .player-row-position {
+    font-size: 0.67rem;
+    position: absolute;
+    top: 23px;
+    left: 19.5px;
+    font-weight: 800;
+    font-family: "CruyffSans", sans-serif;
+    color: var(--player-ovr-color, #FFB86B);
+    z-index: 10;
+    line-height: 1.1;
+    transform: scaleY(1);
+    text-align: center;
+    margin-bottom: 20%;
+    margin-right: 20%;
+  }
+
+.players-grid--database .players-db-row-card .player-row-name {
+  position: absolute;
+  top: 56px;              /* adjust vertically */
+  left: 42.5%;              /* true center */
+  transform: translateX(-50%); /* perfect centering */
+  font-size: 0.60rem;     /* slightly bigger for clarity */
+  font-family: "CruyffSans", sans-serif;
+  letter-spacing: 0.3px;
+  color: #fff;            /* ensure visible */
+  text-align: center;
+  line-height: 1.2;       /* fixes compression */
+  padding: 2px 6px;
+  white-space: nowrap;    /* prevent wrapping */
+  overflow: visible;
+  z-index: 100;
+}
+
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag{
+    width: 13px;
+    height: 9px;
+    left: 26px;
+  }
+  .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
+    width: 13px;
+    height: 13px;
+    margin-top: 19px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
+    width: 10px;
+    height: 10px;
+    top: 75px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag{
+    width: 12px;
+    height: 12px;
+    top: 46px;
+    left: 67px;
+
+  }
+
+  .player-detail-mini-card {
+    width: 230px !important;
+    height: 230px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .player-detail-mini-card .card-ovr-inside {
+    font-size: 1.52rem;
+  }
+
+  .player-detail-mini-card .card-position-inside {
+    font-size: 0.96rem;
+  }
+
+  .player-detail-mini-card .card-player-name-inside {
+    font-size: 1.08rem;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+    width: 19px;
+    height: 19px;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail,
+  .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+
+
+@media (max-width: 768px) {
+  .players-grid--database .players-db-row-card .player-row-main-img {
+    width: 123%;
+    height: 123%;
+    left: 66px;
+    top: 70px;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-ovr {
+    font-size: 1.06rem;
+    position: absolute;
+    top: 13px;
+    left: 18px;
+    padding: 2px 5px;
+    font-weight: 800;
+    font-family: "CruyffSans", sans-serif;
+    color: var(--player-ovr-color, #FFB86B);
+    z-index: 10;
+    letter-spacing: 0.7%;
+    line-height: 1.1;
+    transform: scaleY(1);
+  }
+
+  .players-grid--database .players-db-row-card .player-row-position {
+    font-size: 0.68rem;
+    position: absolute;
+    top: 27px;
+    left: 20.5px;
+    font-weight: 800;
+    font-family: "CruyffSans", sans-serif;
+    color: var(--player-ovr-color, #FFB86B);
+    z-index: 10;
+    line-height: 1.1;
+    transform: scaleY(1);
+    text-align: center;
+    margin-bottom: 20%;
+    margin-right: 20%;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-name {
+    font-size: 0.70rem;
+    position: absolute;
+    top: 88px;              /* adjust vertically */
+    left: 55.5%;              /* true center */
+    transform: translateX(-50%); /* perfect centering */
+    font-family: "CruyffSans", sans-serif;
+    letter-spacing: 0.3px;
+    color: #fff;            /* ensure visible */
+    text-align: center;
+    line-height: 1.2;       /* fixes compression */
+    padding: 2px 6px;
+    white-space: nowrap;    /* prevent wrapping */
+    overflow: visible;
+    z-index: 100;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag{
+    width: 11px;
+    height: 11px;
+    left: 35px;
+  }
+  .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
+    width: 11px;
+    height: 11px;
+    top: 80px;
+    left: 72px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag{
+    width: 10px;
+    height: 10px;
+    top: 97px;
+    left: 28px;
+  }
+  .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag{
+    width: 10px;
+    height: 10px;
+    top: 66px;
+    left: 78px;
+  }
+  .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
+    width: 10px;
+    height: 10px;
+    top: 97px;
+    left: 55px;
+  }
+
+  .player-detail-mini-card {
+    width: 196px !important;
+    height: 196px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .player-detail-mini-card .card-ovr-inside {
+    font-size: 1.3rem;
+  }
+
+  .player-detail-mini-card .card-position-inside {
+    font-size: 0.82rem;
+  }
+
+  .player-detail-mini-card .card-player-name-inside {
+    font-size: 0.9rem;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+    width: 16px;
+    height: 16px;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail,
+  .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 512px) {
+  .players-grid--database .players-db-row-card .player-row-main-img {
+    width: 125%;
+    height: 125%;
+    top: 73px;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-ovr {
+    font-size: 1.1rem;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-position {
+    font-size: 0.65rem;
+    top: 29px;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-name {
+    font-size: 0.70rem;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
+    width: 11px;
+    height: 11px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag,
+  .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
+    width: 11px;
+    height: 13px;
+  }
+
+  .player-detail-mini-card {
+    width: 168px !important;
+    height: 168px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .player-detail-mini-card .card-ovr-inside {
+    font-size: 1.12rem;
+  }
+
+  .player-detail-mini-card .card-position-inside {
+    font-size: 0.72rem;
+  }
+
+  .player-detail-mini-card .card-player-name-inside {
+    font-size: 0.78rem;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+    width: 14px;
+    height: 14px;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail,
+  .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .players-grid--database .players-db-row-card .player-row-main-img {
+    width: 120%;
+    height: 120%;
+    top: 67px;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-ovr {
+    font-size: 1.01rem;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-position {
+    font-size: 0.66rem;
+    left: 20px;
+    top: 28px;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-name {
+    font-size: 0.72rem;
+    top: 74px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
+    width: 12px;
+    height: 12px;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag,
+  .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
+    width: 10px;
+    height: 11px;
+  }
+
+  .player-detail-mini-card {
+    width: 150px !important;
+    height: 150px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .player-detail-mini-card .card-ovr-inside {
+    font-size: 0.98rem;
+  }
+
+  .player-detail-mini-card .card-position-inside {
+    font-size: 0.62rem;
+  }
+
+  .player-detail-mini-card .card-player-name-inside {
+    font-size: 0.68rem;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.hero-icon-club-flag-detail {
+    width: 12px;
+    height: 12px;
+  }
+
+  .player-detail-mini-card .card-nation-flag-inside-detail.normal-nation-flag-detail,
+  .player-detail-mini-card .card-club-flag-inside-detail.normal-club-flag-detail,
+  .player-detail-mini-card .card-league-flag-inside.normal-league-flag {
+    width: 11px;
+    height: 11px;
+  }
 }
