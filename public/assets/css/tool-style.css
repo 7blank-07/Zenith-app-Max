@@ -11139,7 +11139,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 .picker-card-mini .picker-card-ovr {
   top: 11%;
-  left: 22%;
+  left: 24%;
   transform: translateX(-50%);
   font-size: clamp(0.74rem, 1.1vw, 0.92rem);
   line-height: 1;
@@ -11147,7 +11147,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 .picker-card-mini .picker-card-position {
   top: 24%;
-  left: 22%;
+  left: 24%;
   transform: translateX(-50%);
   font-size: clamp(0.46rem, 0.72vw, 0.62rem);
   line-height: 0.9;
@@ -11195,7 +11195,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .picker-card-mini .picker-squad-card-flag-nation.normal-squad-nation-flag,
 .picker-card-mini .picker-card-flag-nation.normal-nation-flag {
   bottom: 16%;
-  left: 20%;
+  left: 18%;
   width: 11px;
   height: 11px;
   object-fit: cover;
@@ -11204,7 +11204,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .picker-card-mini .picker-squad-card-flag-club.normal-squad-club-flag,
 .picker-card-mini .picker-card-flag-club.normal-club-flag {
   bottom: 16%;
-  left: 70%;
+  left: 67%;
   width: 11px;
   height: 11px;
   object-fit: contain;
@@ -11214,7 +11214,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .picker-card-mini .picker-card-flag-league-compare.normal-league-flag-compare {
   bottom: 16%;
   left: 44%;
-  width: 11px;
+  width: 9px;
   height: 11px;
   object-fit: contain;
 }
@@ -11484,41 +11484,43 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   left: 22%;
   margin-left: 0;
   transform: translateX(-50%);
-  font-size: clamp(0.92rem, 1.3vw, 1.26rem);
+  letter-spacing: 0.5%;
+  font-size: clamp(1.35rem, 1.7vw, 1.8rem);
   line-height: 1;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-card-pos {
-  top: 24%;
+  top: 25%;
   left: 22%;
   transform: translateX(-50%);
-  font-size: clamp(0.58rem, 0.84vw, 0.84rem);
+  font-size: clamp(0.75rem, 1.2vw, 1.1rem);
   line-height: 0.9;
+  letter-spacing: 0.5px;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-card-name {
-  bottom: 28%;
+  bottom: 26%;
   left: 50%;
   transform: translateX(-50%);
   max-width: 90%;
-  font-size: clamp(0.66rem, 1vw, 0.94rem);
+  font-size: clamp(0.85rem, 1.3vw, 1.2rem);
   line-height: 0.95;
   letter-spacing: -0.2px;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-nation-flag.hero-icon-nation-flag {
-  bottom: 15%;
+  bottom: 16%;
   left: 25%;
-  width: min(12%, 14px);
+  width: min(12%, 17px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
 }
 
 .compare-player-card.filled-state .compare-card-container .compare-club-flag.hero-icon-club-flag {
-  bottom: 15%;
+  bottom: 16%;
   left: 60%;
-  width: min(12%, 14px);
+  width: min(15%, 17px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
@@ -11526,8 +11528,8 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 .compare-player-card.filled-state .compare-card-container .compare-nation-flag.normal-nation-flag {
   bottom: 16%;
-  left: 20%;
-  width: min(11%, 13px);
+  left: 18%;
+  width: min(15%, 17px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -11536,7 +11538,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 .compare-player-card.filled-state .compare-card-container .compare-club-flag.normal-club-flag {
   bottom: 16%;
   left: 70%;
-  width: min(11%, 13px);
+  width: min(11%, 17px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
@@ -11544,8 +11546,8 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 .compare-player-card.filled-state .compare-card-container .compare-league-flag.normal-league-flag {
   bottom: 16%;
-  left: 44%;
-  width: min(11%, 13px);
+  left: 45%;
+  width: min(11%, 17px);
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
@@ -11557,31 +11559,32 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-player-img {
   top: auto;
-  bottom: 2%;
+  bottom: -11%;
   left: 50%;
-  width: 124%;
-  height: 124%;
+  width: 120%;
+  height: 120%;
   transform: translateX(-50%);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
-  top: 11%;
-  left: 22%;
+  top: 13%;
+  left: 26%;
   transform: translateX(-50%);
   font-size: 1.02rem;
+  letter-spacing: 0.5px;
   line-height: 1;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-position {
   top: 24%;
-  left: 22%;
+  left: 26%;
   transform: translateX(-50%);
   font-size: 0.66rem;
   line-height: 0.9;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-name {
-  bottom: 28%;
+  bottom: 26%;
   left: 50%;
   right: auto;
   transform: translateX(-50%);
@@ -11601,14 +11604,19 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .p
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.hero-icon-nation-flag {
   left: 25%;
   object-fit: cover;
+  top: 76%;
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-club-flag.hero-icon-club-flag {
   left: 60%;
   object-fit: contain;
 }
+main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.normal-nation-flag{
+  bottom: 16%;
+  width: 13px;
+  height: 13px;
+}
 
-main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.normal-nation-flag,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-club-flag.normal-club-flag,
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-league-flag.normal-league-flag {
   bottom: 16%;
@@ -11633,16 +11641,16 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .p
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-player-img {
   top: auto;
-  bottom: 2%;
+  bottom: -11%;
   left: 50%;
-  width: 122%;
-  height: 122%;
+  width: 120%;
+  height: 120%;
   transform: translateX(-50%);
 }
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-ovr {
-  top: 11%;
-  left: 22%;
+  top: 13%;
+  left: 25%;
   transform: translateX(-50%);
   font-size: 0.9rem;
   line-height: 1;
@@ -11650,7 +11658,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-in
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-position {
   top: 24%;
-  left: 22%;
+  left: 24%;
   transform: translateX(-50%);
   font-size: 0.58rem;
   line-height: 0.9;
@@ -11658,7 +11666,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-in
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-name {
   top: auto;
-  bottom: 28%;
+  bottom: 25%;
   left: 50%;
   transform: translateX(-50%);
   max-width: 90%;
@@ -11667,7 +11675,11 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-in
   letter-spacing: -0.2px;
 }
 
-main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag,
+main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag{  bottom: 15%;
+  width: 12px;
+  height: 12px;
+  top: 89px;
+}
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-club.hero-icon-club-flag {
   bottom: 15%;
   width: 12px;
@@ -11684,7 +11696,11 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-in
   object-fit: contain;
 }
 
-main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag,
+main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag{
+  width: 11px;
+  height: 11px;
+  top: 89px;
+}
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-club.normal-club-flag,
 main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-league.normal-bench-league-flag {
   bottom: 16%;
@@ -11827,19 +11843,34 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-name {
     font-size: 0.56rem;
+    top: 75px;
   }
 
-  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag{    width: 11px;
+    width: 11px;
+    height: 11px;
+    top: 84px;
+  }
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-club.hero-icon-club-flag {
     width: 11px;
     height: 11px;
+    top: 84px;
   }
 
-  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag,
-  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-club.normal-club-flag,
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag{
+    width: 10px;
+    height: 10px;
+    top: 83px;
+  }
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-club.normal-club-flag{
+    width: 10px;
+    height: 10px;
+    top: 83px;
+  }
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-league.normal-bench-league-flag {
     width: 10px;
     height: 10px;
+    top: 83px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-mini .picker-card-ovr {
@@ -11873,9 +11904,10 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
   }
 }
 
+
 @media (max-width: 768px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-position {
@@ -11888,33 +11920,46 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.hero-icon-nation-flag,
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-club-flag.hero-icon-club-flag {
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-nation-flag.normal-nation-flag,
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-club-flag.normal-club-flag,
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .card-league-flag.normal-league-flag {
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
   }
 
+  /* BENCH */
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-ovr {
     font-size: 0.76rem;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-position {
-    font-size: 0.46rem;
+    font-size: 0.48rem;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-name {
-    font-size: 0.5rem;
+    top: auto;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    font-size: 0.6rem;
+    line-height: 0.95;
+    letter-spacing: -0.2px;
   }
 
-  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag,
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-club.hero-icon-club-flag {
-    width: 10px;
-    height: 10px;
+    bottom: 15%;
+    width: 12px;
+    height: 12px;
+  }
+
+  main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.hero-icon-nation-flag {
+    left: 25%;
+    object-fit: cover;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag,
@@ -11922,14 +11967,16 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
   main.main-content.main-content--squadbuilder #squad-builder-modal .bench-card-inner .bench-card-flag-league.normal-bench-league-flag {
     width: 9px;
     height: 9px;
+    top: 75px;
   }
 
+  /* PICKER */
   main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-mini .picker-card-ovr {
     font-size: 0.76rem;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-mini .picker-card-position {
-    font-size: 0.48rem;
+    font-size: 0.5rem;
   }
 
   main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-mini .picker-card-name {
@@ -11954,6 +12001,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
     height: 9px;
   }
 }
+
 
 @media (max-width: 512px) {
   main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
