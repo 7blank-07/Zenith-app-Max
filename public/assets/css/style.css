@@ -8886,7 +8886,7 @@ watchlist-view .view-content {
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-ovr {
-    top: 1px;
+    top: 15px;
     left: 0;
     font-size: 14px;
     margin-left: 2px;
@@ -8910,9 +8910,15 @@ watchlist-view .view-content {
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-player-img {
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1.25);
-    margin-top: 12px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 90px !important;
+  height: 90px !important;
+
+  margin-top: 0;
+  object-fit: contain;
 }
 
 /* Player Info */

@@ -8885,7 +8885,7 @@ body.stats-open #squad-builder-modal {
 
 .squad-custom-card-name {
   position: absolute;
-  top: 63%;
+  top: 75%;
   left: 50%;
   transform: translateX(-50%) scaleY(0.8);
 
