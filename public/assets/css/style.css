@@ -12639,29 +12639,30 @@ body {
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-player-img {
-  top: 50%;
+  top: 48%;
   left: 50%;
-  width: 124%;
-  height: 124%;
+  width: 115%;
+  height: 115%;
   transform: translate(-50%, -50%) scale(1.02);
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-ovr {
-  top: 11%;
-  left: 22%;
+  top: 8%;
+  left: 26%;
   margin-left: 0;
   transform: translateX(-50%);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   line-height: 1;
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-position {
-  top: 24%;
-  left: 22%;
+  top: 20%;
+  left: 25.5%;
   margin-left: 0;
   transform: translateX(-50%);
-  font-size: 0.56rem;
+  font-size: 0.50rem;
   line-height: 0.9;
+  z-index: 100;
 }
 
 .dropdown-player-card .dropdown-mini-card .squad-custom-card-name {
@@ -12722,6 +12723,100 @@ body {
   height: 11px;
   object-fit: contain;
 }
+
+
+@media (max-width: 768px) {
+
+  .dropdown-player-card .dropdown-mini-card {
+    width: 100%;
+    height: 100%;
+    margin-left: 0;
+    position: relative;
+  }
+
+  /* PLAYER IMAGE */
+  .dropdown-player-card .dropdown-mini-card .squad-custom-card-player-img {
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    height: 90%;
+    transform: translate(-50%, -50%) scale(0.70);
+  }
+
+  /* OVR */
+  .dropdown-player-card .dropdown-mini-card .squad-custom-card-ovr {
+    top: 5%;
+    left: -10%;
+    transform: translateX(-50%);
+    font-size: 0.45rem;
+    line-height: 1;
+    transform: scaleY(1);
+  }
+
+  /* POSITION */
+  .dropdown-player-card .dropdown-mini-card .squad-custom-card-position {
+    top: 16%;
+    left: 22%;
+    transform: translateX(-50%);
+    font-size: 0.30rem;
+    line-height: 0.9;
+    z-index: 10;
+  }
+
+  /* NAME */
+  .dropdown-player-card .dropdown-mini-card .squad-custom-card-name {
+    bottom: 26%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    font-size: 0.45rem;
+    letter-spacing: -0.3px;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+
+
+  /* HERO FLAGS */
+  .dropdown-player-card .dropdown-mini-card .dropdown-card-flag-nation.hero-icon-dropdown-nation-flag {
+    bottom: 14%;
+    left: 22%;
+    width: 6px;
+    height: 6px;
+  }
+
+  .dropdown-player-card .dropdown-mini-card .dropdown-card-flag-club.hero-icon-dropdown-club-flag {
+    bottom: 14%;
+    left: 58%;
+    width: 6px;
+    height: 6px;
+    left: 30px;
+  }
+
+  /* NORMAL FLAGS */
+  .dropdown-player-card .dropdown-mini-card .dropdown-card-flag-nation.normal-dropdown-nation-flag {
+    bottom: 15%;
+    left: 18%;
+    width: 6px;
+    height: 6px;
+  }
+
+  .dropdown-player-card .dropdown-mini-card .dropdown-card-flag-club.normal-dropdown-club-flag {
+    bottom: 15%;
+    left: 66%;
+    width: 6px;
+    height: 6px;
+  }
+
+  .dropdown-player-card .dropdown-mini-card .dropdown-card-flag-league.normal-dropdown-league-flag {
+    bottom: 15%;
+    left: 42%;
+    width: 6px;
+    height: 6px;
+  }
+}
+
 
 .players-grid--database .players-db-row-card .player-row-main-img {
   top: 50%;
