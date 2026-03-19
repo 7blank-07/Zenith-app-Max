@@ -11221,7 +11221,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-player-img {
   top: auto;
-  bottom: -15%;
+  bottom: -13%;
   left: 50%;
   width: 120%;
   height: 120%;
@@ -11230,7 +11230,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-ovr {
   top: 12%;
-  left: 24%;
+  left: 25%;
   transform: translateX(-50%);
   font-size: clamp(0.78rem, 1.25vw, 1.08rem);
   line-height: 1;
@@ -11238,14 +11238,14 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-position {
   top: 24%;
-  left: 24%;
+  left: 25%;
   transform: translateX(-50%);
   font-size: clamp(0.5rem, 0.82vw, 0.7rem);
   line-height: 0.9;
 }
 
 #squad-builder-modal .squad-slot .preview-card-inner .preview-card-name {
-  bottom: 28%;
+  bottom: 26%;
   left: 50%;
   right: auto;
   transform: translateX(-50%);
