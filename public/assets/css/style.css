@@ -13176,7 +13176,7 @@ body {
   left: 40%;
   transform: translate(-60%, 10px);
 
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-family: "CruyffSans", sans-serif;
   letter-spacing: 0.5px;
 
@@ -13524,27 +13524,28 @@ body {
   .players-grid--database .players-db-row-card .player-row-main-img {
     width: 120%;
     height: 120%;
-    left: 52px;
-    top: 60px;
+    left: 62px;
+    top: 64px;
   }
 
   .players-grid--database .players-db-row-card .player-row-ovr {
     font-size: 0.95rem;
-    top: 10px;
-    left: 14px;
+    top: 12px;
+    left: 19px;
     padding: 2px 4px;
-    letter-spacing: 0.5%;
+    letter-spacing: 0.2%;
   }
 
   .players-grid--database .players-db-row-card .player-row-position {
     font-size: 0.6rem;
-    top: 23px;
-    left: 16px;
+    top: 25px;
+    left: 20px;
+    letter-spacing: 0.5px;
   }
 
   .players-grid--database .players-db-row-card .player-row-name {
     font-size: 0.72rem;
-    top: 78px;
+    top: 85px;
     left: 54%;
     transform: translateX(-50%);
     padding: 1px 4px;
@@ -13553,38 +13554,39 @@ body {
 
   /* FLAGS - HERO */
   .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag {
-    width: 9px;
-    height: 9px;
-    left: 28px;
+    width: 11px;
+    height: 11px;
+    left: 35px;
+    top: 98px;
   }
 
   .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
-    width: 9px;
-    height: 9px;
-    top: 72px;
-    left: 60px;
+    width: 11px;
+    height: 11px;
+    top: 79px;
+    left: 72px;
   }
 
   /* FLAGS - NORMAL */
   .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag {
-    width: 8px;
-    height: 8px;
-    top: 88px;
-    left: 22px;
+    width: 10px;
+    height: 10px;
+    top: 96px;
+    left: 27px;
   }
 
   .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag {
-    width: 8px;
-    height: 8px;
-    top: 60px;
-    left: 66px;
+    width: 10px;
+    height: 10px;
+    top: 65px;
+    left: 78px;
   }
 
   .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
-    width: 8px;
-    height: 8px;
-    top: 88px;
-    left: 45px;
+    width: 10px;
+    height: 10px;
+    top: 97px;
+    left: 53px;
   }
 
   /* MINI CARD */
@@ -13642,30 +13644,31 @@ body {
 
 @media (max-width: 480px) {
   .players-grid--database .players-db-row-card .player-row-main-img {
-    width: 118%;
-    height: 118%;
-    left: 48px;
-    top: 56px;
+    width: 120%;
+    height: 120%;
+    left: 62px;
+    top: 64px;
   }
 
   .players-grid--database .players-db-row-card .player-row-ovr {
-    font-size: 0.88rem;
-    top: 9px;
-    left: 12px;
+    font-size: 0.98rem;
+    top: 15px;
+    left: 20px;
     padding: 1px 4px;
     letter-spacing: 0.4%;
   }
 
   .players-grid--database .players-db-row-card .player-row-position {
-    font-size: 0.56rem;
-    top: 21px;
-    left: 14px;
+    font-size: 0.62rem;
+    top: 27px;
+    letter-spacing: 0.2px;
+    left: 21px;
   }
 
   .players-grid--database .players-db-row-card .player-row-name {
     font-size: 0.68rem;
-    top: 74px;
-    left: 50%;
+    top: 75px;
+    left: 53%;
     transform: translateX(-50%);
     padding: 1px 3px;
     letter-spacing: 0.2px;
@@ -13674,38 +13677,39 @@ body {
 
   /* HERO FLAGS */
   .players-grid--database .players-db-row-card .player-card-nation-flag.hero-icon-nation-flag {
-    width: 8px;
-    height: 8px;
-    left: 25px;
+    width: 9px;
+    height: 10px;
+    left: 36px;
+    top: 98px;
   }
 
   .players-grid--database .players-db-row-card .player-card-club-flag.hero-icon-club-flag {
-    width: 8px;
-    height: 8px;
-    top: 68px;
-    left: 56px;
+    width: 9px;
+    height: 10px;
+    top: 79px;
+    left: 73px;
   }
 
   /* NORMAL FLAGS */
   .players-grid--database .players-db-row-card .player-card-nation-flag.normal-nation-flag {
-    width: 7px;
-    height: 7px;
-    top: 84px;
-    left: 20px;
+    width: 8px;
+    height: 9px;
+    top: 97px;
+    left: 28px;
   }
 
   .players-grid--database .players-db-row-card .player-card-club-flag.normal-club-flag {
-    width: 7px;
-    height: 7px;
-    top: 56px;
-    left: 62px;
+    width: 8px;
+    height: 9px;
+    top: 66px;
+    left: 80px;
   }
 
   .players-grid--database .players-db-row-card .player-card-league-watchlist-flag.normal-league-watchlist-flag {
-    width: 7px;
-    height: 7px;
-    top: 84px;
-    left: 40px;
+    width: 8px;
+    height: 9px;
+    top: 97px;
+    left: 55px;
   }
 
   /* MINI CARD */
