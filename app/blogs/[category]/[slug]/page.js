@@ -58,7 +58,7 @@ export default async function BlogArticlePage({ params }) {
 
   return (
     <SiteChrome activeView="blogs">
-      <main className="main-content">
+      <main className={`main-content blog-article-main-content ${styles.articleMainContent}`}>
         {schemas.map((schema, index) => (
           <script
             key={`blog-article-schema-${index}`}
@@ -66,7 +66,7 @@ export default async function BlogArticlePage({ params }) {
             dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
           />
         ))}
-        <div className={styles.page}>
+        <div className={`${styles.page} ${styles.articlePage}`}>
           {!pageData.availability?.isConfigured ? (
             <section className={styles.unavailableState}>
               <h1 className={styles.emptyStateTitle}>{pageData.availability?.title}</h1>
