@@ -96,6 +96,7 @@ BLOG_EDITOR_EMAIL='editor@example.com' \
 BLOG_EDITOR_PASSWORD='Password123!' \
 npm run db:seed:blog-users
 ```
+#check
 
 Optional bootstrap dry run:
 ```bash
