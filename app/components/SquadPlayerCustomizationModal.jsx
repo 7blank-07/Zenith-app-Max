@@ -18,6 +18,12 @@ const RANK_OVERLAY_SPRITES = Object.freeze({
   4: '/assets/images/ranks/red_rank_enhanced_main.webp',
   5: '/assets/images/ranks/gold_rank_enhanced_main.webp'
 });
+const RANK_OVERLAY_ANIMATION_CONFIG = Object.freeze({
+  frameCount: 36,
+  columns: 6,
+  fps: 18,
+  frameSize: 32
+});
 
 const TRAINING_LEVEL_OPTIONS = Object.freeze([
   0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
@@ -518,6 +524,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   const [skillBoostLevels, setSkillBoostLevels] = useState([]);
   const [skillModalLoading, setSkillModalLoading] = useState(false);
   const [skillModalError, setSkillModalError] = useState('');
+  const [rankOverlayFrame, setRankOverlayFrame] = useState(0);
   const [statsViewOpen, setStatsViewOpen] = useState(false);
 
   const cardVariant = useMemo(() => getPlayerType(player), [player]);
@@ -582,7 +589,22 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillModalError('');
     setSkillModalLoading(false);
     setStatsViewOpen(false);
+    setRankOverlayFrame(0);
   }, [player?.playerId]);
+
+  useEffect(() => {
+    if (selectedRank <= 0 || !RANK_OVERLAY_SPRITES[selectedRank]) {
+      setRankOverlayFrame(0);
+      return undefined;
+    }
+    const intervalMs = Math.max(16, Math.round(1000 / RANK_OVERLAY_ANIMATION_CONFIG.fps));
+    const intervalId = window.setInterval(() => {
+      setRankOverlayFrame((current) => (current + 1) % RANK_OVERLAY_ANIMATION_CONFIG.frameCount);
+    }, intervalMs);
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [selectedRank]);
 
   useEffect(() => {
     const normalizedPlayerId = String(player?.playerId || '').trim();
@@ -1043,6 +1065,11 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   const activeSkillUnlocked = activeSkillDetail ? checkSkillUnlocked(activeSkillDetail, skillLevelsById, availableSkills) : true;
   const activeSkillUnlockMessage = activeSkillDetail ? getSkillUnlockMessage(activeSkillDetail) : 'Skill locked';
   const availablePointsForActiveSkill = Math.max(0, skillPointsRemaining + activeSkillCurrentLevel);
+  const rankOverlayColumns = RANK_OVERLAY_ANIMATION_CONFIG.columns;
+  const rankOverlayScale = 34 / RANK_OVERLAY_ANIMATION_CONFIG.frameSize;
+  const rankOverlayX = -(rankOverlayFrame % rankOverlayColumns) * RANK_OVERLAY_ANIMATION_CONFIG.frameSize * rankOverlayScale;
+  const rankOverlayY =
+    -Math.floor(rankOverlayFrame / rankOverlayColumns) * RANK_OVERLAY_ANIMATION_CONFIG.frameSize * rankOverlayScale;
 
   return (
     <div
@@ -1242,11 +1269,14 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
               {player.name}
             </div>
             {selectedRank > 0 && (
-              <img
-                src={RANK_OVERLAY_SPRITES[selectedRank]}
-                alt=""
+              <span
                 aria-hidden="true"
-                className="rank-diamond-overlay rank-overlay--squad-customization"
+                className="rank-diamond-overlay rank-overlay--squad-customization rank-overlay--animated"
+                style={{
+                  backgroundImage: `url(${RANK_OVERLAY_SPRITES[selectedRank]})`,
+                  backgroundSize: `${RANK_OVERLAY_ANIMATION_CONFIG.columns * 34}px ${RANK_OVERLAY_ANIMATION_CONFIG.columns * 34}px`,
+                  backgroundPosition: `${rankOverlayX}px ${rankOverlayY}px`
+                }}
               />
             )}
             {player.isUntradable && (
