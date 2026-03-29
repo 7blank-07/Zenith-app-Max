@@ -32,7 +32,7 @@ function populateWatchlistFilters() {
     const nations = [...new Set(watchlistData.map(p => p.nation).filter(Boolean))].sort();
     const events = [...new Set(watchlistData.map(p => p.event).filter(Boolean))].sort();
 
-    // Populate Desktop Position dropdown menu
+    // Populate Desktop Position dropdown
     const positionSelect = document.getElementById('watchlist-filter-position');
     if (positionSelect) {
         positionSelect.innerHTML = '<option value="">All Positions</option>' +

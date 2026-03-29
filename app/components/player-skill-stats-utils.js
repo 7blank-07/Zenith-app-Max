@@ -38,9 +38,56 @@ export function getSkillImage(skill) {
   return String(skill?.skill_image ?? skill?.skillImage ?? '').trim();
 }
 
+export function resolvePlayerDetailApiRequest(endpoint) {
+  const endpointText = String(endpoint || '').trim();
+  const absoluteEndpoint = /^https?:\/\//i.test(endpointText);
+  const normalizedEndpoint = absoluteEndpoint
+    ? endpointText
+    : endpointText.startsWith('/')
+      ? endpointText
+      : `/${endpointText}`;
+
+  if (absoluteEndpoint) {
+    return {
+      url: normalizedEndpoint,
+      transform: (payload) => payload
+    };
+  }
+
+  const skillBoostMatch = normalizedEndpoint.match(/^\/skill-boosts\/([^/?#]+)/);
+  if (skillBoostMatch) {
+    return {
+      url: `/api/skill-boosts/${skillBoostMatch[1]}`,
+      transform: (payload) => payload
+    };
+  }
+
+  if (normalizedEndpoint.startsWith('/training/boosts')) {
+    return {
+      url: `/api${normalizedEndpoint}`,
+      transform: (payload) => payload
+    };
+  }
+
+  const playerMatch = normalizedEndpoint.match(/^\/players\/([^/?#]+)(\?.*)?$/);
+  if (playerMatch) {
+    const playerId = playerMatch[1];
+    const query = new URLSearchParams(playerMatch[2] || '');
+    return {
+      url: `/api/players/${playerId}${query.toString() ? `?${query.toString()}` : ''}`,
+      transform: (payload) => payload
+    };
+  }
+
+  return {
+    url: `${API_BASE_URL}${normalizedEndpoint}`,
+    transform: (payload) => payload
+  };
+}
+
 export async function fetchApiJson(endpoint, signal) {
-  const normalizedEndpoint = `${endpoint}`.startsWith('/') ? endpoint : `/${endpoint}`;
-  const response = await fetch(`${API_BASE_URL}${normalizedEndpoint}`, {
+  const request = resolvePlayerDetailApiRequest(endpoint);
+  const response = await fetch(request.url, {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal
@@ -49,7 +96,8 @@ export async function fetchApiJson(endpoint, signal) {
     const details = await response.text();
     throw new Error(`Failed to fetch ${endpoint} (${response.status}): ${details || response.statusText}`);
   }
-  return response.json();
+  const payload = await response.json();
+  return request.transform(payload);
 }
 
 export async function fetchTrainingBoosts(position, trainingLevel, signal) {
@@ -448,3 +496,4 @@ export function getStatAccentColor(value) {
   if (numericValue >= 55) return '#E76A6A';
   return '#B33939';
 }
+
