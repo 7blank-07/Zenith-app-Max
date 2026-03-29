@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import html2canvas from 'html2canvas';
+import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { normalizeSearchText } from './search-normalization';
 import SquadExportCapture from './SquadExportCapture.client';
 import { buildExportFallbackPlayers, buildExportMediaMap, clearExportMediaCache, waitForExportLoadState } from './squad-export-media';
@@ -914,6 +915,15 @@ function normalizeSkillAllocations(value) {
   return normalized;
 }
 
+function hasLocalCustomization(player) {
+  if (!player || typeof player !== 'object') return false;
+  const rank = clamp(toNumber(player?.rank ?? player?.selectedRank ?? player?.rank_level ?? player?.rankLevel, 0), 0, 5);
+  const trainingLevel = clamp(toNumber(player?.trainingLevel ?? player?.training_level, 0), 0, 30);
+  const selectedSkills = normalizeSelectedSkills(player?.selectedSkills ?? player?.selected_skills);
+  const skillAllocations = normalizeSkillAllocations(player?.skillAllocations ?? player?.skill_allocations);
+  return Boolean(player?.isCustomized) || rank > 0 || trainingLevel > 0 || selectedSkills.length > 0 || Object.keys(skillAllocations).length > 0;
+}
+
 function toText(value) {
   return normalizeSearchText(value);
 }
@@ -1273,6 +1283,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         normalizedRows.forEach((player) => {
           if (!player?.playerId) return;
           const existing = current[player.playerId];
+          if (existing && hasLocalCustomization(existing)) return;
           if (!existing || existing.ovr !== player.ovr || existing.rank !== player.rank) {
             next[player.playerId] = player;
             changed = true;
@@ -2094,8 +2105,12 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
       [playerId]: {
         ...currentPlayer,
         ...payload,
+        isCustomized: true,
         playerId,
         rank,
+        selectedRank: rank,
+        rank_level: rank,
+        rankLevel: rank,
         trainingLevel,
         selectedSkills,
         skillAllocations,
@@ -2973,6 +2988,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                     const player = playerId ? playersById.get(playerId) : null;
                     const variant = player ? getPlayerType(player) : 'hero';
                     const adjustedOvr = player ? toNumber(starterAdjustedOvrBySlot[slot.id], 0) : 0;
+                    const playerRank = player
+                      ? Math.max(0, Math.min(5, toNumber(player.rank ?? player.selectedRank ?? player.rank_level ?? player.rankLevel, 0)))
+                      : 0;
                     const dragKey = player ? `slot-${slot.id}` : '';
                     return (
                       <div
@@ -3038,6 +3056,14 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                               {variant === 'normal' && !!player.leagueImage && (
                                 <img src={player.leagueImage} alt="League" className="card-league-flag normal-league-flag" />
                               )}
+                              {playerRank > 0 && RANK_SPRITES[playerRank] ? (
+                                <AnimatedRankIcon
+                                  className="rank-diamond-overlay rank-overlay--squad-pitch rank-overlay--animated"
+                                  rank={playerRank}
+                                  spriteUrl={RANK_SPRITES[playerRank]}
+                                  size={28}
+                                />
+                              ) : null}
                               {player.isUntradable && (
                                 <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch">
                                   <img src="/assets/images/untradable_img.png" alt="Untradable" />
@@ -3171,6 +3197,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
               {bench.map((playerId, index) => {
                 const player = playerId ? playersById.get(playerId) : null;
                 const variant = player ? getPlayerType(player) : 'hero';
+                const playerRank = player
+                  ? Math.max(0, Math.min(5, toNumber(player.rank ?? player.selectedRank ?? player.rank_level ?? player.rankLevel, 0)))
+                  : 0;
                 const dragKey = player ? `bench-${index}` : '';
                 return (
                   <div
@@ -3233,6 +3262,14 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           {variant === 'normal' && !!player.leagueImage && (
                             <img src={player.leagueImage} alt="League" className="bench-card-flag-league normal-bench-league-flag" />
                           )}
+                          {playerRank > 0 && RANK_SPRITES[playerRank] ? (
+                            <AnimatedRankIcon
+                              className="rank-diamond-overlay rank-overlay--squad-bench rank-overlay--animated"
+                              rank={playerRank}
+                              spriteUrl={RANK_SPRITES[playerRank]}
+                              size={20}
+                            />
+                          ) : null}
                           {player.isUntradable && (
                             <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
                               <img src="/assets/images/untradable_img.png" alt="Untradable" />
@@ -3382,6 +3419,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
 
       {selectedCustomizationPlayer && (
         <SquadPlayerCustomizationModal
+          key={`squad-customization-${selectedCustomizationPlayer.playerId}`}
           player={{
             ...selectedCustomizationPlayer,
             slotId: selectedPlayerForCustomization?.slotId || '',

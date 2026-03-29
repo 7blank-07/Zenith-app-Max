@@ -911,6 +911,14 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   const handleRankSelect = (nextRank) => {
     const normalizedRank = clamp(toNumber(nextRank, 0), 0, 5);
     const resetSkills = [];
+    // Persist rank immediately so closing the modal right after click can't drop the update.
+    lastSyncedCustomizationRef.current = '';
+    emitUpdate({
+      rank: normalizedRank,
+      trainingLevel,
+      selectedSkills: resetSkills,
+      skillAllocations: {}
+    });
     setSelectedRank(normalizedRank);
     setSelectedSkills(resetSkills);
     setSkillLevelsById({});
@@ -932,6 +940,13 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
   };
 
   const handleResetRank = () => {
+    lastSyncedCustomizationRef.current = '';
+    emitUpdate({
+      rank: 0,
+      trainingLevel: 0,
+      selectedSkills: [],
+      skillAllocations: {}
+    });
     setSelectedRank(0);
     setTrainingLevel(0);
     setSelectedSkills([]);

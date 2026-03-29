@@ -9048,6 +9048,26 @@ body.stats-open #squad-builder-modal {
   margin-top: 10px;
 }
 
+/* Squad pitch preview cards */
+.rank-overlay--squad-pitch {
+  left: 50%;
+  bottom: 3%;
+  width: 28px;
+  height: 28px;
+  z-index: 12;
+  transform: translateX(-50%);
+}
+
+/* Squad bench preview cards */
+.rank-overlay--squad-bench {
+  left: 50%;
+  bottom: 3%;
+  width: 20px;
+  height: 20px;
+  z-index: 12;
+  transform: translateX(-50%);
+}
+
 /* Squad customization modal */
 .rank-overlay--squad-customization{
   left: 50%;
