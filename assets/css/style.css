@@ -12290,6 +12290,14 @@ body.overflow-hidden {
 }
 
 /* ==================== PLAYER DETAIL MOBILE/TABLET FLOW ==================== */
+.player-detail-shell .player-refresh-container--placeholder {
+  visibility: hidden;
+  pointer-events: none;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 1200px) {
   .player-detail-shell .player-top-section {
     grid-template-columns: minmax(0, 1fr) !important;
