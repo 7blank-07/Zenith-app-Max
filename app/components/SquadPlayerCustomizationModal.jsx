@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fetchApiJson as fetchPlayerApiJson } from './player-skill-stats-utils';
 
 const RANK_OPTIONS = Object.freeze([
   { rank: 1, label: 'Green', icon: '/assets/images/rank_simple/green_rank_simple.png' },
@@ -21,8 +22,6 @@ const RANK_OVERLAY_SPRITES = Object.freeze({
 const TRAINING_LEVEL_OPTIONS = Object.freeze([
   0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
 ]);
-
-const API_BASE_URL = 'https://zenithfcm.com/api';
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -194,19 +193,6 @@ function resolveCurrentUserId() {
     console.error('[squad-customization] Failed to resolve user id:', error);
     return '';
   }
-}
-
-async function fetchApiJson(endpoint, signal) {
-  const response = await fetch(`${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    signal
-  });
-  if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`Failed to fetch ${endpoint} (${response.status}): ${details || response.statusText}`);
-  }
-  return response.json();
 }
 
 function getPlayerType(player) {
@@ -607,9 +593,9 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     const loadSkills = async () => {
       try {
         const userId = resolveCurrentUserId();
-        const detailsRequest = fetchApiJson(`/players/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(selectedRank)}`, controller.signal);
+        const detailsRequest = fetchPlayerApiJson(`/players/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(selectedRank)}`, controller.signal);
         const allocationsRequest = userId
-          ? fetchApiJson(
+          ? fetchPlayerApiJson(
               `/skills/allocations/${encodeURIComponent(userId)}/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(selectedRank)}`,
               controller.signal
             ).catch((error) => {
@@ -711,7 +697,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
         const results = await Promise.all(
           missingSkillIds.map(async (skillId) => {
             try {
-              const payload = await fetchApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`, controller.signal);
+              const payload = await fetchPlayerApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`, controller.signal);
               return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
             } catch (error) {
               if (error?.name === 'AbortError') throw error;
@@ -766,7 +752,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     const controller = new AbortController();
     const loadTrainingBoosts = async () => {
       try {
-        const payload = await fetchApiJson(
+        const payload = await fetchPlayerApiJson(
           `/training/boosts?position=${encodeURIComponent(normalizedPosition)}&level=${encodeURIComponent(normalizedTrainingLevel)}`,
           controller.signal
         );
@@ -995,7 +981,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     setSkillModalLoading(true);
 
     try {
-      const payload = await fetchApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`);
+      const payload = await fetchPlayerApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`);
       if (requestId !== skillRequestSequenceRef.current) return;
       const boosts = Array.isArray(payload?.boosts) ? payload.boosts : [];
       setSkillBoostLevels(boosts);
