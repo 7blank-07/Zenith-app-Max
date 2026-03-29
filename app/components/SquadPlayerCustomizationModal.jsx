@@ -232,7 +232,10 @@ function normalizeStatKey(value) {
 
 function getBoostValue(boosts, ...names) {
   if (!boosts || typeof boosts !== 'object') return 0;
-  const entries = Object.entries(boosts);
+  const entries = Object.entries(boosts).map(([boostKey, rawValue]) => {
+    const normalizedKey = String(boostKey || '').replace(/^boost_/i, '');
+    return [normalizedKey, rawValue];
+  });
   for (const name of names) {
     const normalizedName = normalizeStatKey(name);
     const match = entries.find(([boostKey]) => normalizeStatKey(boostKey) === normalizedName);
