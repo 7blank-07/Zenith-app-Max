@@ -233,6 +233,14 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               <div className="card-player-name-inside" style={{ color: record?.colorName || '#FFFFFF' }}>
                 {record?.name}
               </div>
+              {selectedRank > 0 && RANK_SPRITES[selectedRank] ? (
+                <AnimatedRankIcon
+                  className="rank-diamond-overlay rank-overlay--player-detail rank-overlay--animated"
+                  rank={selectedRank}
+                  spriteUrl={RANK_SPRITES[selectedRank]}
+                  size={40}
+                />
+              ) : null}
               {!!record?.nationFlag && (
                 <img
                   src={record.nationFlag}

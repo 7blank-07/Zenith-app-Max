@@ -3,7 +3,9 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { normalizeSearchText } from './search-normalization';
+import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { buildLegacyStatsModel, resolveLegacyStatValue, toNumber } from './player-skill-stats-utils';
+import { RANK_SPRITES } from './player-detail-utils';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -468,6 +470,14 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                           <div className="compare-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
                             {player.name}
                           </div>
+                          {toNumber(player?.rank, 0) > 0 && RANK_SPRITES[toNumber(player.rank, 0)] ? (
+                            <AnimatedRankIcon
+                              className="rank-diamond-overlay rank-overlay--compare-modal rank-overlay--animated"
+                              rank={toNumber(player.rank, 0)}
+                              spriteUrl={RANK_SPRITES[toNumber(player.rank, 0)]}
+                              size={34}
+                            />
+                          ) : null}
 
                           {!!player.nationFlag && (
                             <img

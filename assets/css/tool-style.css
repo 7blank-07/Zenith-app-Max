@@ -9051,7 +9051,7 @@ body.stats-open #squad-builder-modal {
 /* Squad customization modal */
 .rank-overlay--squad-customization{
   left: 50%;
-  top: 82%;
+  top: 81.5%;
   width: 34px;
   height: 34px;
   z-index: 6;
@@ -9066,11 +9066,10 @@ body.stats-open #squad-builder-modal {
 /* Compare cards */
 .rank-overlay--compare-modal{
   left: 50%;
-  bottom: -5px;
-  width: 20%;
-  height: 20%;
+  bottom: 2px;
+  width: 34px;
+  height: 34px;
   z-index: 8;
-  scale: -4px;
 }
 
 

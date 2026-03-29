@@ -8,6 +8,7 @@ const publicAssetsDir = path.join(root, 'public', 'assets');
 const sourceIndexPath = path.join(root, 'index.html');
 const generatedBodyPath = path.join(root, 'src', 'lib', 'legacy-body.html');
 const legacyBundlePath = path.join(publicAssetsDir, 'js', 'legacy-app.bundle.mjs');
+const shouldSyncLegacyCss = process.env.SYNC_LEGACY_CSS === '1';
 
 const orderedLegacyScripts = [
   'assets/js/data/config.js',
@@ -31,14 +32,15 @@ const orderedLegacyScripts = [
   'assets/js/app.js'
 ];
 
-function copyDirRecursive(src, dest) {
+function copyDirRecursive(src, dest, shouldCopyFile = () => true) {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
-      copyDirRecursive(srcPath, destPath);
+      copyDirRecursive(srcPath, destPath, shouldCopyFile);
     } else {
+      if (!shouldCopyFile(srcPath)) continue;
       fs.copyFileSync(srcPath, destPath);
     }
   }
@@ -195,12 +197,20 @@ function main() {
     throw new Error('index.html not found.');
   }
 
-  copyDirRecursive(sourceAssetsDir, publicAssetsDir);
-  patchPublicCss();
+  copyDirRecursive(sourceAssetsDir, publicAssetsDir, (srcPath) => {
+    if (shouldSyncLegacyCss) return true;
+    const relativePath = path.relative(sourceAssetsDir, srcPath).replace(/\\/g, '/');
+    if (!relativePath) return true;
+    return !relativePath.startsWith('css/');
+  });
+  if (shouldSyncLegacyCss) {
+    patchPublicCss();
+  }
   generateLegacyBody();
   buildLegacyBundle();
 
-  console.log('[prepare-legacy] Done: public assets, body HTML, and legacy bundle generated.');
+  const cssMode = shouldSyncLegacyCss ? 'synced' : 'preserved';
+  console.log(`[prepare-legacy] Done: public assets, body HTML, and legacy bundle generated (CSS ${cssMode}).`);
 }
 
 main();
