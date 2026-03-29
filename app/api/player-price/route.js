@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { selectLatestSnapshotWithPrice } from '../../../src/lib/server/price-snapshot-utils.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,17 @@ function getSupabaseConfig() {
   return { url, key };
 }
 
+function isMissingIdColumnError(error) {
+  return /column .*id.* does not exist/i.test(String(error?.message || ''));
+}
+
+const QUERY_TIERS = [
+  { limit: 30, orderBy: 'id' },
+  { limit: 20, orderBy: 'id' },
+  { limit: 10, orderBy: 'id' },
+  { limit: 10, orderBy: 'captured_at' }
+];
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('id');
@@ -38,29 +50,64 @@ export async function GET(request) {
   }
 
   const rank = parseRank(searchParams.get('rank'));
-  const priceColumn = `price${rank}`;
+  const requestedPriceColumn = `price${rank}`;
+  const priceColumns =
+    rank === 0
+      ? 'price0'
+      : `price0, ${requestedPriceColumn}`;
   const supabase = createClient(url, key, { auth: { persistSession: false } });
-  const query = await supabase
-    .from('price_snapshots')
-    .select(`asset_id, captured_at, ${priceColumn}`)
-    .eq('asset_id', playerId)
-    .not(priceColumn, 'is', null)
-    .limit(1)
-    .maybeSingle();
+  let query = null;
 
-  if (query.error) {
+  for (const tier of QUERY_TIERS) {
+    const includeId = tier.orderBy === 'id';
+    let attempt = await supabase
+      .from('price_snapshots')
+      .select(
+        includeId
+          ? `id, asset_id, captured_at, ${priceColumns}`
+          : `asset_id, captured_at, ${priceColumns}`
+      )
+      .eq('asset_id', playerId)
+      .order(tier.orderBy, { ascending: false })
+      .limit(tier.limit);
+
+    if (attempt.error && includeId && isMissingIdColumnError(attempt.error)) {
+      attempt = await supabase
+        .from('price_snapshots')
+        .select(`asset_id, captured_at, ${priceColumns}`)
+        .eq('asset_id', playerId)
+        .order('captured_at', { ascending: false })
+        .limit(Math.min(tier.limit, 10));
+    }
+
+    if (!attempt.error) {
+      query = attempt;
+      break;
+    }
+
+    query = attempt;
+  }
+
+  if (!query || query.error) {
     return NextResponse.json({ error: `Supabase query failed: ${query.error.message}` }, { status: 500 });
   }
 
-  if (!query.data) {
+  const rows = Array.isArray(query.data) ? query.data : [];
+  if (!rows.length) {
     return NextResponse.json({ error: `No price snapshot found for player ${playerId}` }, { status: 404 });
   }
 
-  const snapshot = query.data;
+  const latest = selectLatestSnapshotWithPrice(rows, rank);
+  if (!latest) {
+    return NextResponse.json({ error: `No price snapshot found for player ${playerId}` }, { status: 404 });
+  }
+
+  const snapshot = latest.row;
   return NextResponse.json({
     playerId: String(snapshot.asset_id ?? playerId),
-    rank,
-    price: snapshot[priceColumn] ?? null,
+    rank: latest.price.resolvedRank,
+    requestedRank: rank,
+    price: latest.price.value ?? null,
     capturedAt: snapshot.captured_at || null
   });
 }

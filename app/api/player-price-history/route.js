@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { buildHistorySnapshots } from '../../../src/lib/server/price-snapshot-utils.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,9 +11,10 @@ const FALLBACK_SUPABASE_ANON_KEY =
 // Tiered query limits — descend to smaller limits on timeout to stay under DB statement timeout.
 // Null filtering is done in JS (not in DB) so the query stays simple and index-friendly.
 const QUERY_TIERS = [
-  { limit: 500, withDateFilter: true },
-  { limit: 200, withDateFilter: false },
-  { limit: 80,  withDateFilter: false }
+  { limit: 50, orderBy: 'id' },
+  { limit: 30, orderBy: 'id' },
+  { limit: 20, orderBy: 'id' },
+  { limit: 50, orderBy: 'captured_at' }
 ];
 
 function isTimeoutError(err) {
@@ -42,19 +44,17 @@ function getSupabaseConfig() {
   return { url, key };
 }
 
-async function queryTier(supabase, { playerId, priceColumn, startIso, limit, withDateFilter }) {
-  let q = supabase
+function isMissingIdColumnError(error) {
+  return /column .*id.* does not exist/i.test(String(error?.message || ''));
+}
+
+async function queryTier(supabase, { playerId, limit, orderBy }) {
+  return supabase
     .from('price_snapshots')
-    .select(`asset_id, captured_at, ${priceColumn}`)
+    .select('id, asset_id, captured_at, price0, price1, price2, price3, price4, price5')
     .eq('asset_id', playerId)
-    .order('captured_at', { ascending: false })
+    .order(orderBy, { ascending: false })
     .limit(limit);
-
-  if (withDateFilter) {
-    q = q.gte('captured_at', startIso);
-  }
-
-  return q;
 }
 
 export async function GET(request) {
@@ -72,13 +72,10 @@ export async function GET(request) {
 
   const rank = parseRank(searchParams.get('rank'));
   const days = parseDays(searchParams.get('days'));
-  const priceColumn = `price${rank}`;
   const endTime = new Date();
   const startTime = new Date(endTime);
   startTime.setDate(startTime.getDate() - days);
-  const startIso = startTime.toISOString();
-
-  console.info('[price-history] request', { playerId, rank, days, priceColumn, startIso });
+  console.info('[price-history] request', { playerId, rank, days });
 
   const supabase = createClient(url, key, { auth: { persistSession: false } });
 
@@ -86,23 +83,53 @@ export async function GET(request) {
   let usedTier = null;
 
   for (const tier of QUERY_TIERS) {
-    console.info('[price-history] trying tier', { limit: tier.limit, withDateFilter: tier.withDateFilter });
-    const attempt = await queryTier(supabase, { playerId, priceColumn, startIso, ...tier });
+    console.info('[price-history] trying tier', tier);
+    let attempt = await queryTier(supabase, { playerId, ...tier });
+
+    if (attempt.error && tier.orderBy === 'id' && isMissingIdColumnError(attempt.error)) {
+      attempt = await supabase
+        .from('price_snapshots')
+        .select('asset_id, captured_at, price0, price1, price2, price3, price4, price5')
+        .eq('asset_id', playerId)
+        .order('captured_at', { ascending: false })
+        .limit(Math.min(tier.limit, 20));
+    }
 
     if (!attempt.error) {
-      result = attempt;
+      let normalizedAttempt = attempt;
+      const rows = Array.isArray(attempt.data) ? attempt.data : [];
+      const seenCaptured = new Set();
+      let hasDuplicateCaptured = false;
+      rows.forEach((row) => {
+        const key = String(row?.captured_at ?? '');
+        if (!key) return;
+        if (seenCaptured.has(key)) hasDuplicateCaptured = true;
+        else seenCaptured.add(key);
+      });
+
+      if (tier.orderBy === 'id' && hasDuplicateCaptured) {
+        const byCapturedAttempt = await supabase
+          .from('price_snapshots')
+          .select('asset_id, captured_at, price0, price1, price2, price3, price4, price5')
+          .eq('asset_id', playerId)
+          .order('captured_at', { ascending: false })
+          .limit(Math.min(rows.length || tier.limit, 20));
+        if (!byCapturedAttempt.error) normalizedAttempt = byCapturedAttempt;
+      }
+
+      result = normalizedAttempt;
       usedTier = tier;
-      console.info('[price-history] tier succeeded', { limit: tier.limit, rows: attempt.data?.length ?? 0 });
+      console.info('[price-history] tier succeeded', { ...tier, rows: normalizedAttempt.data?.length ?? 0 });
       break;
     }
 
     if (isTimeoutError(attempt.error)) {
-      console.warn('[price-history] tier timed out, trying smaller', { limit: tier.limit, error: attempt.error.message });
+      console.warn('[price-history] tier timed out, trying smaller', { ...tier, error: attempt.error.message });
       continue;
     }
 
     // Non-timeout error — fail immediately
-    console.error('[price-history] tier failed (non-timeout)', { limit: tier.limit, error: attempt.error.message });
+    console.error('[price-history] tier failed (non-timeout)', { ...tier, error: attempt.error.message });
     return NextResponse.json({ error: `Supabase query failed: ${attempt.error.message}` }, { status: 500 });
   }
 
@@ -115,22 +142,18 @@ export async function GET(request) {
   const startMs = startTime.getTime();
   const endMs = endTime.getTime();
 
-  const rawSnapshots = (result.data || [])
-    .map((entry) => ({ capturedAt: entry.captured_at || null, price: entry[priceColumn] ?? null }))
-    .filter((entry) => entry.capturedAt && entry.price !== null)
-    .reverse(); // flip DESC → ASC for the chart
+  const rawSnapshots = buildHistorySnapshots(result.data || [], rank);
+  const rangeSnapshots = buildHistorySnapshots(result.data || [], rank, { startMs, endMs });
 
-  // If date-filtered query returned data, keep it; otherwise use raw (most-recent fallback)
-  const timeFiltered = usedTier?.withDateFilter
-    ? rawSnapshots
-    : rawSnapshots.filter((entry) => {
-        const ts = Date.parse(entry.capturedAt);
-        return Number.isFinite(ts) && ts >= startMs && ts <= endMs;
-      });
+  const snapshots = rangeSnapshots.length ? rangeSnapshots : rawSnapshots;
 
-  const snapshots = timeFiltered.length ? timeFiltered : rawSnapshots;
-
-  console.info('[price-history] response', { playerId, rank, days, snapshotCount: snapshots.length, tier: usedTier?.limit });
+  console.info('[price-history] response', {
+    playerId,
+    rank,
+    days,
+    snapshotCount: snapshots.length,
+    tier: usedTier
+  });
 
   return NextResponse.json({ playerId: String(playerId), rank, days, snapshots });
 }
