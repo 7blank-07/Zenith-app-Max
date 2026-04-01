@@ -9028,13 +9028,61 @@ body.stats-open #squad-builder-modal {
   transform: translateX(-50%);
 }
 
-/* Player details */
-.rank-overlay--player-detail {
-  left: 50%;
-  bottom: 0 !important;
-  width: 40px;
-  height: 40px;
-  z-index: 6;
+/* Player details rank icon controls (pixel-tunable per breakpoint) */
+:root {
+  --player-detail-rank-overlay-width: 40px;
+  --player-detail-rank-overlay-height: 40px;
+  --player-detail-rank-overlay-left: 50%;
+  --player-detail-rank-overlay-bottom: 0px;
+  --player-detail-rank-overlay-z-index: 6;
+}
+
+.rank-diamond-overlay.rank-overlay--player-detail.rank-overlay--animated {
+  left: var(--player-detail-rank-overlay-left);
+  bottom: var(--player-detail-rank-overlay-bottom) !important;
+  width: var(--player-detail-rank-overlay-width) !important;
+  height: var(--player-detail-rank-overlay-height) !important;
+  z-index: var(--player-detail-rank-overlay-z-index);
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --player-detail-rank-overlay-width: 35px;
+    --player-detail-rank-overlay-height: 35px;
+    --player-detail-rank-overlay-left: 50%;
+    --player-detail-rank-overlay-bottom: 0px;
+    --player-detail-rank-overlay-z-index: 6;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --player-detail-rank-overlay-width: 30px;
+    --player-detail-rank-overlay-height: 30px;
+    --player-detail-rank-overlay-left: 50%;
+    --player-detail-rank-overlay-bottom: 0px;
+    --player-detail-rank-overlay-z-index: 6;
+  }
+}
+
+@media (max-width: 512px) {
+  :root {
+    --player-detail-rank-overlay-width: 26px;
+    --player-detail-rank-overlay-height: 26px;
+    --player-detail-rank-overlay-left: 50%;
+    --player-detail-rank-overlay-bottom: 0px;
+    --player-detail-rank-overlay-z-index: 6;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --player-detail-rank-overlay-width: 23px;
+    --player-detail-rank-overlay-height: 23px;
+    --player-detail-rank-overlay-left: 50%;
+    --player-detail-rank-overlay-bottom: 0px;
+    --player-detail-rank-overlay-z-index: 6;
+  }
 }
 
 

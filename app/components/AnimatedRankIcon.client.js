@@ -32,32 +32,42 @@ export default function AnimatedRankIcon({ rank, spriteUrl, size = 56, className
     const element = iconRef.current;
     if (!element || !spriteUrl) return () => {};
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = 0;
-    }
+    const startAnimation = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = 0;
+      }
 
-    const iconSize = resolveIconSize(element, size);
-    const scaleFactor = iconSize / FRAME_WIDTH;
-    const scaledFrameWidth = FRAME_WIDTH * scaleFactor;
-    const scaledFrameHeight = FRAME_HEIGHT * scaleFactor;
-    const spriteSheetSize = Math.round(BASE_SPRITE_SIZE * scaleFactor);
-    const intervalMs = 1000 / FPS;
+      const iconSize = resolveIconSize(element, size);
+      const scaleFactor = iconSize / FRAME_WIDTH;
+      const scaledFrameWidth = FRAME_WIDTH * scaleFactor;
+      const scaledFrameHeight = FRAME_HEIGHT * scaleFactor;
+      const spriteSheetSize = Math.round(BASE_SPRITE_SIZE * scaleFactor);
+      const intervalMs = 1000 / FPS;
 
-    element.style.backgroundSize = `${spriteSheetSize}px ${spriteSheetSize}px`;
-    element.style.backgroundPosition = '0px 0px';
+      element.style.backgroundSize = `${spriteSheetSize}px ${spriteSheetSize}px`;
+      element.style.backgroundPosition = '0px 0px';
 
-    let currentFrame = 0;
-    intervalRef.current = window.setInterval(() => {
-      currentFrame = (currentFrame + 1) % FRAME_COUNT;
-      const col = currentFrame % FRAME_COLUMNS;
-      const row = Math.floor(currentFrame / FRAME_COLUMNS);
-      const xOffset = -(col * scaledFrameWidth);
-      const yOffset = -(row * scaledFrameHeight);
-      element.style.backgroundPosition = `${xOffset}px ${yOffset}px`;
-    }, intervalMs);
+      let currentFrame = 0;
+      intervalRef.current = window.setInterval(() => {
+        currentFrame = (currentFrame + 1) % FRAME_COUNT;
+        const col = currentFrame % FRAME_COLUMNS;
+        const row = Math.floor(currentFrame / FRAME_COLUMNS);
+        const xOffset = -(col * scaledFrameWidth);
+        const yOffset = -(row * scaledFrameHeight);
+        element.style.backgroundPosition = `${xOffset}px ${yOffset}px`;
+      }, intervalMs);
+    };
+
+    startAnimation();
+
+    const resizeObserver = new ResizeObserver(() => {
+      startAnimation();
+    });
+    resizeObserver.observe(element);
 
     return () => {
+      resizeObserver.disconnect();
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = 0;
