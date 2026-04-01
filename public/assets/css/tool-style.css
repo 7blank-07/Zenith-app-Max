@@ -9096,7 +9096,7 @@ body.stats-open #squad-builder-modal {
     --player-detail-rank-overlay-width: 23px;
     --player-detail-rank-overlay-height: 23px;
     --player-detail-rank-overlay-left: 50%;
-    --player-detail-rank-overlay-bottom: 2px;
+    --player-detail-rank-overlay-bottom: 0px;
     --player-detail-rank-overlay-z-index: 6;
   }
 }
@@ -9107,7 +9107,7 @@ body.stats-open #squad-builder-modal {
   --compare-rank-overlay-width: 32px;
   --compare-rank-overlay-height: 32px;
   --compare-rank-overlay-left: 50%;
-  --compare-rank-overlay-bottom: 0px;
+  --compare-rank-overlay-bottom: 2px;
   --compare-rank-overlay-z-index: 6;
 }
 
@@ -9151,6 +9151,63 @@ body.stats-open #squad-builder-modal {
     --compare-rank-overlay-height: 21px;
   }
 }
+
+
+
+/*------------------------------------------------------*/
+/* ============================= */
+/* Squad Pitch Rank Overlay */
+/* ============================= */
+
+:root {
+  --squad-rank-overlay-width: 30px;
+  --squad-rank-overlay-height: 30px;
+  --squad-rank-overlay-left: 50%;
+  --squad-rank-overlay-bottom: -4px;
+  --squad-rank-overlay-z-index: 10000;
+
+}
+
+.rank-diamond-overlay.rank-overlay--squad-pitch.rank-overlay--animated {
+  left: var(--squad-rank-overlay-left);
+  bottom: var(--squad-rank-overlay-bottom) !important;
+  width: var(--squad-rank-overlay-width) !important;
+  height: var(--squad-rank-overlay-height) !important;
+  z-index: var(--squad-rank-overlay-z-index);
+}
+
+/* 1024px */
+@media (max-width: 1024px) {
+  :root {
+    --squad-rank-overlay-width: 24px;
+    --squad-rank-overlay-height: 24px;
+  }
+}
+
+/* 768px */
+@media (max-width: 768px) {
+  :root {
+    --squad-rank-overlay-width: 23px;
+    --squad-rank-overlay-height: 23px;
+  }
+}
+
+/* 512px */
+@media (max-width: 512px) {
+  :root {
+    --squad-rank-overlay-width: 21px;
+    --squad-rank-overlay-height: 21px;
+  }
+}
+
+/* 480px */
+@media (max-width: 480px) {
+  :root {
+    --squad-rank-overlay-width: 20px;
+    --squad-rank-overlay-height: 20px;
+  }
+}
+
 
 
 /* Rank overlay base */
