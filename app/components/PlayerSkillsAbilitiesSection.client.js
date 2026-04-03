@@ -302,7 +302,7 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
           availableSkills.map((skill) => {
             const skillId = getSkillId(skill);
             const skillName = getSkillName(skill) || 'Skill';
-            const skillImage = getSkillImage(skill) || '/assets/images/zenith_logo_svg.svg';
+            const skillImage = getSkillImage(skill) || '/assets/images/zenith_logo_main.png';
             const currentLevel = Math.max(0, toNumber(skillLevelsById[skillId], 0));
             const maxLevel = Math.max(1, toNumber(skillMaxLevels[skillId], 1));
             const unlocked = checkSkillUnlocked(skill, skillLevelsById, availableSkills);
@@ -327,7 +327,7 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                       src={skillImage}
                       alt={skillName}
                       onError={(event) => {
-                        event.currentTarget.src = '/assets/images/zenith_logo_svg.svg';
+                        event.currentTarget.src = '/assets/images/zenith_logo_main.png';
                       }}
                     />
                     {!unlocked && <div className="lock-overlay">🔒</div>}

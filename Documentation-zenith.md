@@ -28,7 +28,7 @@ npm install
   Trigger on-demand revalidation for player/listing pages.
 
 - `npm run db:migrate:blog`  
-  Apply the blog CMS PostgreSQL schema migrations using `DATABASE_URL`.
+  Apply the blog CMS PostgreSQL schema migrations using `BLOG_DATABASE_URL` (or `DATABASE_URL`).
 
 ---
 
@@ -57,17 +57,17 @@ TOP_PLAYERS_PRERENDER_LIMIT=20 npm run build
 
 ## 4.1) Blog CMS database migrations
 
-Set `DATABASE_URL` to your PostgreSQL connection string before running the migration command.
+Set `BLOG_DATABASE_URL` (or `DATABASE_URL`) to your PostgreSQL connection string before running the migration command.
 
 ### PowerShell (Windows)
 ```powershell
-$env:DATABASE_URL='postgresql://user:password@host:5432/database'
+$env:BLOG_DATABASE_URL='postgresql://user:password@host:5432/database'
 npm run db:migrate:blog
 ```
 
 ### Bash (Linux/macOS)
 ```bash
-DATABASE_URL='postgresql://user:password@host:5432/database' npm run db:migrate:blog
+BLOG_DATABASE_URL='postgresql://user:password@host:5432/database' npm run db:migrate:blog
 ```
 
 Optional dry run:

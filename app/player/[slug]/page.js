@@ -167,7 +167,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                 <div id="latest-players-grid">
                   {relatedPlayers.map((player) => {
                     const relatedVariant = getPlayerCardVariant(player);
-                    const relatedCardBackground = player.cardBackground || player.image || '/assets/images/zenith_logo_svg.svg';
+                    const relatedCardBackground = player.cardBackground || player.image || '/assets/images/zenith_logo_main.png';
                     const relatedCardImage = player.playerImage || player.image || '';
 
                     return (

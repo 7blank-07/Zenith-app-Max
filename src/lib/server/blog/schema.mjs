@@ -95,7 +95,7 @@ export function buildBlogPostingSchema(article, rawEnv = process.env) {
       url: toAbsoluteBlogUrl('/', rawEnv),
       logo: {
         '@type': 'ImageObject',
-        url: toAbsoluteBlogUrl('/assets/images/zenith_logo_svg.svg', rawEnv)
+        url: toAbsoluteBlogUrl('/assets/images/zenith_logo_main.png', rawEnv)
       }
     },
     articleSection: toText(article?.category?.name),

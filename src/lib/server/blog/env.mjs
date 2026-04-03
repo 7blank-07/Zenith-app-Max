@@ -41,8 +41,12 @@ function resolveSsl(rawEnv) {
   };
 }
 
+function resolveDatabaseUrl(rawEnv) {
+  return toText(rawEnv.BLOG_DATABASE_URL || rawEnv.DATABASE_URL);
+}
+
 export function getBlogEnvironment(rawEnv = process.env) {
-  const databaseUrl = toText(rawEnv.DATABASE_URL);
+  const databaseUrl = resolveDatabaseUrl(rawEnv);
   const migrationsDir = toText(rawEnv.BLOG_MIGRATIONS_DIR) || path.join(process.cwd(), 'scripts', 'db');
 
   return {
@@ -60,7 +64,7 @@ export function getBlogEnvironment(rawEnv = process.env) {
 export function assertBlogDatabaseUrl(rawEnv = process.env) {
   const { databaseUrl } = getBlogEnvironment(rawEnv);
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required to use the blog PostgreSQL data layer.');
+    throw new Error('BLOG_DATABASE_URL or DATABASE_URL is required to use the blog PostgreSQL data layer.');
   }
   return databaseUrl;
 }

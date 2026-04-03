@@ -16,12 +16,12 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
           <div className="logo">
             <Link href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
               <Image
-                src="/assets/images/zenith_logo_svg.svg"
+                src="/assets/images/zenith_logo_main.png"
                 alt="Zenith logo"
                 className="logo-image"
                 width={1024}
                 height={1024}
-                sizes="64px"
+                sizes="(max-width: 768px) 34px, 48px"
               />
               <span className="logo-text">Zenith</span>
             </Link>
@@ -88,12 +88,12 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
         <div className="zenith-footer-inner">
           <div className="zenith-footer-left">
             <Image
-              src="/assets/images/zenith_logo_svg.svg"
+              src="/assets/images/zenith_logo_main.png"
               alt="Zenith logo"
               className="zenith-footer-logo"
               width={1024}
               height={1024}
-              sizes="26px"
+              sizes="(max-width: 768px) 20px, 26px"
             />
             <span className="zenith-footer-tag">FC Mobile Database Engine</span>
           </div>

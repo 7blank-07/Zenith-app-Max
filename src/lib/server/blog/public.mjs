@@ -16,7 +16,7 @@ import {
 
 const BLOG_SETUP_TITLE = 'Blog CMS is not configured yet';
 const BLOG_SETUP_DESCRIPTION =
-  'Set `DATABASE_URL`, run `npm run db:migrate:blog`, and publish articles to populate these public blog routes.';
+  'Set `BLOG_DATABASE_URL` (or `DATABASE_URL`), run `npm run db:migrate:blog`, and publish articles to populate these public blog routes.';
 
 function toText(value, fallback = '') {
   if (value === undefined || value === null) return fallback;

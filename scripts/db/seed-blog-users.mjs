@@ -92,7 +92,7 @@ async function main() {
   }
 
   if (!environment.databaseUrl) {
-    throw new Error('DATABASE_URL is required to seed blog users.');
+    throw new Error('BLOG_DATABASE_URL or DATABASE_URL is required to seed blog users.');
   }
 
   const result = await seedBlogBootstrapUsers(config);

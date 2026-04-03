@@ -80,7 +80,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
     ovr: initialRecord?.ovr || record?.ovr
   });
   const cardVariant = getPlayerCardVariant(record);
-  const cardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_svg.svg';
+  const cardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_main.png';
   const cardImage = record?.playerImage || record?.image || '';
   const profileSummary = record?.summary || `${record?.name || 'Player'} profile and latest market context from Zenith.`;
   const workRateAttackLabel = formatWorkRateText(record?.workRateAttack);

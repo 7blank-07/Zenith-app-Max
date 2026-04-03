@@ -114,7 +114,7 @@ export function getBlogAuthAvailability(rawEnv = process.env) {
   const missing = [];
 
   if (!databaseUrl) {
-    missing.push('DATABASE_URL');
+    missing.push('BLOG_DATABASE_URL or DATABASE_URL');
   }
 
   if (!sessionSecret) {
