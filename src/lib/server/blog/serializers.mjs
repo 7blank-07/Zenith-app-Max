@@ -1,3 +1,5 @@
+import { getStoredEditorHtml, sanitizeRichTextHtml } from './html.mjs';
+
 function toText(value, fallback = '') {
   if (value === undefined || value === null) return fallback;
   return String(value).trim();
@@ -140,6 +142,10 @@ export function serializeBlogPostRow(row) {
   const tags = toArray(source.tags)
     .map((tag) => serializeBlogTagRow(tag))
     .filter(Boolean);
+  const contentJson = parseJsonValue(source.content_json ?? source.contentJson, null);
+  const contentHtml = sanitizeRichTextHtml(
+    getStoredEditorHtml(contentJson, source.content_html ?? source.contentHtml)
+  );
 
   return {
     id: toText(source.id),
@@ -150,8 +156,8 @@ export function serializeBlogPostRow(row) {
     categoryId: category?.id || toText(source.category_id ?? source.categoryId),
     authorId: author?.id || toText(source.author_id ?? source.authorId),
     coverImage: toNullableText(source.cover_image ?? source.coverImage),
-    contentJson: parseJsonValue(source.content_json ?? source.contentJson, null),
-    contentHtml: toNullableText(source.content_html ?? source.contentHtml),
+    contentJson,
+    contentHtml: contentHtml || null,
     seoKeywords: toTextArray(source.seo_keywords ?? source.seoKeywords),
     metaDescription: toNullableText(source.meta_description ?? source.metaDescription),
     featured: toBoolean(source.featured),

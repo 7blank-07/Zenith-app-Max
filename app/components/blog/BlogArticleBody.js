@@ -1,10 +1,11 @@
 import styles from './BlogLayout.module.css';
+import { sanitizeRichTextHtml } from '../../../src/lib/server/blog/html.mjs';
 
 export default function BlogArticleBody({ article }) {
-  const html = article?.contentHtml?.trim();
+  const html = sanitizeRichTextHtml(article?.contentHtml || '').trim();
 
   return (
-    <article className={styles.articleBody}>
+    <article className={styles.articleBody} itemProp="articleBody">
       {html ? (
         <div className={styles.prose} dangerouslySetInnerHTML={{ __html: html }} />
       ) : (

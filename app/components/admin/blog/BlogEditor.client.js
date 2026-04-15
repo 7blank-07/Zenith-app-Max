@@ -30,11 +30,28 @@ function slugifyClient(value) {
     .slice(0, 96);
 }
 
-function stripHtml(value) {
+function decodeCommonHtmlEntities(value) {
   return toText(value)
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#x27;/gi, "'");
+}
+
+function stripHtml(value) {
+  return decodeCommonHtmlEntities(value)
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function normalizeEditorHtml(value) {
+  return toText(value)
+    .replace(/\sdata-selected="true"/g, '')
+    .replace(/\u00a0/g, ' ');
 }
 
 function estimateReadingTime(html) {
@@ -108,7 +125,7 @@ export default function BlogEditor({
 
   function syncEditorSnapshot(nextHtml) {
     const resolvedHtml = typeof nextHtml === 'string' ? nextHtml : editorRef.current?.innerHTML || '';
-    setEditorHtml(resolvedHtml);
+    setEditorHtml(normalizeEditorHtml(resolvedHtml));
   }
 
   async function uploadAsset(file, slugHint) {

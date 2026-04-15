@@ -89,6 +89,14 @@ export default function BlogMetadataForm({
           onChange={onTagsChange}
         />
 
+        <CoverImageField
+          value={values.coverImage}
+          error={errors.coverImage}
+          slugHint={values.slug || values.title}
+          onChange={onCoverImageChange}
+          onUpload={onUploadAsset}
+        />
+
         <TagSelector
           name="seoKeywords"
           label="SEO keywords"
@@ -123,14 +131,6 @@ export default function BlogMetadataForm({
           <span className={styles.fieldHint}>{values.metaDescription.length}/160 characters</span>
           {errors.metaDescription ? <span className={styles.fieldError}>{errors.metaDescription}</span> : null}
         </label>
-
-        <CoverImageField
-          value={values.coverImage}
-          error={errors.coverImage}
-          slugHint={values.slug || values.title}
-          onChange={onCoverImageChange}
-          onUpload={onUploadAsset}
-        />
 
         {capabilities.canFeature ? (
           <label className={styles.checkboxRow}>

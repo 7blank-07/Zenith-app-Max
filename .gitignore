@@ -23,7 +23,8 @@ node_modules
 
 # development tools
 tests/
-.github/
+.github/*
+!.github/copilot-instructions.md
 .junie/
 
 # build output

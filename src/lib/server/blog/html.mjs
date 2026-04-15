@@ -43,6 +43,19 @@ const TRUSTED_EMBED_HOSTS = new Set([
   'youtube-nocookie.com',
   'player.vimeo.com'
 ]);
+const IMAGE_SIZE_VALUES = new Set(['narrow', 'medium', 'wide', 'full']);
+const IMAGE_ALIGN_VALUES = new Set(['left', 'center', 'right']);
+const IMAGE_RATIO_VALUES = new Set(['auto', '16x9', '4x3', '1x1', '3x4']);
+const IMAGE_FIT_VALUES = new Set(['contain', 'cover']);
+const IMAGE_FOCUS_VALUES = new Set(['center', 'top', 'bottom', 'left', 'right']);
+const NAMED_HTML_ENTITY_MAP = Object.freeze({
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' '
+});
 
 function toText(value, fallback = '') {
   if (value === undefined || value === null) return fallback;
@@ -64,6 +77,47 @@ function escapeAttribute(value) {
 
 function normalizeWhitespace(value) {
   return toText(value).replace(/\s+/g, ' ').trim();
+}
+
+function decodeHtmlEntities(value) {
+  const pattern = /&(#x?[0-9a-f]+|[a-z][a-z0-9]+);/gi;
+  let output = toText(value);
+
+  for (let pass = 0; pass < 8; pass += 1) {
+    const decoded = output.replace(pattern, (fullMatch, entityBody) => {
+      const entity = String(entityBody || '');
+      if (!entity) return fullMatch;
+
+      if (entity[0] === '#') {
+        const isHex = entity[1]?.toLowerCase() === 'x';
+        const codePoint = Number.parseInt(entity.slice(isHex ? 2 : 1), isHex ? 16 : 10);
+        if (!Number.isInteger(codePoint) || codePoint <= 0 || codePoint > 0x10ffff) {
+          return fullMatch;
+        }
+
+        try {
+          return String.fromCodePoint(codePoint);
+        } catch {
+          return fullMatch;
+        }
+      }
+
+      const named = NAMED_HTML_ENTITY_MAP[entity.toLowerCase()];
+      return named ?? fullMatch;
+    });
+
+    output = decoded;
+    if (!/&(#x?[0-9a-f]+|[a-z][a-z0-9]+);/i.test(output)) {
+      break;
+    }
+  }
+
+  return output.replace(/\u00a0/g, ' ');
+}
+
+function sanitizeEnumAttribute(value, allowedValues) {
+  const normalized = normalizeWhitespace(value).toLowerCase();
+  return allowedValues.has(normalized) ? normalized : '';
 }
 
 function sanitizeUrl(value, options = {}) {
@@ -187,6 +241,20 @@ function sanitizeTagAttributes(tagName, attributes) {
     sanitizedAttributes.push('allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"');
   }
 
+  if (tagName === 'figure') {
+    const size = sanitizeEnumAttribute(attributes.get('data-img-size'), IMAGE_SIZE_VALUES);
+    const align = sanitizeEnumAttribute(attributes.get('data-img-align'), IMAGE_ALIGN_VALUES);
+    const ratio = sanitizeEnumAttribute(attributes.get('data-img-ratio'), IMAGE_RATIO_VALUES);
+    const fit = sanitizeEnumAttribute(attributes.get('data-img-fit'), IMAGE_FIT_VALUES);
+    const focus = sanitizeEnumAttribute(attributes.get('data-img-focus'), IMAGE_FOCUS_VALUES);
+
+    if (size) sanitizedAttributes.push(`data-img-size="${size}"`);
+    if (align) sanitizedAttributes.push(`data-img-align="${align}"`);
+    if (ratio) sanitizedAttributes.push(`data-img-ratio="${ratio}"`);
+    if (fit) sanitizedAttributes.push(`data-img-fit="${fit}"`);
+    if (focus) sanitizedAttributes.push(`data-img-focus="${focus}"`);
+  }
+
   if (tagName === 'th' || tagName === 'td') {
     const colspan = Number.parseInt(String(attributes.get('colspan') || ''), 10);
     const rowspan = Number.parseInt(String(attributes.get('rowspan') || ''), 10);
@@ -249,7 +317,7 @@ export function sanitizeRichTextHtml(input) {
 
     if (!tag) {
       if (blockedStack.length) continue;
-      output += escapeHtml(token);
+      output += escapeHtml(decodeHtmlEntities(token));
       continue;
     }
 
@@ -304,16 +372,11 @@ export function sanitizeRichTextHtml(input) {
 }
 
 export function stripRichTextHtml(input) {
-  return toText(input)
+  return decodeHtmlEntities(
+    toText(input)
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|li|blockquote|tr|h1|h2|h3|h4|h5|h6|figcaption)>/gi, '\n')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
+    .replace(/<[^>]+>/g, ' '))
     .replace(/\s+/g, ' ')
     .trim();
 }
