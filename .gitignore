@@ -33,3 +33,4 @@ build
 
 #environment variables
 .env.local
+.playwright-mcp/
