@@ -454,6 +454,13 @@
   gap: 14px;
 }
 
+.categoryCreateRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
 .label {
   color: rgba(226, 232, 240, 0.94);
   font-size: 14px;
@@ -499,6 +506,12 @@
 
 .fieldError {
   color: #fecaca;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.fieldSuccess {
+  color: #99f6e4;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -598,6 +611,7 @@
   }
 
   .fieldGrid,
+  .categoryCreateRow,
   .linkRow,
   .imagePanelGrid {
     grid-template-columns: 1fr;

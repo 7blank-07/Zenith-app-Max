@@ -69,10 +69,14 @@ function getFallbackCategories() {
   return BLOG_FIXED_CATEGORIES.map((category) => toPublicCategory(category));
 }
 
-export function getKnownBlogCategory(categorySlug) {
+function getFallbackCategoryBySlug(categorySlug) {
   const normalizedSlug = toText(categorySlug).toLowerCase();
   const category = BLOG_FIXED_CATEGORIES.find((entry) => entry.slug === normalizedSlug);
   return category ? toPublicCategory(category) : null;
+}
+
+export function getKnownBlogCategory(categorySlug) {
+  return getFallbackCategoryBySlug(categorySlug);
 }
 
 export function getBlogPublicAvailability(rawEnv = process.env) {
@@ -176,37 +180,40 @@ export async function getBlogIndexPageData({ searchParams = {}, rawEnv = process
 }
 
 export async function getBlogCategoryPageData(categorySlug, { searchParams = {}, rawEnv = process.env } = {}) {
-  const knownCategory = getKnownBlogCategory(categorySlug);
-  if (!knownCategory) return null;
+  const normalizedCategorySlug = toText(categorySlug).toLowerCase();
+  if (!normalizedCategorySlug) return null;
 
   const page = parsePage(searchParams);
   const availability = getBlogPublicAvailability(rawEnv);
-  const categories = availability.isConfigured ? await listBlogCategories() : getFallbackCategories();
 
   if (!availability.isConfigured) {
+    const fallbackCategory = getFallbackCategoryBySlug(normalizedCategorySlug);
+    if (!fallbackCategory) return null;
+
     return buildUnavailableCollectionState({
       page,
-      title: knownCategory.name,
-      description: knownCategory.description,
-      categories,
-      activeCategorySlug: knownCategory.slug
+      title: fallbackCategory.name,
+      description: fallbackCategory.description,
+      categories: getFallbackCategories(),
+      activeCategorySlug: fallbackCategory.slug
     });
   }
 
-  const result = await listPublishedBlogsByCategory(knownCategory.slug, {
+  const categories = await listBlogCategories();
+  const result = await listPublishedBlogsByCategory(normalizedCategorySlug, {
     page,
     pageSize: BLOG_DEFAULT_PAGE_SIZE
   });
 
   if (!result.category) {
-    throw new Error(`Blog category "${knownCategory.slug}" is missing from the database seed data.`);
+    return null;
   }
 
   return {
     availability,
     categories,
     title: result.category.name,
-    description: result.category.description || knownCategory.description,
+    description: result.category.description || `Published FC Mobile articles in ${result.category.name}.`,
     activeCategorySlug: result.category.slug,
     activeTag: null,
     category: result.category,
@@ -262,23 +269,27 @@ export async function getBlogTagPageData(tagSlug, { searchParams = {}, rawEnv = 
 }
 
 export async function getBlogArticlePageData(categorySlug, slug, { rawEnv = process.env } = {}) {
-  const knownCategory = getKnownBlogCategory(categorySlug);
-  if (!knownCategory) return null;
+  const normalizedCategorySlug = toText(categorySlug).toLowerCase();
+  const normalizedSlug = toText(slug);
+  if (!normalizedCategorySlug || !normalizedSlug) return null;
 
   const availability = getBlogPublicAvailability(rawEnv);
-  const categories = availability.isConfigured ? await listBlogCategories() : getFallbackCategories();
 
   if (!availability.isConfigured) {
+    const fallbackCategory = getFallbackCategoryBySlug(normalizedCategorySlug);
+    if (!fallbackCategory) return null;
+
     return {
       availability,
-      categories,
-      category: knownCategory,
+      categories: getFallbackCategories(),
+      category: fallbackCategory,
       post: null,
       relatedPosts: []
     };
   }
 
-  const post = await getPublishedBlogByCategoryAndSlug(knownCategory.slug, toText(slug));
+  const categories = await listBlogCategories();
+  const post = await getPublishedBlogByCategoryAndSlug(normalizedCategorySlug, normalizedSlug);
   if (!post) {
     return null;
   }
@@ -315,7 +326,7 @@ export async function getBlogArticlePageData(categorySlug, slug, { rawEnv = proc
   return {
     availability,
     categories,
-    category: post.category || knownCategory,
+    category: post.category || null,
     post,
     relatedPosts: mergeUniquePosts(relatedGroups, BLOG_RELATED_ARTICLES_LIMIT)
   };

@@ -19,6 +19,13 @@ const DEFAULT_IMAGE_SETTINGS = Object.freeze({
   caption: ''
 });
 
+const DEFAULT_TABLE_SETTINGS = Object.freeze({
+  columns: 3,
+  rows: 3
+});
+
+const MAX_TABLE_DIMENSION = 12;
+
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -108,6 +115,25 @@ function buildImageMarkup({ url, alt, caption }) {
   return `<figure data-img-size="${DEFAULT_IMAGE_SETTINGS.size}" data-img-align="${DEFAULT_IMAGE_SETTINGS.align}" data-img-ratio="${DEFAULT_IMAGE_SETTINGS.ratio}" data-img-fit="${DEFAULT_IMAGE_SETTINGS.fit}" data-img-focus="${DEFAULT_IMAGE_SETTINGS.focus}"><img src="${escapeHtml(url)}" alt="${escapedAlt}" />${escapedCaption ? `<figcaption>${escapedCaption}</figcaption>` : ''}</figure>`;
 }
 
+function sanitizeTableDimension(value, fallback) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(MAX_TABLE_DIMENSION, Math.max(1, parsed));
+}
+
+function buildTableMarkup({ columns, rows }) {
+  const safeColumns = sanitizeTableDimension(columns, DEFAULT_TABLE_SETTINGS.columns);
+  const safeRows = sanitizeTableDimension(rows, DEFAULT_TABLE_SETTINGS.rows);
+
+  const headCells = Array.from({ length: safeColumns }, (_, index) => `<th>Column ${index + 1}</th>`).join('');
+  const bodyRows = Array.from({ length: safeRows }, (_, rowIndex) => {
+    const cells = Array.from({ length: safeColumns }, () => `<td>Value ${rowIndex + 1}</td>`).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+
+  return `<table><thead><tr>${headCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+}
+
 function buildEmbedMarkup(url) {
   try {
     const parsed = new URL(url);
@@ -146,11 +172,13 @@ export default function BlogEditorToolbar({
   slugHint
 }) {
   const fileInputRef = useRef(null);
+  const toolbarRootRef = useRef(null);
   const selectionRef = useRef(null);
   const selectedFigureRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [toolbarError, setToolbarError] = useState('');
   const [selectedImageSettings, setSelectedImageSettings] = useState(null);
+  const [tableSettings, setTableSettings] = useState(DEFAULT_TABLE_SETTINGS);
 
   function selectionBelongsToEditor(selection) {
     const editor = editorRef.current;
@@ -292,9 +320,23 @@ export default function BlogEditorToolbar({
   }
 
   function insertTable() {
-    insertHtml(
-      '<table><thead><tr><th>Column 1</th><th>Column 2</th></tr></thead><tbody><tr><td>Value</td><td>Value</td></tr><tr><td>Value</td><td>Value</td></tr></tbody></table>'
+    rememberSelection();
+    const columnsInput = window.prompt(
+      `How many columns? (1-${MAX_TABLE_DIMENSION})`,
+      String(tableSettings.columns)
     );
+    if (!columnsInput) return;
+
+    const rowsInput = window.prompt(
+      `How many rows? (1-${MAX_TABLE_DIMENSION})`,
+      String(tableSettings.rows)
+    );
+    if (!rowsInput) return;
+
+    const columns = sanitizeTableDimension(columnsInput, tableSettings.columns);
+    const rows = sanitizeTableDimension(rowsInput, tableSettings.rows);
+    setTableSettings({ columns, rows });
+    insertHtml(buildTableMarkup({ columns, rows }));
   }
 
   function insertEmbed() {
@@ -351,9 +393,12 @@ export default function BlogEditorToolbar({
     }
 
     function handleEditorBlur() {
-      if (!editor.contains(document.activeElement)) {
+      window.requestAnimationFrame(() => {
+        const activeElement = document.activeElement;
+        if (editor.contains(activeElement)) return;
+        if (toolbarRootRef.current?.contains(activeElement)) return;
         setSelectedFigure(null);
-      }
+      });
     }
 
     editor.addEventListener('click', handleEditorClick);
@@ -370,7 +415,7 @@ export default function BlogEditorToolbar({
   }, [editorRef]);
 
   return (
-    <>
+    <div ref={toolbarRootRef}>
       <div className={styles.toolbar}>
         <div className={styles.toolbarGroup}>
           <button type="button" className={styles.toolbarButton} onMouseDown={preventBlur} onClick={() => runCommand('formatBlock', 'p')}>
@@ -544,7 +589,7 @@ export default function BlogEditorToolbar({
       <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleImageUpload} />
 
       {toolbarError ? <div className={styles.error}>{toolbarError}</div> : null}
-    </>
+    </div>
   );
 }
 

@@ -27,6 +27,7 @@ import {
   GET_BLOG_CATEGORY_BY_SLUG_QUERY,
   GET_BLOG_TAG_BY_SLUG_QUERY,
   GET_BLOG_USER_BY_ID_QUERY,
+  INSERT_BLOG_CATEGORY_QUERY,
   INSERT_BLOG_QUERY,
   INSERT_BLOG_TAG_RELATION_QUERY,
   LIST_BLOG_CATEGORIES_QUERY,
@@ -321,6 +322,41 @@ async function syncBlogTags(client, blogId, tags) {
 export async function listBlogCategories(options = {}) {
   const result = await queryWithExecutor(LIST_BLOG_CATEGORIES_QUERY, options);
   return result.rows.map((row) => serializeBlogCategoryRow(row));
+}
+
+export async function createBlogCategory(input = {}, options = {}) {
+  const name = toText(input?.name);
+  if (!name) {
+    throw new Error('A category name is required.');
+  }
+
+  const slug = slugifyBlogSegment(input?.slug || name, { fallback: 'category' });
+  const description = toNullableText(input?.description);
+  const inserted = await queryOne(
+    {
+      text: INSERT_BLOG_CATEGORY_QUERY,
+      values: [name, slug, description]
+    },
+    options
+  );
+
+  if (inserted) {
+    return serializeBlogCategoryRow(inserted);
+  }
+
+  const existing = await queryOne(
+    {
+      text: GET_BLOG_CATEGORY_BY_SLUG_QUERY,
+      values: [slug]
+    },
+    options
+  );
+
+  if (existing) {
+    throw new Error(`A blog category with slug "${slug}" already exists.`);
+  }
+
+  throw new Error('Blog category could not be created.');
 }
 
 export async function getBlogCategoryBySlug(slug, options = {}) {

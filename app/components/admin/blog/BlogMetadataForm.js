@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import CoverImageField from './CoverImageField.client';
 import InternalLinkPicker from './InternalLinkPicker.client';
 import TagSelector from './TagSelector.client';
@@ -14,8 +17,55 @@ export default function BlogMetadataForm({
   onInternalLinksChange,
   onExternalLinksChange,
   onCoverImageChange,
-  onUploadAsset
+  onUploadAsset,
+  onCreateCategory
 }) {
+  const [categoryName, setCategoryName] = useState('');
+  const [categorySlug, setCategorySlug] = useState('');
+  const [categoryDescription, setCategoryDescription] = useState('');
+  const [categoryNotice, setCategoryNotice] = useState('');
+  const [categoryError, setCategoryError] = useState('');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+
+  async function createCategory() {
+    if (typeof onCreateCategory !== 'function') {
+      return;
+    }
+
+    const name = String(categoryName || '').trim();
+    if (!name) {
+      setCategoryNotice('');
+      setCategoryError('Category name is required.');
+      return;
+    }
+
+    setIsCreatingCategory(true);
+    setCategoryNotice('');
+    setCategoryError('');
+
+    try {
+      const created = await onCreateCategory({
+        name,
+        slug: String(categorySlug || '').trim(),
+        description: String(categoryDescription || '').trim()
+      });
+      setCategoryName('');
+      setCategorySlug('');
+      setCategoryDescription('');
+      setCategoryNotice(`Category "${created?.name || name}" was added and selected.`);
+    } catch (error) {
+      setCategoryError(error instanceof Error ? error.message : 'Category creation failed.');
+    } finally {
+      setIsCreatingCategory(false);
+    }
+  }
+
+  function handleCategoryKeyDown(event) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    createCategory();
+  }
+
   return (
     <section className={styles.card}>
       <div className={styles.metaCardBody}>
@@ -79,6 +129,59 @@ export default function BlogMetadataForm({
             {errors.categoryId ? <span className={styles.fieldError}>{errors.categoryId}</span> : null}
           </label>
         </div>
+
+        {capabilities.canManageCategories ? (
+          <div className={styles.field}>
+            <span className={styles.label}>Add category</span>
+            <div className={styles.categoryCreateRow}>
+              <input
+                className={styles.input}
+                value={categoryName}
+                onChange={(event) => {
+                  setCategoryName(event.target.value);
+                  setCategoryNotice('');
+                  setCategoryError('');
+                }}
+                onKeyDown={handleCategoryKeyDown}
+                placeholder="Market Tips"
+              />
+              <button
+                type="button"
+                className={styles.addButton}
+                onClick={createCategory}
+                disabled={isCreatingCategory || !categoryName.trim()}
+              >
+                {isCreatingCategory ? 'Adding...' : 'Add'}
+              </button>
+            </div>
+            <input
+              className={styles.input}
+              value={categorySlug}
+              onChange={(event) => {
+                setCategorySlug(event.target.value);
+                setCategoryNotice('');
+                setCategoryError('');
+              }}
+              onKeyDown={handleCategoryKeyDown}
+              placeholder="Optional slug (auto-generated if blank)"
+            />
+            <textarea
+              className={styles.textarea}
+              value={categoryDescription}
+              onChange={(event) => {
+                setCategoryDescription(event.target.value);
+                setCategoryNotice('');
+                setCategoryError('');
+              }}
+              placeholder="Optional category description for archive pages."
+            />
+            {categoryNotice ? <span className={styles.fieldSuccess}>{categoryNotice}</span> : null}
+            {categoryError ? <span className={styles.fieldError}>{categoryError}</span> : null}
+            <span className={styles.fieldHint}>
+              New categories become available immediately for this article and public blog routes.
+            </span>
+          </div>
+        ) : null}
 
         <TagSelector
           name="tags"

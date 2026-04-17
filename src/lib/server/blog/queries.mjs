@@ -170,6 +170,13 @@ export const GET_BLOG_CATEGORY_BY_SLUG_QUERY = `
   LIMIT 1
 `;
 
+export const INSERT_BLOG_CATEGORY_QUERY = `
+  INSERT INTO blog_categories (name, slug, description)
+  VALUES ($1, $2, $3)
+  ON CONFLICT (slug) DO NOTHING
+  RETURNING id, name, slug, description, created_at, updated_at
+`;
+
 export const LIST_BLOG_TAGS_QUERY = `
   SELECT id, name, slug, created_at, updated_at
   FROM blog_tags

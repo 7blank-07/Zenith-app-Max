@@ -76,6 +76,27 @@ function buildInitialValues(post) {
   };
 }
 
+function sortCategoriesByName(input = []) {
+  return [...(Array.isArray(input) ? input : [])].sort((left, right) =>
+    String(left?.name || '').localeCompare(String(right?.name || ''), undefined, { sensitivity: 'base' })
+  );
+}
+
+function mergeCategory(categories, category) {
+  const next = [];
+  const seen = new Set();
+  const nextCategory = category && typeof category === 'object' ? category : null;
+
+  for (const entry of [...(Array.isArray(categories) ? categories : []), nextCategory]) {
+    if (!entry?.id) continue;
+    if (seen.has(entry.id)) continue;
+    seen.add(entry.id);
+    next.push(entry);
+  }
+
+  return sortCategoriesByName(next);
+}
+
 export default function BlogEditor({
   user,
   post = null,
@@ -87,6 +108,7 @@ export default function BlogEditor({
   const editorRef = useRef(null);
   const initialValues = useMemo(() => buildInitialValues(post), [post]);
   const [values, setValues] = useState(initialValues);
+  const [availableCategories, setAvailableCategories] = useState(() => sortCategoriesByName(categories));
   const [editorHtml, setEditorHtml] = useState(post?.contentHtml || '');
   const [slugDirty, setSlugDirty] = useState(Boolean(post?.id || post?.slug));
 
@@ -94,6 +116,10 @@ export default function BlogEditor({
     setValues(initialValues);
     setSlugDirty(Boolean(post?.id || post?.slug));
   }, [initialValues, post?.id, post?.slug]);
+
+  useEffect(() => {
+    setAvailableCategories(sortCategoriesByName(categories));
+  }, [categories]);
 
   useEffect(() => {
     const nextHtml = post?.contentHtml || '';
@@ -144,6 +170,34 @@ export default function BlogEditor({
     }
 
     return payload.url;
+  }
+
+  async function createCategory(input = {}) {
+    const response = await fetch('/api/blog/categories', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(input)
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload?.error || 'Category creation failed.');
+    }
+
+    const category = payload?.category;
+    if (!category?.id) {
+      throw new Error('The server returned an invalid category response.');
+    }
+
+    setAvailableCategories((current) => mergeCategory(current, category));
+    setValues((current) => ({
+      ...current,
+      categoryId: category.id
+    }));
+
+    return category;
   }
 
   const publicHref = post?.id && post?.category?.slug && post?.slug
@@ -214,7 +268,7 @@ export default function BlogEditor({
         <div className={styles.sideColumn}>
           <BlogMetadataForm
             values={values}
-            categories={categories}
+            categories={availableCategories}
             errors={formState.fieldErrors || {}}
             capabilities={capabilities}
             onFieldChange={updateField}
@@ -224,6 +278,7 @@ export default function BlogEditor({
             onExternalLinksChange={(nextLinks) => updateField('externalLinks', nextLinks)}
             onCoverImageChange={(nextUrl) => updateField('coverImage', nextUrl)}
             onUploadAsset={uploadAsset}
+            onCreateCategory={createCategory}
           />
         </div>
       </div>

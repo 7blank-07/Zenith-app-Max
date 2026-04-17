@@ -51,7 +51,8 @@ export function getBlogEditorCapabilities(user, post = null) {
     canPublish: isAdmin && currentStatus !== BLOG_STATUS.PENDING,
     canReject: isAdmin && Boolean(post),
     canDelete: isAdmin && Boolean(post),
-    canFeature: isAdmin
+    canFeature: isAdmin,
+    canManageCategories: isAdmin
   };
 }
 
