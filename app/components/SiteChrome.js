@@ -37,6 +37,9 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <MarketNavLink href="/market" data-link="" data-nav-link="" className={getNavClass(activeView, 'market')}>
               Market
             </MarketNavLink>
+            <Link href="/redeem-codes" data-link="" data-nav-link="" className={getNavClass(activeView, 'redeem-codes')}>
+              Codes
+            </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
               Blogs
             </Link>
@@ -108,6 +111,9 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <MarketNavLink href="/market" data-link="" data-nav-link="">
               Market
             </MarketNavLink>
+            <Link href="/redeem-codes" data-link="" data-nav-link="">
+              Codes
+            </Link>
             <Link href="/tools?tool=watchlist" data-link="" data-nav-link="">
               Watchlist
             </Link>

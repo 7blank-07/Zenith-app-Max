@@ -1,0 +1,76 @@
+{
+  "codes": [
+    {
+      "id": "1",
+      "code": "LEGEND2024",
+      "reward": "5000 Coins + 3 Player Packs",
+      "status": "active",
+      "expiresAt": "2024-12-31T23:59:59Z",
+      "addedAt": "2024-04-15T10:00:00Z",
+      "source": "Official Twitter"
+    },
+    {
+      "id": "2",
+      "code": "SPRING5K",
+      "reward": "5000 Coins",
+      "status": "active",
+      "expiresAt": "2024-05-31T23:59:59Z",
+      "addedAt": "2024-04-20T14:30:00Z",
+      "source": "Live Event"
+    },
+    {
+      "id": "3",
+      "code": "NEWSEASON",
+      "reward": "1 Elite Pack + 2500 Coins",
+      "status": "active",
+      "expiresAt": null,
+      "addedAt": "2024-04-18T09:15:00Z",
+      "source": "Game Update"
+    },
+    {
+      "id": "4",
+      "code": "MARCH2024",
+      "reward": "3000 Coins + 1 Silver Pack",
+      "status": "expired",
+      "expiresAt": "2024-03-31T23:59:59Z",
+      "addedAt": "2024-03-01T08:00:00Z",
+      "source": "Official Twitter"
+    },
+    {
+      "id": "5",
+      "code": "WELCOME100",
+      "reward": "10000 Coins + 5 Gold Packs",
+      "status": "active",
+      "expiresAt": "2024-06-30T23:59:59Z",
+      "addedAt": "2024-04-01T00:00:00Z",
+      "source": "New Player"
+    },
+    {
+      "id": "6",
+      "code": "FESTIVE50",
+      "reward": "2500 Coins",
+      "status": "expired",
+      "expiresAt": "2024-02-29T23:59:59Z",
+      "addedAt": "2024-02-15T12:00:00Z",
+      "source": "Live Event"
+    },
+    {
+      "id": "7",
+      "code": "ERA7CODES",
+      "reward": "1 Ultimate Pack + 7500 Coins",
+      "status": "active",
+      "expiresAt": "2024-07-15T23:59:59Z",
+      "addedAt": "2024-04-10T16:45:00Z",
+      "source": "Official Discord"
+    },
+    {
+      "id": "8",
+      "code": "CAMPAIGN30",
+      "reward": "3 Gold Packs + 5000 Coins",
+      "status": "active",
+      "expiresAt": "2024-05-15T23:59:59Z",
+      "addedAt": "2024-04-25T11:20:00Z",
+      "source": "Social Media"
+    }
+  ]
+}

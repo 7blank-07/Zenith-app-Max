@@ -50,6 +50,7 @@ const MOBILE_PREFETCH_ROUTES = Object.freeze([
   '/tools?tool=compare',
   '/tools?tool=watchlist',
   '/market',
+  '/redeem-codes',
   '/blogs'
 ]);
 
