@@ -4,6 +4,7 @@ import BlogEditor from '../../../../components/admin/blog/BlogEditor.client';
 import { requireBlogSessionUser } from '../../../../../src/lib/server/blog/auth.mjs';
 import { getBlogById, getBlogDashboardCounts, listBlogCategories } from '../../../../../src/lib/server/blog/repository.mjs';
 import { canEditBlogPost, getBlogEditorCapabilities } from '../../../../../src/lib/server/blog/workflow.mjs';
+import { getRedeemDashboardCounts } from '../../../../../src/lib/server/redeem-codes/repository.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +33,9 @@ export default async function EditBlogPostPage({ params, searchParams = {} }) {
   const user = await requireBlogSessionUser({ nextPath: `/admin/blogs/edit/${params.id}`, permission: 'edit-blogs' });
   const scope = getAuthorScope(user);
 
-  const [counts, categories, post] = await Promise.all([
+  const [counts, redeemCounts, categories, post] = await Promise.all([
     getBlogDashboardCounts(scope),
+    getRedeemDashboardCounts(),
     listBlogCategories(),
     getBlogById(params.id)
   ]);
@@ -52,7 +54,7 @@ export default async function EditBlogPostPage({ params, searchParams = {} }) {
       description="Update content, adjust metadata, and move this article through the editorial workflow."
       currentPath="/admin/blogs"
       user={user}
-      counts={counts}
+      counts={{ ...counts, ...redeemCounts }}
       notice={readNotice(searchParams)}
     >
       <BlogEditor

@@ -3,6 +3,7 @@ import AdminBlogTable from '../../../components/admin/AdminBlogTable';
 import { BLOG_STATUS } from '../../../../src/lib/server/blog/constants.mjs';
 import { requireBlogSessionUser } from '../../../../src/lib/server/blog/auth.mjs';
 import { getBlogDashboardCounts, listAdminBlogs, listBlogCategories } from '../../../../src/lib/server/blog/repository.mjs';
+import { getRedeemDashboardCounts } from '../../../../src/lib/server/redeem-codes/repository.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,8 +41,9 @@ export default async function AdminDraftBlogsPage({ searchParams = {} }) {
   const notice = readSearchParam(searchParams, 'notice');
   const scope = getAuthorScope(user);
 
-  const [counts, categories, blogList] = await Promise.all([
+  const [counts, redeemCounts, categories, blogList] = await Promise.all([
     getBlogDashboardCounts(scope),
+    getRedeemDashboardCounts(),
     listBlogCategories(),
     listAdminBlogs({
       ...scope,
@@ -58,7 +60,7 @@ export default async function AdminDraftBlogsPage({ searchParams = {} }) {
       description="See which stories are still being shaped before they move into the editorial review workflow."
       currentPath="/admin/blogs/drafts"
       user={user}
-      counts={counts}
+      counts={{ ...counts, ...redeemCounts }}
       notice={notice}
     >
       <AdminBlogTable

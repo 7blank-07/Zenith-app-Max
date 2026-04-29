@@ -1,7 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import dotenv from 'dotenv';
 import { closeBlogPool, getBlogPool } from '../../src/lib/server/blog/db.mjs';
 import { getBlogEnvironment, getBlogMigrationsDirectory } from '../../src/lib/server/blog/env.mjs';
+
+function loadScriptEnv() {
+  const root = process.cwd();
+  dotenv.config({ path: path.join(root, '.env') });
+  dotenv.config({ path: path.join(root, '.env.local'), override: true });
+}
 
 function parseArgs(argv) {
   const config = {
@@ -80,6 +87,7 @@ async function applyMigration(client, tableName, fileName, sql) {
 }
 
 async function main() {
+  loadScriptEnv();
   const args = parseArgs(process.argv.slice(2));
   const environment = getBlogEnvironment(process.env);
   const migrationsDir = path.isAbsolute(args.migrationsDir || '')

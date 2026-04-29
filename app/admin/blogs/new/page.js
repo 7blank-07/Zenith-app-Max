@@ -3,6 +3,7 @@ import BlogEditor from '../../../components/admin/blog/BlogEditor.client';
 import { requireBlogSessionUser } from '../../../../src/lib/server/blog/auth.mjs';
 import { getBlogDashboardCounts, listBlogCategories } from '../../../../src/lib/server/blog/repository.mjs';
 import { getBlogEditorCapabilities } from '../../../../src/lib/server/blog/workflow.mjs';
+import { getRedeemDashboardCounts } from '../../../../src/lib/server/redeem-codes/repository.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,8 +22,9 @@ function getAuthorScope(user) {
 export default async function NewBlogPostPage({ searchParams = {} }) {
   const user = await requireBlogSessionUser({ nextPath: '/admin/blogs/new', permission: 'edit-blogs' });
   const scope = getAuthorScope(user);
-  const [counts, categories] = await Promise.all([
+  const [counts, redeemCounts, categories] = await Promise.all([
     getBlogDashboardCounts(scope),
+    getRedeemDashboardCounts(),
     listBlogCategories()
   ]);
 
@@ -32,7 +34,7 @@ export default async function NewBlogPostPage({ searchParams = {} }) {
       description="Write, save, and route new FC Mobile content through the editorial workflow."
       currentPath="/admin/blogs"
       user={user}
-      counts={counts}
+      counts={{ ...counts, ...redeemCounts }}
       notice={typeof searchParams?.notice === 'string' ? searchParams.notice : ''}
     >
       <BlogEditor

@@ -2,13 +2,16 @@ import HomeDashboardInteractions from './components/HomeDashboardInteractions.cl
 import HomeLatestBlogsSection from './components/HomeLatestBlogsSection.client';
 import MarketNavLink from './components/MarketNavLink.client';
 import MobileNavigation from './components/MobileNavigation.client';
+import RedeemCodeHomeWidget from './components/redeem/RedeemCodeHomeWidget.client';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { buildPlayerPath } from '../src/lib/player-slug.mjs';
 import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
+import { getHomeRedeemCodeWidgetData } from '../src/lib/server/redeem-codes/public.mjs';
 import { fetchLatestPlayers } from '../src/lib/server/top-players.mjs';
+import { getTopTickerConfig } from '../src/lib/server/top-ticker-config.mjs';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
@@ -123,9 +126,15 @@ export default async function HomePage() {
     candidateLimit: 240
   });
   const blogPageDataPromise = getBlogIndexPageData();
-  const [latestPlayers, blogPageData] = await Promise.all([latestPlayersPromise, blogPageDataPromise]);
+  const redeemCodeWidgetPromise = getHomeRedeemCodeWidgetData();
+  const [latestPlayers, blogPageData, homeRedeemWidgetData] = await Promise.all([
+    latestPlayersPromise,
+    blogPageDataPromise,
+    redeemCodeWidgetPromise
+  ]);
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
+  const topTicker = getTopTickerConfig();
 
   console.info('[metrics] / render', {
     elapsedMs: Date.now() - startedAt,
@@ -194,106 +203,43 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <div className="slider" style={{ maxWidth: '100vw', overflow: 'hidden' }}>
-        <span>Trade, Build, Dominate – Massive Rewards Await on Zenith!</span>
-      </div>
+      {topTicker.enabled ? (
+        <div className="slider" style={{ maxWidth: '100vw', overflow: 'hidden' }}>
+          <span>{topTicker.text}</span>
+        </div>
+      ) : null}
 
       <main className="main-content">
         <div id="dashboard-view" className="view active">
-          <section className="search-section">
-            <div className="search-container">
-              <div className="search-box">
-                <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-                <input type="text" id="home-search" className="search-input" placeholder="Search for players..." autoComplete="off" />
-              </div>
-              <div id="search-dropdown" className="search-dropdown">
-                <div className="search-dropdown-content" id="search-results-dropdown" />
-              </div>
-            </div>
-          </section>
-
-          <section className="hero-banner-section">
-            <div className="hero-banner-slider">
-              <div className="banner-slide active" data-redirect="view" data-target="database">
-                <picture>
-                  <source media="(min-width: 1024px)" srcSet="/assets/images/last_banner_desktop.webp" />
-                  <img
-                    src="/assets/images/capped_legends_banner.webp"
-                    alt="Capped Legends Event"
-                    className="banner-image banner-image--capped-legends"
-                    width="1721"
-                    height="721"
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                  />
-                </picture>
-                <div className="banner-overlay">
-                  <div className="banner-content">
-                    <h2 className="banner-title">Explore Players</h2>
-                    <p className="banner-subtitle">Analyze all players</p>
+          <section className="home-utility-hero" aria-label="Hero utility hub">
+            <div className="home-utility-card">
+              <div className="home-utility-search">
+                <div className="search-container">
+                  <div className="search-box">
+                    <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input
+                      type="text"
+                      id="home-search"
+                      className="search-input"
+                      placeholder="Search for players, clubs, or positions..."
+                      autoComplete="off"
+                    />
+                  </div>
+                  <div id="search-dropdown" className="search-dropdown">
+                    <div className="search-dropdown-content" id="search-results-dropdown" />
                   </div>
                 </div>
               </div>
 
-              <div className="banner-slide" data-redirect="tool" data-target="compare">
-                <Image
-                  src="/assets/images/banner1.webp"
-                  alt="FC Mobile Event"
-                  className="banner-image"
-                  width={1600}
-                  height={400}
-                  sizes="(max-width: 1400px) 100vw, 1400px"
-                  loading="lazy"
-                  fetchPriority="low"
-                />
-                <div className="banner-overlay">
-                  <div className="banner-content">
-                    <h2 className="banner-title">Compare Players</h2>
-                    <p className="banner-subtitle">Compare at once</p>
-                  </div>
-                </div>
-              </div>
+              <div className="home-utility-divider" aria-hidden="true" />
 
-              <div className="banner-slide" data-redirect="tool" data-target="squadbuilder">
-                <Image
-                  src="/assets/images/squad-build-bg.jpeg"
-                  alt="Squad Building"
-                  className="banner-image"
-                  width={1600}
-                  height={400}
-                  sizes="(max-width: 1400px) 100vw, 1400px"
-                  loading="lazy"
-                  fetchPriority="low"
-                />
-                <div className="banner-overlay">
-                  <div className="banner-content">
-                    <h2 className="banner-title">Build Your Squad</h2>
-                    <p className="banner-subtitle">Create the perfect team</p>
-                  </div>
-                </div>
+              <div className="home-utility-redeem-shell">
+                <RedeemCodeHomeWidget codeEntry={homeRedeemWidgetData?.code || null} />
               </div>
             </div>
-
-            <div className="banner-dots">
-              <span className="banner-dot active" data-slide="0" />
-              <span className="banner-dot" data-slide="1" />
-              <span className="banner-dot" data-slide="2" />
-            </div>
-
-            <button className="banner-arrow banner-prev" aria-label="Previous banner" type="button">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <button className="banner-arrow banner-next" aria-label="Next banner" type="button">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
           </section>
 
           <div id="dashboard-search-results" style={{ display: 'none' }}>
@@ -370,3 +316,4 @@ export default async function HomePage() {
     </>
   );
 }
+

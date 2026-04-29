@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { buildBlogRevalidationPathsFromPayload, revalidateAppPaths } from '../../../src/lib/server/blog/revalidation.mjs';
+import { buildRedeemRevalidationPathsFromPayload } from '../../../src/lib/server/redeem-codes/revalidation.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,10 @@ function buildTargetPaths(body) {
 
   for (const blogPath of buildBlogRevalidationPathsFromPayload(body)) {
     targetPaths.add(blogPath);
+  }
+
+  for (const redeemPath of buildRedeemRevalidationPathsFromPayload(body)) {
+    targetPaths.add(redeemPath);
   }
 
   return [...targetPaths];

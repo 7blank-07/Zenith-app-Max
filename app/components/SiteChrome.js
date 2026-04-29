@@ -3,13 +3,16 @@ import MarketNavLink from './MarketNavLink.client';
 import MobileNavigation from './MobileNavigation.client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getTopTickerConfig } from '../../src/lib/server/top-ticker-config.mjs';
 
 function getNavClass(activeView, view) {
   return activeView === view ? 'nav-link active' : 'nav-link';
 }
 
 export default function SiteChrome({ activeView = '', showSlider = false, children }) {
-  return (
+  const topTicker = getTopTickerConfig();
+
+return (
     <>
       <header className="header">
         <div className="header-content">
@@ -74,11 +77,11 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
         </div>
       </header>
 
-      {showSlider && (
+      {showSlider && topTicker.enabled ? (
         <div className="slider" style={{ maxWidth: '100vw', overflow: 'hidden' }}>
-          <span>Trade, Build, Dominate – Massive Rewards Await on Zenith!</span>
+          <span>{topTicker.text}</span>
         </div>
-      )}
+      ) : null}
 
       {children}
 

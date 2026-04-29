@@ -2,6 +2,7 @@ import AdminShell from '../../components/admin/AdminShell';
 import AdminBlogTable from '../../components/admin/AdminBlogTable';
 import { getBlogDashboardCounts, listAdminBlogs, listBlogCategories } from '../../../src/lib/server/blog/repository.mjs';
 import { requireBlogSessionUser } from '../../../src/lib/server/blog/auth.mjs';
+import { getRedeemDashboardCounts } from '../../../src/lib/server/redeem-codes/repository.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,8 +40,9 @@ export default async function AdminBlogsPage({ searchParams = {} }) {
   const notice = readSearchParam(searchParams, 'notice');
   const scope = getAuthorScope(user);
 
-  const [counts, categories, blogList] = await Promise.all([
+  const [counts, redeemCounts, categories, blogList] = await Promise.all([
     getBlogDashboardCounts(scope),
+    getRedeemDashboardCounts(),
     listBlogCategories(),
     listAdminBlogs({
       ...scope,
@@ -56,7 +58,7 @@ export default async function AdminBlogsPage({ searchParams = {} }) {
       description="Track every article, monitor editorial volume, and keep the public blog routes aligned with the CMS."
       currentPath="/admin/blogs"
       user={user}
-      counts={counts}
+      counts={{ ...counts, ...redeemCounts }}
       notice={notice}
     >
       <AdminBlogTable

@@ -14,11 +14,7 @@ export default function robots() {
         ]
       }
     ],
-    sitemap: [
-      `${siteUrl}/sitemap/0.xml`,
-      `${siteUrl}/sitemap/1.xml`,
-      `${siteUrl}/sitemap/2.xml`
-    ]
+    sitemap: `${siteUrl}/sitemap.xml`
     // removed host — not a valid Google directive
   };
 }

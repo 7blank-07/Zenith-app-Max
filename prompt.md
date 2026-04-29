@@ -1,180 +1,334 @@
-Perform a full architecture and runtime behavior audit of this project and generate a comprehensive documentation file called:
+You are building the COMPLETE production-level FC Mobile Redeem Code SEO + CMS + Homepage System for ZenithFCM.
 
-zenith-details.md
+This is not just a page.
+This is a full international redeem-code ecosystem designed to outperform competitors through:
+- Better SEO
+- Better freshness
+- Better UX
+- Better country targeting
+- Better admin speed
+- Better homepage CTR
 
-The goal is to clearly document how the Zenith application works internally.
+Use the keyword map below EXACTLY unless dataset validation strongly proves better.
 
-This document must analyze the real implementation and confirm behavior based on code, not assumptions.
+==================================================
+MASTER GOAL
+==================================================
 
-Topics that must be covered in detail:
+Build:
+1. Homepage Redeem Code Section (above Latest Players)
+2. Global Redeem Code Hub
+3. Global “Today” Page
+4. Country-Specific Redeem Code Pages
+5. Admin Redeem Code CMS we already have cms for blog you can just add this feature redeem code management there
+6. Auto Active/Expired Logic
+7. Full SEO Metadata + Schema + Internal Linking
+8. Copy-to-Clipboard UX
+9. Mobile-first premium design
 
-1. Technology Stack
-- Determine if the app is fully Next.js App Router based or if any SPA behavior still exists.
-- Identify all frameworks and libraries used (Next.js, React, ISR, etc).
-- Confirm if any legacy SPA scripts remain and where they are used.
+==================================================
+KEYWORD MAP
+==================================================
 
-2. Rendering Architecture
-Explain exactly how pages are rendered:
+GLOBAL
+URL: /fc-mobile-redeem-codes/
+Primary keyword: fc mobile redeem codes
+Secondary keywords:
+- fc mobile redeem code
+- redeem code fc mobile
+- fc mobile redeem codes today
+- latest fc mobile redeem codes
 
-- Static generation
-- ISR (Incremental Static Regeneration)
-- Dynamic rendering
-- Server rendering
-- Client components
+GLOBAL TODAY PAGE
+URL: /fc-mobile-redeem-codes-today/
+Primary keyword: fc mobile redeem codes today
+Secondary keywords:
+- fc mobile redeem code today
+- new fc mobile redeem code
+- latest fc mobile redeem codes
+- working fc mobile redeem codes
 
-Confirm how the following pages render:
+INDIA
+URL: /in/fc-mobile-redeem-codes/
+Primary keyword: fc mobile redeem codes
+Secondary keywords:
+- fc mobile redeem code
+- fifa redeem code
+- fifa redeem
+- redeem code list
 
-/
- /players
- /player/[id]
- /blogs
- /tools
- /watchlist
- /compare
- /legacy
+INDONESIA
+URL: /id/kode-redeem-fc-mobile/
+Primary keyword: kode redeem fc mobile
+Secondary keywords:
+- redeem fc mobile
+- code redeem fc mobile
+- kode redeem fc mobile hari ini
+- kode redeem fc mobile 2025
+- fc mobile redeem
 
-3. Player Page Generation Strategy
-Investigate the generateStaticParams logic and explain:
+MALAYSIA
+URL: /my/fc-mobile-redeem-codes/
+Primary keyword: fc mobile redeem codes
+Secondary keywords:
+- fc mobile redeem code
+- fc mobile codes
+- redeem code
+- redeem codes
+- ea redeem codes
 
-- prerenderLimit (currently 10,000)
-- how the first 10k players are selected
-- what happens for the remaining ~25k players
+VIETNAM
+URL: /vn/code-fc-mobile/
+Primary keyword: code fc mobile
+Secondary keywords:
+- code fifa mobile
+- code fifa
+- fc mobile code
+- redeem code fc mobile
 
-Document the exact flow:
+THAILAND
+URL: /th/fc-mobile-code/
+Primary keyword: fc mobile code
+Secondary keywords:
+- code fifa
+- mobile code
+- แจก รหัส ฟีฟ่า
 
-Build time
-User first visit
-ISR cache generation
-Subsequent visits
+PHILIPPINES
+URL: /ph/ea-fc-mobile-redeem-codes/
+Primary keyword: ea fc mobile redeem codes
+Secondary keywords:
+- ea fc redeem codes mobile
+- ea fc mobile redeem codes today
+- ea fc mobile free redeem codes
+- ea sports fc mobile redeem codes
+- ea fc mobile redeem codes new
 
-Explain where the cached HTML is stored and how Next.js handles it.
+USA
+URL: /us/ea-redeem-codes/
+Primary keyword: ea redeem codes
+Secondary keywords:
+- ea redeem code
+- redeem code ea
+- ea code redemption
+- ea redemption code
+- redeem ea code
 
-4. Cache and Revalidation
-Explain all caching layers used in the project:
+UAE
+URL: /ae/kod-fifa/
+Primary keyword: كود فيفا
+Secondary keywords:
+- fifa redeem code
+- fifa redeem
+- منتدى فيفا
+- موقع فيفا موبايل
 
-Next.js ISR cache
-Browser caching
-Nginx caching
-Static asset caching
-Image CDN caching
+==================================================
+HOMEPAGE REDEEM CODE SECTION (ABOVE LATEST PLAYERS)
+==================================================
 
-If possible determine:
+Create a premium, visually dominant Redeem Code section ABOVE Latest Players.
 
-- ISR revalidation interval
-- whether player pages are permanent or periodically regenerated
+REQUIREMENTS:
+1. Placement:
+- Must appear above Latest Players
+- High CTR, homepage-first design
 
-5. Static Assets and CDN
-Document how assets are served:
+2. Redeem Code Box:
+- Green ACTIVE live dot
+- Redeem code publish date
+- Redeem code name/title
+- Main redeem code centered in large box
+- Entire code clickable
+- One-click copy-to-clipboard
+- “Copied” success state
+- Premium dark theme UI
+- Desktop + mobile responsive
 
-images.zenithfcm.com
-_next/static bundles
-public assets
+3. CTA:
+- “View All Redeem Codes” button
+- Goes to full redeem code hub page
+- Must be highly visible
 
-Explain how caching works for these resources.
+4. Logic:
+- Show newest active code only
+- If no active code:
+  Show “No active redeem code currently”
 
-6. Tools System Architecture
-Explain how tools are implemented:
+5. SEO:
+- Include crawlable text
+- Include primary keyword naturally
+- Add supporting text:
+  “Latest FC Mobile redeem codes updated weekly.”
 
-Compare tool
-Squad builder
-Shard calculator
+==================================================
+FULL REDEEM CODE HUB
+==================================================
 
-Identify:
+Build:
+- Global page
+- Today page
+- Country pages
 
-client components
-dynamic imports
-bundle splitting
+Each page must contain:
+1. Active Codes section
+2. Latest Codes section
+3. Expired Codes section
+4. Search/filter
+5. Copy buttons
+6. Code title
+7. Publish date
+8. Expiry date
+9. Country targeting
+10. FAQ
+11. Breadcrumbs
+12. Schema
 
-7. Blog System Architecture
-Explain the blog CMS system:
+SORTING:
+- Active first
+- Newest first
+- Expired archived below
 
-- PostgreSQL schema
-- admin workflow
-- blog routes
-- ISR behavior
-- SEO structure
+==================================================
+ADMIN PANEL / CMS
+==================================================
 
-8. Data Layer
-Explain where data comes from:
+Create a simple admin publishing workflow.
 
-PostgreSQL tables
-API endpoints
-server functions
-repository layer
+ADMIN INPUT FIELDS:
+1. Redeem Code Name
+2. Redeem Code
+3. Country Scope:
+- Global
+- India
+- Indonesia
+- Malaysia
+- Vietnam
+- Thailand
+- Philippines
+- USA
+- UAE
 
-9. Build System
-Document the build pipeline:
+4. Status:
+- Active
+- Expired
 
-npm run build
-static generation
-ISR page generation
-bundle creation
+5. Publish Date
+6. Expiry Date
 
-Explain what the build output shows and what it means.
+ADMIN LOGIC:
+1. When admin publishes new code:
+- New code instantly becomes ACTIVE
+- Previous ACTIVE code in same scope automatically becomes EXPIRED
+- Homepage widget updates instantly
+- Relevant country page updates instantly
+- Global page updates if global
 
-10. Runtime Architecture
-Explain how production runs:
+2. Expired codes remain archived
 
-PM2
-Next.js server
-Nginx reverse proxy
-image CDN
+3. Admin can:
+- Edit
+- Delete
+- Update
 
-Document the request flow:
+==================================================
+SEO RULES
+==================================================
 
-User
-↓
-Nginx
-↓
-Next.js
-↓
-Database
+FOR EVERY PAGE:
+Generate:
+- Title tag
+- Meta description
+- H1
+- Slug
+- FAQ
+- Schema
+- Internal links
 
-11. Performance Strategy
-Document how the system scales:
+TITLE:
+- Start with primary keyword
+- Under 60 chars where possible
+- “Today” only on freshness pages
 
-10k prerendered player pages
-ISR generation for remaining players
-lazy-loaded tools
-optimized images
+META:
+- 145–160 chars
+- Include primary keyword once
+- Mention updated codes + copy feature
+- Natural wording
 
-Explain how the system handles 35k+ player pages.
+H1:
+- One H1 only
+- Closely match primary keyword
 
-12. Deployment Process
-Document the full deployment workflow:
+CONTENT:
+- Primary keyword in first paragraph
+- Secondary keywords natural only
+- No keyword stuffing
+- Localized by country
+- Active before expired
 
-Laptop development
-GitHub push
-VPS pull
-npm install
-npm run build
-pm2 restart
+INTERNAL LINKING:
+- Homepage → Global + country page
+- Global → all country pages
+- Country → Global
+- Today → Global
 
-13. Known Limits
-Document important limits in the architecture:
+TECHNICAL SEO:
+- Canonical tags
+- Hreflang
+- FAQ schema
+- Breadcrumb schema
+- Fast indexing
+- Dynamic updated timestamps
 
-prerenderLimit
-players list limits
-bundle sizes
-ISR behavior
+==================================================
+OUTPUT REQUIRED
+==================================================
 
-14. Future Scaling Considerations
-Explain what would happen if traffic grows to:
+Provide:
+1. Final keyword map
+2. Final international URL structure
+3. Homepage redeem widget design + functionality
+4. Full redeem code hub structure
+5. Country page templates
+6. Admin panel CMS structure
+7. Database logic for active/expired
+8. SEO metadata for every page type
+9. Internal linking architecture
+10. Priority publishing roadmap
 
-10k users/day
-50k users/day
-100k users/day
+==================================================
+PUBLISHING PRIORITY
+==================================================
 
-Identify potential bottlenecks.
+Phase 1:
+- Global
+- Global Today
+- India
+- Indonesia
 
-Output Requirements:
+Phase 2:
+- Malaysia
+- Vietnam
+- Thailand
 
-Create a clear, structured markdown document with sections and diagrams where useful.
+Phase 3:
+- Philippines
+- USA
+- UAE
 
-File must be created at:
+==================================================
+DESIGN STANDARD
+==================================================
 
-zenith-details.md
+Must feel:
+- Premium
+- Fast
+- SEO-first
+- Mobile-first
+- Copy-first
+- Scalable
+- Production-ready
 
-Do not modify any application code.
-
-Only analyze the project and generate documentation.
+Goal:
+Build the strongest FC Mobile Redeem Code ecosystem possible for ZenithFCM.

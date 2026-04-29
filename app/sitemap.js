@@ -51,6 +51,66 @@ function getStaticEntries(lastModified) {
       priority: 0.9
     },
     {
+      url: toAbsoluteUrl('/fc-mobile-redeem-codes'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.92
+    },
+    {
+      url: toAbsoluteUrl('/fc-mobile-redeem-codes-today'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.9
+    },
+    {
+      url: toAbsoluteUrl('/in/fc-mobile-redeem-codes'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/id/kode-redeem-fc-mobile'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/my/fc-mobile-redeem-codes'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/vn/code-fc-mobile'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/th/fc-mobile-code'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/ph/ea-fc-mobile-redeem-codes'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/us/ea-redeem-codes'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
+      url: toAbsoluteUrl('/ae/kod-fifa'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.86
+    },
+    {
       url: toAbsoluteUrl('/watchlist'),
       lastModified,
       changeFrequency: 'weekly',
