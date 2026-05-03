@@ -2543,7 +2543,7 @@ main.players-main-content {
     display: grid;
     grid-template-columns: max-content max-content;
     align-items: stretch;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 8px;
     margin-top: 0;
     margin-bottom: 10px;
