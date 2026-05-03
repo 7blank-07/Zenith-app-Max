@@ -2583,7 +2583,7 @@ main.players-main-content {
 
   #players-results-info {
     margin: 0 0 0.75rem !important;
-    margin-left: 0 !important;
+    margin-left: 9px !important;
     font-size: 0.95rem !important;
     line-height: 1.3;
   }
