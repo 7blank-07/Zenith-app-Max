@@ -1546,30 +1546,37 @@ export default function PlayersDatabaseInteractions({
                     {renderPlayerCard(player)}
 
                     <div className="player-row-info">
-                      <div className="player-info-name">{player.name}</div>
-                      <div className="player-info-meta">
-                        {player.ovr || 'N/A'} • {player.position || 'N/A'}
+                      <div className="player-row-info-desktop">
+                        <div className="player-info-name">{player.name}</div>
+                        <div className="player-info-meta">
+                          {player.ovr || 'N/A'} • {player.position || 'N/A'}
+                        </div>
                       </div>
-                      <div
-                        className="player-price"
-                        style={{ color: '#fbbf24', fontWeight: 500, fontSize: '0.9rem', marginTop: '4px', minHeight: '20px', display: 'flex', alignItems: 'center' }}
-                      >
+                      <div className="player-row-info-mobile">
+                        <span className="player-row-position-text player-row-position-text--primary">{player.position || 'N/A'}</span>
+                        {player.alternatePositions.map((position) => (
+                          <span key={`${player.uniqueId}-mobile-${position}`} className="player-row-position-text">
+                            {position}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="player-price player-row-price">
                         {player.isUntradable ? (
                           <img
                             src="/assets/images/untradable-red-flag.png"
                             alt="Non-auctionable"
-                            style={{ height: '18px', width: 'auto', verticalAlign: 'middle', opacity: 0.95, marginLeft: '6px' }}
+                            className="player-row-tradability-icon"
                             title="Non-auctionable"
                           />
                         ) : (
-                          <span className="price-inline">
+                          <span className="price-inline player-row-price-inline">
                             <img src="/assets/images/background/fc coin img.webp" alt="coin" className="price-icon" />
                             <span className="price-text">{hasPrice ? formatPrice(resolvedPrice) : 'No data'}</span>
                           </span>
                         )}
                       </div>
                       {!!player.alternatePositions.length && (
-                        <div className="player-info-secondary">
+                        <div className="player-info-secondary player-info-secondary--desktop">
                           {player.alternatePositions.map((position) => (
                             <span key={`${player.uniqueId}-${position}`} className="secondary-position-badge">
                               {position}

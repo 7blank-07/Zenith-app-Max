@@ -81,7 +81,7 @@ export default async function PlayersPage({ searchParams = {} }) {
 
   return (
     <SiteChrome activeView="players">
-      <main className="main-content">
+      <main className="main-content players-main-content">
         <PlayersDatabaseInteractions
           players={players}
           positions={positions}

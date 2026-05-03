@@ -13419,3 +13419,312 @@ body {
   }
 }
 
+.players-grid--database .player-row-info-mobile {
+  display: none;
+}
+
+.players-grid--database .player-row-price {
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  margin-top: 4px;
+  color: #fbbf24;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.players-grid--database .player-row-price-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.players-grid--database .player-row-tradability-icon {
+  height: 18px;
+  width: auto;
+  vertical-align: middle;
+  opacity: 0.95;
+  margin-left: 6px;
+}
+
+@media (max-width: 640px) {
+  .players-main-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .players-main-content .database-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  #players-grid.players-grid--database {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .players-grid--database .player-row {
+    display: grid !important;
+    grid-template-columns: 78px minmax(0, 1fr) 30px;
+    grid-template-areas:
+      "card stats action"
+      "card info action";
+    gap: 4px 8px;
+    align-items: start;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 7px 0;
+    border-radius: 0;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+
+  .players-grid--database .player-row-card {
+    grid-area: card;
+    width: 78px;
+    min-width: 78px;
+    height: 96px;
+    margin-right: 0;
+    overflow: visible;
+    justify-self: start;
+    aspect-ratio: auto;
+  }
+
+  .players-grid--database .players-db-row-card .player-card-image-placeholder {
+    position: relative;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-card-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    z-index: 1;
+    display: block;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-main-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 124%;
+    height: 124%;
+    transform: translate(-50%, -50%) scale(1.02);
+    object-fit: contain;
+    z-index: 2;
+    display: block;
+  }
+
+  .players-grid--database .players-db-row-card .player-row-name,
+  .players-grid--database .players-db-row-card .player-row-ovr,
+  .players-grid--database .players-db-row-card .player-row-position,
+  .players-grid--database .players-db-row-card .player-card-nation-flag,
+  .players-grid--database .players-db-row-card .player-card-club-flag,
+  .players-grid--database .players-db-row-card .player-card-league-watchlist-flag {
+    position: absolute;
+    z-index: 10;
+    display: block;
+  }
+
+  .players-grid--database .player-row-info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-left: 0;
+    align-self: start;
+    align-items: center;
+    text-align: center;
+  }
+
+  .players-grid--database .player-row-info-desktop,
+  .players-grid--database .player-info-secondary--desktop {
+    display: none;
+  }
+
+  .players-grid--database .player-row-info-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    align-items: center;
+    justify-content: center;
+    min-height: 14px;
+  }
+
+  .players-grid--database .player-row-position-text {
+    position: relative;
+    color: rgba(226, 232, 240, 0.78);
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .players-grid--database .player-row-position-text--primary {
+    color: #f8fafc;
+  }
+
+  .players-grid--database .player-row-position-text + .player-row-position-text {
+    padding-left: 10px;
+  }
+
+  .players-grid--database .player-row-position-text + .player-row-position-text::before {
+    content: "/";
+    position: absolute;
+    left: 0;
+    color: rgba(148, 163, 184, 0.55);
+  }
+
+  .players-grid--database .player-row-price {
+    margin-top: 0;
+    min-height: 14px;
+    font-size: 0.72rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .players-grid--database .player-row-price .price-icon {
+    height: 12px;
+    margin-left: 0;
+    margin-right: 4px;
+  }
+
+  .players-grid--database .player-row-price .price-text {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    margin-left: 0;
+  }
+
+  .players-grid--database .player-row-tradability-icon {
+    height: 12px;
+    margin-left: 0;
+  }
+
+  .players-grid--database .card-untradable-badge--players {
+    display: none;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row {
+    grid-area: stats;
+    display: flex !important;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 2px 0 3px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    align-self: start;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row .stat-pill {
+    width: 70px;
+    min-width: 70px;
+    flex-shrink: 0;
+    height: 36px;
+    margin: 0;
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row .stat-pill-value {
+    font-size: 0.8rem;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row .stat-pill-label {
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .players-grid--database .player-row-watchlist {
+    grid-area: action;
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    align-self: start;
+    justify-self: end;
+    border-radius: 999px;
+    background: rgba(14, 17, 20, 0.92);
+  }
+
+  .players-grid--database .player-row-watchlist svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  #players-grid.players-grid--database {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .players-grid--database .player-row {
+    grid-template-columns: 72px minmax(0, 1fr) 28px;
+    gap: 4px 7px;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 6px 0;
+  }
+
+  .players-grid--database .player-row-card {
+    width: 72px;
+    min-width: 72px;
+    height: 90px;
+  }
+
+  .players-grid--database .player-row-watchlist {
+    width: 26px;
+    height: 26px;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row .stat-pill {
+    height: 34px;
+    width: 68px;
+    min-width: 68px;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row .stat-pill-value {
+    font-size: 0.82rem;
+  }
+
+  .players-grid--database .player-row-stats.player-card-stats-row .stat-pill-label {
+    font-size: 0.46rem;
+  }
+}
+
