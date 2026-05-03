@@ -11772,9 +11772,15 @@ body.overflow-hidden {
   }
 }
 
+@media (max-width: 767px) {
+  .zenith-footer {
+    padding-bottom: calc(95px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
 @media (max-width: 480px) {
   .zenith-footer {
-    padding: 16px 20px;
+    padding: 16px 20px calc(110px + env(safe-area-inset-bottom)) !important;
     margin-top: 50px;
   }
 
