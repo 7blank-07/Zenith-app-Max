@@ -895,7 +895,7 @@ select.form-control {
 }
 
 /* Main Content */
-.main-content {
+.main-content:not(.players-main-content) {
   max-width: 1600px;
   margin: 0 auto;
   padding: 26px; /*26 can be better */
@@ -905,6 +905,14 @@ select.form-control {
   width: 100%;
   max-width: 100% !important;
   margin: 0 !important;
+  padding: 0 !important;
+}
+
+body:has(.nav-link.active[href="/players"]) main.main-content,
+main.players-main-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 0 !important;
 }
 
@@ -2349,9 +2357,15 @@ select.form-control {
     display: flex;
   }
 
-  .main-content {
+  .main-content:not(.players-main-content) {
     padding: 20px;
     padding-bottom: 80px;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content,
+  main.players-main-content {
+    padding: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   .header-content {
@@ -6948,11 +6962,17 @@ watchlist-view .view-content {
 
 /* Mobile Market View Fix */
 @media (max-width: 768px) {
-  .main-content {
+  .main-content:not(.players-main-content) {
     padding-bottom: 20px;
     overflow-x: hidden;
     overflow-y: auto;
     max-width: 110vw;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content,
+  main.players-main-content {
+    padding: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   #market-view {
@@ -13728,3 +13748,62 @@ body {
   }
 }
 
+/* Players page: rows bleed edge-to-edge on mobile */
+.players-main-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .players-main-content {
+    padding: 0 !important;
+  }
+
+  .players-main-content .mobile-search-container,
+  .players-main-content .database-toolbar,
+  .players-main-content .active-filters {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content .database-layout,
+  body:has(.nav-link.active[href="/players"]) main.main-content .database-content,
+  body:has(.nav-link.active[href="/players"]) main.main-content #players-grid,
+  .players-main-content .database-layout,
+  .players-main-content .database-content,
+  .players-main-content #players-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content .player-row,
+  .players-main-content .player-row {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content #players-grid,
+  body:has(.nav-link.active[href="/players"]) main.main-content .players-grid--database,
+  body:has(.nav-link.active[href="/players"]) main.main-content .database-content,
+  .players-main-content #players-grid,
+  .players-main-content .players-grid--database,
+  .players-main-content .database-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+}

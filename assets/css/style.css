@@ -895,10 +895,53 @@ select.form-control {
 }
 
 /* Main Content */
-.main-content {
+.main-content:not(.players-main-content) {
   max-width: 1600px;
   margin: 0 auto;
   padding: 26px; /*26 can be better */
+}
+
+.players-main-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 !important;
+}
+
+body:has(.nav-link.active[href="/players"]) main.main-content,
+main.players-main-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 !important;
+}
+
+@media (max-width: 767px) {
+  body:has(.nav-link.active[href="/players"]) main.main-content .database-layout,
+  body:has(.nav-link.active[href="/players"]) main.main-content .database-content,
+  body:has(.nav-link.active[href="/players"]) main.main-content #players-grid,
+  main.players-main-content .database-layout,
+  main.players-main-content .database-content,
+  main.players-main-content #players-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content .player-row,
+  main.players-main-content .player-row {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
 }
 
 .player-detail-main-content {
@@ -1381,7 +1424,7 @@ select.form-control {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 32px;
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -2349,9 +2392,15 @@ select.form-control {
     display: flex;
   }
 
-  .main-content {
+  .main-content:not(.players-main-content) {
     padding: 20px;
     padding-bottom: 80px;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content,
+  main.players-main-content {
+    padding: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   .header-content {
@@ -6948,11 +6997,17 @@ watchlist-view .view-content {
 
 /* Mobile Market View Fix */
 @media (max-width: 768px) {
-  .main-content {
+  .main-content:not(.players-main-content) {
     padding-bottom: 20px;
     overflow-x: hidden;
     overflow-y: auto;
     max-width: 110vw;
+  }
+
+  body:has(.nav-link.active[href="/players"]) main.main-content,
+  main.players-main-content {
+    padding: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   #market-view {
