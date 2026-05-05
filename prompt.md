@@ -1,334 +1,71 @@
-You are building the COMPLETE production-level FC Mobile Redeem Code SEO + CMS + Homepage System for ZenithFCM.
+About ZenithFCM
 
-This is not just a page.
-This is a full international redeem-code ecosystem designed to outperform competitors through:
-- Better SEO
-- Better freshness
-- Better UX
-- Better country targeting
-- Better admin speed
-- Better homepage CTR
+ZenithFCM was built with one clear purpose: to make FC Mobile easier, smarter, and more practical for every player.
 
-Use the keyword map below EXACTLY unless dataset validation strongly proves better.
+As dedicated FC Mobile fans, we understood the frustration of searching through multiple websites, outdated pages, and scattered resources just to find accurate player data, market trends, redeem codes, or useful tools. Players needed a faster, cleaner, and more reliable solution — so ZenithFCM was created.
 
-==================================================
-MASTER GOAL
-==================================================
+ZenithFCM is a fan-built platform designed for the FC Mobile community, focused on giving players the tools and information they actually need to make better decisions.
 
-Build:
-1. Homepage Redeem Code Section (above Latest Players)
-2. Global Redeem Code Hub
-3. Global “Today” Page
-4. Country-Specific Redeem Code Pages
-5. Admin Redeem Code CMS we already have cms for blog you can just add this feature redeem code management there
-6. Auto Active/Expired Logic
-7. Full SEO Metadata + Schema + Internal Linking
-8. Copy-to-Clipboard UX
-9. Mobile-first premium design
+Who We Are
 
-==================================================
-KEYWORD MAP
-==================================================
+We’re FC Mobile players who wanted a better experience.
 
-GLOBAL
-URL: /fc-mobile-redeem-codes/
-Primary keyword: fc mobile redeem codes
-Secondary keywords:
-- fc mobile redeem code
-- redeem code fc mobile
-- fc mobile redeem codes today
-- latest fc mobile redeem codes
+ZenithFCM is not an official publisher or large corporate platform. It was created by fans who understand squad building, market investments, player comparisons, and the daily decisions that shape progression in FC Mobile.
 
-GLOBAL TODAY PAGE
-URL: /fc-mobile-redeem-codes-today/
-Primary keyword: fc mobile redeem codes today
-Secondary keywords:
-- fc mobile redeem code today
-- new fc mobile redeem code
-- latest fc mobile redeem codes
-- working fc mobile redeem codes
+Our platform is built around real player needs:
+quick access to trustworthy data, practical tools, and a smooth experience that saves time.
 
-INDIA
-URL: /in/fc-mobile-redeem-codes/
-Primary keyword: fc mobile redeem codes
-Secondary keywords:
-- fc mobile redeem code
-- fifa redeem code
-- fifa redeem
-- redeem code list
+What We Offer
 
-INDONESIA
-URL: /id/kode-redeem-fc-mobile/
-Primary keyword: kode redeem fc mobile
-Secondary keywords:
-- redeem fc mobile
-- code redeem fc mobile
-- kode redeem fc mobile hari ini
-- kode redeem fc mobile 2025
-- fc mobile redeem
+ZenithFCM combines essential FC Mobile resources into one streamlined platform so players can spend less time searching and more time improving.
 
-MALAYSIA
-URL: /my/fc-mobile-redeem-codes/
-Primary keyword: fc mobile redeem codes
-Secondary keywords:
-- fc mobile redeem code
-- fc mobile codes
-- redeem code
-- redeem codes
-- ea redeem codes
+Player Database
+Discover detailed player stats, compare cards, analyze performance, and make stronger squad-building decisions based on practical value—not just ratings.
 
-VIETNAM
-URL: /vn/code-fc-mobile/
-Primary keyword: code fc mobile
-Secondary keywords:
-- code fifa mobile
-- code fifa
-- fc mobile code
-- redeem code fc mobile
+Market Insights
+Stay updated with player price movements, market opportunities, and trends that help you buy smarter, sell smarter, and understand market behavior.
 
-THAILAND
-URL: /th/fc-mobile-code/
-Primary keyword: fc mobile code
-Secondary keywords:
-- code fifa
-- mobile code
-- แจก รหัส ฟีฟ่า
+Redeem Codes & Updates
+Find the latest FC Mobile redeem codes, rewards, and important updates in one convenient place.
 
-PHILIPPINES
-URL: /ph/ea-fc-mobile-redeem-codes/
-Primary keyword: ea fc mobile redeem codes
-Secondary keywords:
-- ea fc redeem codes mobile
-- ea fc mobile redeem codes today
-- ea fc mobile free redeem codes
-- ea sports fc mobile redeem codes
-- ea fc mobile redeem codes new
+Tools & Blogs
+Access useful gameplay tools, guides, and blog content designed to support smarter progression and better gameplay understanding.
 
-USA
-URL: /us/ea-redeem-codes/
-Primary keyword: ea redeem codes
-Secondary keywords:
-- ea redeem code
-- redeem code ea
-- ea code redemption
-- ea redemption code
-- redeem ea code
+Our Philosophy
 
-UAE
-URL: /ae/kod-fifa/
-Primary keyword: كود فيفا
-Secondary keywords:
-- fifa redeem code
-- fifa redeem
-- منتدى فيفا
-- موقع فيفا موبايل
+Everything at ZenithFCM is built around three core principles:
 
-==================================================
-HOMEPAGE REDEEM CODE SECTION (ABOVE LATEST PLAYERS)
-==================================================
+Clarity
+Clean design and straightforward information without unnecessary clutter.
 
-Create a premium, visually dominant Redeem Code section ABOVE Latest Players.
+Speed
+Fast-loading pages and efficient navigation so players get answers quickly.
 
-REQUIREMENTS:
-1. Placement:
-- Must appear above Latest Players
-- High CTR, homepage-first design
+Utility
+Every feature is designed to solve real FC Mobile problems and improve decision-making.
 
-2. Redeem Code Box:
-- Green ACTIVE live dot
-- Redeem code publish date
-- Redeem code name/title
-- Main redeem code centered in large box
-- Entire code clickable
-- One-click copy-to-clipboard
-- “Copied” success state
-- Premium dark theme UI
-- Desktop + mobile responsive
+Built for Modern FC Mobile Players
 
-3. CTA:
-- “View All Redeem Codes” button
-- Goes to full redeem code hub page
-- Must be highly visible
+FC Mobile moves fast. Markets shift, metas change, and new content arrives constantly.
 
-4. Logic:
-- Show newest active code only
-- If no active code:
-  Show “No active redeem code currently”
+ZenithFCM is designed to keep pace by prioritizing:
+mobile-friendly performance, responsive design, reliable updates, and practical features that match how players actually play.
 
-5. SEO:
-- Include crawlable text
-- Include primary keyword naturally
-- Add supporting text:
-  “Latest FC Mobile redeem codes updated weekly.”
+Whether you’re checking player values during market changes, comparing top cards, or searching for strategic insights, ZenithFCM is built to deliver value quickly and clearly.
 
-==================================================
-FULL REDEEM CODE HUB
-==================================================
+Why ZenithFCM Exists
 
-Build:
-- Global page
-- Today page
-- Country pages
+We believe FC Mobile players deserve a platform that respects their time.
 
-Each page must contain:
-1. Active Codes section
-2. Latest Codes section
-3. Expired Codes section
-4. Search/filter
-5. Copy buttons
-6. Code title
-7. Publish date
-8. Expiry date
-9. Country targeting
-10. FAQ
-11. Breadcrumbs
-12. Schema
+Every coin matters. Every purchase matters. Every squad decision matters.
 
-SORTING:
-- Active first
-- Newest first
-- Expired archived below
+ZenithFCM exists to simplify those decisions by offering reliable resources that help players play smarter, build better squads, and stay informed.
 
-==================================================
-ADMIN PANEL / CMS
-==================================================
+Our Vision
 
-Create a simple admin publishing workflow.
+ZenithFCM aims to become a trusted destination for FC Mobile players by continuously improving its Players, Market, Tools, and Blogs ecosystem.
 
-ADMIN INPUT FIELDS:
-1. Redeem Code Name
-2. Redeem Code
-3. Country Scope:
-- Global
-- India
-- Indonesia
-- Malaysia
-- Vietnam
-- Thailand
-- Philippines
-- USA
-- UAE
+We are committed to creating a platform that evolves with the game while staying focused on what matters most:
+helping players make better FC Mobile decisions every day.
 
-4. Status:
-- Active
-- Expired
-
-5. Publish Date
-6. Expiry Date
-
-ADMIN LOGIC:
-1. When admin publishes new code:
-- New code instantly becomes ACTIVE
-- Previous ACTIVE code in same scope automatically becomes EXPIRED
-- Homepage widget updates instantly
-- Relevant country page updates instantly
-- Global page updates if global
-
-2. Expired codes remain archived
-
-3. Admin can:
-- Edit
-- Delete
-- Update
-
-==================================================
-SEO RULES
-==================================================
-
-FOR EVERY PAGE:
-Generate:
-- Title tag
-- Meta description
-- H1
-- Slug
-- FAQ
-- Schema
-- Internal links
-
-TITLE:
-- Start with primary keyword
-- Under 60 chars where possible
-- “Today” only on freshness pages
-
-META:
-- 145–160 chars
-- Include primary keyword once
-- Mention updated codes + copy feature
-- Natural wording
-
-H1:
-- One H1 only
-- Closely match primary keyword
-
-CONTENT:
-- Primary keyword in first paragraph
-- Secondary keywords natural only
-- No keyword stuffing
-- Localized by country
-- Active before expired
-
-INTERNAL LINKING:
-- Homepage → Global + country page
-- Global → all country pages
-- Country → Global
-- Today → Global
-
-TECHNICAL SEO:
-- Canonical tags
-- Hreflang
-- FAQ schema
-- Breadcrumb schema
-- Fast indexing
-- Dynamic updated timestamps
-
-==================================================
-OUTPUT REQUIRED
-==================================================
-
-Provide:
-1. Final keyword map
-2. Final international URL structure
-3. Homepage redeem widget design + functionality
-4. Full redeem code hub structure
-5. Country page templates
-6. Admin panel CMS structure
-7. Database logic for active/expired
-8. SEO metadata for every page type
-9. Internal linking architecture
-10. Priority publishing roadmap
-
-==================================================
-PUBLISHING PRIORITY
-==================================================
-
-Phase 1:
-- Global
-- Global Today
-- India
-- Indonesia
-
-Phase 2:
-- Malaysia
-- Vietnam
-- Thailand
-
-Phase 3:
-- Philippines
-- USA
-- UAE
-
-==================================================
-DESIGN STANDARD
-==================================================
-
-Must feel:
-- Premium
-- Fast
-- SEO-first
-- Mobile-first
-- Copy-first
-- Scalable
-- Production-ready
-
-Goal:
-Build the strongest FC Mobile Redeem Code ecosystem possible for ZenithFCM.
+ZenithFCM is more than just a resource — it’s a platform built by fans, shaped by practical experience, and dedicated to giving the FC Mobile community smarter tools for success.

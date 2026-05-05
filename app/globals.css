@@ -277,9 +277,12 @@ footer.zenith-footer .zenith-footer-legal-text {
 
 @media (max-width: 1024px) {
   .zenith-static-page {
-    margin-top: 22px;
+    margin: 0;
     padding: 20px 16px;
-    border-radius: 14px;
+    border-radius: 0;
+    border: none;
+    max-width: none;
+    min-height: 100vh;
   }
 
   .zenith-static-page-grid {
