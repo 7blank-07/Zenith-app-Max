@@ -29,26 +29,51 @@ export function parseRedeemSearchParam(searchParams, key, options = {}) {
   return normalized.slice(0, options.maxLength || 160);
 }
 
+const REDEEM_ALTERNATE_ROUTE_KEYS = Object.freeze([
+  REDEEM_ROUTE_KEY.GLOBAL,
+  REDEEM_ROUTE_KEY.INDIA,
+  REDEEM_ROUTE_KEY.INDONESIA,
+  REDEEM_ROUTE_KEY.MALAYSIA,
+  REDEEM_ROUTE_KEY.VIETNAM,
+  REDEEM_ROUTE_KEY.THAILAND,
+  REDEEM_ROUTE_KEY.PHILIPPINES,
+  REDEEM_ROUTE_KEY.USA,
+  REDEEM_ROUTE_KEY.UAE
+]);
+
 function buildLanguageAlternates() {
-  return {
-    'x-default': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL].path,
-    en: REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL].path,
-    'en-x-today': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL_TODAY].path,
-    'en-IN': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.INDIA].path,
-    'id-ID': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.INDONESIA].path,
-    'ms-MY': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.MALAYSIA].path,
-    'vi-VN': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.VIETNAM].path,
-    'th-TH': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.THAILAND].path,
-    'en-PH': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.PHILIPPINES].path,
-    'en-US': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.USA].path,
-    'ar-AE': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.UAE].path
+  const alternates = {
+    'x-default': REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL].path
   };
+
+  for (const routeKey of REDEEM_ALTERNATE_ROUTE_KEYS) {
+    const routeConfig = REDEEM_ROUTE_CONFIG[routeKey];
+    const hreflang = toText(routeConfig?.hreflang);
+    const path = toText(routeConfig?.path);
+    if (!hreflang || !path) continue;
+    alternates[hreflang] = path;
+  }
+
+  return alternates;
+}
+
+function resolveLanguageAlternates(routeConfig) {
+  const alternates = buildLanguageAlternates();
+  if (routeConfig?.key === REDEEM_ROUTE_KEY.GLOBAL_TODAY) {
+    return {
+      ...alternates,
+      en: REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL_TODAY].path
+    };
+  }
+
+  return alternates;
 }
 
 export function buildRedeemRouteMetadata(routeConfig) {
   const canonicalPath = routeConfig?.path || REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL].path;
   const title = toText(routeConfig?.title, 'FC Mobile Redeem Codes | Zenith');
   const description = toText(routeConfig?.metaDescription);
+  const locale = toText(routeConfig?.locale, 'en-US');
 
   return {
     title,
@@ -56,7 +81,7 @@ export function buildRedeemRouteMetadata(routeConfig) {
     keywords: [toText(routeConfig?.primaryKeyword), ...toTextArray(routeConfig?.secondaryKeywords)].filter(Boolean),
     alternates: {
       canonical: canonicalPath,
-      languages: buildLanguageAlternates()
+      languages: resolveLanguageAlternates(routeConfig)
     },
     robots: {
       index: true,
@@ -67,6 +92,7 @@ export function buildRedeemRouteMetadata(routeConfig) {
       description,
       type: 'website',
       url: canonicalPath,
+      locale: locale.replace('-', '_'),
       siteName: 'Zenith'
     },
     twitter: {

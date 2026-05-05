@@ -32,7 +32,11 @@ export function serializeJsonLd(schema) {
   return JSON.stringify(cleanJsonLdValue(schema));
 }
 
-export function buildRedeemBreadcrumbSchema(items = [], siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com') {
+export function buildRedeemBreadcrumbSchema(
+  items = [],
+  siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com',
+  { inLanguage = '' } = {}
+) {
   const normalizedItems = items
     .map((item, index) => {
       const name = toText(item?.name);
@@ -55,11 +59,12 @@ export function buildRedeemBreadcrumbSchema(items = [], siteUrl = process.env.NE
   return cleanJsonLdValue({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
+    inLanguage: toText(inLanguage),
     itemListElement: normalizedItems
   });
 }
 
-export function buildRedeemFaqSchema(faqItems = []) {
+export function buildRedeemFaqSchema(faqItems = [], { inLanguage = '' } = {}) {
   const entities = (Array.isArray(faqItems) ? faqItems : [])
     .map((entry) => {
       const question = toText(entry?.question);
@@ -84,11 +89,15 @@ export function buildRedeemFaqSchema(faqItems = []) {
   return cleanJsonLdValue({
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    inLanguage: toText(inLanguage),
     mainEntity: entities
   });
 }
 
-export function buildRedeemCollectionSchema({ title, description, path, entries = [] } = {}, siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com') {
+export function buildRedeemCollectionSchema(
+  { title, description, path, entries = [], inLanguage = '' } = {},
+  siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com'
+) {
   const normalizedPath = toText(path);
   if (!normalizedPath) return null;
 
@@ -116,6 +125,7 @@ export function buildRedeemCollectionSchema({ title, description, path, entries 
   return cleanJsonLdValue({
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
+    inLanguage: toText(inLanguage),
     name: toText(title),
     description: toText(description),
     dateModified,

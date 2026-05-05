@@ -3,6 +3,7 @@ import Script from 'next/script';
 import { Inter } from 'next/font/google';
 import { Suspense } from 'react';
 import ImageCacheServiceWorker from './components/ImageCacheServiceWorker.client';
+import HtmlLanguageController from './components/HtmlLanguageController.client';
 import RouteProgress from './components/RouteProgress.client';
 import WebVitalsReporter from './components/WebVitalsReporter.client';
 
@@ -34,6 +35,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var p=window.location.pathname||'';var isArabic=(p==='/ae/kod-fifa'||p.indexOf('/ae/kod-fifa/')===0);if(isArabic){var root=document.documentElement;root.lang='ar';root.dir='rtl';}})();`
+          }}
+        />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-BN8W9Y5DC8"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -58,6 +64,7 @@ gtag('config', 'G-BN8W9Y5DC8');`
         <Suspense fallback={null}>
           <RouteProgress />
         </Suspense>
+        <HtmlLanguageController />
         {children}
         <ImageCacheServiceWorker />
         <WebVitalsReporter />

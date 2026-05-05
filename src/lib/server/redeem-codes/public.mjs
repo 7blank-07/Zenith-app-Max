@@ -73,6 +73,10 @@ export async function getRedeemPublicAvailability(rawEnv = process.env) {
 }
 
 function resolveScopes(routeConfig) {
+  if (routeConfig?.sharedGlobalCodes === true) {
+    return [REDEEM_CODE_SCOPE.GLOBAL];
+  }
+
   const scope = routeConfig?.scope || REDEEM_CODE_SCOPE.GLOBAL;
   if (scope === REDEEM_CODE_SCOPE.GLOBAL) {
     return [REDEEM_CODE_SCOPE.GLOBAL];
