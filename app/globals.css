@@ -3,3 +3,286 @@ html, body {
   padding: 0;
   min-height: 100%;
 }
+
+footer.zenith-footer {
+  margin-top: 80px;
+  padding: 60px 24px 30px;
+  background: linear-gradient(180deg, #0a1418 0%, #070d10 100%);
+  border-top: 1px solid rgba(0, 194, 168, 0.15);
+  color: #cdd7db;
+  font-family: inherit;
+}
+
+footer.zenith-footer .zenith-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+footer.zenith-footer .zenith-footer-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  margin-bottom: 50px;
+}
+
+footer.zenith-footer .zenith-footer-brand-column {
+  flex: 0 0 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+footer.zenith-footer .zenith-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+footer.zenith-footer .zenith-footer-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+footer.zenith-footer .zenith-footer-brand-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #ffffff, #00c2a8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+footer.zenith-footer .zenith-footer-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #94a3a8;
+  margin: 0;
+}
+
+footer.zenith-footer .zenith-footer-socials {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+footer.zenith-footer .zenith-footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3a8;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+footer.zenith-footer .zenith-footer-social-link:hover {
+  background: rgba(0, 194, 168, 0.15);
+  color: #00c2a8;
+  border-color: rgba(0, 194, 168, 0.3);
+  transform: translateY(-2px);
+}
+
+footer.zenith-footer .zenith-footer-links-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 40px;
+}
+
+footer.zenith-footer .zenith-footer-nav-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+footer.zenith-footer .zenith-footer-nav-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+footer.zenith-footer .zenith-footer-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+footer.zenith-footer .zenith-footer-link {
+  font-size: 0.95rem;
+  color: #94a3a8;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+footer.zenith-footer .zenith-footer-link:hover {
+  color: #00c2a8;
+  padding-left: 4px;
+}
+
+footer.zenith-footer .zenith-footer-sub {
+  margin-top: 40px;
+  padding: 30px 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+footer.zenith-footer .zenith-footer-copyright {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6a7c82;
+  margin-bottom: 12px;
+}
+
+footer.zenith-footer .zenith-footer-legal-text {
+  margin: 0 auto;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: #56656a;
+  max-width: 1000px;
+}
+
+@media (max-width: 1100px) {
+  footer.zenith-footer .zenith-footer-main {
+    flex-direction: column;
+    gap: 50px;
+    align-items: center;
+    text-align: center;
+  }
+  
+  footer.zenith-footer .zenith-footer-brand-column {
+    flex: 1;
+    max-width: 500px;
+    align-items: center;
+  }
+
+  footer.zenith-footer .zenith-footer-brand {
+    justify-content: center;
+  }
+
+  footer.zenith-footer .zenith-footer-socials {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  footer.zenith-footer {
+    padding: 60px 0 0;
+  }
+
+  footer.zenith-footer .zenith-footer-inner {
+    padding: 0 24px;
+  }
+  
+  footer.zenith-footer .zenith-footer-links-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 20px;
+  }
+
+  footer.zenith-footer .zenith-footer-sub {
+    padding: 30px 24px calc(100px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  footer.zenith-footer .zenith-footer-links-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  footer.zenith-footer .zenith-footer-links-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.zenith-static-page {
+  max-width: 1080px;
+  margin: 30px auto 0;
+  padding: 26px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(82, 102, 110, 0.32);
+  background: linear-gradient(180deg, rgba(9, 20, 25, 0.94) 0%, rgba(8, 17, 21, 0.92) 100%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.26);
+}
+
+.zenith-static-page-header h1 {
+  margin: 0;
+  color: #edf7f9;
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  line-height: 1.2;
+}
+
+.zenith-static-page-header p {
+  margin: 10px 0 0;
+  max-width: 80ch;
+  color: #b5c5cb;
+  line-height: 1.6;
+}
+
+.zenith-static-page-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.zenith-static-page-card {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(78, 96, 104, 0.26);
+  background: rgba(16, 31, 38, 0.5);
+}
+
+.zenith-static-page-card h2 {
+  margin: 0 0 8px;
+  color: #eaf4f7;
+  font-size: 1.05rem;
+}
+
+.zenith-static-page-content p,
+.zenith-static-page-content ul {
+  margin: 0 0 10px;
+  color: #b8c8cd;
+  line-height: 1.6;
+}
+
+.zenith-static-page-content a {
+  color: #2dd5c0;
+  text-decoration: none;
+}
+
+.zenith-static-page-content a:hover {
+  text-decoration: underline;
+}
+
+.zenith-static-page-content ul {
+  padding-left: 18px;
+}
+
+@media (max-width: 1024px) {
+  .zenith-static-page {
+    margin-top: 22px;
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .zenith-static-page-grid {
+    grid-template-columns: 1fr;
+  }
+}

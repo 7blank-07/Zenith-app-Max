@@ -1,6 +1,7 @@
 import SiteChromeInteractions from './SiteChromeInteractions.client';
 import MarketNavLink from './MarketNavLink.client';
 import MobileNavigation from './MobileNavigation.client';
+import SiteFooter from './SiteFooter';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getTopTickerConfig } from '../../src/lib/server/top-ticker-config.mjs';
@@ -12,7 +13,7 @@ function getNavClass(activeView, view) {
 export default function SiteChrome({ activeView = '', showSlider = false, children }) {
   const topTicker = getTopTickerConfig();
 
-return (
+  return (
     <>
       <header className="header">
         <div className="header-content">
@@ -87,45 +88,7 @@ return (
 
       <MobileNavigation activeView={activeView} />
 
-      <footer className="zenith-footer">
-        <div className="zenith-footer-inner">
-          <div className="zenith-footer-left">
-            <Image
-              src="/assets/images/zenith_logo_main.png"
-              alt="Zenith logo"
-              className="zenith-footer-logo"
-              width={1024}
-              height={1024}
-              sizes="(max-width: 768px) 20px, 26px"
-            />
-            <span className="zenith-footer-tag">FC Mobile Database Engine</span>
-          </div>
-
-          <div className="zenith-footer-center">
-            <Link href="/" data-link="" data-nav-link="">
-              Home
-            </Link>
-            <Link href="/players" data-link="" data-nav-link="">
-              Database
-            </Link>
-            <MarketNavLink href="/market" data-link="" data-nav-link="">
-              Market
-            </MarketNavLink>
-            <Link href="/tools?tool=watchlist" data-link="" data-nav-link="">
-              Watchlist
-            </Link>
-            <Link href="/blogs" data-link="" data-nav-link="">
-              Blogs
-            </Link>
-          </div>
-
-          <div className="zenith-footer-right">
-            <span>v1.0</span>
-            <span className="zenith-footer-dot">•</span>
-            <span>Zenith Engine</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
 
       <SiteChromeInteractions />
     </>
