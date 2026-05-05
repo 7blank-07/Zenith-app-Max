@@ -1,71 +1,120 @@
-About ZenithFCM
+Terms and Conditions
+1. Acceptance of Terms
 
-ZenithFCM was built with one clear purpose: to make FC Mobile easier, smarter, and more practical for every player.
+By accessing or using ZenithFCM, you agree to comply with and be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use this website.
 
-As dedicated FC Mobile fans, we understood the frustration of searching through multiple websites, outdated pages, and scattered resources just to find accurate player data, market trends, redeem codes, or useful tools. Players needed a faster, cleaner, and more reliable solution — so ZenithFCM was created.
+2. Eligibility & Age Requirement
 
-ZenithFCM is a fan-built platform designed for the FC Mobile community, focused on giving players the tools and information they actually need to make better decisions.
+You must be at least 13 years old to use ZenithFCM. If you are under 13, you should use this website only with parental or guardian consent and supervision.
 
-Who We Are
+3. User Accounts
+3.1
 
-We’re FC Mobile players who wanted a better experience.
+Certain features of ZenithFCM may require account registration. You are responsible for maintaining the confidentiality of your account credentials, including your password, and for restricting access to your account.
 
-ZenithFCM is not an official publisher or large corporate platform. It was created by fans who understand squad building, market investments, player comparisons, and the daily decisions that shape progression in FC Mobile.
+3.2
 
-Our platform is built around real player needs:
-quick access to trustworthy data, practical tools, and a smooth experience that saves time.
+You agree to notify ZenithFCM immediately of any unauthorized access, security breach, or suspicious activity related to your account.
 
-What We Offer
+3.3
 
-ZenithFCM combines essential FC Mobile resources into one streamlined platform so players can spend less time searching and more time improving.
+You are solely responsible for all activities conducted under your account.
 
-Player Database
-Discover detailed player stats, compare cards, analyze performance, and make stronger squad-building decisions based on practical value—not just ratings.
+4. Acceptable Use & Code of Conduct
+4.1
 
-Market Insights
-Stay updated with player price movements, market opportunities, and trends that help you buy smarter, sell smarter, and understand market behavior.
+You agree to use ZenithFCM responsibly, respectfully, and lawfully.
 
-Redeem Codes & Updates
-Find the latest FC Mobile redeem codes, rewards, and important updates in one convenient place.
+4.2
 
-Tools & Blogs
-Access useful gameplay tools, guides, and blog content designed to support smarter progression and better gameplay understanding.
+You may not:
 
-Our Philosophy
+Post or share false, harmful, abusive, defamatory, obscene, or misleading content
+Violate intellectual property rights
+Harass, threaten, or exploit other users
+Attempt unauthorized access to systems or data
+Introduce malware, spam, bots, or malicious code
+Disrupt website functionality or performance
+4.3
 
-Everything at ZenithFCM is built around three core principles:
+Any misuse of ZenithFCM may result in suspension or permanent termination of access.
 
-Clarity
-Clean design and straightforward information without unnecessary clutter.
+5. User-Generated Content
+5.1
 
-Speed
-Fast-loading pages and efficient navigation so players get answers quickly.
+ZenithFCM may allow users to submit content including comments, feedback, suggestions, reviews, or other materials.
 
-Utility
-Every feature is designed to solve real FC Mobile problems and improve decision-making.
+5.2
 
-Built for Modern FC Mobile Players
+By submitting content, you grant ZenithFCM a non-exclusive, worldwide, royalty-free license to use, reproduce, modify, adapt, publish, and distribute such content for website operation, promotion, and improvement.
 
-FC Mobile moves fast. Markets shift, metas change, and new content arrives constantly.
+5.3
 
-ZenithFCM is designed to keep pace by prioritizing:
-mobile-friendly performance, responsive design, reliable updates, and practical features that match how players actually play.
+You remain solely responsible for your submitted content and must ensure it does not violate laws, third-party rights, or these Terms.
 
-Whether you’re checking player values during market changes, comparing top cards, or searching for strategic insights, ZenithFCM is built to deliver value quickly and clearly.
+6. Intellectual Property Rights
+6.1
 
-Why ZenithFCM Exists
+All ZenithFCM content, including but not limited to text, branding, design, graphics, tools, logos, software, and original resources, is the property of ZenithFCM unless otherwise stated and is protected by applicable copyright, trademark, and intellectual property laws.
 
-We believe FC Mobile players deserve a platform that respects their time.
+6.2
 
-Every coin matters. Every purchase matters. Every squad decision matters.
+FC Mobile, EA SPORTS, Electronic Arts, and related assets remain the property of their respective owners. ZenithFCM is an independent fan-built platform and is not officially affiliated with or endorsed by Electronic Arts.
 
-ZenithFCM exists to simplify those decisions by offering reliable resources that help players play smarter, build better squads, and stay informed.
+6.3
 
-Our Vision
+Third-party resources, trademarks, or data sources referenced on ZenithFCM remain the property of their respective owners.
 
-ZenithFCM aims to become a trusted destination for FC Mobile players by continuously improving its Players, Market, Tools, and Blogs ecosystem.
+6.4
 
-We are committed to creating a platform that evolves with the game while staying focused on what matters most:
-helping players make better FC Mobile decisions every day.
+You may not copy, reproduce, republish, or distribute ZenithFCM content without prior written permission, except where permitted by law.
 
-ZenithFCM is more than just a resource — it’s a platform built by fans, shaped by practical experience, and dedicated to giving the FC Mobile community smarter tools for success.
+7. Disclaimer
+7.1
+
+ZenithFCM is provided on an “as is” and “as available” basis.
+
+7.2
+
+While we strive for accuracy, we do not guarantee that player data, market insights, redeem codes, tools, or other content will always be complete, current, or error-free.
+
+7.3
+
+ZenithFCM does not guarantee uninterrupted access, website availability, or that all features will function without errors or delays.
+
+8. Limitation of Liability
+
+To the fullest extent permitted by law, ZenithFCM, its owners, affiliates, contributors, or operators shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from:
+
+Use or inability to use the website
+Errors or inaccuracies in content
+Loss of data
+Market decisions based on website information
+Third-party links or services
+9. Third-Party Links & Services
+
+ZenithFCM may include links to third-party websites, tools, or resources for user convenience. We are not responsible for the content, policies, or practices of third-party platforms.
+
+10. Account Suspension or Termination
+
+ZenithFCM reserves the right to suspend, restrict, or terminate user access at any time, without prior notice, for violations of these Terms or for any activity deemed harmful to the platform or its users.
+
+11. Changes to Terms
+
+ZenithFCM may update or revise these Terms and Conditions at any time without prior notice. Continued use of the website after updates are posted constitutes your acceptance of the revised terms.
+
+12. Privacy
+
+Your use of ZenithFCM may also be subject to our Privacy Policy, which explains how user information may be collected, used, and protected.
+
+13. Governing Principle
+
+By using ZenithFCM, you acknowledge that you are using an independent fan platform designed to provide FC Mobile-related tools, insights, and resources for informational purposes.
+
+14. Contact Information
+
+For questions, concerns, or legal inquiries regarding these Terms and Conditions, please contact:
+
+Email: zenithfcm@gmail.com
+
+By using ZenithFCM, you confirm that you have read, understood, and agreed to these Terms and Conditions.

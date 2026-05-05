@@ -276,6 +276,10 @@ footer.zenith-footer .zenith-footer-legal-text {
 }
 
 @media (max-width: 1024px) {
+  .main-content.static-page-container {
+    padding: 0 !important;
+  }
+
   .zenith-static-page {
     margin: 0;
     padding: 20px 16px;

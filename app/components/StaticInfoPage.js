@@ -3,7 +3,7 @@ import SiteChrome from './SiteChrome';
 export default function StaticInfoPage({ title, intro, sections = [] }) {
   return (
     <SiteChrome>
-      <main className="main-content">
+      <main className="main-content static-page-container">
         <section className="zenith-static-page" aria-labelledby="zenith-static-page-title">
           <header className="zenith-static-page-header">
             <h1 id="zenith-static-page-title">{title}</h1>

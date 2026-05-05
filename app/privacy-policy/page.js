@@ -108,7 +108,7 @@ export default function PrivacyPolicyPage() {
           body: (
             <>
               <p>If you have questions, concerns, or privacy-related requests, please contact us:</p>
-              <p><strong>ZenithFCM</strong><br />Email: <a href="mailto:zenithfcm@gmail.com" style={{ color: '#2dd5c0' }}>zenithfcm@gmail.com</a></p>
+              <p><strong>ZenithFCM</strong><br />Email: <a href="mailto:zenithfcmofficial@gmail.com" style={{ color: '#2dd5c0' }}>zenithfcmofficial@gmail.com</a></p>
               <p>Continued use of this site is also subject to our <Link href="/terms-and-conditions" style={{ color: '#2dd5c0' }}>Terms and Conditions</Link>.</p>
             </>
           )

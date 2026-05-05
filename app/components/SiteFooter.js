@@ -3,7 +3,7 @@ import Link from 'next/link';
 import packageMetadata from '../../package.json';
 import MarketNavLink from './MarketNavLink.client';
 
-const CONTACT_EMAIL = 'zenithfcm@gmail.com';
+const CONTACT_EMAIL = 'zenithfcmofficial@gmail.com';
 
 const SOCIAL_LINKS = [
   {

@@ -1,15 +1,15 @@
 import StaticInfoPage from '../components/StaticInfoPage';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
-const contactEmail = 'zenithfcm@gmail.com';
+const contactEmail = 'zenithfcmofficial@gmail.com';
 
 export const metadata = {
-  title: 'Contact | ZenithFCM',
-  description: 'Get in touch with ZenithFCM for feedback, collaboration, and platform-related support.',
+  title: 'Contact Us | ZenithFCM - Feedback & Support',
+  description: 'Have questions or feedback? Contact the ZenithFCM team for support, business inquiries, or collaboration opportunities within the FC Mobile community.',
   alternates: { canonical: '/contact' },
   openGraph: {
-    title: 'Contact | ZenithFCM',
-    description: 'Get in touch with ZenithFCM for feedback, collaboration, and platform-related support.',
+    title: 'Contact Us | ZenithFCM',
+    description: 'Get in touch with ZenithFCM for support, feedback, and partnerships.',
     url: `${siteUrl}/contact`,
     siteName: 'ZenithFCM',
     type: 'website'
@@ -19,28 +19,48 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <StaticInfoPage
-      title="Contact ZenithFCM"
-      intro="We welcome partnerships, support questions, and platform feedback from the FC Mobile community."
+      title="Contact Us"
+      intro="We value your input and are here to help. Whether you have a question about our tools or want to discuss a partnership, we'd love to hear from you."
       sections={[
         {
-          heading: 'Primary contact',
+          heading: 'General Support',
           body: (
             <>
-              <p>Email us directly for all platform inquiries:</p>
+              <p>For help with the player database, market tools, or any site features, please reach out to our support email:</p>
               <p>
-                <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                <a href={`mailto:${contactEmail}`} style={{ color: '#2dd5c0', fontWeight: '600' }}>{contactEmail}</a>
               </p>
+              <p>We aim to respond to all inquiries within 24-48 hours.</p>
             </>
           )
         },
         {
-          heading: 'What to include',
+          heading: 'Partnerships & Business',
           body: (
-            <ul>
-              <li>Your page URL or route, if relevant</li>
-              <li>A short description of your request</li>
-              <li>Screenshots or context that helps us reproduce the issue quickly</li>
-            </ul>
+            <p>
+              Interested in collaborating with ZenithFCM? We are open to working with content creators, community leaders, and developers in the FC Mobile ecosystem. Please use the subject line <strong>"Partnership Inquiry"</strong> in your email.
+            </p>
+          )
+        },
+        {
+          heading: 'Media & Press',
+          body: (
+            <p>
+              For media inquiries or requests for platform data/insights for your articles or videos, please contact us at the email address above with the subject line <strong>"Media Request"</strong>.
+            </p>
+          )
+        },
+        {
+          heading: 'What to Include',
+          body: (
+            <>
+              <p>To help us assist you faster, please include:</p>
+              <ul>
+                <li>Your device and browser information.</li>
+                <li>Relevant page URLs or player names.</li>
+                <li>A clear description of your request or issue.</li>
+              </ul>
+            </>
           )
         }
       ]}
