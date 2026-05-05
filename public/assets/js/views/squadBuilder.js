@@ -4074,8 +4074,29 @@ async function renderSquadPlayerSkills() {
     const pointsSpent = userAllocations.reduce((sum, a) => sum + a.skill_level, 0);
     const pointsRemaining = availablePoints - pointsSpent;
 
+    const skillBoostCatalogById = {};
+    if (window.apiClient && typeof window.apiClient.getSkillBoosts === 'function') {
+        const boostRows = await Promise.all(
+            availableSkills.map(async (skill) => {
+                const skillId = String(skill?.skill_id || '').trim();
+                if (!skillId) return [skillId, []];
+                try {
+                    const payload = await window.apiClient.getSkillBoosts(skillId);
+                    return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
+                } catch (error) {
+                    console.error(`[SQUAD SKILLS] Error loading boosts for skill ${skillId}:`, error);
+                    return [skillId, []];
+                }
+            })
+        );
+        boostRows.forEach(([skillId, boosts]) => {
+            if (!skillId) return;
+            skillBoostCatalogById[skillId] = boosts;
+        });
+    }
+
     const maxLevels = typeof calculateMaxLevels === 'function'
-        ? calculateMaxLevels(availableSkills)
+        ? calculateMaxLevels(availableSkills, skillBoostCatalogById)
         : {};
 
     container.style.display = 'grid';

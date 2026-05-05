@@ -54,7 +54,10 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
     [skillLevelsById]
   );
   const skillPointsRemaining = Math.max(0, skillPointBudget - skillPointsSpent);
-  const skillMaxLevels = useMemo(() => calculateSkillMaxLevels(availableSkills), [availableSkills]);
+  const skillMaxLevels = useMemo(
+    () => calculateSkillMaxLevels(availableSkills, skillBoostCatalogById),
+    [availableSkills, skillBoostCatalogById]
+  );
   const aggregatedBoosts = useMemo(
     () => aggregateSkillBoostsByLevel(skillLevelsById, skillBoostCatalogById),
     [skillLevelsById, skillBoostCatalogById]

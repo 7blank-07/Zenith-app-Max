@@ -422,13 +422,19 @@ export function aggregateSkillBoostsByLevel(skillLevelsById, skillBoostCatalogBy
   return totals;
 }
 
-export function calculateSkillMaxLevels(skills) {
+export function calculateSkillMaxLevels(skills, skillBoostCatalogById = {}) {
   if (!Array.isArray(skills) || !skills.length) return {};
   const maxLevels = {};
+  const normalizedBoostCatalog = skillBoostCatalogById && typeof skillBoostCatalogById === 'object' ? skillBoostCatalogById : {};
   skills.forEach((skill) => {
     const skillId = getSkillId(skill);
     if (!skillId) return;
-    maxLevels[skillId] = 1;
+    const boostRows = Array.isArray(normalizedBoostCatalog[skillId]) ? normalizedBoostCatalog[skillId] : [];
+    const maxBoostLevel = boostRows.reduce((maxLevel, row) => {
+      const levelNumber = Math.max(0, toNumber(row?.level_number ?? row?.levelNumber, 0));
+      return Math.max(maxLevel, levelNumber);
+    }, 0);
+    maxLevels[skillId] = Math.max(1, maxBoostLevel);
   });
   skills.forEach((skill) => {
     const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();

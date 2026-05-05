@@ -1944,15 +1944,23 @@ window.downsampleHistory = function(points, maxPoints) {
 // Add this function after renderPlayerDetail()
 // ==================== RENDER PLAYER SKILLS ====================
 // ==================== CALCULATE MAX LEVELS ====================
-function calculateMaxLevels(skills) {
+function calculateMaxLevels(skills, skillBoostCatalogById = {}) {
   const maxLevels = {};
+  const normalizedBoostCatalog = skillBoostCatalogById && typeof skillBoostCatalogById === 'object' ? skillBoostCatalogById : {};
   
-  // Default: all skills have max level 1
+  // Primary source of truth: highest level_number in boost rows
   skills.forEach(skill => {
-    maxLevels[skill.skill_id] = 1;
+    const skillId = String(skill?.skill_id || '').trim();
+    if (!skillId) return;
+    const boostRows = Array.isArray(normalizedBoostCatalog[skillId]) ? normalizedBoostCatalog[skillId] : [];
+    const maxBoostLevel = boostRows.reduce((maxLevel, row) => {
+      const levelNumber = Math.max(0, Number(row?.level_number ?? row?.levelNumber) || 0);
+      return Math.max(maxLevel, levelNumber);
+    }, 0);
+    maxLevels[skillId] = Math.max(1, maxBoostLevel);
   });
   
-  // Find skills that appear as prerequisites and update their max levels
+  // Secondary floor: unlock requirements can raise a prerequisite's minimum max level
   skills.forEach(skill => {
     if (skill.unlock_requirement_skillname && skill.unlock_requirement_level) {
       // Find the skill_id of the prerequisite by matching name
@@ -1963,9 +1971,11 @@ function calculateMaxLevels(skills) {
       
       if (prereqSkill) {
         // Update max level to the highest requirement level seen
-        const currentMax = maxLevels[prereqSkill.skill_id] || 1;
+        const prereqSkillId = String(prereqSkill?.skill_id || '').trim();
+        if (!prereqSkillId) return;
+        const currentMax = maxLevels[prereqSkillId] || 1;
         const requiredLevel = skill.unlock_requirement_level || 1;
-        maxLevels[prereqSkill.skill_id] = Math.max(currentMax, requiredLevel);
+        maxLevels[prereqSkillId] = Math.max(currentMax, requiredLevel);
       }
     }
   });
@@ -2047,8 +2057,30 @@ async function renderPlayerSkills(player, options = {}) {
     return;
   }
 
+  // Build boost catalog to derive each skill's max level from level_number rows
+  const skillBoostCatalogById = {};
+  if (window.apiClient && typeof window.apiClient.getSkillBoosts === 'function') {
+    const boostRows = await Promise.all(
+      skills.map(async (skill) => {
+        const skillId = String(skill?.skill_id || '').trim();
+        if (!skillId) return [skillId, []];
+        try {
+          const payload = await window.apiClient.getSkillBoosts(skillId);
+          return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
+        } catch (error) {
+          console.error(`[SKILLS] Error loading boosts for skill ${skillId}:`, error);
+          return [skillId, []];
+        }
+      })
+    );
+    boostRows.forEach(([skillId, boosts]) => {
+      if (!skillId) return;
+      skillBoostCatalogById[skillId] = boosts;
+    });
+  }
+
   // Calculate max levels for each skill
-  const maxLevels = calculateMaxLevels(skills);
+  const maxLevels = calculateMaxLevels(skills, skillBoostCatalogById);
 
   // Fetch user's current allocations
   const hasProvidedAllocations = Array.isArray(options.allocations);
@@ -8461,8 +8493,29 @@ async function renderComparePlayerSkills(options = {}) {
   const pointsSpent = userAllocations.reduce((sum, a) => sum + a.skill_level, 0);
   const pointsRemaining = availablePoints - pointsSpent;
 
+  const skillBoostCatalogById = {};
+  if (window.apiClient && typeof window.apiClient.getSkillBoosts === 'function') {
+    const boostRows = await Promise.all(
+      availableSkills.map(async (skill) => {
+        const skillId = String(skill?.skill_id || '').trim();
+        if (!skillId) return [skillId, []];
+        try {
+          const payload = await window.apiClient.getSkillBoosts(skillId);
+          return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
+        } catch (error) {
+          console.error(`[COMPARE SKILLS] Error loading boosts for skill ${skillId}:`, error);
+          return [skillId, []];
+        }
+      })
+    );
+    boostRows.forEach(([skillId, boosts]) => {
+      if (!skillId) return;
+      skillBoostCatalogById[skillId] = boosts;
+    });
+  }
+
   const maxLevels = typeof calculateMaxLevels === 'function'
-    ? calculateMaxLevels(availableSkills)
+    ? calculateMaxLevels(availableSkills, skillBoostCatalogById)
     : {};
 
   container.style.display = 'grid';
