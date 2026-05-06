@@ -71,7 +71,7 @@ async function renderRedeemRoutePage(routeConfig, searchParams = {}) {
   ].filter(Boolean);
 
   return (
-    <SiteChrome activeView="home">
+    <SiteChrome activeView="redeem">
       <main className="main-content redeem-main-content">
         {schemas.map((schema, index) => (
           <script

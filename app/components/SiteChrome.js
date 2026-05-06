@@ -38,16 +38,16 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <Link href="/players" data-link="" data-nav-link="" className={getNavClass(activeView, 'players')}>
               Players
             </Link>
-            <MarketNavLink href="/market" data-link="" data-nav-link="" className={getNavClass(activeView, 'market')}>
-              Market
-            </MarketNavLink>
+            <Link href="/fc-mobile-redeem-codes" data-link="" data-nav-link="" className={getNavClass(activeView, 'redeem')}>
+              Redeem
+            </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
               Blogs
             </Link>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
               <button
-                className={`tools-btn${activeView === 'tools' ? ' active' : ''}`}
+                className={`tools-btn${activeView === 'tools' || activeView === 'market' ? ' active' : ''}`}
                 id="tools-dropdown-btn"
                 type="button"
                 aria-haspopup="true"
@@ -66,6 +66,9 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 <Link href="/tools?tool=watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ❤️ Watchlist
                 </Link>
+                <MarketNavLink href="/market" data-link="" data-nav-link="" className="tools-dropdown-item">
+                  📈 Market
+                </MarketNavLink>
               </div>
             </div>
           </nav>

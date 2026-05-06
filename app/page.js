@@ -171,9 +171,9 @@ export default async function HomePage() {
             <Link href="/players" data-link="" data-nav-link="" className="nav-link">
               Players
             </Link>
-            <MarketNavLink href="/market" data-link="" data-nav-link="" className="nav-link">
-              Market
-            </MarketNavLink>
+            <Link href="/fc-mobile-redeem-codes" data-link="" data-nav-link="" className="nav-link">
+              Redeem
+            </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className="nav-link">
               Blogs
             </Link>
@@ -192,6 +192,9 @@ export default async function HomePage() {
                 <Link href="/tools?tool=watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ❤️ Watchlist
                 </Link>
+                <MarketNavLink href="/market" data-link="" data-nav-link="" className="tools-dropdown-item">
+                  📈 Market
+                </MarketNavLink>
               </div>
             </div>
           </nav>

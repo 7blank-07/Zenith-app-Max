@@ -39,12 +39,23 @@ const MOBILE_TOOL_ITEMS = [
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     )
+  },
+  {
+    key: 'market',
+    label: 'Market',
+    type: 'market',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+    )
   }
 ];
 
 const MOBILE_PREFETCH_ROUTES = Object.freeze([
   '/',
   '/players',
+  '/fc-mobile-redeem-codes',
   '/tools',
   '/tools?tool=squadbuilder',
   '/tools?tool=compare',
@@ -149,15 +160,16 @@ export default function MobileNavigation({ activeView = '' }) {
           <span>Players</span>
         </button>
         <button
-          className={getButtonClassName(activeView === 'market')}
-          data-view="market"
+          className={getButtonClassName(activeView === 'redeem')}
+          data-view="redeem"
           type="button"
-          onClick={openMarket}
+          onClick={() => navigateTo('/fc-mobile-redeem-codes')}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            <path d="M20 12h-2M4 12H2m10 10v-2m0-16V2m5 5-1.5 1.5M7 7l1.5 1.5m8 8-1.5-1.5M7 17l1.5-1.5" />
+            <rect x="6" y="9" width="12" height="8" rx="2" />
           </svg>
-          <span>Market</span>
+          <span>Redeem</span>
         </button>
         <button
           className={getButtonClassName(activeView === 'blogs')}
@@ -221,7 +233,7 @@ export default function MobileNavigation({ activeView = '' }) {
                 key={item.key}
                 className="tool-item"
                 type="button"
-                onClick={() => navigateTo(item.href)}
+                onClick={() => (item.type === 'market' ? openMarket() : navigateTo(item.href))}
               >
                 <div className="tool-item-icon">{item.icon}</div>
                 <span>{item.label}</span>
