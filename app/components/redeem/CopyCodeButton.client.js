@@ -40,7 +40,7 @@ export default function CopyCodeButton({
   const statusLabel = status === 'copied' ? copiedLabel : status === 'failed' ? 'Copy failed' : idleLabel;
 
   return (
-    <button type="button" className={className} onClick={handleCopy} aria-live="polite">
+    <button type="button" className={className} onClick={handleCopy} aria-live="polite" data-status={status}>
       {statusLabel}
     </button>
   );

@@ -275,6 +275,16 @@ footer.zenith-footer .zenith-footer-legal-text {
   padding-left: 18px;
 }
 
+/* Redeem Page Full Width Mobile/Tablet */
+@media (max-width: 1024px) {
+  .main-content.redeem-main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+
 @media (max-width: 1024px) {
   .main-content.static-page-container {
     padding: 0 !important;

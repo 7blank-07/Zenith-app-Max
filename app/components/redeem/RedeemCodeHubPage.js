@@ -6,26 +6,26 @@ const DEFAULT_COPY = Object.freeze({
   breadcrumbLabel: 'Breadcrumb',
   eyebrow: 'Redeem code hub',
   lastUpdatedLabel: 'Last updated:',
-  browsePagesTitle: 'Browse current launch pages',
-  searchLabel: 'Search codes or titles',
-  searchPlaceholder: 'Search redeem code list',
-  sectionFilterLabel: 'Section filter',
-  sectionAll: 'All sections',
-  sectionActive: 'Active only',
-  sectionLatest: 'Latest only',
-  sectionExpired: 'Expired only',
-  applyButton: 'Apply',
+  browsePagesTitle: 'Select Region',
+  searchLabel: 'Search codes',
+  searchPlaceholder: 'Search for active codes...',
+  sectionFilterLabel: 'Filter by status',
+  sectionAll: 'All Codes',
+  sectionActive: 'Active',
+  sectionLatest: 'Latest',
+  sectionExpired: 'Expired',
+  applyButton: 'Apply Filters',
   activeTitle: 'Active Codes',
   activeCountSuffix: 'active',
   activeEmpty: 'No active redeem code currently.',
   latestTitle: 'Latest Codes',
-  latestTodayTitle: 'Latest Codes Published Today',
+  latestTodayTitle: 'Published Today',
   latestCountSuffix: 'listed',
-  latestEmpty: 'No matching latest codes were found.',
+  latestEmpty: 'No matching codes found.',
   expiredTitle: 'Expired Codes',
   expiredCountSuffix: 'archived',
-  expiredEmpty: 'No expired codes are archived yet.',
-  faqTitle: 'FAQ',
+  expiredEmpty: 'No expired codes archived.',
+  faqTitle: 'Frequently Asked Questions',
   statusActive: 'Active',
   statusExpired: 'Expired',
   publishedLabel: 'Published',
@@ -53,14 +53,19 @@ function renderCodeCard(entry, locale, copy) {
       </div>
 
       <h3 className={styles.cardTitle}>{entry.title}</h3>
-      <CopyCodeButton codeValue={entry.codeValue} className={styles.codeButton} copiedLabel="Copied" idleLabel={entry.codeValue} />
+      <CopyCodeButton 
+        codeValue={entry.codeValue} 
+        className={styles.codeButton} 
+        copiedLabel="COPIED!" 
+        idleLabel={entry.codeValue} 
+      />
 
       <div className={styles.cardFooter}>
         <span>
-          {copy.publishedLabel}: {formatDate(entry.publishedAt, locale)}
+          <strong>{copy.publishedLabel}:</strong> {formatDate(entry.publishedAt, locale)}
         </span>
         <span>
-          {copy.expiresLabel}: {formatDate(entry.expiresAt, locale)}
+          <strong>{copy.expiresLabel}:</strong> {formatDate(entry.expiresAt, locale)}
         </span>
       </div>
     </article>
@@ -99,43 +104,57 @@ export default function RedeemCodeHubPage({ pageData }) {
         <span className={styles.eyebrow}>{copy.eyebrow}</span>
         <h1 className={styles.title}>{route.h1}</h1>
         <p className={styles.description}>{route.intro}</p>
-        {route.globalCodeNote ? <p className={styles.description}>{route.globalCodeNote}</p> : null}
-        <p className={styles.updatedAt}>
+        {route.globalCodeNote ? (
+          <p className={styles.description} style={{ marginTop: '8px', opacity: 0.8 }}>
+            {route.globalCodeNote}
+          </p>
+        ) : null}
+        <div className={styles.updatedAt}>
           {copy.lastUpdatedLabel} {formatDate(updatedAt, locale)}
-        </p>
+        </div>
       </header>
 
-      <section className={styles.linkPanel}>
-        <h2 className={styles.linkPanelTitle}>{copy.browsePagesTitle}</h2>
-        <div className={styles.links}>
-          {links.map((entry) => (
-            <Link key={entry.href} href={entry.href}>
-              {entry.label}
-            </Link>
-          ))}
-        </div>
-      </section>
+      <div className={styles.dashboard}>
+        {links.length > 0 && (
+          <section className={styles.linkPanel}>
+            <h2 className={styles.linkPanelTitle}>{copy.browsePagesTitle}</h2>
+            <div className={styles.links}>
+              {links.map((entry) => (
+                <Link key={entry.href} href={entry.href} className={route.path === entry.href ? styles.activeLink : ''}>
+                  {entry.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
-      <form className={styles.filters} action={route.path} method="get">
-        <label className={styles.field}>
-          <span className={styles.label}>{copy.searchLabel}</span>
-          <input className={styles.input} type="search" name="q" defaultValue={pageData?.search || ''} placeholder={copy.searchPlaceholder} />
-        </label>
+        <form className={styles.filters} action={route.path} method="get">
+          <label className={styles.field}>
+            <span className={styles.label}>{copy.searchLabel}</span>
+            <input
+              className={styles.input}
+              type="search"
+              name="q"
+              defaultValue={pageData?.search || ''}
+              placeholder={copy.searchPlaceholder}
+            />
+          </label>
 
-        <label className={styles.field}>
-          <span className={styles.label}>{copy.sectionFilterLabel}</span>
-          <select className={styles.select} name="section" defaultValue={section.value || 'all'}>
-            <option value="all">{copy.sectionAll}</option>
-            <option value="active">{copy.sectionActive}</option>
-            <option value="latest">{copy.sectionLatest}</option>
-            <option value="expired">{copy.sectionExpired}</option>
-          </select>
-        </label>
+          <label className={styles.field}>
+            <span className={styles.label}>{copy.sectionFilterLabel}</span>
+            <select className={styles.select} name="section" defaultValue={section.value || 'all'}>
+              <option value="all">{copy.sectionAll}</option>
+              <option value="active">{copy.sectionActive}</option>
+              <option value="latest">{copy.sectionLatest}</option>
+              <option value="expired">{copy.sectionExpired}</option>
+            </select>
+          </label>
 
-        <button className={styles.button} type="submit">
-          {copy.applyButton}
-        </button>
-      </form>
+          <button className={styles.button} type="submit">
+            {copy.applyButton}
+          </button>
+        </form>
+      </div>
 
       {!availability.isConfigured ? (
         <section className={styles.availabilityCard}>
@@ -144,7 +163,7 @@ export default function RedeemCodeHubPage({ pageData }) {
         </section>
       ) : (
         <>
-          {section.showActive ? (
+          {section.showActive && (
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <h2 className={styles.sectionTitle}>{copy.activeTitle}</h2>
@@ -156,9 +175,9 @@ export default function RedeemCodeHubPage({ pageData }) {
                 <p className={styles.empty}>{copy.activeEmpty}</p>
               )}
             </section>
-          ) : null}
+          )}
 
-          {section.showLatest ? (
+          {section.showLatest && (
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <h2 className={styles.sectionTitle}>{route.todayOnly ? copy.latestTodayTitle : copy.latestTitle}</h2>
@@ -170,9 +189,9 @@ export default function RedeemCodeHubPage({ pageData }) {
                 <p className={styles.empty}>{copy.latestEmpty}</p>
               )}
             </section>
-          ) : null}
+          )}
 
-          {section.showExpired ? (
+          {section.showExpired && (
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <h2 className={styles.sectionTitle}>{copy.expiredTitle}</h2>
@@ -184,19 +203,23 @@ export default function RedeemCodeHubPage({ pageData }) {
                 <p className={styles.empty}>{copy.expiredEmpty}</p>
               )}
             </section>
-          ) : null}
+          )}
         </>
       )}
 
-      <section className={styles.faq}>
-        <h2 className={styles.faqTitle}>{copy.faqTitle}</h2>
-        {faqEntries.map((entry) => (
-          <details key={entry.question}>
-            <summary>{entry.question}</summary>
-            <p>{entry.answer}</p>
-          </details>
-        ))}
-      </section>
+      {faqEntries.length > 0 && (
+        <section className={styles.faq}>
+          <h2 className={styles.faqTitle}>{copy.faqTitle}</h2>
+          <div className={styles.faqList}>
+            {faqEntries.map((entry) => (
+              <details key={entry.question}>
+                <summary>{entry.question}</summary>
+                <p>{entry.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

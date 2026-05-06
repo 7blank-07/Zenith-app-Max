@@ -72,7 +72,7 @@ async function renderRedeemRoutePage(routeConfig, searchParams = {}) {
 
   return (
     <SiteChrome activeView="home">
-      <main className="main-content">
+      <main className="main-content redeem-main-content">
         {schemas.map((schema, index) => (
           <script
             key={`${schemaKeyBase}-schema-${index}`}
