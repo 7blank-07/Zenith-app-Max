@@ -66,9 +66,13 @@ export default function RouteProgress() {
         setIsVisible(true);
       }
 
-      if (progressRef.current < INITIAL_PROGRESS) {
-        setProgress(INITIAL_PROGRESS);
-      }
+      // If we are already near the end, don't jump back to INITIAL_PROGRESS
+      // but ensure we show movement
+      setProgress((prev) => {
+        if (prev < INITIAL_PROGRESS) return INITIAL_PROGRESS;
+        if (prev >= MAX_TRICKLE_PROGRESS) return prev;
+        return Math.min(MAX_TRICKLE_PROGRESS, prev + 2);
+      });
 
       if (!trickleIntervalRef.current) {
         trickleIntervalRef.current = setInterval(() => {
@@ -77,7 +81,7 @@ export default function RouteProgress() {
               return currentProgress;
             }
             const remaining = MAX_TRICKLE_PROGRESS - currentProgress;
-            const step = Math.max(0.8, remaining * 0.14);
+            const step = Math.max(0.4, remaining * 0.12);
             return Math.min(MAX_TRICKLE_PROGRESS, currentProgress + step);
           });
         }, TRICKLE_INTERVAL_MS);
@@ -103,6 +107,7 @@ export default function RouteProgress() {
 
       if (link.target && link.target !== '_self') return false;
       if (link.hasAttribute('download')) return false;
+      if (link.hasAttribute('data-no-progress')) return false;
 
       const rawHref = link.getAttribute('href');
       if (!rawHref || rawHref.startsWith('#')) return false;
@@ -116,9 +121,12 @@ export default function RouteProgress() {
       }
 
       if (destinationUrl.origin !== window.location.origin) return false;
+      
+      // Even if same path, search params might change which is a navigation
       if (
         destinationUrl.pathname === window.location.pathname &&
-        destinationUrl.search === window.location.search
+        destinationUrl.search === window.location.search &&
+        destinationUrl.hash === window.location.hash
       ) {
         return false;
       }
@@ -127,9 +135,38 @@ export default function RouteProgress() {
     };
 
     const handleDocumentClick = (event) => {
+      // Ignore right clicks or clicks with modifiers
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      const target = event.target;
+      if (!target || !(target instanceof HTMLElement)) return;
+
+      // 1. Standard internal link clicks
       if (isInternalNavigationClick(event)) {
         startProgress();
+        return;
       }
+
+      // 2. Programmatic navigation triggers (cards, buttons, etc.)
+      // We look for elements that are known to trigger router.push()
+      const trigger = target.closest(
+        'button, [role="button"], .player-row-card, .dashboard-player-card, .player-row, .banner-slide, .market-nav-link, .player-card-item, .tool-card, .nav-item, .mobile-nav-item'
+      );
+
+      if (trigger) {
+        // Skip if explicitly opted out or if it's a type="submit" in a form (usually handled by submit)
+        if (trigger.hasAttribute('data-no-progress') || trigger.closest('[data-no-progress]')) {
+          return;
+        }
+        
+        // Skip for simple UI toggles if we can identify them (optional)
+        // But the user said "any button", so we'll be generous
+        startProgress();
+      }
+    };
+
+    const handleCustomTrigger = () => {
+      startProgress();
     };
 
     const originalPushState = window.history.pushState;
@@ -151,12 +188,18 @@ export default function RouteProgress() {
 
     document.addEventListener('click', handleDocumentClick, true);
     window.addEventListener('popstate', handlePopState);
+    window.addEventListener('zenith:navigation-start', handleCustomTrigger);
+
+    // Also expose a global function for manual triggers if needed
+    window.startRouteProgress = startProgress;
 
     return () => {
       document.removeEventListener('click', handleDocumentClick, true);
       window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('zenith:navigation-start', handleCustomTrigger);
       window.history.pushState = originalPushState;
       window.history.replaceState = originalReplaceState;
+      delete window.startRouteProgress;
       clearTrickle();
       clearHideTimeout();
       clearSafetyTimeout();
