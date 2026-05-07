@@ -246,8 +246,6 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="home-utility-divider" aria-hidden="true" />
-
               <div className="home-utility-redeem-shell">
                 <RedeemCodeHomeWidget codeEntry={homeRedeemWidgetData?.code || null} />
               </div>

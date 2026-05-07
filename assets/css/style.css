@@ -1112,7 +1112,8 @@ main.players-main-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-top: 16px;
+  margin-bottom: 32px;
 }
 
 .section-header h2 {
@@ -8888,7 +8889,7 @@ watchlist-view .view-content {
 /* ==================== HOME HERO UTILITY HUB ==================== */
 #dashboard-view .home-utility-hero {
   width: min(62%, 860px);
-  margin: 14px auto 12px;
+  margin: 14px auto 96px;
   position: relative;
   isolation: isolate;
   z-index: 30;
@@ -8917,13 +8918,6 @@ watchlist-view .view-content {
   box-shadow: none;
   padding: 0;
   overflow: visible;
-}
-
-#dashboard-view .home-utility-divider {
-  height: 1px;
-  margin: 14px 0;
-  background: linear-gradient(90deg, rgba(34, 211, 238, 0), rgba(34, 211, 238, 0.5), rgba(34, 211, 238, 0));
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
 }
 
 #dashboard-view .home-utility-search .search-container {
@@ -8963,6 +8957,7 @@ watchlist-view .view-content {
 #dashboard-view .home-utility-redeem-shell {
   display: grid;
   gap: 12px;
+  margin-top: 10px;
 }
 
 #dashboard-view .home-utility-redeem-link {
@@ -9002,7 +8997,7 @@ watchlist-view .view-content {
 @media (max-width: 768px) {
   #dashboard-view .home-utility-hero {
     width: min(90%, 600px);
-    margin: 10px auto 8px;
+    margin: 10px auto 32px;
   }
 
   #dashboard-view .home-utility-card {

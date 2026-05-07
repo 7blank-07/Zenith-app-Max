@@ -8853,7 +8853,7 @@ watchlist-view .view-content {
 /* ==================== HOME HERO UTILITY HUB ==================== */
 #dashboard-view .home-utility-hero {
   width: min(62%, 860px);
-  margin: 14px auto 12px;
+  margin: 14px auto 86px;
   position: relative;
   isolation: isolate;
   z-index: 30;
@@ -8882,13 +8882,6 @@ watchlist-view .view-content {
   box-shadow: none;
   padding: 0;
   overflow: visible;
-}
-
-#dashboard-view .home-utility-divider {
-  height: 1px;
-  margin: 14px 0;
-  background: linear-gradient(90deg, rgba(34, 211, 238, 0), rgba(34, 211, 238, 0.5), rgba(34, 211, 238, 0));
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
 }
 
 #dashboard-view .home-utility-search .search-container {
@@ -8928,6 +8921,7 @@ watchlist-view .view-content {
 #dashboard-view .home-utility-redeem-shell {
   display: grid;
   gap: 12px;
+  margin-top: 10px;
 }
 
 #dashboard-view .home-utility-redeem-link {
