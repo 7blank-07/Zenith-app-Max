@@ -1,120 +1,494 @@
-Terms and Conditions
-1. Acceptance of Terms
+# ZenithFCM Streaming / Live Hub — Production-Ready Gemini CLI Master Prompt
 
-By accessing or using ZenithFCM, you agree to comply with and be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use this website.
+## ROLE
 
-2. Eligibility & Age Requirement
+You are a senior full-stack architect, product strategist, UI/UX systems designer, and SEO engineer working on the existing **ZenithFCM web app** (FC Mobile platform).
 
-You must be at least 13 years old to use ZenithFCM. If you are under 13, you should use this website only with parental or guardian consent and supervision.
+Your job is to design and implement a **fully production-ready Streaming / Live Hub ecosystem** that transforms ZenithFCM from a blog + database into a:
 
-3. User Accounts
-3.1
+# FC Mobile Content + Streaming + Tournament + Community Hub
 
-Certain features of ZenithFCM may require account registration. You are responsible for maintaining the confidentiality of your account credentials, including your password, and for restricting access to your account.
+**IMPORTANT:**
 
-3.2
+* Use **YouTube Live + YouTube embeds only** as the streaming engine
+* DO NOT build custom streaming servers or video hosting
+* Build scalable infrastructure for tournaments, replays, and future esports growth
+* Match existing ZenithFCM premium branding and architecture
+* Mobile-first, SEO-first, production-grade
 
-You agree to notify ZenithFCM immediately of any unauthorized access, security breach, or suspicious activity related to your account.
+---
 
-3.3
+# PRIMARY BUSINESS GOAL
 
-You are solely responsible for all activities conducted under your account.
+ZenithFCM should:
 
-4. Acceptable Use & Code of Conduct
-4.1
+* Host live tournament broadcasts
+* Showcase ongoing community events
+* Archive stream replays
+* Increase social growth via YouTube
+* Increase website SEO via streaming pages
+* Increase Discord community growth
+* Create monetization opportunities
 
-You agree to use ZenithFCM responsibly, respectfully, and lawfully.
+---
 
-4.2
+# CORE IMPLEMENTATION REQUIREMENTS
 
-You may not:
+# 1. CREATE A NEW TOP-LEVEL STREAMING CATEGORY
 
-Post or share false, harmful, abusive, defamatory, obscene, or misleading content
-Violate intellectual property rights
-Harass, threaten, or exploit other users
-Attempt unauthorized access to systems or data
-Introduce malware, spam, bots, or malicious code
-Disrupt website functionality or performance
-4.3
+## Add:
 
-Any misuse of ZenithFCM may result in suspension or permanent termination of access.
+### Navigation Label:
 
-5. User-Generated Content
-5.1
+**Streaming**
 
-ZenithFCM may allow users to submit content including comments, feedback, suggestions, reviews, or other materials.
+### SEO Slug:
 
-5.2
+`/streaming`
 
-By submitting content, you grant ZenithFCM a non-exclusive, worldwide, royalty-free license to use, reproduce, modify, adapt, publish, and distribute such content for website operation, promotion, and improvement.
+### Integrate into:
 
-5.3
+* Header navigation
+* Footer navigation
+* Homepage sections
+* Sitemap
+* Internal search
+* Breadcrumbs
 
-You remain solely responsible for your submitted content and must ensure it does not violate laws, third-party rights, or these Terms.
+---
 
-6. Intellectual Property Rights
-6.1
+# 2. BUILD A COMPLETE STREAMING HUB PAGE
 
-All ZenithFCM content, including but not limited to text, branding, design, graphics, tools, logos, software, and original resources, is the property of ZenithFCM unless otherwise stated and is protected by applicable copyright, trademark, and intellectual property laws.
+## Route:
 
-6.2
+`/streaming`
 
-FC Mobile, EA SPORTS, Electronic Arts, and related assets remain the property of their respective owners. ZenithFCM is an independent fan-built platform and is not officially affiliated with or endorsed by Electronic Arts.
+## PURPOSE:
 
-6.3
+Main central hub for all livestreams, tournaments, replays, and upcoming events.
 
-Third-party resources, trademarks, or data sources referenced on ZenithFCM remain the property of their respective owners.
+---
 
-6.4
+## PAGE ARCHITECTURE:
 
-You may not copy, reproduce, republish, or distribute ZenithFCM content without prior written permission, except where permitted by law.
+# HERO SECTION:
 
-7. Disclaimer
-7.1
+### LIVE NOW (if active)
 
-ZenithFCM is provided on an “as is” and “as available” basis.
+Include:
 
-7.2
+* Large featured YouTube livestream embed
+* Live badge
+* Stream title
+* Tournament/event title
+* Host / streamer
+* CTA: Watch on YouTube
+* CTA: Join Discord
+* CTA: View Tournament Page
 
-While we strive for accuracy, we do not guarantee that player data, market insights, redeem codes, tools, or other content will always be complete, current, or error-free.
+### If no live stream:
 
-7.3
+Display featured upcoming stream instead.
 
-ZenithFCM does not guarantee uninterrupted access, website availability, or that all features will function without errors or delays.
+---
 
-8. Limitation of Liability
+# UPCOMING STREAMS SECTION:
 
-To the fullest extent permitted by law, ZenithFCM, its owners, affiliates, contributors, or operators shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from:
+Cards with:
 
-Use or inability to use the website
-Errors or inaccuracies in content
-Loss of data
-Market decisions based on website information
-Third-party links or services
-9. Third-Party Links & Services
+* Thumbnail
+* Match/Event title
+* Date/time
+* Countdown / Scheduled label
+* Tournament category
+* Player/team names
+* Reminder CTA
 
-ZenithFCM may include links to third-party websites, tools, or resources for user convenience. We are not responsible for the content, policies, or practices of third-party platforms.
+---
 
-10. Account Suspension or Termination
+# RECENT REPLAYS SECTION:
 
-ZenithFCM reserves the right to suspend, restrict, or terminate user access at any time, without prior notice, for violations of these Terms or for any activity deemed harmful to the platform or its users.
+Cards with:
 
-11. Changes to Terms
+* YouTube thumbnail/embed
+* Replay badge
+* Match summary
+* Result
+* Watch replay CTA
+* Read full blog CTA
 
-ZenithFCM may update or revise these Terms and Conditions at any time without prior notice. Continued use of the website after updates are posted constitutes your acceptance of the revised terms.
+---
 
-12. Privacy
+# STREAM FILTER SYSTEM:
 
-Your use of ZenithFCM may also be subject to our Privacy Policy, which explains how user information may be collected, used, and protected.
+Include tabs/filters:
 
-13. Governing Principle
+* All
+* Live
+* Upcoming
+* Replay
+* Tournaments
+* Community
 
-By using ZenithFCM, you acknowledge that you are using an independent fan platform designed to provide FC Mobile-related tools, insights, and resources for informational purposes.
+---
 
-14. Contact Information
+# 3. INDIVIDUAL STREAM PAGES (DYNAMIC)
 
-For questions, concerns, or legal inquiries regarding these Terms and Conditions, please contact:
+## Route Example:
 
-Email: zenithfcm@gmail.com
+`/streaming/community-cup-1`
 
-By using ZenithFCM, you confirm that you have read, understood, and agreed to these Terms and Conditions.
+## REQUIRED TEMPLATE:
+
+### Top Section:
+
+* Stream title
+* YouTube embed
+* Status badge (Live / Upcoming / Replay)
+* Tournament banner
+* Match date/time
+* Host
+* Players/participants
+
+### Main Content:
+
+* Full event description
+* Match breakdown
+* Bracket / standings support
+* Related blogs
+* Related player database links
+* Discord CTA
+* Redeem code CTA
+
+### Sidebar / Secondary:
+
+* Upcoming matches
+* Related streams
+* Featured players
+* Popular blogs
+
+### SEO:
+
+* Schema markup
+* OpenGraph
+* Rich snippets
+* Canonical structure
+
+---
+
+# 4. ADMIN / CMS SYSTEM (EXTEND EXISTING ZENITHFCM ADMIN)
+
+## IMPORTANT:
+
+ZenithFCM already has an existing admin CMS at:
+
+### `zenithfcm.com/admin`
+
+This current CMS already manages:
+
+* Blogs
+* Redeem Codes
+
+## PRIMARY OBJECTIVE:
+
+DO NOT build a separate CMS.
+
+### Instead:
+
+**Extend the existing ZenithFCM admin panel architecture** to support Streaming / Live Hub features while preserving current admin design language, authentication, dashboard patterns, database structure, and content workflows.
+
+---
+
+# REQUIRED CMS EXPANSION:
+
+## Add a new admin module/tab:
+
+### Streaming
+
+### Suggested Admin Navigation:
+
+* Dashboard
+* Blogs
+* Redeem Codes
+* Streaming (NEW)
+* Tournaments (future-ready optional)
+
+---
+
+# STREAMING MODULE FEATURES:
+
+## STREAM MANAGEMENT:
+
+Admins should be able to:
+
+* Create stream
+* Edit stream
+* Delete stream
+* Schedule stream
+* Feature stream on homepage
+* Mark stream status:
+
+  * Live
+  * Upcoming
+  * Replay
+* Archive completed streams
+* Connect stream to related blog post
+* Connect stream to tournament/event
+
+---
+
+# REQUIRED STREAM FIELDS:
+
+* Stream title
+* Slug (auto-generate + editable)
+* YouTube URL
+* YouTube video/live ID
+* Thumbnail/banner
+* Status:
+
+  * Live
+  * Upcoming
+  * Replay
+* Tournament/Event name
+* Match stage:
+
+  * Group Stage
+  * Quarterfinal
+  * Semifinal
+  * Final
+* Match date/time
+* Host / streamer
+* Player/team names
+* Description
+* Featured toggle
+* Homepage visibility toggle
+* Discord invite/join link
+* Related blog selector
+* SEO title
+* Meta description
+* Tags
+
+---
+
+# CMS UX REQUIREMENTS:
+
+## Reuse existing Zenith admin design system:
+
+* Existing sidebar
+* Existing authentication
+* Existing CRUD patterns
+* Existing image upload system
+* Existing SEO fields logic
+* Existing slug logic
+
+## New additions should feel native, not bolted on.
+
+---
+
+# DASHBOARD ENHANCEMENTS:
+
+Add widgets/cards for:
+
+* Active Live Stream
+* Upcoming Streams Count
+* Replay Library Count
+* Featured Stream Status
+
+---
+
+# DATABASE / CONTENT MODEL:
+
+Extend current CMS schema instead of rebuilding.
+
+## Example:
+
+### New Content Type:
+
+`streams`
+
+### Related to:
+
+* blogs
+* tournaments (future)
+* categories
+
+---
+
+# AUTOMATION SUPPORT (FUTURE READY):
+
+Prepare architecture for:
+
+* Auto YouTube metadata sync
+* Live status sync
+* Scheduled publishing
+* Replay auto-conversion
+
+---
+
+# PERMISSIONS:
+
+Maintain existing admin permission system and allow role expansion later for:
+
+* Stream managers
+* Tournament hosts
+* Editors
+
+---
+
+# 5. HOMEPAGE INTEGRATION
+
+## Add a premium section:
+
+# Zenith Live
+
+### Must include:
+
+* Current live stream OR next featured stream
+* Live badge
+* Watch now CTA
+* Latest replay cards
+* Tournament promo banner
+
+---
+
+# 6. TOURNAMENT INTEGRATION
+
+Build structure so streams connect naturally with tournament ecosystem.
+
+## Include:
+
+* Tournament pages
+* Bracket compatibility
+* Match stages (Quarterfinal, Semifinal, Final)
+* Community cups
+* Discord tournaments
+
+---
+
+# 7. UI / UX REQUIREMENTS
+
+## Design Style:
+
+* Premium esports aesthetic
+* FC Mobile-inspired visuals
+* Mobile-first responsive
+* High-performance
+* Clean dark UI optional
+* Fast-loading embeds
+* Premium cards
+* Modern CTA buttons
+* Professional badges
+
+## Performance:
+
+* Lazy load embeds
+* Thumbnail-first optimization
+* Core Web Vitals aware
+
+---
+
+# 8. SEO STRATEGY
+
+## Must include:
+
+* Streaming category index page
+* Dynamic stream page schema
+* YouTube embed SEO
+* Internal linking
+* Blog-stream crosslinking
+* Discord funnel
+* Tournament keyword optimization
+
+### Target Search Terms:
+
+* FC Mobile live stream
+* FC Mobile tournament live
+* FC Mobile India tournament
+* ZenithFCM live
+
+---
+
+# 9. CODE ARCHITECTURE DELIVERABLES
+
+Provide:
+
+## FRONTEND:
+
+* Page architecture
+* Component hierarchy
+* Reusable stream cards
+* Live player embed component
+* Status badge system
+* CMS integration layer
+
+## BACKEND:
+
+* Database schema
+* Admin schema
+* Routing
+* Slug system
+* SEO metadata system
+
+## FILE STRUCTURE:
+
+Production-ready folder/component organization
+
+---
+
+# 10. SCALABILITY
+
+Design for future expansion:
+
+* Multiple hosts
+* Regional tournaments
+* Creator streams
+* Separate esports hub
+* Automated YouTube API support
+* Sponsorship slots
+
+---
+
+# FINAL OBJECTIVE
+
+ZenithFCM should become:
+
+# Website + YouTube Growth Engine + Tournament Broadcast Hub + Community Ecosystem
+
+### SIMPLE:
+
+**YouTube powers streaming. ZenithFCM powers brand, SEO, community, and monetization.**
+
+---
+
+# OUTPUT FORMAT REQUIRED FROM GEMINI CLI
+
+## Deliver:
+
+### Phase 1:
+
+MVP implementation
+
+### Phase 2:
+
+Scaling architecture
+
+### Phase 3:
+
+Advanced automation
+
+### Include:
+
+* Full product strategy
+* Frontend system
+* Backend schema
+* CMS system
+* Routing map
+* SEO system
+* Monetization opportunities
+* Production deployment guidance
+
+---
+
+# NON-NEGOTIABLE:
+
+This must feel like a serious scalable digital media platform, not a basic blog category.

@@ -13,6 +13,9 @@ import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-con
 import { getHomeRedeemCodeWidgetData } from '../src/lib/server/redeem-codes/public.mjs';
 import { fetchLatestPlayers } from '../src/lib/server/top-players.mjs';
 import { getTopTickerConfig } from '../src/lib/server/top-ticker-config.mjs';
+import { getHomepageFeaturedStream } from '../src/lib/server/streams/repository.mjs';
+import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponents';
+import streamingStyles from './components/streaming/Streaming.module.css';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
@@ -128,10 +131,12 @@ export default async function HomePage() {
   });
   const blogPageDataPromise = getBlogIndexPageData();
   const redeemCodeWidgetPromise = getHomeRedeemCodeWidgetData();
-  const [latestPlayers, blogPageData, homeRedeemWidgetData] = await Promise.all([
+  const featuredStreamPromise = getHomepageFeaturedStream();
+  const [latestPlayers, blogPageData, homeRedeemWidgetData, featuredStream] = await Promise.all([
     latestPlayersPromise,
     blogPageDataPromise,
-    redeemCodeWidgetPromise
+    redeemCodeWidgetPromise,
+    featuredStreamPromise
   ]);
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
@@ -176,6 +181,9 @@ export default async function HomePage() {
             </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className="nav-link">
               Blogs
+            </Link>
+            <Link href="/streaming" data-link="" data-nav-link="" className="nav-link">
+              Streaming
             </Link>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
@@ -252,6 +260,26 @@ export default async function HomePage() {
             </div>
             <div id="search-results-container" />
           </div>
+
+          {featuredStream ? (
+            <section className="dashboard-section" style={{ marginBottom: '3rem' }}>
+              <div className="section-header">
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ff0000' }}>●</span> Zenith Live
+                </h2>
+                <Link href="/streaming" data-link="" data-nav-link="" className="view-all-btn">
+                  Streaming Hub
+                </Link>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: '#111', padding: '1rem', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>{featuredStream.title}</h3>
+                  <StreamBadge status={featuredStream.status} />
+                </div>
+                <YouTubeEmbed youtubeId={featuredStream.youtubeId} title={featuredStream.title} />
+              </div>
+            </section>
+          ) : null}
 
           <section className="dashboard-section">
             <div className="section-header">

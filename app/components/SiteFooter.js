@@ -63,7 +63,8 @@ const FOOTER_COLUMNS = Object.freeze([
       { label: 'Players', href: '/players' },
       { label: 'Market', href: '/market', market: true },
       { label: 'Redeem Codes', href: '/fc-mobile-redeem-codes' },
-      { label: 'Blogs', href: '/blogs' }
+      { label: 'Blogs', href: '/blogs' },
+      { label: 'Streaming', href: '/streaming' }
     ]
   },
   {
