@@ -26,11 +26,41 @@ export default function ContactPage() {
           heading: 'General Support',
           body: (
             <>
-              <p>For help with the player database, market tools, or any site features, please reach out to our support email:</p>
+              <p>For help with the player database, market tools, or any site features, you can reach out to us via email or on our social media platforms (Discord, X, or Instagram):</p>
               <p>
                 <a href={`mailto:${contactEmail}`} style={{ color: '#2dd5c0', fontWeight: '600' }}>{contactEmail}</a>
               </p>
-              <p>We aim to respond to all inquiries within 24-48 hours.</p>
+              <p>We aim to respond to all inquiries within 24-48 hours. For faster community-driven support, we recommend joining our Discord.</p>
+            </>
+          )
+        },
+        {
+          heading: 'Social Media',
+          body: (
+            <>
+              <p>Join our growing community and stay updated with the latest FC Mobile news and ZenithFCM features:</p>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                <li style={{ marginBottom: '8px' }}>
+                  <strong>Discord:</strong> <a href="https://discord.gg/HM2JajuQjQ" target="_blank" rel="noopener noreferrer" style={{ color: '#2dd5c0' }}>Join our Discord Server</a>
+                </li>
+                <li style={{ marginBottom: '8px' }}>
+                  <strong>X (Twitter):</strong> <a href="https://x.com/zenithfcm" target="_blank" rel="noopener noreferrer" style={{ color: '#2dd5c0' }}>Follow us on X</a>
+                </li>
+                <li>
+                  <strong>Instagram:</strong> <a href="https://www.instagram.com/zenithfcm/" target="_blank" rel="noopener noreferrer" style={{ color: '#2dd5c0' }}>Follow us on Instagram</a>
+                </li>
+              </ul>
+            </>
+          )
+        },
+        {
+          heading: 'Report a Bug',
+          body: (
+            <>
+              <p>Found a technical issue or have a suggestion for a new feature?</p>
+              <p>
+                <a href="/bug-feature-request" style={{ color: '#2dd5c0', fontWeight: '600' }}>Submit a Bug or Feature Request</a>
+              </p>
             </>
           )
         },
@@ -48,6 +78,28 @@ export default function ContactPage() {
             <p>
               For media inquiries or requests for platform data/insights for your articles or videos, please contact us at the email address above with the subject line <strong>"Media Request"</strong>.
             </p>
+          )
+        },
+        {
+          heading: 'Quick Links',
+          body: (
+            <>
+              <p>Looking for something else? Here are some quick links to our most popular features:</p>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                <li style={{ marginBottom: '8px' }}>
+                  <a href="/players" style={{ color: '#2dd5c0' }}>Player Database</a> - Search and filter through the latest FC Mobile players.
+                </li>
+                <li style={{ marginBottom: '8px' }}>
+                  <a href="/market" style={{ color: '#2dd5c0' }}>Market Tools</a> - Track player prices and market trends.
+                </li>
+                <li style={{ marginBottom: '8px' }}>
+                  <a href="/squad-builder" style={{ color: '#2dd5c0' }}>Squad Builder</a> - Create and share your dream team.
+                </li>
+                <li>
+                  <a href="/compare" style={{ color: '#2dd5c0' }}>Player Comparison</a> - Compare stats and attributes of different players side-by-side.
+                </li>
+              </ul>
+            </>
           )
         },
         {
