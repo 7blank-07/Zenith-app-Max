@@ -59,6 +59,8 @@ gtag('config', 'G-BN8W9Y5DC8');`
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />
         <link rel="apple-touch-icon" href="/assets/images/zenith_logo_main.png" />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
+             crossOrigin="anonymous"></script>
       </head>
       <body>
         <Suspense fallback={null}>
