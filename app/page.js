@@ -1,5 +1,4 @@
 import HomeDashboardInteractions from './components/HomeDashboardInteractions.client';
-import HomeLatestBlogsSection from './components/HomeLatestBlogsSection.client';
 import MarketNavLink from './components/MarketNavLink.client';
 import MobileNavigation from './components/MobileNavigation.client';
 import RedeemCodeHomeWidget from './components/redeem/RedeemCodeHomeWidget.client';
@@ -7,6 +6,7 @@ import SiteFooter from './components/SiteFooter';
 import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { buildPlayerPath } from '../src/lib/player-slug.mjs';
 import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
@@ -16,6 +16,10 @@ import { getTopTickerConfig } from '../src/lib/server/top-ticker-config.mjs';
 import { getHomepageFeaturedStream } from '../src/lib/server/streams/repository.mjs';
 import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponents';
 import streamingStyles from './components/streaming/Streaming.module.css';
+
+const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
+  ssr: true
+});
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
@@ -63,7 +67,7 @@ function buildHomeLatestBlogPosts(pageData) {
   return deduped.sort((left, right) => getLatestBlogTimestamp(right) - getLatestBlogTimestamp(left)).slice(0, HOME_BLOG_LIMIT);
 }
 
-function renderDashboardPlayerCard(player, key) {
+function renderDashboardPlayerCard(player, key, index = 0) {
   const cardVariant = getHomeCardVariant(player);
   const cardBackground = player.cardBackground || 'https://via.placeholder.com/300x400';
   const cardImage = player.playerImage || 'https://via.placeholder.com/200x300';
@@ -96,20 +100,28 @@ function renderDashboardPlayerCard(player, key) {
           {player.name || 'Unknown'}
         </div>
 
-        <img
-          src={player.nationFlag || ''}
-          alt="Nation"
-          className={`card-nation-flag-home ${
-            cardVariant === 'normal' ? 'normal-nation-flag-home' : 'hero-icon-nation-flag-home'
-          }`}
-        />
-        <img
-          src={player.clubFlag || ''}
-          alt="Club"
-          className={`card-club-flag-home ${cardVariant === 'normal' ? 'normal-club-flag-home' : 'hero-icon-club-flag-home'}`}
-        />
+        {player.nationFlag && (
+          <img
+            src={player.nationFlag}
+            alt="Nation"
+            className={`card-nation-flag-home ${
+              cardVariant === 'normal' ? 'normal-nation-flag-home' : 'hero-icon-nation-flag-home'
+            }`}
+          />
+        )}
+        {player.clubFlag && (
+          <img
+            src={player.clubFlag}
+            alt="Club"
+            className={`card-club-flag-home ${cardVariant === 'normal' ? 'normal-club-flag-home' : 'hero-icon-club-flag-home'}`}
+          />
+        )}
         {cardVariant === 'normal' && !!player.leagueImage && (
-          <img src={player.leagueImage} alt="League" className="card-league-flag-home normal-league-flag-home" />
+          <img
+            src={player.leagueImage}
+            alt="League"
+            className="card-league-flag-home normal-league-flag-home"
+          />
         )}
 
         {player.isUntradable && (
@@ -286,7 +298,7 @@ export default async function HomePage() {
                 View All
               </Link>
             </div>
-            <div id="latest-players-grid">{latestPlayers.map((player) => renderDashboardPlayerCard(player, `latest-${player.playerId}`))}</div>
+            <div id="latest-players-grid">{latestPlayers.map((player, index) => renderDashboardPlayerCard(player, `latest-${player.playerId}`, index))}</div>
           </section>
 
           {shouldRenderLatestBlogs ? (
