@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import StaticInfoPage from '../components/StaticInfoPage';
+import MarketNavLink from '../components/MarketNavLink.client';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 const contactEmail = 'zenithfcmofficial@gmail.com';
@@ -60,7 +61,7 @@ export default function BugFeatureRequestPage() {
           heading: 'High-Impact Focus',
           body: (
             <p>
-              We are currently prioritizing improvements to our <Link href="/players" style={{ color: '#2dd5c0' }}>Player Database</Link>, <Link href="/market" style={{ color: '#2dd5c0' }}>Market Analysis Tools</Link>, and the <Link href="/squad-builder" style={{ color: '#2dd5c0' }}>Squad Builder</Link>.
+              We are currently prioritizing improvements to our <Link href="/players" style={{ color: '#2dd5c0' }}>Player Database</Link>, <MarketNavLink style={{ color: '#2dd5c0' }}>Market Analysis Tools</MarketNavLink>, and the <Link href="/squad-builder" style={{ color: '#2dd5c0' }}>Squad Builder</Link>.
             </p>
           )
         },

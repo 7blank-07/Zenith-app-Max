@@ -1,4 +1,5 @@
 import StaticInfoPage from '../components/StaticInfoPage';
+import MarketNavLink from '../components/MarketNavLink.client';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 const contactEmail = 'zenithfcmofficial@gmail.com';
@@ -90,7 +91,7 @@ export default function ContactPage() {
                   <a href="/players" style={{ color: '#2dd5c0' }}>Player Database</a> - Search and filter through the latest FC Mobile players.
                 </li>
                 <li style={{ marginBottom: '8px' }}>
-                  <a href="/market" style={{ color: '#2dd5c0' }}>Market Tools</a> - Track player prices and market trends.
+                  <MarketNavLink style={{ color: '#2dd5c0' }}>Market Tools</MarketNavLink> - Track player prices and market trends.
                 </li>
                 <li style={{ marginBottom: '8px' }}>
                   <a href="/squad-builder" style={{ color: '#2dd5c0' }}>Squad Builder</a> - Create and share your dream team.
