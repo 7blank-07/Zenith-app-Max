@@ -1,125 +1,135 @@
-You are a senior Next.js App Router developer + Technical SEO architect.
+You are a senior Next.js App Router engineer + Technical SEO debugging specialist.
+
+CRITICAL ISSUE:
+My SEO migration to clean tool URLs is mostly complete, but there is now a redirect loop error on legacy query URLs.
+
+CURRENT PROBLEM:
+When visiting:
+http://localhost:3000/tools?tool=squadbuilder
+
+I get:
+ERR_TOO_MANY_REDIRECTS
+
+BUT:
+http://localhost:3000/tools/squad-builder
+works correctly.
 
 PRIMARY OBJECTIVE:
-SEO is the HIGHEST PRIORITY.
-This project must be optimized first for Google rankings, indexing, crawlability, keyword dominance, and long-term organic traffic growth.
-
-TASK:
-My website currently uses query parameter tool pages:
-
-/tools?tool=squadbuilder
-/tools?tool=compare
-/tools?tool=watchlist
-
-This is hurting SEO because Google treats them as alternate pages.
-
-I need this migrated into fully SEO-optimized static-style clean routes:
-
-/tools/squad-builder
-/tools/player-compare
-/tools/watchlist
-
-CORE SEO GOALS:
-- Maximize indexing of each tool as its own keyword-targeted landing page
-- Rank separately for:
-  * FC Mobile Squad Builder
-  * FC Mobile Player Compare
-  * FC Mobile Watchlist
-- Improve crawlability
-- Improve sitemap clarity
-- Improve canonical precision
-- Improve CTR from SERPs
-- Improve internal linking structure
-- Eliminate duplicate/alternate page issues
-- Preserve domain authority while transferring URL equity
-- Future-proof for backlinks and content expansion
-
-DEVELOPMENT REQUIREMENTS:
-
-1. Use Next.js App Router best practices
-2. Build:
-   /app/tools/page.js  (main tools hub)
-   /app/tools/[slug]/page.js  (individual SEO pages)
-
-3. Valid slugs:
-   - squad-builder
-   - player-compare
-   - watchlist
-
-4. INVALID slugs:
-   - Return proper 404
-
-5. MOST IMPORTANT:
-   Reuse current tool components and logic.
-   Do NOT rebuild tools from scratch.
-   Keep functionality identical.
-
-6. Dynamic SEO Metadata:
-   Use generateMetadata() per slug with:
-   - Unique title
-   - Meta description
-   - Canonical
-   - Open Graph
-   - Twitter cards
-   - Keyword relevance
-
-7. Example:
-   squad-builder:
-   Title: FC Mobile Squad Builder | ZenithFCM
-   Description: Build your ultimate FC Mobile squad with OVR optimization, chemistry planning, and team testing tools.
-
-8. Add schema recommendations if useful.
-
-9. Add breadcrumb SEO if beneficial.
-
-10. Ensure:
-   /tools links prominently to all tool pages
-
-11. Create 301 PERMANENT redirects from:
-   /tools?tool=squadbuilder → /tools/squad-builder
-   /tools?tool=compare → /tools/player-compare
-   /tools?tool=watchlist → /tools/watchlist
-
-12. Preserve old traffic and SEO equity.
-
-13. Update sitemap structure:
-   Include:
-   /tools
-   /tools/squad-builder
-   /tools/player-compare
-   /tools/watchlist
-
-14. Ensure robots/indexability is correct.
-
-15. Avoid duplicate content issues.
-
-16. Prioritize:
-   SEO > Clean Architecture > Maintainability > UX
-
-ADVANCED SEO EXPECTATIONS:
-- Best URL architecture
-- Strong canonical strategy
-- Search Console compatibility
-- Google-friendly indexing
-- Strong page-level keyword targeting
-- Structured internal authority flow
-- Better ranking opportunities
-
-DELIVERABLES:
-- Best-practice folder structure
-- Full implementation code
-- generateMetadata()
-- Redirect setup
-- next-sitemap recommendations
-- Canonical examples
-- Structured data recommendations
-- SEO reasoning for each major decision
+Fix the redirect loop completely while preserving perfect SEO architecture.
 
 IMPORTANT:
+I need:
+- Legacy query URLs to 301 ONCE to clean URLs
+- Clean URLs to load normally with 200
+- Zero redirect loops
+- Zero crawl waste
+- Zero duplicate content
+- Zero canonical confusion
+
+DESIRED BEHAVIOR:
+
+/tools?tool=squadbuilder
+→ 301
+→ /tools/squad-builder
+→ 200
+
+/tools?tool=compare
+→ 301
+→ /tools/player-compare
+→ 200
+
+/tools?tool=watchlist
+→ 301
+→ /tools/watchlist
+→ 200
+
+/tools/squad-builder
+→ 200 only
+
+/tools/player-compare
+→ 200 only
+
+/tools/watchlist
+→ 200 only
+
+LIKELY ROOT CAUSES TO AUDIT:
+1. next.config.js redirect rules too broad
+2. middleware redirect conditions conflicting
+3. Legacy redirect rules matching clean routes
+4. Cleanup redirects looping
+5. Client-side router logic re-appending ?tool=
+6. window.history.replaceState
+7. router.push/router.replace
+8. useSearchParams sync
+9. Redirect chain conflicts
+
+TASKS:
+
+1. Audit next.config.js redirects thoroughly
+2. Audit middleware thoroughly
+3. Audit ToolsInteractions.client.js thoroughly
+4. Search entire codebase for:
+   - tool=
+   - replaceState
+   - pushState
+   - router.push
+   - router.replace
+   - searchParams
+   - useSearchParams
+
+5. Ensure legacy redirects ONLY trigger when:
+   pathname === /tools
+   AND query param tool exists
+
+6. Ensure clean URLs NEVER trigger legacy redirects
+
+7. Ensure cleanup redirects ONLY strip params from already-clean routes:
+   Example:
+   /tools/squad-builder?tool=squadbuilder
+   → /tools/squad-builder
+
+8. Prevent:
+   /tools?tool=squadbuilder
+   → /tools/squad-builder
+   → /tools?tool=squadbuilder
+
+9. Ensure no reverse redirects exist
+
+10. Preserve:
+   - Current UI
+   - Tool rendering
+   - SEO metadata
+   - Sitemap
+   - Canonicals
+
+11. Validate:
+   One-hop redirects only
+
+12. Production-ready implementation
+
+IDEAL IMPLEMENTATION:
+- Strict redirect conditions
+- Path-specific matching
+- No wildcard overreach
+- No duplicate rule collisions
+
+DELIVER:
+- Root cause diagnosis
+- next.config.js fixes
+- middleware fixes
+- client-side fixes
+- exact corrected redirect logic
+- validation checklist
+- explanation of why loop occurred
+
+PRIORITY:
+SEO + Redirect correctness + Crawl efficiency + Production stability
+
+IMPORTANT:
+This is a technical SEO debugging mission.
+Do NOT rebuild architecture.
+Fix the existing implementation with the cleanest possible redirect logic.
 Think like:
 Google Search Console expert +
-Technical SEO strategist +
-Senior Next.js engineer
-
-Do NOT give average code.
-Provide the highest SEO-value architecture possible while keeping implementation practical.
+Next.js routing engineer +
+SEO migration specialist.

@@ -42,8 +42,8 @@ Zenith currently uses all major Next rendering modes:
 | `/player/[id]` | `● SSG` | 10,000 static params at build (`+9997 more`) |
 | `/blogs` | `ƒ Dynamic` | Blog DB-backed pages rendered on demand |
 | `/tools` | `ƒ Dynamic` | Request-aware tool shell + server player pool |
-| `/watchlist` | `○ Static` | Static shell, client-side localStorage hydration |
-| `/compare` | `○ Static` | Compat route, server redirect to `/tools?tool=compare` |
+| `/watchlist` | `○ Static` | Compat route, server redirect to `/tools/watchlist` |
+| `/compare` | `○ Static` | Compat route, server redirect to `/tools/player-compare` |
 | `/legacy` | `○ Static` | Static HTML shell + client legacy runtime bootstrap |
 
 ## 3) Player Page Generation Strategy (`/player/[id]`)

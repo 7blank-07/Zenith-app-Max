@@ -246,7 +246,7 @@ That payload revalidates `/blogs`, the affected category page, the article page,
 3. `npm run build` (full 10k pre-render validation)
 4. `REVALIDATE_SECRET=dev-secret npm run start` (or PowerShell equivalent)
 5. Open `/`, `/players`, `/market`, `/blogs`, `/blogs/reviews`, `/player/<id>`, `/robots.txt`, `/sitemap.xml`
-6. Check tools routing (`/tools`, plus deep links `/squad-builder`, `/compare`, `/shard-calculator`)
+6. Check tools routing (`/tools`, `/tools/squad-builder`, `/tools/player-compare`, `/tools/watchlist`)
 7. Run `npm run rollout:status`
 8. Run `npm run revalidate:call ...` and confirm success response
 

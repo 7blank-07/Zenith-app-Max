@@ -1,5 +1,4 @@
 import nextDynamic from 'next/dynamic';
-import { permanentRedirect } from 'next/navigation';
 import SiteChrome from '../components/SiteChrome';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getToolsData } from './tools-data';
@@ -23,24 +22,7 @@ export const metadata = {
   }
 };
 
-function normalizeToolParam(value) {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return String(raw || '').toLowerCase().trim();
-}
-
-export default async function ToolsHubPage({ searchParams }) {
-  const tool = normalizeToolParam(searchParams?.tool);
-
-  if (tool === 'squadbuilder' || tool === 'squad-builder') {
-    permanentRedirect('/tools/squad-builder');
-  }
-  if (tool === 'compare') {
-    permanentRedirect('/tools/player-compare');
-  }
-  if (tool === 'watchlist') {
-    permanentRedirect('/tools/watchlist');
-  }
-
+export default async function ToolsHubPage() {
   const { toolPlayers, squadFilterOptions } = await getToolsData(false);
 
   const breadcrumbJsonLd = {

@@ -12,7 +12,7 @@ Next.js App Router project with:
 - `scripts/`: operational scripts (revalidation, top-player generation, blog DB setup)
 - `assets/` → `public/assets/`: legacy assets copied by `scripts/prepare-legacy.mjs`
 
-Key routes: `/`, `/players`, `/player/[slug]`, `/market`, `/tools`, `/watchlist` → `/tools?tool=watchlist`, `/blogs`, `/legacy`, plus localized redeem code pages (e.g., `/fc-mobile-redeem-codes`, `/ae/kod-fifa`).
+Key routes: `/`, `/players`, `/player/[slug]`, `/market`, `/tools` (`/tools/squad-builder`, `/tools/player-compare`, `/tools/watchlist`), `/blogs`, `/legacy`, plus localized redeem code pages (e.g., `/fc-mobile-redeem-codes`, `/ae/kod-fifa`).
 
 ## Build, Test, and Development Commands
 
@@ -74,7 +74,7 @@ Operational commands:
 
 - For player skill/training payloads in client tools, use local API proxies (`/api/players/[playerId]`, `/api/skill-boosts/[skillId]`, `/api/training/boosts`) via `app/components/player-skill-stats-utils.js`
 
-- Tool query states: `squadbuilder`, `compare`, `watchlist` (alias `squad-builder` → `squadbuilder`)
+- Tool routes: `/tools/squad-builder`, `/tools/player-compare`, `/tools/watchlist`
 
 ## Testing Guidelines
 

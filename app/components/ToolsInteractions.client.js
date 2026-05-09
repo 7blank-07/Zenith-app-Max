@@ -1537,21 +1537,6 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   }, [activeTool]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const url = new URL(window.location.href);
-    if (activeTool === 'none') {
-      url.searchParams.delete('tool');
-    } else {
-      url.searchParams.set('tool', activeTool);
-    }
-    const nextPath = `${url.pathname}${url.search}`;
-    const currentPath = `${window.location.pathname}${window.location.search}`;
-    if (nextPath !== currentPath) {
-      window.history.replaceState(null, '', nextPath);
-    }
-  }, [activeTool]);
-
-  useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key !== 'Escape') return;
       if (selectedPlayerForCustomization) {
