@@ -1,170 +1,43 @@
-Refine this ZenithFCM README from “excellent” to “elite final production version.”
+Refine and professionally polish my existing Privacy Policy for ZenithFCM to make it more legally precise, realistic, trustworthy, and highly optimized for Google AdSense approval — without changing the core meaning.
 
-IMPORTANT:
-The README is already extremely strong.
-Your job is NOT to rewrite or drastically restructure it.
-Your job is to strategically polish it by:
-- reducing overhype,
-- improving credibility,
-- increasing trust,
-- future-proofing wording,
-- protecting strategic infrastructure,
-- and adding final GitHub authority features.
+IMPORTANT CONTEXT:
+- ZenithFCM is an independent fan-operated FC Mobile database, tools, and blog website.
+- ZenithFCM does NOT have user accounts, user registration, or sign-up systems.
+- Users may only contact us through email.
+- ZenithFCM may use cookies, Google Analytics, and future Google AdSense advertising.
+- ZenithFCM is NOT affiliated with EA, EA Sports, FC Mobile, or FIFA.
+- The policy is already structured well, but it needs stronger legal wording, cleaner formatting, and more professional trust signals.
+- Keep the tone transparent, realistic, and user-friendly.
 
-PRIMARY GOAL:
-Transform this from “high-quality marketing README” into “credible category-dominating platform README.”
+SPECIFIC IMPROVEMENTS REQUIRED:
+1. Replace overly generic phrases like “your privacy is a top priority” with more professional, transparent wording.
+2. Replace legally weak wording like “non-identifiable information” when referring to IP addresses with more accurate terminology like “technical and usage information.”
+3. Replace phrases like “industry-standard security” with more legally realistic language such as “reasonable administrative and technical safeguards.”
+4. Add a clear statement that ZenithFCM does NOT sell users’ personal information.
+5. Improve Google AdSense / advertising cookie language for professionalism and clarity.
+6. Strengthen user rights wording while keeping it realistic for a no-account platform.
+7. Improve formatting for readability (clearer bullets, spacing, scan-friendly structure).
+8. Maintain strong AdSense trust signals.
+9. Preserve all major sections:
+   - Information We Collect
+   - How We Use Information
+   - Cookies & Analytics
+   - Google AdSense & Third-Party Advertising
+   - Data Security
+   - User Rights & Choices
+   - Children’s Privacy
+   - External Links
+   - Policy Updates
+   - Contact Information
 
-CORE RULES:
-- Keep current structure
-- Keep current premium tone
-- Preserve strong SEO
-- Preserve keyword breadth
-- Preserve branding strength
-- DO NOT remove major sections unless necessary
-- DO NOT over-simplify
-- DO NOT keyword stuff
-- Make it sound more authoritative and believable
-- Prioritize trust > hype
-
----
-
-## HIGH PRIORITY IMPROVEMENTS:
-
-### 1) Reduce Over-Optimized / Overhyped Language
-Replace exaggerated claims like:
-- “industry’s most advanced”
-- “most responsive database in existence”
-- “99.9% accuracy”
-- “significantly faster”
-- “category-dominating”
-
-WITH more credible alternatives such as:
-- “high-performance”
-- “production-grade”
-- “comprehensive”
-- “built for speed”
-- “designed for accuracy”
-- “modern platform”
-
-IMPORTANT:
-Maintain confidence without sounding inflated.
-
----
-
-### 2) Remove or Soften Potentially Risky Strategic Details
-Reduce backend oversharing such as:
-- “sourced directly from the production engine”
-- exact structured schema types
-- overly specific infrastructure advantages
-
-REPLACE with:
-- “advanced structured data”
-- “SEO-optimized architecture”
-- “real-time data infrastructure”
-- “production-grade systems”
-
-GOAL:
-Retain EEAT while protecting competitive strategy.
-
----
-
-### 3) Future-Proof Outdated Time References
-Replace:
-- “2024 standards”
-
-WITH:
-- “modern standards”
-- “next-generation UX”
-
----
-
-### 4) Reduce Potential Spam Signals
-“kode redeem fc mobile” should appear naturally ONCE maximum, only if useful for multilingual SEO.
-Avoid repetitive secondary keyword stuffing.
-
----
-
-### 5) Add GitHub Authority Section Near Top
-Add:
-## ⭐ Support ZenithFCM
-Encourage users to star the repository for updates, innovation, and platform growth.
-
-GOAL:
-Improve GitHub engagement and trust.
-
----
-
-### 6) Add NEW Roadmap Section
-Professional roadmap examples:
-- AI-powered squad recommendations
-- Expanded market prediction tools
-- More advanced player analytics
-- Community squad sharing
-- Enhanced redeem code automation
-
-IMPORTANT:
-Make this feel realistic and strategic.
-
----
-
-### 7) Add NEW Feedback / Community Contribution Section
-Even if repo is not open-source:
-Examples:
-- Feature suggestions
-- Feedback
-- Community insights
-
-GOAL:
-Increase legitimacy and product maturity.
-
----
-
-### 8) Improve Footer
-Current footer is strong but can feel slightly generic.
-Upgrade it into:
-- Stronger mission
-- Community trust
-- Long-term ecosystem positioning
-
----
-
-### 9) Final Tone Calibration
-Target:
-“Professional SaaS / elite gaming platform”
-NOT:
-“Overaggressive SEO landing page”
-
----
-
-## SEO RULES:
-Retain and naturally preserve:
-- FC Mobile redeem codes
-- FC Mobile player database
-- FC Mobile squad builder
-- FC Mobile compare players
-- FC Mobile best players
-- FC Mobile market tracker
-- FC Mobile blogs
-- FC Mobile tools
-- EA FC Mobile players
-
-DO NOT:
-- Remove SEO power
-- Remove screenshots
-- Remove competitor differentiation
-- Remove product positioning
-
----
-
-## FINAL OUTPUT GOAL:
-Produce the FINAL polished README that is:
-- GitHub investor-ready
-- Product Hunt-ready
-- SEO authority-ready
-- Brand SERP-ready
-- More credible
-- Less hype-heavy
-- Better protected strategically
+STYLE REQUIREMENTS:
+- Publication-ready
+- Professional but readable
+- Not generic template spam
+- Strong legal clarity
+- Accurate to current site reality
+- SEO-friendly
+- Trustworthy for both users and AdSense reviewers
 
 OUTPUT:
-Return the FULL refined README.md with all final upgrades integrated.
+Provide a complete revised ready-to-publish Privacy Policy page for ZenithFCM with improved wording, formatting, and trust optimization.

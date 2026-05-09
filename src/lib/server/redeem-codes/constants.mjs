@@ -61,18 +61,18 @@ export const REDEEM_ROUTE_CONFIG = Object.freeze({
     locale: 'en-US',
     hreflang: 'en',
     primaryKeyword: 'fc mobile redeem codes',
-    secondaryKeywords: ['fc mobile redeem code', 'global fc mobile codes', 'latest fc mobile redeem codes', 'fc mobile codes list'],
-    title: 'Global FC Mobile Redeem Codes | Working Codes List',
+    secondaryKeywords: ['fc mobile redeem code', 'latest fc mobile redeem codes', 'fc mobile codes list'],
+    title: 'FC Mobile Redeem Codes',
     metaDescription:
-      'Global FC Mobile redeem codes with active, latest, and expired tracking. Built for players in every country without fake regional exclusives.',
-    h1: 'Global FC Mobile Redeem Codes',
+      'FC Mobile redeem codes with active, latest, and expired tracking. Built for players in every country without fake regional exclusives.',
+    h1: 'FC Mobile Redeem Codes',
     intro:
-      'Use this global FC Mobile redeem code tracker to check active rewards first, then copy any working code in one tap.',
+      'Use this FC Mobile redeem code tracker to check active rewards first, then copy any working code in one tap.',
     globalCodeNote:
       'Most FC Mobile redeem codes are shared worldwide. If EA marks a promotion as country-limited, we call that out directly in the listing.',
     copy: {
-      eyebrow: 'Global redeem code tracker',
-      lastUpdatedLabel: 'Global list updated:'
+      eyebrow: 'Redeem code tracker',
+      lastUpdatedLabel: 'List updated:'
     },
     faqEntries: [
       {

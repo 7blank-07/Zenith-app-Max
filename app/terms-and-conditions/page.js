@@ -4,12 +4,12 @@ import StaticInfoPage from '../components/StaticInfoPage';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
-  title: 'Terms and Conditions | ZenithFCM - Platform Usage Rules',
-  description: 'Read the ZenithFCM Terms and Conditions. Understand the rules for using our FC Mobile tools, player database, and community resources.',
+  title: 'Terms and Conditions | ZenithFCM - Usage Policy',
+  description: 'Read the ZenithFCM Terms and Conditions. Understand the rules, non-affiliation notice, and usage policies for our FC Mobile database and tools.',
   alternates: { canonical: '/terms-and-conditions' },
   openGraph: {
     title: 'Terms and Conditions | ZenithFCM',
-    description: 'Official terms and conditions governing the use of the ZenithFCM platform and its FC Mobile resources.',
+    description: 'Official terms and conditions governing the use of ZenithFCM, an independent FC Mobile fan platform.',
     url: `${siteUrl}/terms-and-conditions`,
     siteName: 'ZenithFCM',
     type: 'website'
@@ -20,122 +20,137 @@ export default function TermsAndConditionsPage() {
   return (
     <StaticInfoPage
       title="Terms and Conditions"
-      intro="Last Updated: May 5, 2026. By accessing or using ZenithFCM, you agree to comply with and be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use this website."
+      intro={
+        <>
+          Last Updated: May 9, 2026. <br /><br />
+          Welcome to <strong>ZenithFCM</strong>. By accessing or using our website, tools, and informational resources, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully. If you do not agree with any part of these terms, you must not use this website.
+        </>
+      }
       sections={[
         {
           heading: '1. Acceptance of Terms',
           body: (
             <p>
-              By using ZenithFCM, you acknowledge that you have read, understood, and agreed to these Terms and Conditions in their entirety.
+              By visiting ZenithFCM, you acknowledge that you have read, understood, and agreed to these Terms and Conditions, as well as our Privacy Policy. These terms apply to all visitors and users who access the service.
             </p>
           )
         },
         {
-          heading: '2. Eligibility & Age Requirement',
+          heading: '2. Eligibility / Age Requirements',
           body: (
             <p>
-              You must be at least <strong>13 years old</strong> to use ZenithFCM. If you are under 13, you should use this website only with parental or guardian consent and supervision.
+              ZenithFCM is intended for a general audience. Users must be at least <strong>13 years old</strong>. If you are under the age of 13, you may only use this website under the direct supervision of a parent or legal guardian who agrees to be bound by these Terms.
             </p>
           )
         },
         {
-          heading: '3. User Accounts',
+          heading: '3. Acceptable Use & Prohibited Activities',
           body: (
             <>
-              <p>Certain features may require registration. You are responsible for:</p>
+              <p>ZenithFCM provides tools and data for personal, non-commercial use. You agree not to engage in any of the following prohibited activities:</p>
               <ul>
-                <li>Maintaining the confidentiality of your account credentials.</li>
-                <li>Restricting access to your account to prevent unauthorized use.</li>
-                <li>Notifying us immediately of any security breaches or suspicious activity.</li>
+                <li><strong>Unauthorized Data Extraction:</strong> Scraping, crawling, or using automated systems (bots) to extract data, player stats, or content from ZenithFCM is strictly prohibited.</li>
+                <li><strong>System Abuse:</strong> Attempting to disrupt, overburden, or compromise the security of our servers or networks.</li>
+                <li><strong>Malicious Code:</strong> Introducing viruses, malware, or any other harmful technology to the site.</li>
+                <li><strong>Spam:</strong> Using our contact information for unauthorized advertising or solicitation.</li>
               </ul>
-              <p>You are solely responsible for all activities conducted under your account.</p>
+              <p>We reserve the right to restrict or block access to users who violate these rules.</p>
             </>
           )
         },
         {
-          heading: '4. Acceptable Use & Conduct',
+          heading: '4. User Communications & Feedback',
           body: (
             <>
-              <p>You agree to use ZenithFCM responsibly and lawfully. You may <strong>not</strong>:</p>
-              <ul>
-                <li>Post false, harmful, abusive, or misleading content.</li>
-                <li>Violate intellectual property rights or harass other users.</li>
-                <li>Introduce malware, bots, or malicious code.</li>
-                <li>Attempt unauthorized access to our systems or disrupt website performance.</li>
-              </ul>
-              <p>Misuse may result in suspension or permanent termination of access.</p>
+              <p>ZenithFCM does not feature user accounts or public posting areas. Any communication with us occurs via email.</p>
+              <p>By sending us feedback, suggestions, or bug reports, you grant ZenithFCM a perpetual, royalty-free, and irrevocable right to use, implement, and share those ideas for any purpose without compensation to you.</p>
             </>
           )
         },
         {
-          heading: '5. User-Generated Content',
+          heading: '5. Intellectual Property Rights',
           body: (
             <>
               <p>
-                By submitting comments, feedback, or suggestions, you grant ZenithFCM a non-exclusive, worldwide, royalty-free license to use, reproduce, and distribute such content to improve our services.
-              </p>
-              <p>You remain solely responsible for ensuring your content does not violate any laws or third-party rights.</p>
-            </>
-          )
-        },
-        {
-          heading: '6. Intellectual Property Rights',
-          body: (
-            <>
-              <p>
-                All ZenithFCM branding, design, tools, and original content are the property of ZenithFCM and protected by copyright laws.
+                The design, layout, custom tools, original articles, and branding of ZenithFCM are the exclusive intellectual property of ZenithFCM and are protected by copyright and trademark laws.
               </p>
               <p>
-                <strong>FC Mobile, EA SPORTS, and Electronic Arts</strong> assets remain the property of their respective owners. ZenithFCM is an independent fan-built platform and is not officially affiliated with or endorsed by Electronic Arts.
+                You may not reproduce, distribute, or create derivative works from our content without explicit written permission.
               </p>
             </>
           )
         },
         {
-          heading: '7. Disclaimer of Warranties',
+          heading: '6. FC Mobile / EA Non-Affiliation Notice',
           body: (
             <p>
-              ZenithFCM is provided on an “as is” and “as available” basis. While we strive for accuracy, we do not guarantee that player data, market insights, or tools will always be complete, current, or error-free.
+              <strong>ZenithFCM is an independent fan-operated platform.</strong> We are NOT affiliated with, endorsed by, sponsored by, or officially connected to Electronic Arts Inc. (EA), EA SPORTS, FC Mobile, or FIFA. All game-related assets, player names, club logos, and trademarks used on this site remain the property of their respective owners and are used here for informational and community-driven purposes only.
             </p>
           )
         },
         {
-          heading: '8. Limitation of Liability',
+          heading: '7. Data Accuracy & Tool Limitations',
           body: (
             <p>
-              To the fullest extent permitted by law, ZenithFCM shall not be liable for any damages arising from the use or inability to use the website, inaccuracies in content, or market decisions based on website information.
+              While we strive to provide accurate and up-to-date information, ZenithFCM does not guarantee the completeness or accuracy of player stats, market values, or calculator results. All data is provided for <strong>informational purposes only</strong>. We are not responsible for any in-game decisions or losses resulting from the use of our tools.
             </p>
           )
         },
         {
-          heading: '9. Third-Party Links',
+          heading: '8. Disclaimer of Warranties',
           body: (
             <p>
-              ZenithFCM may include links to third-party websites for convenience. We are not responsible for the content, policies, or practices of these external platforms.
+              ZenithFCM is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express or implied. We do not warrant that the website will be uninterrupted, error-free, or free of harmful components.
             </p>
           )
         },
         {
-          heading: '10. Termination & Changes',
+          heading: '9. Limitation of Liability',
           body: (
-            <>
-              <p>
-                We reserve the right to suspend or terminate access at any time for violations of these terms.
-              </p>
-              <p>
-                We may update these Terms and Conditions periodically. Continued use of the website constitutes acceptance of the revised terms.
-              </p>
-            </>
+            <p>
+              To the maximum extent permitted by law, ZenithFCM and its operators shall not be liable for any direct, indirect, incidental, or consequential damages arising out of your use of the site, even if advised of the possibility of such damages.
+            </p>
           )
         },
         {
-          heading: '11. Privacy & Contact',
+          heading: '10. Third-Party Links',
+          body: (
+            <p>
+              Our site may contain links to external websites that are not operated by us. We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party sites.
+            </p>
+          )
+        },
+        {
+          heading: '11. Advertising & Sponsored Content',
+          body: (
+            <p>
+              ZenithFCM may display advertisements from third-party partners like Google AdSense. We are not responsible for the content of these ads or the practices of the advertisers. Please refer to our Privacy Policy for more details on how cookies are used for advertising.
+            </p>
+          )
+        },
+        {
+          heading: '12. Service Changes & Access Restriction',
+          body: (
+            <p>
+              We reserve the right to modify, suspend, or discontinue any part of the website or its tools at any time without notice. We also reserve the right to block specific IP addresses or users from accessing the site if we detect patterns of abuse or violation of these terms.
+            </p>
+          )
+        },
+        {
+          heading: '13. Privacy Policy Reference',
+          body: (
+            <p>
+              Your use of the site is also governed by our <Link href="/privacy-policy" style={{ color: '#2dd5c0' }}>Privacy Policy</Link>, which outlines how we handle data and cookies.
+            </p>
+          )
+        },
+        {
+          heading: '14. Contact Information',
           body: (
             <>
-              <p>
-                Your use of ZenithFCM is also subject to our <Link href="/privacy-policy" style={{ color: '#2dd5c0' }}>Privacy Policy</Link> and <Link href="/disclaimer" style={{ color: '#2dd5c0' }}>Disclaimer</Link>.
-              </p>
-              <p>For legal inquiries, contact us at: <a href="mailto:zenithfcmofficial@gmail.com" style={{ color: '#2dd5c0' }}>zenithfcmofficial@gmail.com</a></p>
+              <p>If you have any questions regarding these Terms and Conditions, please contact us at:</p>
+              <p><strong>ZenithFCM Official</strong><br />
+              Email: <a href="mailto:zenithfcmofficial@gmail.com" style={{ color: '#2dd5c0' }}>zenithfcmofficial@gmail.com</a></p>
             </>
           )
         }
