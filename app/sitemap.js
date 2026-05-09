@@ -111,19 +111,19 @@ function getStaticEntries(lastModified) {
       priority: 0.86
     },
     {
-      url: toAbsoluteUrl('/watchlist'),
+      url: toAbsoluteUrl('/tools/watchlist'),
       lastModified,
       changeFrequency: 'weekly',
       priority: 0.85
     },
     {
-      url: toAbsoluteUrl('/squad-builder'),
+      url: toAbsoluteUrl('/tools/squad-builder'),
       lastModified,
       changeFrequency: 'weekly',
       priority: 0.85
     },
     {
-      url: toAbsoluteUrl('/compare'),
+      url: toAbsoluteUrl('/tools/player-compare'),
       lastModified,
       changeFrequency: 'weekly',
       priority: 0.85

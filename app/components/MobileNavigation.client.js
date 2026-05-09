@@ -8,7 +8,7 @@ const MOBILE_TOOL_ITEMS = [
   {
     key: 'squadbuilder',
     label: 'Squad Builder',
-    href: '/tools?tool=squadbuilder',
+    href: '/tools/squad-builder',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M3 10.5 12 4l9 6.5" />
@@ -20,7 +20,7 @@ const MOBILE_TOOL_ITEMS = [
   {
     key: 'compare',
     label: 'Compare Players',
-    href: '/tools?tool=compare',
+    href: '/tools/player-compare',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M12 3v18" />
@@ -33,7 +33,7 @@ const MOBILE_TOOL_ITEMS = [
   {
     key: 'watchlist',
     label: 'Watchlist',
-    href: '/tools?tool=watchlist',
+    href: '/tools/watchlist',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -71,9 +71,9 @@ const MOBILE_PREFETCH_ROUTES = Object.freeze([
   '/players',
   '/fc-mobile-redeem-codes',
   '/tools',
-  '/tools?tool=squadbuilder',
-  '/tools?tool=compare',
-  '/tools?tool=watchlist',
+  '/tools/squad-builder',
+  '/tools/player-compare',
+  '/tools/watchlist',
   '/market',
   '/blogs',
   '/streaming'

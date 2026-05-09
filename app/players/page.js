@@ -69,7 +69,7 @@ export default async function PlayersPage({ searchParams = {} }) {
     benchIndex: readBenchIndexParam(searchParams, 'benchIndex'),
     position: readSearchParam(searchParams, 'position').toUpperCase(),
     formationId: readSearchParam(searchParams, 'formationId'),
-    returnTo: readSearchParam(searchParams, 'returnTo', '/tools?tool=squadbuilder')
+    returnTo: readSearchParam(searchParams, 'returnTo', '/tools/squad-builder')
   };
 
   console.info('[metrics] /players render', {

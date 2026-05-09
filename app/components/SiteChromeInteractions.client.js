@@ -7,9 +7,9 @@ const PREFETCH_ROUTES = Object.freeze([
   '/',
   '/players',
   '/tools',
-  '/tools?tool=squadbuilder',
-  '/tools?tool=compare',
-  '/tools?tool=watchlist',
+  '/tools/squad-builder',
+  '/tools/player-compare',
+  '/tools/watchlist',
   '/market',
   '/blogs'
 ]);

@@ -6,8 +6,8 @@ import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
 
 const TOOL_ROUTE_MAP = Object.freeze({
-  compare: '/tools?tool=compare',
-  squadbuilder: '/tools?tool=squadbuilder'
+  compare: '/tools/player-compare',
+  squadbuilder: '/tools/squad-builder'
 });
 
 const VIEW_ROUTE_MAP = Object.freeze({
@@ -15,7 +15,7 @@ const VIEW_ROUTE_MAP = Object.freeze({
   database: '/players',
   players: '/players',
   market: '/market',
-  watchlist: '/tools?tool=watchlist'
+  watchlist: '/tools/watchlist'
 });
 
 function escapeHtml(value) {

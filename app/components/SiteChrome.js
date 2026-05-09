@@ -60,13 +60,13 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 Tools ▾
               </button>
               <div className="tools-dropdown-menu" id="tools-dropdown-menu" style={{ display: 'none' }}>
-                <Link href="/tools?tool=squadbuilder" data-link="" data-nav-link="" className="tools-dropdown-item">
+                <Link href="/tools/squad-builder" data-link="" data-nav-link="" className="tools-dropdown-item">
                   🏟️ Squad Builder
                 </Link>
-                <Link href="/tools?tool=compare" data-link="" data-nav-link="" className="tools-dropdown-item">
+                <Link href="/tools/player-compare" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ⚖️ Compare Players
                 </Link>
-                <Link href="/tools?tool=watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
+                <Link href="/tools/watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ❤️ Watchlist
                 </Link>
                 <MarketNavLink href="/market" data-link="" data-nav-link="" className="tools-dropdown-item">

@@ -51,9 +51,9 @@ const FOOTER_COLUMNS = Object.freeze([
     title: 'Tools',
     ariaLabel: 'Tools links',
     links: [
-      { label: 'Squad Builder', href: '/tools?tool=squadbuilder' },
-      { label: 'Compare Players', href: '/tools?tool=compare' },
-      { label: 'Watchlist', href: '/watchlist' }
+      { label: 'Squad Builder', href: '/tools/squad-builder' },
+      { label: 'Compare Players', href: '/tools/player-compare' },
+      { label: 'Watchlist', href: '/tools/watchlist' }
     ]
   },
   {

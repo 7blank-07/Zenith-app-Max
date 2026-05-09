@@ -1,26 +1,24 @@
 import nextDynamic from 'next/dynamic';
+import { permanentRedirect } from 'next/navigation';
 import SiteChrome from '../components/SiteChrome';
-import WatchlistView from '../components/WatchlistView';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
-import { fetchAllPlayerFilterMetadata, fetchPlayersByIds, readTopPlayerIds } from '../../src/lib/server/top-players.mjs';
+import { getToolsData } from './tools-data';
 
 const ToolsInteractions = nextDynamic(() => import('../components/ToolsInteractions.client'));
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
-export const dynamic = 'force-dynamic';
 
-const TOOLS_PLAYER_POOL_LIMIT = 350;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
 export const metadata = {
-  title: 'Tools | Zenith',
-  description: 'Squad Builder, Compare Players, Watchlist, and Profit Calculator tools for Zenith.',
+  title: 'FC Mobile Tools Hub | ZenithFCM',
+  description: 'Access the best FC Mobile tools: Squad Builder, Player Comparison tool, and Watchlist. Optimize your team today.',
   alternates: { canonical: '/tools' },
   openGraph: {
-    title: 'Tools | Zenith',
-    description: 'Squad Builder, Compare Players, Watchlist, and Profit Calculator tools for Zenith.',
+    title: 'FC Mobile Tools Hub | ZenithFCM',
+    description: 'Access the best FC Mobile tools: Squad Builder, Player Comparison tool, and Watchlist. Optimize your team today.',
     url: `${siteUrl}/tools`,
-    siteName: 'Zenith',
+    siteName: 'ZenithFCM',
     type: 'website'
   }
 };
@@ -30,84 +28,48 @@ function normalizeToolParam(value) {
   return String(raw || '').toLowerCase().trim();
 }
 
-function serializeToolPlayer(player) {
-  return {
-    playerId: player.playerId,
-    name: player.name || 'Unknown',
-    ovr: Number(player.ovr) || 0,
-    position: player.position || '',
-    alternatePosition: player.alternatePosition || '',
-    nation: player.nation || '',
-    club: player.club || '',
-    league: player.league || '',
-    cardBackground: player.cardBackground || '',
-    playerImage: player.playerImage || player.image || '',
-    nationFlag: player.nationFlag || '',
-    clubFlag: player.clubFlag || '',
-    leagueImage: player.leagueImage || '',
-    colorRating: player.colorRating || '#FFB86B',
-    colorPosition: player.colorPosition || '#FFFFFF',
-    colorName: player.colorName || '#FFFFFF',
-    skillMoves: Number(player.skillMoves || player.skill_moves || player.skillmoves || 0) || 0,
-    isUntradable: !!player.isUntradable,
-    price:
-      player.price ??
-      player.latestPrice ??
-      player.latest_price ??
-      player.marketPrice ??
-      player.market_price ??
-      0,
-    attributes: player.attributes || {}
-  };
-}
+export default async function ToolsHubPage({ searchParams }) {
+  const tool = normalizeToolParam(searchParams?.tool);
 
-export default async function ToolsPage({ searchParams }) {
-  const startedAt = Date.now();
-  const initialTool = normalizeToolParam(searchParams?.tool);
-  const isWatchlistTool = initialTool === 'watchlist';
-  let toolPlayers = [];
-  let squadFilterOptions = {
-    positions: [],
-    leagues: [],
-    clubs: [],
-    nations: [],
-    skillMoves: []
-  };
-
-  if (!isWatchlistTool) {
-    const topIds = await readTopPlayerIds(TOOLS_PLAYER_POOL_LIMIT);
-    const [players, filterMetadata] = await Promise.all([
-      fetchPlayersByIds(topIds, { rank: 0 }),
-      fetchAllPlayerFilterMetadata({ rank: 0 })
-    ]);
-    toolPlayers = players.map(serializeToolPlayer);
-    squadFilterOptions = {
-      positions: filterMetadata.positions,
-      leagues: filterMetadata.leagues,
-      clubs: filterMetadata.clubs,
-      nations: filterMetadata.nations,
-      skillMoves: filterMetadata.skillMoves
-    };
+  if (tool === 'squadbuilder' || tool === 'squad-builder') {
+    permanentRedirect('/tools/squad-builder');
   }
-  const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}${
-    initialTool === 'compare' ? ' main-content--compare' : ''
-  }`;
+  if (tool === 'compare') {
+    permanentRedirect('/tools/player-compare');
+  }
+  if (tool === 'watchlist') {
+    permanentRedirect('/tools/watchlist');
+  }
 
-  console.info('[metrics] /tools render', {
-    elapsedMs: Date.now() - startedAt,
-    playerPool: toolPlayers.length,
-    initialTool,
-    isWatchlistTool
-  });
+  const { toolPlayers, squadFilterOptions } = await getToolsData(false);
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': siteUrl
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Tools',
+        'item': `${siteUrl}/tools`
+      }
+    ]
+  };
 
   return (
     <SiteChrome activeView="tools">
-      <main className={mainContentClassName}>
-        {isWatchlistTool ? (
-          <WatchlistView />
-        ) : (
-          <ToolsInteractions players={toolPlayers} initialTool={initialTool} filterOptions={squadFilterOptions} />
-        )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <main className="main-content">
+        <ToolsInteractions players={toolPlayers} initialTool="none" filterOptions={squadFilterOptions} />
       </main>
     </SiteChrome>
   );

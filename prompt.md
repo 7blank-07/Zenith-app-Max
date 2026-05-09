@@ -1,43 +1,125 @@
-Refine and professionally polish my existing Privacy Policy for ZenithFCM to make it more legally precise, realistic, trustworthy, and highly optimized for Google AdSense approval — without changing the core meaning.
+You are a senior Next.js App Router developer + Technical SEO architect.
 
-IMPORTANT CONTEXT:
-- ZenithFCM is an independent fan-operated FC Mobile database, tools, and blog website.
-- ZenithFCM does NOT have user accounts, user registration, or sign-up systems.
-- Users may only contact us through email.
-- ZenithFCM may use cookies, Google Analytics, and future Google AdSense advertising.
-- ZenithFCM is NOT affiliated with EA, EA Sports, FC Mobile, or FIFA.
-- The policy is already structured well, but it needs stronger legal wording, cleaner formatting, and more professional trust signals.
-- Keep the tone transparent, realistic, and user-friendly.
+PRIMARY OBJECTIVE:
+SEO is the HIGHEST PRIORITY.
+This project must be optimized first for Google rankings, indexing, crawlability, keyword dominance, and long-term organic traffic growth.
 
-SPECIFIC IMPROVEMENTS REQUIRED:
-1. Replace overly generic phrases like “your privacy is a top priority” with more professional, transparent wording.
-2. Replace legally weak wording like “non-identifiable information” when referring to IP addresses with more accurate terminology like “technical and usage information.”
-3. Replace phrases like “industry-standard security” with more legally realistic language such as “reasonable administrative and technical safeguards.”
-4. Add a clear statement that ZenithFCM does NOT sell users’ personal information.
-5. Improve Google AdSense / advertising cookie language for professionalism and clarity.
-6. Strengthen user rights wording while keeping it realistic for a no-account platform.
-7. Improve formatting for readability (clearer bullets, spacing, scan-friendly structure).
-8. Maintain strong AdSense trust signals.
-9. Preserve all major sections:
-   - Information We Collect
-   - How We Use Information
-   - Cookies & Analytics
-   - Google AdSense & Third-Party Advertising
-   - Data Security
-   - User Rights & Choices
-   - Children’s Privacy
-   - External Links
-   - Policy Updates
-   - Contact Information
+TASK:
+My website currently uses query parameter tool pages:
 
-STYLE REQUIREMENTS:
-- Publication-ready
-- Professional but readable
-- Not generic template spam
-- Strong legal clarity
-- Accurate to current site reality
-- SEO-friendly
-- Trustworthy for both users and AdSense reviewers
+/tools?tool=squadbuilder
+/tools?tool=compare
+/tools?tool=watchlist
 
-OUTPUT:
-Provide a complete revised ready-to-publish Privacy Policy page for ZenithFCM with improved wording, formatting, and trust optimization.
+This is hurting SEO because Google treats them as alternate pages.
+
+I need this migrated into fully SEO-optimized static-style clean routes:
+
+/tools/squad-builder
+/tools/player-compare
+/tools/watchlist
+
+CORE SEO GOALS:
+- Maximize indexing of each tool as its own keyword-targeted landing page
+- Rank separately for:
+  * FC Mobile Squad Builder
+  * FC Mobile Player Compare
+  * FC Mobile Watchlist
+- Improve crawlability
+- Improve sitemap clarity
+- Improve canonical precision
+- Improve CTR from SERPs
+- Improve internal linking structure
+- Eliminate duplicate/alternate page issues
+- Preserve domain authority while transferring URL equity
+- Future-proof for backlinks and content expansion
+
+DEVELOPMENT REQUIREMENTS:
+
+1. Use Next.js App Router best practices
+2. Build:
+   /app/tools/page.js  (main tools hub)
+   /app/tools/[slug]/page.js  (individual SEO pages)
+
+3. Valid slugs:
+   - squad-builder
+   - player-compare
+   - watchlist
+
+4. INVALID slugs:
+   - Return proper 404
+
+5. MOST IMPORTANT:
+   Reuse current tool components and logic.
+   Do NOT rebuild tools from scratch.
+   Keep functionality identical.
+
+6. Dynamic SEO Metadata:
+   Use generateMetadata() per slug with:
+   - Unique title
+   - Meta description
+   - Canonical
+   - Open Graph
+   - Twitter cards
+   - Keyword relevance
+
+7. Example:
+   squad-builder:
+   Title: FC Mobile Squad Builder | ZenithFCM
+   Description: Build your ultimate FC Mobile squad with OVR optimization, chemistry planning, and team testing tools.
+
+8. Add schema recommendations if useful.
+
+9. Add breadcrumb SEO if beneficial.
+
+10. Ensure:
+   /tools links prominently to all tool pages
+
+11. Create 301 PERMANENT redirects from:
+   /tools?tool=squadbuilder → /tools/squad-builder
+   /tools?tool=compare → /tools/player-compare
+   /tools?tool=watchlist → /tools/watchlist
+
+12. Preserve old traffic and SEO equity.
+
+13. Update sitemap structure:
+   Include:
+   /tools
+   /tools/squad-builder
+   /tools/player-compare
+   /tools/watchlist
+
+14. Ensure robots/indexability is correct.
+
+15. Avoid duplicate content issues.
+
+16. Prioritize:
+   SEO > Clean Architecture > Maintainability > UX
+
+ADVANCED SEO EXPECTATIONS:
+- Best URL architecture
+- Strong canonical strategy
+- Search Console compatibility
+- Google-friendly indexing
+- Strong page-level keyword targeting
+- Structured internal authority flow
+- Better ranking opportunities
+
+DELIVERABLES:
+- Best-practice folder structure
+- Full implementation code
+- generateMetadata()
+- Redirect setup
+- next-sitemap recommendations
+- Canonical examples
+- Structured data recommendations
+- SEO reasoning for each major decision
+
+IMPORTANT:
+Think like:
+Google Search Console expert +
+Technical SEO strategist +
+Senior Next.js engineer
+
+Do NOT give average code.
+Provide the highest SEO-value architecture possible while keeping implementation practical.

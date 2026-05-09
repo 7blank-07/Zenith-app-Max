@@ -85,7 +85,7 @@ const DEFAULT_SQUAD_PICK_CONTEXT = Object.freeze({
   benchIndex: null,
   position: '',
   formationId: '',
-  returnTo: '/tools?tool=squadbuilder'
+  returnTo: '/tools/squad-builder'
 });
 
 function normalizeSquadPickContext(context) {
@@ -1195,7 +1195,7 @@ export default function PlayersDatabaseInteractions({
       } catch (error) {
         console.error('[players] Failed to persist squad picker selection:', error);
       }
-      router.push(squadPickContext.returnTo || '/tools?tool=squadbuilder');
+      router.push(squadPickContext.returnTo || '/tools/squad-builder');
       return;
     }
     router.push(buildPlayerPath(player));
