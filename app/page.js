@@ -66,12 +66,17 @@ function buildHomeLatestBlogPosts(pageData) {
   return deduped.sort((left, right) => getLatestBlogTimestamp(right) - getLatestBlogTimestamp(left)).slice(0, HOME_BLOG_LIMIT);
 }
 
+import { getOptimizedZenithUrl, optimizeIconUrl } from '../src/lib/image-optimization.mjs';
+
 function renderDashboardPlayerCard(player, key, index = 0) {
   const cardVariant = getHomeCardVariant(player);
   const cardBackground = player.cardBackground || 'https://via.placeholder.com/300x400';
   const cardImage = player.playerImage || 'https://via.placeholder.com/200x300';
   const playerPath = buildPlayerPath(player);
   const isPriority = index < 4;
+
+  const optimizedBackground = getOptimizedZenithUrl(cardBackground, 1024);
+  const optimizedPlayerImage = getOptimizedZenithUrl(cardImage, 256);
 
   return (
     <div
@@ -87,19 +92,27 @@ function renderDashboardPlayerCard(player, key, index = 0) {
       data-player-nation={player.nation || ''}
     >
       <div className="card-container">
-        <img
-          src={cardBackground}
+        <Image
+          src={optimizedBackground}
           alt="Card Background"
           className="card-background-img"
-          loading={isPriority ? 'eager' : 'lazy'}
+          fill
+          sizes="(max-width: 768px) 50vw, 25vw"
+          priority={isPriority}
+          loading={isPriority ? undefined : 'lazy'}
           fetchPriority={isPriority ? 'high' : 'auto'}
+          unoptimized
         />
-        <img
-          src={cardImage}
+        <Image
+          src={optimizedPlayerImage}
           alt={player.name || 'Player'}
           className="player-image-img"
-          loading={isPriority ? 'eager' : 'lazy'}
+          width={256}
+          height={256}
+          priority={isPriority}
+          loading={isPriority ? undefined : 'lazy'}
           fetchPriority={isPriority ? 'high' : 'auto'}
+          unoptimized
         />
 
         <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
