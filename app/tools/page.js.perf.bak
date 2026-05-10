@@ -1,0 +1,59 @@
+import nextDynamic from 'next/dynamic';
+import SiteChrome from '../components/SiteChrome';
+import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
+import { getToolsData } from './tools-data';
+
+const ToolsInteractions = nextDynamic(() => import('../components/ToolsInteractions.client'));
+
+export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
+
+export const metadata = {
+  title: 'FC Mobile Tools Hub | ZenithFCM',
+  description: 'Access the best FC Mobile tools: Squad Builder, Player Comparison tool, and Watchlist. Optimize your team today.',
+  alternates: { canonical: '/tools' },
+  openGraph: {
+    title: 'FC Mobile Tools Hub | ZenithFCM',
+    description: 'Access the best FC Mobile tools: Squad Builder, Player Comparison tool, and Watchlist. Optimize your team today.',
+    url: `${siteUrl}/tools`,
+    siteName: 'ZenithFCM',
+    type: 'website'
+  }
+};
+
+export default async function ToolsHubPage() {
+  const { toolPlayers, squadFilterOptions } = await getToolsData(false);
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': siteUrl
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Tools',
+        'item': `${siteUrl}/tools`
+      }
+    ]
+  };
+
+  return (
+    <SiteChrome activeView="tools">
+      <link rel="stylesheet" href="/assets/css/tool-style.css" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <main className="main-content">
+        <ToolsInteractions players={toolPlayers} initialTool="none" filterOptions={squadFilterOptions} />
+      </main>
+    </SiteChrome>
+  );
+}
