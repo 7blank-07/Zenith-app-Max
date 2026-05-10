@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import MarketUnderConstructionModal from './MarketUnderConstructionModal.client';
+import dynamic from 'next/dynamic';
+
+const MarketUnderConstructionModal = dynamic(() => import('./MarketUnderConstructionModal.client'), {
+  ssr: false
+});
 
 export default function MarketNavLink({ children = 'Market', onClick, ...props }) {
   const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);

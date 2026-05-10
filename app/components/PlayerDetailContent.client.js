@@ -4,11 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
 import PlayerDetailInteractions from './PlayerDetailInteractions.client';
 import PlayerMarketValue from './PlayerMarketValue.client';
-import PlayerPriceHistorySection from './PlayerPriceHistorySection.client';
 import PlayerRefreshTimePanel from './PlayerRefreshTimePanel.client';
 import PlayerSkillsAbilitiesSection from './PlayerSkillsAbilitiesSection.client';
 import PlayerStatisticsSection from './PlayerStatisticsSection.client';
 import PlayerTrainingLevelPanel from './PlayerTrainingLevelPanel.client';
+import dynamic from 'next/dynamic';
+
+const PlayerPriceHistorySection = dynamic(() => import('./PlayerPriceHistorySection.client'), {
+  ssr: false,
+  loading: () => <div className="section-loading-placeholder" style={{ height: '300px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }} />
+});
+
 import {
   buildProfileOverviewItems,
   formatProfileValue,

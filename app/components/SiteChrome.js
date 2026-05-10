@@ -1,4 +1,3 @@
-import SiteChromeInteractions from './SiteChromeInteractions.client';
 import MarketNavLink from './MarketNavLink.client';
 import SiteFooter from './SiteFooter';
 import Image from 'next/image';
@@ -8,6 +7,10 @@ import { getTopTickerConfig } from '../../src/lib/server/top-ticker-config.mjs';
 
 const MobileNavigation = dynamic(() => import('./MobileNavigation.client'), {
   ssr: true
+});
+
+const SiteChromeInteractions = dynamic(() => import('./SiteChromeInteractions.client'), {
+  ssr: false
 });
 
 function getNavClass(activeView, view) {

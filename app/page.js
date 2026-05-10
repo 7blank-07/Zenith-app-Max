@@ -1,9 +1,5 @@
-import HomeDashboardInteractions from './components/HomeDashboardInteractions.client';
-import MarketNavLink from './components/MarketNavLink.client';
-import MobileNavigation from './components/MobileNavigation.client';
+import SiteChrome from './components/SiteChrome';
 import RedeemCodeHomeWidget from './components/redeem/RedeemCodeHomeWidget.client';
-import SiteFooter from './components/SiteFooter';
-import SiteChromeInteractions from './components/SiteChromeInteractions.client';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -12,32 +8,22 @@ import { getBlogIndexPageData } from '../src/lib/server/blog/public.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../src/lib/server/player-seo-contract.mjs';
 import { getHomeRedeemCodeWidgetData } from '../src/lib/server/redeem-codes/public.mjs';
 import { fetchLatestPlayers } from '../src/lib/server/top-players.mjs';
-import { getTopTickerConfig } from '../src/lib/server/top-ticker-config.mjs';
 import { getHomepageFeaturedStream } from '../src/lib/server/streams/repository.mjs';
 import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponents';
+import { getOptimizedZenithUrl } from '../src/lib/image-optimization.mjs';
 
 const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
   ssr: true
+});
+
+const HomeDashboardInteractions = dynamic(() => import('./components/HomeDashboardInteractions.client'), {
+  ssr: false
 });
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
 const HOME_SECTION_LIMIT = 12;
 const HOME_BLOG_LIMIT = 8;
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
-
-export const metadata = {
-  title: 'Zenith - FC Mobile Database',
-  description: 'Zenith FC Mobile tools and database',
-  alternates: { canonical: '/' },
-  openGraph: {
-    title: 'Zenith - FC Mobile Database',
-    description: 'Zenith FC Mobile tools and database',
-    url: siteUrl,
-    siteName: 'Zenith',
-    type: 'website'
-  }
-};
 
 function getHomeCardVariant(player) {
   return player.leagueImage ? 'normal' : 'hero';
@@ -65,8 +51,6 @@ function buildHomeLatestBlogPosts(pageData) {
 
   return deduped.sort((left, right) => getLatestBlogTimestamp(right) - getLatestBlogTimestamp(left)).slice(0, HOME_BLOG_LIMIT);
 }
-
-import { getOptimizedZenithUrl, optimizeIconUrl } from '../src/lib/image-optimization.mjs';
 
 function renderDashboardPlayerCard(player, key, index = 0) {
   const cardVariant = getHomeCardVariant(player);
@@ -182,165 +166,90 @@ export default async function HomePage() {
   ]);
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
-  const topTicker = getTopTickerConfig();
 
   return (
     <>
       <div id="toast-container" />
-
-      <header className="header">
-        <div className="header-content">
-          <div className="logo">
-            <Link href="/" data-link="" data-nav-link="" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              <Image
-                src="/assets/images/zenith_logo_main.png"
-                alt="Zenith logo"
-                className="logo-image"
-                width={48}
-                height={48}
-                sizes="(max-width: 768px) 34px, 48px"
-                priority
-              />
-              <span className="logo-text">Zenith</span>
-            </Link>
-          </div>
-
-          <nav className="nav-desktop">
-            <Link href="/" data-link="" data-nav-link="" className="nav-link active">
-              Home
-            </Link>
-            <Link href="/players" data-link="" data-nav-link="" className="nav-link">
-              Players
-            </Link>
-            <Link href="/fc-mobile-redeem-codes" data-link="" data-nav-link="" className="nav-link">
-              Redeem
-            </Link>
-            <Link href="/blogs" data-link="" data-nav-link="" className="nav-link">
-              Blogs
-            </Link>
-            <Link href="/streaming" data-link="" data-nav-link="" className="nav-link">
-              Streaming
-            </Link>
-
-            <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
-              <button className="tools-btn" id="tools-dropdown-btn" type="button">
-                Tools ▾
-              </button>
-              <div className="tools-dropdown-menu" id="tools-dropdown-menu" style={{ display: 'none' }}>
-                <Link href="/tools/squad-builder" data-link="" data-nav-link="" className="tools-dropdown-item">
-                  🏟️ Squad Builder
-                </Link>
-                <Link href="/tools/player-compare" data-link="" data-nav-link="" className="tools-dropdown-item">
-                  ⚖️ Compare Players
-                </Link>
-                <Link href="/tools/watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
-                  ❤️ Watchlist
-                </Link>
-                <MarketNavLink href="/market" data-link="" data-nav-link="" className="tools-dropdown-item">
-                  📈 Market
-                </MarketNavLink>
-              </div>
-            </div>
-          </nav>
-
-          <div className="header-actions">
-            <div className="user-avatar">
-              <div className="avatar-circle">FC</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {topTicker.enabled ? (
-        <div className="slider" style={{ maxWidth: '100vw', overflow: 'hidden' }}>
-          <span>{topTicker.text}</span>
-        </div>
-      ) : null}
-
-      <main className="main-content">
-        <div id="dashboard-view" className="view active">
-          <section className="home-utility-hero" aria-label="Hero utility hub">
-            <div className="home-utility-card">
-              <div className="home-utility-search">
-                <div className="search-container">
-                  <div className="search-box">
-                    <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="11" cy="11" r="8" />
-                      <path d="m21 21-4.35-4.35" />
-                    </svg>
-                    <input
-                      type="text"
-                      id="home-search"
-                      className="search-input"
-                      placeholder="Search for players, clubs, or positions..."
-                      autoComplete="off"
-                    />
-                  </div>
-                  <div id="search-dropdown" className="search-dropdown">
-                    <div className="search-dropdown-content" id="search-results-dropdown" />
+      <SiteChrome activeView="home" showSlider={true}>
+        <main className="main-content">
+          <div id="dashboard-view" className="view active">
+            <section className="home-utility-hero" aria-label="Hero utility hub">
+              <div className="home-utility-card">
+                <div className="home-utility-search">
+                  <div className="search-container">
+                    <div className="search-box">
+                      <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                      </svg>
+                      <input
+                        type="text"
+                        id="home-search"
+                        className="search-input"
+                        placeholder="Search for players, clubs, or positions..."
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div id="search-dropdown" className="search-dropdown">
+                      <div className="search-dropdown-content" id="search-results-dropdown" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="home-utility-redeem-shell">
-                <RedeemCodeHomeWidget codeEntry={homeRedeemWidgetData?.code || null} />
-              </div>
-            </div>
-          </section>
-
-          <div id="dashboard-search-results" style={{ display: 'none' }}>
-            <div className="search-results-header">
-              <h3 id="search-results-count">0 Results</h3>
-            </div>
-            <div id="search-results-container" />
-          </div>
-
-          {featuredStream ? (
-            <section className="dashboard-section" style={{ marginBottom: '3rem' }}>
-              <div className="section-header">
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ color: '#ff0000' }}>●</span> Zenith Live
-                </h2>
-                <Link href="/streaming" data-link="" data-nav-link="" className="view-all-btn">
-                  Streaming Hub
-                </Link>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: '#111', padding: '1rem', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>{featuredStream.title}</h3>
-                  <StreamBadge status={featuredStream.status} />
+                <div className="home-utility-redeem-shell">
+                  <RedeemCodeHomeWidget codeEntry={homeRedeemWidgetData?.code || null} />
                 </div>
-                <YouTubeEmbed youtubeId={featuredStream.youtubeId} title={featuredStream.title} />
               </div>
             </section>
-          ) : null}
 
-          <section className="dashboard-section">
-            <div className="section-header">
-              <h2>⚡ Latest Players</h2>
-              <Link href="/players" data-link="" data-nav-link="" className="view-all-btn">
-                View All
-              </Link>
+            <div id="dashboard-search-results" style={{ display: 'none' }}>
+              <div className="search-results-header">
+                <h3 id="search-results-count">0 Results</h3>
+              </div>
+              <div id="search-results-container" />
             </div>
-            <div id="latest-players-grid">{latestPlayers.map((player, index) => renderDashboardPlayerCard(player, `latest-${player.playerId}`, index))}</div>
-          </section>
 
-          {shouldRenderLatestBlogs ? (
-            <HomeLatestBlogsSection
-              posts={latestBlogPosts}
-              categories={blogPageData?.categories || []}
-              availability={blogPageData?.availability || null}
-            />
-          ) : null}
-        </div>
-      </main>
+            {featuredStream ? (
+              <section className="dashboard-section" style={{ marginBottom: '3rem' }}>
+                <div className="section-header">
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ color: '#ff0000' }}>●</span> Zenith Live
+                  </h2>
+                  <Link href="/streaming" data-link="" data-nav-link="" className="view-all-btn">
+                    Streaming Hub
+                  </Link>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: '#111', padding: '1rem', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>{featuredStream.title}</h3>
+                    <StreamBadge status={featuredStream.status} />
+                  </div>
+                  <YouTubeEmbed youtubeId={featuredStream.youtubeId} title={featuredStream.title} />
+                </div>
+              </section>
+            ) : null}
 
-      <MobileNavigation activeView="home" />
+            <section className="dashboard-section">
+              <div className="section-header">
+                <h2>⚡ Latest Players</h2>
+                <Link href="/players" data-link="" data-nav-link="" className="view-all-btn">
+                  View All
+                </Link>
+              </div>
+              <div id="latest-players-grid">{latestPlayers.map((player, index) => renderDashboardPlayerCard(player, `latest-${player.playerId}`, index))}</div>
+            </section>
 
-      <SiteFooter />
-
-      <HomeDashboardInteractions />
-      <SiteChromeInteractions />
+            {shouldRenderLatestBlogs ? (
+              <HomeLatestBlogsSection
+                posts={latestBlogPosts}
+                categories={blogPageData?.categories || []}
+                availability={blogPageData?.availability || null}
+              />
+            ) : null}
+          </div>
+        </main>
+        <HomeDashboardInteractions />
+      </SiteChrome>
     </>
   );
 }

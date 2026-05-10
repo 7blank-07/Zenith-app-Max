@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import MarketUnderConstructionModal from './MarketUnderConstructionModal.client';
+import dynamic from 'next/dynamic';
+
+const MarketUnderConstructionModal = dynamic(() => import('./MarketUnderConstructionModal.client'), {
+  ssr: false
+});
 
 const MOBILE_TOOL_ITEMS = [
   {

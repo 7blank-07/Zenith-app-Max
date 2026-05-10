@@ -1,95 +1,77 @@
-Perform a HIGH-ROI, controlled deep optimization of ZenithFCM's blog image pipeline.
+Perform a HIGH-ROI advanced JavaScript bundle waste audit for ZenithFCM.
 
 CONTEXT:
-We have already completed:
-- Major style.css purge
-- Homepage image optimization
-- Homepage icon stability fixes
-- Deferred search hydration
-- Stable production checkpoints
+Major CSS, image, and search hydration optimizations are already complete.
 
-CURRENT SYSTEM:
-- src/lib/image-optimization.mjs
-- app/components/blog/OptimizedCoverImage.js
+CURRENT LIGHTHOUSE:
+- Reduce unused JS: ~98 KiB
+- Shared chunk 2117 includes legacy polyfills
+- First Load JS shared by all still significant
 
 PRIMARY GOAL:
-Make the blog image pipeline one of the final major performance wins by aggressively reducing real image payload across:
-- Homepage featured blog
-- Homepage compact blog cards
-- Blog article hero
-- Blog article cards
-- Featured articles
-- Related articles
+Identify and reduce the biggest remaining first-party JavaScript waste BEFORE risky polyfill/build-target surgery.
 
 ABSOLUTE RULES:
-- Preserve exact visual parity
+- Preserve functionality
 - Preserve SEO
 - Preserve routing
 - Preserve AdSense
-- Preserve build safety
-- No custom loader function serialization issues
-- No Players / Tools / Watchlist changes
-- Backup all modified files
+- Preserve Players / Tools / Watchlist
+- Backup before edits
+- No speculative framework rewrites
+- Focus on highest-ROI bundle reductions
 
 ==================================================
-PHASE 1 — PIPELINE AUDIT
+PHASE 1 — SHARED JS FORENSIC AUDIT
 ==================================================
 Inspect:
-- src/lib/image-optimization.mjs
-- app/components/blog/OptimizedCoverImage.js
-- All usage contexts
+- Shared chunks
+- app/page.js
+- SiteChrome
+- HomeDashboardInteractions
+- Blog components
+- Global imports
+- Legacy utilities
 
 Tasks:
-1. Audit current width params
-2. Audit quality defaults
-3. Audit responsive breakpoints
-4. Identify oversized defaults
-5. Identify wasted bytes by context
-6. Verify build-safe implementation
+1. Identify:
+   - dead imports
+   - duplicated client logic
+   - over-hydrated components
+   - globally loaded but route-local code
+   - unnecessary shared dependencies
+2. Rank largest likely JS waste sources
 
 ==================================================
-PHASE 2 — CONTEXTUAL PAYLOAD REDUCTION
+PHASE 2 — HIGH-CONFIDENCE JS PURGE
 ==================================================
 Tasks:
-1. Optimize separately for:
-   - Homepage featured
-   - Homepage compact
-   - Blog hero
-   - Related cards
-2. Improve:
-   - width params
-   - sizes
-   - quality
-   - source selection
-3. Preserve appearance
+1. Remove dead code
+2. Split route-specific JS
+3. Reduce global client bundle
+4. Defer non-critical hydration
+5. Preserve UX
 
 ==================================================
-PHASE 3 — SYSTEM HARDENING
+PHASE 3 — POLYFILL STRATEGY AUDIT
 ==================================================
 Tasks:
-1. Ensure:
-   - No client/server boundary issues
-   - No broken URLs
-   - No homepage icon regressions
-2. Improve maintainability of image optimization logic
+1. Determine if chunk 2117 polyfills are framework-default or dependency-driven
+2. Identify safe opportunities
+3. DO NOT aggressively rewrite browser targets yet unless high confidence
+
+Important: - you can check change using playwright mcp if it affects or not UI/UX and everything stayed all well if yes then implement
+
 
 ==================================================
 OUTPUT FORMAT
 ==================================================
 ## PHASE 1 AUDIT
 ## PHASE 2 CHANGES
-## PHASE 3 HARDENING
-## BACKUPS CREATED
+## PHASE 3 POLYFILL ANALYSIS
 ## FILES MODIFIED
-## EXPECTED KB SAVINGS
-## EXPECTED LIGHTHOUSE IMPACT
+## EXPECTED JS SAVINGS
 ## RISK LEVEL
 ## SAFE TO BUILD? (YES/NO)
 ## SAFE TO DEPLOY? (YES/NO)
-## HIGH-RISK QA CHECKLIST
-## FULL ROLLBACK COMMAND
-
-Important: - you can check change using playwright mcp if it affects or not UI/UX and everything stayed all well if yes then implement
-
-FINAL GOAL:
-Turn the blog image pipeline into one of the final major site-wide performance wins while preserving full production stability.
+## ROLLBACK COMMAND
