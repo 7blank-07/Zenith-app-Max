@@ -90,90 +90,95 @@ export default function PlayerStatisticsSection({
         {statsModel.title}
       </h2>
       <div className="stats-grid-container">
-        <div className={`player-detail-stats-grid ${shouldUseInlineProfileRail ? 'with-profile-rail' : ''}`}>
-          {statsModel.categories.map((category) => (
-            <article
-              key={category.key}
-              className="player-detail-stat-card"
-              style={{
-                background: 'var(--color-graphite-800, #14181C)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderLeft: '4px solid #00C2A8',
-                borderRadius: 'var(--radius-lg, 12px)',
-                padding: '20px'
-              }}
-            >
-              <div
-                className="player-detail-stat-header"
+        <div className={`player-detail-stats-layout ${shouldUseInlineProfileRail ? 'with-profile-rail' : ''}`}>
+          <div className="player-detail-stats-grid">
+            {statsModel.categories.map((category) => (
+              <article
+                key={category.key}
+                className="player-detail-stat-card"
                 style={{
+                  background: 'var(--color-graphite-800, #14181C)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderLeft: '4px solid #00C2A8',
+                  borderRadius: 'var(--radius-lg, 12px)',
+                  padding: '20px',
+                  height: '100%',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px',
-                  paddingBottom: '12px',
-                  borderBottom: '1px solid rgba(255,255,255,0.08)'
+                  flexDirection: 'column'
                 }}
               >
-                <h3
-                  className="player-detail-stat-title"
-                  style={{
-                    margin: 0,
-                    fontSize: '16px',
-                    color: 'var(--color-text-primary, #E6EEF2)',
-                    textTransform: 'uppercase',
-                    minWidth: 0
-                  }}
-                >
-                  {category.name}
-                </h3>
                 <div
-                  className="player-detail-stat-value"
+                  className="player-detail-stat-header"
                   style={{
-                    fontSize: '30px',
-                    fontWeight: 900,
-                    color: getStatAccentColor(category.mainValue),
-                    lineHeight: 1,
-                    flexShrink: 0
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '12px',
+                    marginBottom: '16px',
+                    paddingBottom: '12px',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)'
                   }}
                 >
-                  {category.mainValue}
+                  <h3
+                    className="player-detail-stat-title"
+                    style={{
+                      margin: 0,
+                      fontSize: '16px',
+                      color: 'var(--color-text-primary, #E6EEF2)',
+                      textTransform: 'uppercase',
+                      minWidth: 0
+                    }}
+                  >
+                    {category.name}
+                  </h3>
+                  <div
+                    className="player-detail-stat-value"
+                    style={{
+                      fontSize: '30px',
+                      fontWeight: 900,
+                      color: getStatAccentColor(category.mainValue),
+                      lineHeight: 1,
+                      flexShrink: 0
+                    }}
+                  >
+                    {category.mainValue}
+                  </div>
                 </div>
-              </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <tbody>
-                  {category.substats.map((row, index) => (
-                    <tr key={`${category.key}-${row.label}-${index}`}>
-                      <th
-                        scope="row"
-                        style={{
-                          textAlign: 'left',
-                          padding: '7px 0',
-                          borderBottom: '1px solid rgba(255,255,255,0.08)',
-                          color: 'var(--color-text-muted, #98A0A6)',
-                          fontWeight: 600,
-                          width: '72%'
-                        }}
-                      >
-                        {row.label}
-                      </th>
-                      <td
-                        style={{
-                          textAlign: 'right',
-                          padding: '7px 0',
-                          borderBottom: '1px solid rgba(255,255,255,0.08)',
-                          color: getStatAccentColor(row.value),
-                          fontWeight: 800
-                        }}
-                      >
-                        {row.value}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </article>
-          ))}
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {category.substats.map((row, index) => (
+                      <tr key={`${category.key}-${row.label}-${index}`}>
+                        <th
+                          scope="row"
+                          style={{
+                            textAlign: 'left',
+                            padding: '7px 0',
+                            borderBottom: '1px solid rgba(255,255,255,0.08)',
+                            color: 'var(--color-text-muted, #98A0A6)',
+                            fontWeight: 600,
+                            width: '72%'
+                          }}
+                        >
+                          {row.label}
+                        </th>
+                        <td
+                          style={{
+                            textAlign: 'right',
+                            padding: '7px 0',
+                            borderBottom: '1px solid rgba(255,255,255,0.08)',
+                            color: getStatAccentColor(row.value),
+                            fontWeight: 800
+                          }}
+                        >
+                          {row.value}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </article>
+            ))}
+          </div>
           {shouldRenderProfile ? (
             <aside className={`player-detail-profile-card ${shouldUseInlineProfileRail ? 'inline-rail' : ''}`}>
               <h3>{profileSectionTitle}</h3>

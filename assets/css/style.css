@@ -9593,19 +9593,25 @@ watchlist-view .view-content {
   transform: scale(0.98);
 }
 
+.player-detail-stats-layout.with-profile-rail {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
 .player-detail-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
+  grid-auto-rows: 1fr;
 }
 
 .player-detail-stat-card {
   min-width: 0;
-}
-
-.player-detail-stats-grid.with-profile-rail {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: start;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .player-detail-profile-card {
@@ -9617,8 +9623,20 @@ watchlist-view .view-content {
 }
 
 .player-detail-profile-card.inline-rail {
-  grid-column: 3 / span 2;
-  grid-row: 2;
+  position: sticky;
+  top: 20px;
+}
+
+@media (max-width: 1200px) {
+  .player-detail-stats-layout.with-profile-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .player-detail-profile-card.inline-rail {
+    position: static;
+    grid-column: auto;
+    grid-row: auto;
+  }
 }
 
 .player-detail-profile-card h3 {
