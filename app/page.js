@@ -92,14 +92,14 @@ function renderDashboardPlayerCard(player, key, index = 0) {
           alt="Card Background"
           className="card-background-img"
           loading={isPriority ? 'eager' : 'lazy'}
-          fetchpriority={isPriority ? 'high' : 'auto'}
+          fetchPriority={isPriority ? 'high' : 'auto'}
         />
         <img
           src={cardImage}
           alt={player.name || 'Player'}
           className="player-image-img"
           loading={isPriority ? 'eager' : 'lazy'}
-          fetchpriority={isPriority ? 'high' : 'auto'}
+          fetchPriority={isPriority ? 'high' : 'auto'}
         />
 
         <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
@@ -120,7 +120,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
               cardVariant === 'normal' ? 'normal-nation-flag-home' : 'hero-icon-nation-flag-home'
             }`}
             loading="lazy"
-            fetchpriority="low"
+            fetchPriority="low"
           />
         )}
         {player.clubFlag && (
@@ -129,7 +129,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             alt="Club"
             className={`card-club-flag-home ${cardVariant === 'normal' ? 'normal-club-flag-home' : 'hero-icon-club-flag-home'}`}
             loading="lazy"
-            fetchpriority="low"
+            fetchPriority="low"
           />
         )}
         {cardVariant === 'normal' && !!player.leagueImage && (
@@ -138,13 +138,13 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             alt="League"
             className="card-league-flag-home normal-league-flag-home"
             loading="lazy"
-            fetchpriority="low"
+            fetchPriority="low"
           />
         )}
 
         {player.isUntradable && (
           <div className="card-untradable-badge">
-            <img src="/assets/images/untradable_img.png" alt="Untradable" loading="lazy" fetchpriority="low" />
+            <img src="/assets/images/untradable_img.png" alt="Untradable" loading="lazy" fetchPriority="low" />
           </div>
         )}
       </div>
@@ -153,7 +153,6 @@ function renderDashboardPlayerCard(player, key, index = 0) {
 }
 
 export default async function HomePage() {
-  const startedAt = Date.now();
   const latestPlayersPromise = fetchLatestPlayers({
     rank: 0,
     limit: HOME_SECTION_LIMIT,
