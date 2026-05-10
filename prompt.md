@@ -1,94 +1,95 @@
-Recover ONLY the valuable homepage search hydration performance optimization that was previously implemented in HomeDashboardInteractions.client.js.
+Perform a HIGH-ROI, controlled deep optimization of ZenithFCM's blog image pipeline.
 
 CONTEXT:
-All files were restored, so the prior search hydration optimization is gone.
-We now want to RE-APPLY ONLY the real performance gains from that work,
-WITHOUT reintroducing risky DOM rewrites, dropdown rendering changes, CSS regressions, or structural search changes.
+We have already completed:
+- Major style.css purge
+- Homepage image optimization
+- Homepage icon stability fixes
+- Deferred search hydration
+- Stable production checkpoints
+
+CURRENT SYSTEM:
+- src/lib/image-optimization.mjs
+- app/components/blog/OptimizedCoverImage.js
 
 PRIMARY GOAL:
-Restore:
-1. Immediate homepage card interaction setup (critical path)
-2. Deferred search hydration (search logic loads on first focus/input instead of full mount)
-3. Reduced initial homepage main-thread work
-
-DO NOT RESTORE:
-- Event delegation rewrite
-- DocumentFragment rewrite
-- Dropdown markup changes
-- Search result rendering changes
-- CSS structure changes
-- Experimental DOM refactors
-- Mapping/helper rewrites
+Make the blog image pipeline one of the final major performance wins by aggressively reducing real image payload across:
+- Homepage featured blog
+- Homepage compact blog cards
+- Blog article hero
+- Blog article cards
+- Featured articles
+- Related articles
 
 ABSOLUTE RULES:
-- Keep original stable search dropdown rendering exactly as baseline
-- Keep original search result HTML structure exactly as baseline
-- Keep original helper logic exactly as baseline
-- Only optimize hydration timing / initialization timing
-- Preserve keyboard navigation
-- Preserve search correctness
-- Preserve dropdown behavior
-- Preserve player card click behavior
-- Build-safe only
-- Backup file before edits
+- Preserve exact visual parity
+- Preserve SEO
+- Preserve routing
+- Preserve AdSense
+- Preserve build safety
+- No custom loader function serialization issues
+- No Players / Tools / Watchlist changes
+- Backup all modified files
 
 ==================================================
-PHASE 1 — BASELINE RESTORE AUDIT
+PHASE 1 — PIPELINE AUDIT
 ==================================================
 Inspect:
-- app/components/HomeDashboardInteractions.client.js
+- src/lib/image-optimization.mjs
+- app/components/blog/OptimizedCoverImage.js
+- All usage contexts
 
 Tasks:
-1. Preserve original stable search rendering
-2. Identify all search setup currently happening immediately on mount
-3. Separate:
-   - Critical immediate homepage card interactions
-   - Search-specific heavy setup
+1. Audit current width params
+2. Audit quality defaults
+3. Audit responsive breakpoints
+4. Identify oversized defaults
+5. Identify wasted bytes by context
+6. Verify build-safe implementation
 
 ==================================================
-PHASE 2 — SEARCH HYDRATION RECOVERY
+PHASE 2 — CONTEXTUAL PAYLOAD REDUCTION
 ==================================================
 Tasks:
-1. Create setupCritical:
-   - Homepage card clicks
-   - Above-the-fold essentials
-2. Create setupDeferredSearch:
-   - Search DOM queries
-   - Search listeners
-   - Keyboard nav
-   - Outside-click logic
-3. Trigger setupDeferredSearch ONLY on:
-   - first focus
-   - first input
-4. Ensure one-time initialization only
+1. Optimize separately for:
+   - Homepage featured
+   - Homepage compact
+   - Blog hero
+   - Related cards
+2. Improve:
+   - width params
+   - sizes
+   - quality
+   - source selection
+3. Preserve appearance
 
 ==================================================
-PHASE 3 — SAFETY
+PHASE 3 — SYSTEM HARDENING
 ==================================================
 Tasks:
-1. No rendering structure changes
-2. No dropdown HTML changes
-3. No helper rewrites
-4. No event delegation rewrite
-5. No syntax corruption
-6. Preserve cleanup integrity
+1. Ensure:
+   - No client/server boundary issues
+   - No broken URLs
+   - No homepage icon regressions
+2. Improve maintainability of image optimization logic
 
 ==================================================
 OUTPUT FORMAT
 ==================================================
-## Original Baseline Preserved
-## Search Hydration Gains Restored
-## Immediate vs Deferred Split
-## Backup Created
-## Files Modified
-## Expected TBT / INP Gains
-## Risk Level
-## Safe to Build? (YES/NO)
-## Safe to Deploy? (YES/NO)
-## QA Checklist
-## Rollback Command
+## PHASE 1 AUDIT
+## PHASE 2 CHANGES
+## PHASE 3 HARDENING
+## BACKUPS CREATED
+## FILES MODIFIED
+## EXPECTED KB SAVINGS
+## EXPECTED LIGHTHOUSE IMPACT
+## RISK LEVEL
+## SAFE TO BUILD? (YES/NO)
+## SAFE TO DEPLOY? (YES/NO)
+## HIGH-RISK QA CHECKLIST
+## FULL ROLLBACK COMMAND
 
 Important: - you can check change using playwright mcp if it affects or not UI/UX and everything stayed all well if yes then implement
 
 FINAL GOAL:
-Recover the real homepage search hydration performance benefits only, while preserving the original stable search UI and rendering system exactly.
+Turn the blog image pipeline into one of the final major site-wide performance wins while preserving full production stability.

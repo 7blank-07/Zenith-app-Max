@@ -30,8 +30,8 @@ export default function FeaturedArticles({ posts = [] }) {
                   src={primary.coverImage}
                   alt={primary.title}
                   className={styles.featuredImage}
-                  width={1600}
-                  height={900}
+                  width={1200}
+                  height={675}
                   sizes="(max-width: 1024px) 100vw, 62vw"
                   priority
                 />
@@ -63,8 +63,8 @@ export default function FeaturedArticles({ posts = [] }) {
                       src={post.coverImage}
                       alt={post.title}
                       className={styles.cardImage}
-                      width={1200}
-                      height={720}
+                      width={640}
+                      height={384}
                       sizes="(max-width: 1024px) 100vw, 32vw"
                       loading="lazy"
                       fetchPriority="low"

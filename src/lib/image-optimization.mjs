@@ -3,36 +3,39 @@
  * Focuses on real byte reduction via source transformation.
  */
 
+/**
+ * Custom loader for Next.js Image component (Client-side usage).
+ * NOTE: Do not pass this function as a prop from Server to Client components.
+ */
 export function zenithImageLoader({ src, width, quality }) {
-  // If not a Zenith-hosted image, return as-is
-  if (!src.includes('images.zenithfcm.com')) {
-    return src;
-  }
-
-  // Common CDN pattern: append width and quality
-  // Even if the server doesn't support it yet, this prepares for the aggressive pipeline
-  const url = new URL(src);
-  url.searchParams.set('w', width.toString());
-  url.searchParams.set('q', (quality || 75).toString());
-  
-  return url.toString();
+  return getOptimizedZenithUrl(src, width, quality);
 }
 
 /**
  * Manually applies optimization parameters to a Zenith URL string.
- * Used to avoid passing functions to Client Components.
+ * This is the preferred build-safe method for Server Components.
  */
 export function getOptimizedZenithUrl(src, width, quality = 75) {
-  if (!src || typeof src !== 'string' || !src.includes('images.zenithfcm.com')) {
+  if (!src || typeof src !== 'string') return '';
+  
+  // If not a Zenith-hosted image, return as-is
+  if (!src.includes('images.zenithfcm.com')) {
     return src;
   }
   
   try {
-    const url = new URL(src);
-    if (width) url.searchParams.set('w', width.toString());
-    url.searchParams.set('q', quality.toString());
+    // Handle both absolute and relative-like strings (though Zenith images are usually absolute)
+    const url = new URL(src, 'https://images.zenithfcm.com');
+    
+    if (width) {
+      url.searchParams.set('w', width.toString());
+    }
+    
+    url.searchParams.set('q', (quality || 75).toString());
+    
     return url.toString();
-  } catch {
+  } catch (error) {
+    console.warn('[image-opt] Failed to transform Zenith URL:', src, error);
     return src;
   }
 }
@@ -42,12 +45,10 @@ export function getOptimizedZenithUrl(src, width, quality = 75) {
  * Example: flags_23_128x128_27 -> flags_23_64x64_27
  */
 export function optimizeIconUrl(url, targetSize = 64) {
-  if (!url || typeof url !== 'string') return url;
-  
-  // Pattern match for 128x128 or other large dimensions in Zenith URLs
-  if (url.includes('images.zenithfcm.com')) {
-    return url.replace(/\d+x\d+/, `${targetSize}x${targetSize}`);
+  if (!url || typeof url !== 'string' || !url.includes('images.zenithfcm.com')) {
+    return url;
   }
   
-  return url;
+  // Pattern match for 128x128 or other large dimensions in Zenith URLs
+  return url.replace(/\d+x\d+/, `${targetSize}x${targetSize}`);
 }

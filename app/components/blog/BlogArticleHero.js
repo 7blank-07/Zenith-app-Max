@@ -26,8 +26,8 @@ export default function BlogArticleHero({ article }) {
             src={article.coverImage}
             alt={article.title}
             className={styles.articleCoverImage}
-            width={1600}
-            height={900}
+            width={1200}
+            height={675}
             sizes="(max-width: 1024px) 100vw, 62vw"
             priority
           />
