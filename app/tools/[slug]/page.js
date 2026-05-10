@@ -104,6 +104,8 @@ export default async function ToolSlugPage({ params }) {
 
   return (
     <SiteChrome activeView="tools">
+      <link rel="stylesheet" href="/assets/css/tool-style.css" />
+      {isWatchlistTool && <link rel="stylesheet" href="/assets/css/watchlist-styles.css" />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}

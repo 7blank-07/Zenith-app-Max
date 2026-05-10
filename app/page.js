@@ -169,13 +169,6 @@ export default async function HomePage() {
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
   const topTicker = getTopTickerConfig();
 
-  console.info('[metrics] / render', {
-    elapsedMs: Date.now() - startedAt,
-    cardCount: latestPlayers.length,
-    latestCount: latestPlayers.length,
-    latestBlogsCount: latestBlogPosts.length
-  });
-
   return (
     <>
       <div id="toast-container" />
@@ -191,6 +184,7 @@ export default async function HomePage() {
                 width={48}
                 height={48}
                 sizes="(max-width: 768px) 34px, 48px"
+                priority
               />
               <span className="logo-text">Zenith</span>
             </Link>

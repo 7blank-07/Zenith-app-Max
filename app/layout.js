@@ -43,8 +43,6 @@ export default function RootLayout({ children }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="/assets/css/style.css" />
-        <link rel="stylesheet" href="/assets/css/tool-style.css" />
-        <link rel="stylesheet" href="/assets/css/watchlist-styles.css" />
         <link rel="icon" type="image/png" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />

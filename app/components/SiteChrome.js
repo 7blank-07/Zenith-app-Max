@@ -30,6 +30,7 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 width={48}
                 height={48}
                 sizes="(max-width: 768px) 34px, 48px"
+                priority
               />
               <span className="logo-text">Zenith</span>
             </Link>

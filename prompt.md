@@ -1,135 +1,113 @@
-You are a senior Next.js App Router engineer + Technical SEO debugging specialist.
+Perform a STRICT, production-safe performance bottleneck audit + surgical optimization for the remaining highest-impact Lighthouse issues.
 
-CRITICAL ISSUE:
-My SEO migration to clean tool URLs is mostly complete, but there is now a redirect loop error on legacy query URLs.
+CRITICAL CONTEXT:
+This codebase previously suffered regressions from broad CSS scoping and over-aggressive optimization.
+We must preserve stability above all else.
 
-CURRENT PROBLEM:
-When visiting:
-http://localhost:3000/tools?tool=squadbuilder
+ABSOLUTE RULES:
+- Prioritize performance gains ONLY where risk is low or clearly isolated
+- Audit first, then apply ONLY the minimum safe fix
+- No broad CSS architecture rewrites
+- No player card CSS regressions
+- No tools page regressions
+- No homepage visual regressions
+- No redesigns
+- No speculative refactors
 
-I get:
-ERR_TOO_MANY_REDIRECTS
+DO NOT TOUCH:
+- app/players page card structure
+- PlayerRowCard layout
+- tools page core styling
+- watchlist layout
+- SiteChrome layout structure
+- API logic
+- routing
+- SEO-critical structure
 
-BUT:
-http://localhost:3000/tools/squad-builder
-works correctly.
+PRIMARY TARGETS (IN ORDER):
 
-PRIMARY OBJECTIVE:
-Fix the redirect loop completely while preserving perfect SEO architecture.
+==================================================
+PHASE 1 — RENDER-BLOCKING CSS (SAFE REDUCTION ONLY)
+==================================================
+Inspect:
+- app/layout.js
+- app/page.js
+- public/assets/css/style.css
+- CSS imports currently loaded globally
 
-IMPORTANT:
-I need:
-- Legacy query URLs to 301 ONCE to clean URLs
-- Clean URLs to load normally with 200
-- Zero redirect loops
-- Zero crawl waste
-- Zero duplicate content
-- Zero canonical confusion
-
-DESIRED BEHAVIOR:
-
-/tools?tool=squadbuilder
-→ 301
-→ /tools/squad-builder
-→ 200
-
-/tools?tool=compare
-→ 301
-→ /tools/player-compare
-→ 200
-
-/tools?tool=watchlist
-→ 301
-→ /tools/watchlist
-→ 200
-
-/tools/squad-builder
-→ 200 only
-
-/tools/player-compare
-→ 200 only
-
-/tools/watchlist
-→ 200 only
-
-LIKELY ROOT CAUSES TO AUDIT:
-1. next.config.js redirect rules too broad
-2. middleware redirect conditions conflicting
-3. Legacy redirect rules matching clean routes
-4. Cleanup redirects looping
-5. Client-side router logic re-appending ?tool=
-6. window.history.replaceState
-7. router.push/router.replace
-8. useSearchParams sync
-9. Redirect chain conflicts
-
-TASKS:
-
-1. Audit next.config.js redirects thoroughly
-2. Audit middleware thoroughly
-3. Audit ToolsInteractions.client.js thoroughly
-4. Search entire codebase for:
-   - tool=
-   - replaceState
-   - pushState
-   - router.push
-   - router.replace
-   - searchParams
-   - useSearchParams
-
-5. Ensure legacy redirects ONLY trigger when:
-   pathname === /tools
-   AND query param tool exists
-
-6. Ensure clean URLs NEVER trigger legacy redirects
-
-7. Ensure cleanup redirects ONLY strip params from already-clean routes:
-   Example:
-   /tools/squad-builder?tool=squadbuilder
-   → /tools/squad-builder
-
-8. Prevent:
-   /tools?tool=squadbuilder
-   → /tools/squad-builder
-   → /tools?tool=squadbuilder
-
-9. Ensure no reverse redirects exist
-
-10. Preserve:
-   - Current UI
-   - Tool rendering
-   - SEO metadata
-   - Sitemap
-   - Canonicals
-
-11. Validate:
-   One-hop redirects only
-
-12. Production-ready implementation
-
-IDEAL IMPLEMENTATION:
-- Strict redirect conditions
-- Path-specific matching
-- No wildcard overreach
-- No duplicate rule collisions
-
-DELIVER:
-- Root cause diagnosis
-- next.config.js fixes
-- middleware fixes
-- client-side fixes
-- exact corrected redirect logic
-- validation checklist
-- explanation of why loop occurred
-
-PRIORITY:
-SEO + Redirect correctness + Crawl efficiency + Production stability
+Tasks:
+1. Identify homepage-critical CSS vs non-critical CSS
+2. Detect any safely deferrable homepage-noncritical CSS
+3. Detect duplicate global selectors
+4. Identify opportunities for:
+   - preload
+   - media-based deferred CSS
+   - safe route-only CSS
+5. ONLY apply changes if:
+   - zero players/tools regression risk
+   - zero homepage layout risk
 
 IMPORTANT:
-This is a technical SEO debugging mission.
-Do NOT rebuild architecture.
-Fix the existing implementation with the cleanest possible redirect logic.
-Think like:
-Google Search Console expert +
-Next.js routing engineer +
-SEO migration specialist.
+If CSS optimization is risky, explicitly say so and preserve stability.
+
+==================================================
+PHASE 2 — HOMEPAGE LCP PATH
+==================================================
+Inspect:
+- app/page.js
+- homepage hero/latest players section
+- header/logo
+
+Tasks:
+1. Identify actual LCP candidate(s)
+2. Check:
+   - fetchpriority
+   - eager vs lazy
+   - image discovery timing
+   - oversized above-the-fold assets
+3. Apply ONLY safe LCP improvements:
+   - preload
+   - fetchpriority
+   - dimensions
+   - better discovery
+4. Preserve current image stability
+
+==================================================
+PHASE 3 — REMAINING JS WASTE
+==================================================
+Inspect:
+- app/page.js
+- HomeDashboardInteractions.client.js
+- SiteChromeInteractions.client.js
+- HomeLatestBlogsSection.client.js
+
+Tasks:
+1. Detect:
+   - dead imports
+   - unnecessary hydration
+   - unused listeners
+   - oversized noncritical chunks
+2. Remove ONLY clearly dead or redundant code
+3. No broad component rewrites
+
+==================================================
+OUTPUT FORMAT
+==================================================
+## PHASE 1 AUDIT
+## PHASE 1 SAFE FIX (or NO SAFE FIX)
+## PHASE 2 AUDIT
+## PHASE 2 SAFE FIX
+## PHASE 3 AUDIT
+## PHASE 3 SAFE FIX
+## FILES MODIFIED
+## EXPECTED LIGHTHOUSE IMPACT
+## RISK LEVEL PER PHASE
+## SAFE TO BUILD? (YES/NO)
+## SAFE TO DEPLOY? (YES/NO)
+## WHAT SHOULD NOT BE TOUCHED YET
+
+Important: - you can check change using playwright mcp if it affects or not UI/UX and everything stayed all well if yes then implement: 
+
+FINAL GOAL:
+Recover the largest remaining performance gains while preserving the hard-earned stable UI.
+

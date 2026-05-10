@@ -46,6 +46,7 @@ export default async function ToolsHubPage() {
 
   return (
     <SiteChrome activeView="tools">
+      <link rel="stylesheet" href="/assets/css/tool-style.css" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}

@@ -81,7 +81,8 @@ export default async function PlayersPage({ searchParams = {} }) {
 
   return (
     <SiteChrome activeView="players">
-      <main className="players-main-content">
+      <link rel="stylesheet" href="/assets/css/watchlist-styles.css" />
+      <main className="players-main-content players-grid--database">
         <PlayersDatabaseInteractions
           players={players}
           positions={positions}

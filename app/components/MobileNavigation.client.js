@@ -89,12 +89,6 @@ export default function MobileNavigation({ activeView = '' }) {
   const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
 
   useEffect(() => {
-    MOBILE_PREFETCH_ROUTES.forEach((route) => {
-      Promise.resolve(router.prefetch(route)).catch(() => {});
-    });
-  }, [router]);
-
-  useEffect(() => {
     if (!isToolsSheetOpen) return undefined;
 
     const previousOverflow = document.body.style.overflow;
