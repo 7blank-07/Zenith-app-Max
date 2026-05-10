@@ -15,7 +15,6 @@ import { fetchLatestPlayers } from '../src/lib/server/top-players.mjs';
 import { getTopTickerConfig } from '../src/lib/server/top-ticker-config.mjs';
 import { getHomepageFeaturedStream } from '../src/lib/server/streams/repository.mjs';
 import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponents';
-import streamingStyles from './components/streaming/Streaming.module.css';
 
 const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
   ssr: true

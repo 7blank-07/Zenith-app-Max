@@ -53,9 +53,9 @@ function BlogFeatureCard({ post }) {
               src={post.coverImage}
               alt={post.title}
               className={styles.featuredImage}
-              width={1400}
-              height={840}
-              sizes="(max-width: 1024px) 100vw, 58vw"
+              width={1024}
+              height={614}
+              sizes="(max-width: 1100px) 100vw, 65vw"
               loading="lazy"
               fetchPriority="low"
             />
@@ -94,9 +94,9 @@ function BlogCompactCard({ post }) {
               src={post.coverImage}
               alt={post.title}
               className={styles.compactImage}
-              width={1200}
-              height={720}
-              sizes="(max-width: 1024px) 100vw, 32vw"
+              width={640}
+              height={384}
+              sizes="(max-width: 768px) 100vw, (max-width: 1100px) 50vw, 33vw"
               loading="lazy"
               fetchPriority="low"
             />
