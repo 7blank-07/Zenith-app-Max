@@ -1,77 +1,96 @@
-Perform a HIGH-ROI advanced JavaScript bundle waste audit for ZenithFCM.
+Perform the FINAL high-ROI optimization polish for ZenithFCM focused on:
+- Explicit image dimensions
+- CLS prevention
+- Residual DOM efficiency
+- Forced reflow reduction
 
 CONTEXT:
-Major CSS, image, and search hydration optimizations are already complete.
-
-CURRENT LIGHTHOUSE:
-- Reduce unused JS: ~98 KiB
-- Shared chunk 2117 includes legacy polyfills
-- First Load JS shared by all still significant
+Major optimization phases already completed:
+- style.css purge
+- Homepage image optimization
+- Blog image pipeline
+- Search hydration
+- Shared JS reduction
+- Chart.js deferral
 
 PRIMARY GOAL:
-Identify and reduce the biggest remaining first-party JavaScript waste BEFORE risky polyfill/build-target surgery.
+Capture the final meaningful Lighthouse gains WITHOUT risky architecture rewrites.
+
+TARGET METRICS:
+- Explicit width/height warnings
+- CLS
+- Forced reflow
+- DOM efficiency
+- Residual long-task micro-optimizations
 
 ABSOLUTE RULES:
-- Preserve functionality
-- Preserve SEO
-- Preserve routing
-- Preserve AdSense
-- Preserve Players / Tools / Watchlist
-- Backup before edits
-- No speculative framework rewrites
-- Focus on highest-ROI bundle reductions
+- No broad rewrites
+- No SEO changes
+- No AdSense changes
+- No API changes
+- No routing changes
+- No speculative framework changes
+- Preserve visual parity
+- Backup every touched file
 
 ==================================================
-PHASE 1 — SHARED JS FORENSIC AUDIT
+PHASE 1 — IMAGE DIMENSION AUDIT
 ==================================================
 Inspect:
-- Shared chunks
-- app/page.js
-- SiteChrome
-- HomeDashboardInteractions
-- Blog components
-- Global imports
-- Legacy utilities
+- Homepage cards
+- Blog cards
+- Player cards
+- Search dropdown
+- Shared icon/image components
 
+Tasks:
+1. Find images missing explicit width/height
+2. Add proper intrinsic sizing
+3. Preserve responsive behavior
+4. Avoid breaking existing CSS positioning
+
+==================================================
+PHASE 2 — CLS + LAYOUT STABILITY
+==================================================
+Tasks:
+1. Reduce layout shifts
+2. Preserve placeholders/aspect ratios
+3. Improve browser pre-layout calculations
+
+==================================================
+PHASE 3 — DOM / REFLOW MICRO-AUDIT
+==================================================
 Tasks:
 1. Identify:
-   - dead imports
-   - duplicated client logic
-   - over-hydrated components
-   - globally loaded but route-local code
-   - unnecessary shared dependencies
-2. Rank largest likely JS waste sources
+   - repeated layout reads
+   - forced reflow hotspots
+   - unnecessary sync measurements
+2. Apply only safe micro-optimizations
 
 ==================================================
-PHASE 2 — HIGH-CONFIDENCE JS PURGE
+PHASE 4 — FINAL CLEANUP
 ==================================================
 Tasks:
-1. Remove dead code
-2. Split route-specific JS
-3. Reduce global client bundle
-4. Defer non-critical hydration
-5. Preserve UX
-
-==================================================
-PHASE 3 — POLYFILL STRATEGY AUDIT
-==================================================
-Tasks:
-1. Determine if chunk 2117 polyfills are framework-default or dependency-driven
-2. Identify safe opportunities
-3. DO NOT aggressively rewrite browser targets yet unless high confidence
-
-Important: - you can check change using playwright mcp if it affects or not UI/UX and everything stayed all well if yes then implement
-
+1. Remove dead micro-waste
+2. Preserve all functionality
+3. Build-safe only
 
 ==================================================
 OUTPUT FORMAT
 ==================================================
-## PHASE 1 AUDIT
-## PHASE 2 CHANGES
-## PHASE 3 POLYFILL ANALYSIS
+## PHASE 1 IMAGE AUDIT
+## PHASE 2 CLS FIXES
+## PHASE 3 DOM / REFLOW FIXES
+## PHASE 4 CLEANUP
 ## FILES MODIFIED
-## EXPECTED JS SAVINGS
+## EXPECTED LIGHTHOUSE IMPACT
 ## RISK LEVEL
 ## SAFE TO BUILD? (YES/NO)
 ## SAFE TO DEPLOY? (YES/NO)
-## ROLLBACK COMMAND
+## QA CHECKLIST
+## FULL ROLLBACK COMMAND
+
+Important: - you can check change using playwright mcp if it affects or not UI/UX and everything stayed all well if yes then implement
+
+FINAL GOAL:
+Deliver the final production polish pass that captures remaining Lighthouse gains while preserving the now highly-optimized architecture.

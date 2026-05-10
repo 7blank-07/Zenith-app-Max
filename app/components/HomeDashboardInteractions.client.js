@@ -65,6 +65,8 @@ export default function HomeDashboardInteractions() {
 
         const renderDropdownResults = (results) => {
           searchResultsDropdown.innerHTML = '';
+          const fragment = document.createDocumentFragment();
+
           results.forEach((player) => {
             const variant = player.leagueImage ? 'normal' : 'hero';
             const row = document.createElement('div');
@@ -73,10 +75,10 @@ export default function HomeDashboardInteractions() {
             row.innerHTML = `
               <div class="dropdown-player-card">
                 <div class="squad-custom-mini-card dropdown-mini-card">
-                   <img src="${escapeHtml(player.cardBackground || 'https://via.placeholder.com/120x160')}" alt="Card Background" class="squad-custom-card-bg">
+                   <img src="${escapeHtml(player.cardBackground || 'https://via.placeholder.com/120x160')}" alt="Card Background" class="squad-custom-card-bg" width="60" height="80">
                    ${
                      player.playerImage
-                       ? `<img src="${escapeHtml(player.playerImage)}" alt="${escapeHtml(player.name)}" class="squad-custom-card-player-img">
+                       ? `<img src="${escapeHtml(player.playerImage)}" alt="${escapeHtml(player.name)}" class="squad-custom-card-player-img" width="80" height="80">
                           <span class="player-initials" style="display:none">${escapeHtml(getInitials(player.name))}</span>`
                       : `<span class="player-initials">${escapeHtml(getInitials(player.name))}</span>`
                   }
@@ -85,17 +87,17 @@ export default function HomeDashboardInteractions() {
                   <div class="squad-custom-card-name" style="color: ${escapeHtml(player.colorName || '#FFFFFF')}">${escapeHtml(player.name || 'Unknown')}</div>
                   ${
                     player.nationFlag
-                      ? `<img src="${escapeHtml(player.nationFlag)}" alt="Nation" class="dropdown-card-flag-nation ${variant === 'normal' ? 'normal-dropdown-nation-flag' : 'hero-icon-dropdown-nation-flag'}">`
+                      ? `<img src="${escapeHtml(player.nationFlag)}" alt="Nation" class="dropdown-card-flag-nation ${variant === 'normal' ? 'normal-dropdown-nation-flag' : 'hero-icon-dropdown-nation-flag'}" width="14" height="14">`
                       : ''
                   }
                   ${
                     player.clubFlag
-                      ? `<img src="${escapeHtml(player.clubFlag)}" alt="Club" class="dropdown-card-flag-club ${variant === 'normal' ? 'normal-dropdown-club-flag' : 'hero-icon-dropdown-club-flag'}">`
+                      ? `<img src="${escapeHtml(player.clubFlag)}" alt="Club" class="dropdown-card-flag-club ${variant === 'normal' ? 'normal-dropdown-club-flag' : 'hero-icon-dropdown-club-flag'}" width="14" height="14">`
                       : ''
                   }
                   ${
                     variant === 'normal' && player.leagueImage
-                      ? `<img src="${escapeHtml(player.leagueImage)}" alt="League" class="dropdown-card-flag-league normal-dropdown-league-flag">`
+                      ? `<img src="${escapeHtml(player.leagueImage)}" alt="League" class="dropdown-card-flag-league normal-dropdown-league-flag" width="14" height="14">`
                       : ''
                   }
                 </div>
@@ -119,8 +121,9 @@ export default function HomeDashboardInteractions() {
               navigate(player.playerPath);
             });
 
-            searchResultsDropdown.appendChild(row);
+            fragment.appendChild(row);
           });
+          searchResultsDropdown.appendChild(fragment);
         };
 
         const toText = (value, fallback = '') => {
@@ -213,16 +216,17 @@ export default function HomeDashboardInteractions() {
         };
 
         const updateSelection = () => {
-          const rows = Array.from(searchResultsDropdown.querySelectorAll('.dropdown-player-row'));
-          rows.forEach((row, index) => {
-            if (index === selectedDropdownIndex) {
+          const rows = searchResultsDropdown.children;
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            if (i === selectedDropdownIndex) {
               row.style.background = 'rgba(0, 194, 168, 0.08)';
               row.style.borderColor = 'var(--color-teal-500)';
             } else {
               row.style.background = '';
               row.style.borderColor = '';
             }
-          });
+          }
         };
 
         const applySearch = () => {

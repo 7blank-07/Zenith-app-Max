@@ -14,10 +14,26 @@ export default function PlayerRowCard({ player }) {
   return (
     <div className="player-row-card players-db-row-card">
       <div className="player-card-image-placeholder">
-        {player.cardBackground ? <img src={player.cardBackground} alt="Card Background" className="player-row-card-bg" /> : null}
+        {player.cardBackground ? (
+          <img
+            src={player.cardBackground}
+            alt="Card Background"
+            className="player-row-card-bg"
+            width={120}
+            height={160}
+            loading="lazy"
+          />
+        ) : null}
         {hasPlayerImage ? (
           <>
-            <img src={player.playerImage} alt={player.name} className="player-row-main-img" />
+            <img
+              src={player.playerImage}
+              alt={player.name}
+              className="player-row-main-img"
+              width={160}
+              height={160}
+              loading="lazy"
+            />
             <span className="player-initials player-initials-hidden">{getInitials(player.name)}</span>
           </>
         ) : (
@@ -39,6 +55,9 @@ export default function PlayerRowCard({ player }) {
             src={player.nationFlag}
             alt="Nation"
             className={`player-card-nation-flag ${playerType === 'normal' ? 'normal-nation-flag' : 'hero-icon-nation-flag'}`}
+            width={14}
+            height={14}
+            loading="lazy"
           />
         ) : null}
         {player.clubFlag ? (
@@ -46,15 +65,25 @@ export default function PlayerRowCard({ player }) {
             src={player.clubFlag}
             alt="Club"
             className={`player-card-club-flag ${playerType === 'normal' ? 'normal-club-flag' : 'hero-icon-club-flag'}`}
+            width={14}
+            height={14}
+            loading="lazy"
           />
         ) : null}
         {playerType === 'normal' && player.leagueImage ? (
-          <img src={player.leagueImage} alt="League" className="player-card-league-watchlist-flag normal-league-watchlist-flag" />
+          <img
+            src={player.leagueImage}
+            alt="League"
+            className="player-card-league-watchlist-flag normal-league-watchlist-flag"
+            width={14}
+            height={14}
+            loading="lazy"
+          />
         ) : null}
 
         {player.isUntradable && (
           <div className="card-untradable-badge card-untradable-badge--players" style={{ pointerEvents: 'none' }}>
-            <img src="/assets/images/untradable_img.png" alt="Untradable" />
+            <img src="/assets/images/untradable_img.png" alt="Untradable" width={12} height={12} loading="lazy" />
           </div>
         )}
       </div>

@@ -116,6 +116,8 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             className={`card-nation-flag-home ${
               cardVariant === 'normal' ? 'normal-nation-flag-home' : 'hero-icon-nation-flag-home'
             }`}
+            width={18}
+            height={18}
             loading="lazy"
             fetchPriority="low"
           />
@@ -125,6 +127,8 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             src={player.clubFlag}
             alt="Club"
             className={`card-club-flag-home ${cardVariant === 'normal' ? 'normal-club-flag-home' : 'hero-icon-club-flag-home'}`}
+            width={18}
+            height={18}
             loading="lazy"
             fetchPriority="low"
           />
@@ -134,6 +138,8 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             src={player.leagueImage}
             alt="League"
             className="card-league-flag-home normal-league-flag-home"
+            width={18}
+            height={18}
             loading="lazy"
             fetchPriority="low"
           />
@@ -141,7 +147,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
 
         {player.isUntradable && (
           <div className="card-untradable-badge">
-            <img src="/assets/images/untradable_img.png" alt="Untradable" loading="lazy" fetchPriority="low" />
+            <img src="/assets/images/untradable_img.png" alt="Untradable" width={16} height={16} loading="lazy" fetchPriority="low" />
           </div>
         )}
       </div>
