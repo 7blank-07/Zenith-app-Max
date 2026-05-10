@@ -40,16 +40,6 @@ export default function RootLayout({ children }) {
             __html: `(function(){var p=window.location.pathname||'';var isArabic=(p==='/ae/kod-fifa'||p.indexOf('/ae/kod-fifa/')===0);if(isArabic){var root=document.documentElement;root.lang='ar';root.dir='rtl';}})();`
           }}
         />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BN8W9Y5DC8"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-
-gtag('config', 'G-BN8W9Y5DC8');`
-          }}
-        />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="/assets/css/style.css" />
@@ -59,8 +49,6 @@ gtag('config', 'G-BN8W9Y5DC8');`
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />
         <link rel="apple-touch-icon" href="/assets/images/zenith_logo_main.png" />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
-             crossOrigin="anonymous"></script>
       </head>
       <body>
         <Suspense fallback={null}>
@@ -70,6 +58,25 @@ gtag('config', 'G-BN8W9Y5DC8');`
         {children}
         <ImageCacheServiceWorker />
         <WebVitalsReporter />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-BN8W9Y5DC8"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-BN8W9Y5DC8');
+          `}
+        </Script>
+        <Script
+          id="adsbygoogle"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
         <Script
           id="simple-analytics"
           src="https://scripts.simpleanalyticscdn.com/latest.js"
