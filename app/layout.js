@@ -42,6 +42,9 @@ export default function RootLayout({ children }) {
         />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://images.zenithfcm.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/assets/css/style.css" />
         <link rel="icon" type="image/png" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
@@ -72,7 +75,7 @@ export default function RootLayout({ children }) {
         <Script
           id="adsbygoogle"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           crossOrigin="anonymous"
         />
         <Script
