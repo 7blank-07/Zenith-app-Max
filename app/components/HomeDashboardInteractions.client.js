@@ -34,35 +34,16 @@ export default function HomeDashboardInteractions() {
       router.push(path);
     };
 
-    let idleId = null;
+    let searchInitialized = false;
 
-    const setupInteractions = () => {
-      const handleCardClick = (event) => {
-        const card = event.target?.closest?.('.dashboard-player-card[data-player-id]');
-        if (!card) return;
-        const playerPath = card.getAttribute('data-player-link');
-        if (playerPath) {
-          navigate(playerPath);
-          return;
-        }
-        const playerId = card.getAttribute('data-player-id');
-        if (!playerId) return;
-        navigate(
-          buildPlayerPath({
-            playerId,
-            recordId: card.getAttribute('data-record-id') || '',
-            name: card.getAttribute('data-player-name') || '',
-            ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0
-          })
-        );
-      };
-      document.addEventListener('click', handleCardClick);
-      cleanup.push(() => document.removeEventListener('click', handleCardClick));
+    const setupDeferredSearch = () => {
+      if (searchInitialized) return;
 
       const homeSearchInput = document.getElementById('home-search');
       const searchDropdown = document.getElementById('search-dropdown');
       const searchResultsDropdown = document.getElementById('search-results-dropdown');
       if (homeSearchInput && searchDropdown && searchResultsDropdown) {
+        searchInitialized = true;
         let selectedDropdownIndex = -1;
         let activeResults = [];
         let searchTimeoutId = null;
@@ -325,20 +306,57 @@ export default function HomeDashboardInteractions() {
           if (searchTimeoutId) window.clearTimeout(searchTimeoutId);
           if (activeController) activeController.abort();
         });
+
+        // Trigger search if focus happens and input already exists
+        if (document.activeElement === homeSearchInput && normalizeSearchText(homeSearchInput.value).length >= 2) {
+          applySearch();
+        }
       }
     };
 
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      idleId = window.requestIdleCallback(setupInteractions, { timeout: 2000 });
-    } else {
-      idleId = window.setTimeout(setupInteractions, 100);
-    }
+    // Setup critical path: Card clicks + Search trigger
+    const setupCritical = () => {
+      const handleCardClick = (event) => {
+        const card = event.target?.closest?.('.dashboard-player-card[data-player-id]');
+        if (!card) return;
+        const playerPath = card.getAttribute('data-player-link');
+        if (playerPath) {
+          navigate(playerPath);
+          return;
+        }
+        const playerId = card.getAttribute('data-player-id');
+        if (!playerId) return;
+        navigate(
+          buildPlayerPath({
+            playerId,
+            recordId: card.getAttribute('data-record-id') || '',
+            name: card.getAttribute('data-player-name') || '',
+            ovr: Number.parseInt(card.getAttribute('data-player-ovr') || '0', 10) || 0
+          })
+        );
+      };
+      document.addEventListener('click', handleCardClick);
+      cleanup.push(() => document.removeEventListener('click', handleCardClick));
+
+      const homeSearchInput = document.getElementById('home-search');
+      if (homeSearchInput) {
+        const onFirstInteraction = () => {
+          setupDeferredSearch();
+          homeSearchInput.removeEventListener('focus', onFirstInteraction);
+          homeSearchInput.removeEventListener('input', onFirstInteraction);
+        };
+        homeSearchInput.addEventListener('focus', onFirstInteraction);
+        homeSearchInput.addEventListener('input', onFirstInteraction);
+        cleanup.push(() => {
+          homeSearchInput.removeEventListener('focus', onFirstInteraction);
+          homeSearchInput.removeEventListener('input', onFirstInteraction);
+        });
+      }
+    };
+
+    setupCritical();
 
     return () => {
-      if (idleId !== null) {
-        if ('cancelIdleCallback' in window) window.cancelIdleCallback(idleId);
-        else window.clearTimeout(idleId);
-      }
       cleanup.forEach((dispose) => dispose());
     };
   }, [router]);
