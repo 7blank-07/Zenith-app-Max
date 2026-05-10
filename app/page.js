@@ -72,6 +72,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
   const cardBackground = player.cardBackground || 'https://via.placeholder.com/300x400';
   const cardImage = player.playerImage || 'https://via.placeholder.com/200x300';
   const playerPath = buildPlayerPath(player);
+  const isPriority = index < 4;
 
   return (
     <div
@@ -87,8 +88,20 @@ function renderDashboardPlayerCard(player, key, index = 0) {
       data-player-nation={player.nation || ''}
     >
       <div className="card-container">
-        <img src={cardBackground} alt="Card Background" className="card-background-img" />
-        <img src={cardImage} alt={player.name || 'Player'} className="player-image-img" />
+        <img
+          src={cardBackground}
+          alt="Card Background"
+          className="card-background-img"
+          loading={isPriority ? 'eager' : 'lazy'}
+          fetchpriority={isPriority ? 'high' : 'auto'}
+        />
+        <img
+          src={cardImage}
+          alt={player.name || 'Player'}
+          className="player-image-img"
+          loading={isPriority ? 'eager' : 'lazy'}
+          fetchpriority={isPriority ? 'high' : 'auto'}
+        />
 
         <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
           {player.ovr && player.ovr > 0 ? player.ovr : 'NA'}
@@ -107,6 +120,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             className={`card-nation-flag-home ${
               cardVariant === 'normal' ? 'normal-nation-flag-home' : 'hero-icon-nation-flag-home'
             }`}
+            loading="lazy"
           />
         )}
         {player.clubFlag && (
@@ -114,6 +128,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             src={player.clubFlag}
             alt="Club"
             className={`card-club-flag-home ${cardVariant === 'normal' ? 'normal-club-flag-home' : 'hero-icon-club-flag-home'}`}
+            loading="lazy"
           />
         )}
         {cardVariant === 'normal' && !!player.leagueImage && (
@@ -121,12 +136,13 @@ function renderDashboardPlayerCard(player, key, index = 0) {
             src={player.leagueImage}
             alt="League"
             className="card-league-flag-home normal-league-flag-home"
+            loading="lazy"
           />
         )}
 
         {player.isUntradable && (
           <div className="card-untradable-badge">
-            <img src="/assets/images/untradable_img.png" alt="Untradable" />
+            <img src="/assets/images/untradable_img.png" alt="Untradable" loading="lazy" />
           </div>
         )}
       </div>
@@ -173,8 +189,8 @@ export default async function HomePage() {
                 src="/assets/images/zenith_logo_main.png"
                 alt="Zenith logo"
                 className="logo-image"
-                width={1024}
-                height={1024}
+                width={48}
+                height={48}
                 sizes="(max-width: 768px) 34px, 48px"
               />
               <span className="logo-text">Zenith</span>

@@ -27,8 +27,8 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 src="/assets/images/zenith_logo_main.png"
                 alt="Zenith logo"
                 className="logo-image"
-                width={1024}
-                height={1024}
+                width={48}
+                height={48}
                 sizes="(max-width: 768px) 34px, 48px"
               />
               <span className="logo-text">Zenith</span>
