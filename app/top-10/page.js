@@ -8,7 +8,7 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Cache for 1 hour
 
-const POSITIONS = ['ST', 'LW', 'RW', 'LM', 'RM', 'CAM', 'CDM', 'CM', 'CB', 'LB', 'RB', 'GK'];
+const POSITIONS = ['ST', 'LW', 'RW', 'CAM', 'CDM', 'CM', 'CB', 'LB', 'RB', 'GK'];
 
 export default async function TopTenPage({ searchParams = {} }) {
   const currentPos = String(searchParams.pos || 'ST').trim().toUpperCase();

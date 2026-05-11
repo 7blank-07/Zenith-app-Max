@@ -16,7 +16,7 @@ export const metadata = {
   }
 };
 
-const POSITIONS = ['ST', 'LW', 'RW', 'LM', 'RM', 'CAM', 'CDM', 'CM', 'CB', 'LB', 'RB', 'GK'];
+const POSITIONS = ['ST', 'LW', 'RW', 'CAM', 'CDM', 'CM', 'CB', 'LB', 'RB', 'GK'];
 
 export default async function AdminTopTenPage({ searchParams = {} }) {
   const user = await requireBlogSessionUser({ nextPath: '/admin/top-10' });
