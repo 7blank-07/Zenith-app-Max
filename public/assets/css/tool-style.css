@@ -5583,7 +5583,7 @@ body.stats-open #squad-builder-modal {
 .stat-name-cell {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
+  color: #FFFFFF;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -5924,7 +5924,7 @@ body.stats-open #squad-builder-modal {
     display: inline-flex;
     max-width: calc(100% - 56px);
     font-size: 10px;
-    color: var(--color-text-secondary);
+    color: #D1D5DB;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     white-space: nowrap;
