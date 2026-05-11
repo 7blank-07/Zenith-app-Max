@@ -126,16 +126,28 @@
 }
 
 @media (max-width: 768px) {
-  .cardContent { padding: 8px; gap: 8px; }
-  .rankBadge { font-size: 20px; top: 6px; right: 8px; }
-  .statsGrid { gap: 2px; padding: 6px 2px; }
-  .statVal { font-size: 11px; }
-  .statLabel { font-size: 5px; }
-  .archetype { font-size: 8px; padding: 2px 6px; }
-  .cta { font-size: 10px; padding: 6px; }
+  .cardContent { padding: 12px; gap: 10px; }
+  .rankBadge { 
+    font-size: 22px; 
+    top: 6px; 
+    right: 8px; 
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 8px;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+  }
+  .statsGrid { 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; 
+    padding: 10px 8px; 
+  }
+  .statVal { font-size: 13px; }
+  .statLabel { font-size: 8px; }
+  .archetype { font-size: 9px; padding: 3px 8px; }
+  .cta { font-size: 11px; padding: 8px; }
 }
 
 @media (max-width: 360px) {
-  .statsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-  .rankBadge { font-size: 18px; }
+  .rankBadge { font-size: 18px; padding: 2px 6px; }
+  .statsGrid { gap: 6px; }
 }
