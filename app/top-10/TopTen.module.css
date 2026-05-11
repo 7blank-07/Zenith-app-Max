@@ -1,0 +1,147 @@
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 12px;
+  background: linear-gradient(135deg, #fff, #5eead4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #94a3b8;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.posTabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 48px;
+  padding: 8px;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.tab {
+  padding: 10px 20px;
+  border-radius: 14px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.tab:hover {
+  color: #fff;
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.tabActive {
+  background: linear-gradient(135deg, #14b8a6, #0ea5e9);
+  color: #04111d !important;
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.3);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.topThreeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: end;
+}
+
+.rank1 {
+  order: 2;
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.rank2 {
+  order: 1;
+}
+
+.rank3 {
+  order: 3;
+}
+
+.remainingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.emptyState {
+  padding: 80px 24px;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.3);
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 32px;
+  color: #94a3b8;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  color: #fff;
+  font-size: 24px;
+  margin: 0 0 12px;
+}
+
+@media (max-width: 1024px) {
+  .topThreeGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .rank1, .rank2, .rank3 {
+    order: initial;
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px 60px;
+  }
+  
+  .header {
+    margin-bottom: 32px;
+  }
+  
+  .posTabs {
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  
+  .tab {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}

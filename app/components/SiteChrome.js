@@ -49,6 +49,9 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <Link href="/fc-mobile-redeem-codes" data-link="" data-nav-link="" className={getNavClass(activeView, 'redeem')}>
               Redeem
             </Link>
+            <Link href="/top-10" data-link="" data-nav-link="" className={getNavClass(activeView, 'top-10')}>
+              Top 10
+            </Link>
             <Link href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
               Blogs
             </Link>

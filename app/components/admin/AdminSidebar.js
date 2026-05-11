@@ -5,6 +5,7 @@ const NAV_ITEMS = Object.freeze([
   { href: '/admin/blogs', label: 'All posts', countKey: 'total', exact: true },
   { href: '/admin/blogs/drafts', label: 'Drafts', countKey: 'draft', exact: true },
   { href: '/admin/blogs/pending', label: 'Pending review', countKey: 'pending', exact: true },
+  { href: '/admin/top-10', label: 'Top 10 Rankings', countKey: 'topTenTotal', exact: true },
   { href: '/admin/redeem-codes', label: 'Redeem codes', countKey: 'redeemTotal', exact: true },
   { href: '/admin/streaming', label: 'Streaming', countKey: 'streamingTotal', exact: true }
 ]);

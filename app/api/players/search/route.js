@@ -71,34 +71,97 @@ function resolvePlayerId(row) {
   return String(row?.player_id ?? row?.playerId ?? row?.playerid ?? row?.id ?? '').trim();
 }
 
+function isPhantomRecord(normalized) {
+  // MANDATORY: Real cards MUST have both a recordId and cardBackground
+  // This is the strongest signal for "Not a placeholder" in the production DB.
+  if (!normalized.recordId || !normalized.cardBackground) {
+    return true;
+  }
+
+  // Skip records with obviously fake names or placeholder indicators
+  const name = String(normalized.name || '').toLowerCase();
+  if (name.includes('test player') || name.includes('placeholder')) return true;
+
+  // CRITICAL FIX: The user reported searching for players returns "fake" 120 OVR versions.
+  // In the current database, a 120 OVR at Rank 0 is almost certainly a data error or phantom.
+  // We filter these out to ensure only legitimate base cards (Rank 0) are shown.
+  if (Number(normalized.ovr) >= 120 && Number(normalized.rank || 0) === 0) {
+    return true;
+  }
+  
+  return false;
+}
+
+
+
+
+
+function getRealnessScore(normalized) {
+  let score = 0;
+  if (normalized.recordId) score += 50;
+  if (normalized.cardBackground) score += 30;
+  if (normalized.playerImage) score += 20;
+  if (normalized.nationFlag) score += 10;
+  if (normalized.clubFlag) score += 10;
+  
+  // Penalize missing critical data
+  if (!normalized.club || normalized.club === 'No Club') score -= 20;
+  if (!normalized.nation) score -= 20;
+  
+  return score;
+}
+
 function dedupePreferredPlayers(rows) {
   if (!Array.isArray(rows) || !rows.length) return [];
 
   const byId = new Map();
-  const fallbackRows = [];
 
   for (const row of rows) {
     const playerId = resolvePlayerId(row);
-    if (!playerId) {
-      fallbackRows.push(row);
-      continue;
-    }
+    if (!playerId) continue;
 
     const normalized = normalizePlayerStableRecord(row, playerId);
+    
+    // Skip obvious phantoms
+    if (isPhantomRecord(normalized)) continue;
+
     const existing = byId.get(playerId);
     if (!existing) {
       byId.set(playerId, { row, normalized });
       continue;
     }
 
-    const preferred = preferPlayerStableRecord(existing.normalized, normalized);
-    if (preferred === normalized) {
+    // Comparison logic:
+    // 1. Prefer higher realness score
+    // 2. If same realness, prefer LOWER rank (base cards are prioritized)
+    // 3. If same rank, prefer higher OVR
+    const currentScore = getRealnessScore(existing.normalized);
+    const candidateScore = getRealnessScore(normalized);
+
+    if (candidateScore > currentScore) {
       byId.set(playerId, { row, normalized });
+    } else if (candidateScore === currentScore) {
+      const currentRank = Number(existing.normalized.rank || 0);
+      const candidateRank = Number(normalized.rank || 0);
+      
+      if (candidateRank < currentRank) {
+        // We found a lower rank (more "base" card), prefer it
+        byId.set(playerId, { row, normalized });
+      } else if (candidateRank === currentRank) {
+        // Same rank, pick the one with better OVR
+        const currentOvr = Number(existing.normalized.ovr || 0);
+        const candidateOvr = Number(normalized.ovr || 0);
+        if (candidateOvr >= currentOvr) {
+          byId.set(playerId, { row, normalized });
+        }
+      }
     }
   }
 
-  return [...byId.values()].map((entry) => entry.row).concat(fallbackRows);
+  // Return the normalized objects instead of raw rows for consistency
+  return [...byId.values()].map((entry) => entry.normalized);
 }
+
 
 function readRowColorValue(row, keys) {
   for (const key of keys) {
@@ -258,9 +321,28 @@ function pickSearchParams(incoming) {
   const outgoing = new URLSearchParams();
   for (const [key, value] of incoming.entries()) {
     if (!ALLOWED_PARAMS.has(key)) continue;
-    const text = String(value || '').trim();
+    let text = String(value || '').trim();
     if (!text) continue;
+    
+    // Normalize position to uppercase for consistent backend filtering
+    if (key === 'position') {
+      text = text.toUpperCase();
+    }
+    
+    // Ensure OVR values are valid numbers
+    if (key === 'min_ovr' || key === 'max_ovr' || key === 'rank') {
+      const num = parseInt(text, 10);
+      if (isNaN(num)) continue;
+      text = String(num);
+    }
+    
     outgoing.append(key, text);
+  }
+
+  // DEFAULT: Always search for Rank 0 (base cards) unless explicitly requested otherwise.
+  // This prevents getting rank 5 versions with inflated OVRs (like 120).
+  if (!outgoing.has('rank')) {
+    outgoing.set('rank', '0');
   }
 
   const limit = Math.min(50, Math.max(1, Number.parseInt(outgoing.get('limit') || '50', 10) || 50));
@@ -273,13 +355,9 @@ function pickSearchParams(incoming) {
   } else {
     outgoing.delete('q');
   }
-  if (legacyQuery) {
-    outgoing.set('name_starts_with', legacyQuery);
-  } else {
-    outgoing.delete('name_starts_with');
-  }
   return outgoing;
 }
+
 
 function buildPlayersQuery(outgoing, { includeQ } = { includeQ: true }) {
   const query = new URLSearchParams(outgoing);
@@ -325,7 +403,10 @@ function normalizeSearchValue(value) {
 }
 
 function rowSearchSource(row) {
-  return normalizeSearchValue(`${row?.name || row?.player_name || ''} ${row?.card_name || row?.cardName || ''}`);
+  // Support both raw rows and normalized objects
+  const name = row?.name || row?.player_name || '';
+  const event = row?.eventName || row?.card_name || row?.cardName || '';
+  return normalizeSearchValue(`${name} ${event}`);
 }
 
 function payloadMatchesSearchFilter(normalizedPayload, query) {
@@ -333,8 +414,12 @@ function payloadMatchesSearchFilter(normalizedPayload, query) {
   if (!needle) return true;
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
   if (!rows.length) return true;
-  return rows.every((row) => rowSearchSource(row).includes(needle));
+  // If ANY row matches the needle, we consider it a match (or every? usually search is inclusive)
+  // The original code used .every which is strange for a search result check
+  // but let's stick to the intent of filtering.
+  return rows.some((row) => rowSearchSource(row).includes(needle));
 }
+
 
 function filterPayloadBySearch(normalizedPayload, query) {
   const needle = normalizeSearchValue(query);
@@ -396,10 +481,25 @@ export async function GET(request) {
 
     try {
       const result = await fetchJson(playersUrl);
-      const normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
+      let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
+      
+      // FALLBACK: If no results found with position/ovr filters, try searching by name only
+      if ((!normalized || normalized.players.length === 0) && searchQuery) {
+        console.log(`[top-10-search-api] No results with filters. Trying name-only fallback for: ${searchQuery}`);
+        const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit) });
+        const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
+        const fallbackResult = await fetchJson(fallbackUrl);
+        const fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit);
+        
+        if (fallbackResult.response.ok && fallbackNormalized && fallbackNormalized.players.length > 0) {
+          normalized = fallbackNormalized;
+        }
+      }
+
       const normalizedWithColors = result.response.ok && normalized
         ? await enrichPayloadColors(base, normalized, attempts)
         : normalized;
+
 
       if (result.response.ok && normalizedWithColors) {
         if (searchQuery && playersQuery.has('q') && !payloadMatchesSearchFilter(normalizedWithColors, searchQuery)) {

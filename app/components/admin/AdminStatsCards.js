@@ -49,8 +49,17 @@ const REDEEM_CARD_CONFIG = Object.freeze([
   }
 ]);
 
+const TOP_TEN_CARD_CONFIG = Object.freeze([
+  {
+    href: '/admin/top-10',
+    label: 'Top 10 Rankings',
+    key: 'topTenTotal',
+    description: 'Total number of live position-based rankings published.'
+  }
+]);
+
 export default function AdminStatsCards({ counts }) {
-  const allCards = [...BLOG_CARD_CONFIG, ...REDEEM_CARD_CONFIG];
+  const allCards = [...BLOG_CARD_CONFIG, ...TOP_TEN_CARD_CONFIG, ...REDEEM_CARD_CONFIG];
   const visibleCards = allCards.filter((card) => Object.prototype.hasOwnProperty.call(counts || {}, card.key));
   const cards = visibleCards.length ? visibleCards : BLOG_CARD_CONFIG;
 

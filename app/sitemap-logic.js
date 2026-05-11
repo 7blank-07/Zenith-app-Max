@@ -3,8 +3,8 @@ import { fetchPlayersByIds, readTopPlayerIds } from '../src/lib/server/top-playe
 import { getBlogSitemapEntries } from '../src/lib/server/blog/seo.mjs';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
-const STATIC_SITEMAP_ID = 0;
-const PLAYER_SITEMAP_START_ID = 1;
+export const STATIC_SITEMAP_ID = 0;
+export const PLAYER_SITEMAP_START_ID = 1;
 const PLAYER_SITEMAP_MAX_URLS = 50000;
 const PLAYER_FETCH_BATCH_SIZE = 2000;
 
@@ -24,7 +24,7 @@ function splitIntoChunks(items, size) {
   return chunks;
 }
 
-function getStaticEntries(lastModified) {
+export function getStaticEntries(lastModified) {
   return [
     {
       url: toAbsoluteUrl('/'),
@@ -111,6 +111,18 @@ function getStaticEntries(lastModified) {
       priority: 0.86
     },
     {
+      url: toAbsoluteUrl('/top-10'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.9
+    },
+    {
+      url: toAbsoluteUrl('/streaming'),
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.8
+    },
+    {
       url: toAbsoluteUrl('/tools/watchlist'),
       lastModified,
       changeFrequency: 'weekly',
@@ -179,15 +191,6 @@ async function fetchPlayersForSitemap(playerIds) {
   return players;
 }
 
-async function resolveSitemapLayout() {
-  const playerChunks = await getPlayerSitemapChunks();
-  const blogSitemapId = PLAYER_SITEMAP_START_ID + playerChunks.length;
-  return {
-    playerChunks,
-    blogSitemapId
-  };
-}
-
 export async function generateSitemaps() {
   const { playerChunks, blogSitemapId } = await resolveSitemapLayout();
   const sitemapIds = [{ id: STATIC_SITEMAP_ID }];
@@ -200,7 +203,16 @@ export async function generateSitemaps() {
   return sitemapIds;
 }
 
-export default async function sitemap({ id }) {
+async function resolveSitemapLayout() {
+  const playerChunks = await getPlayerSitemapChunks();
+  const blogSitemapId = PLAYER_SITEMAP_START_ID + playerChunks.length;
+  return {
+    playerChunks,
+    blogSitemapId
+  };
+}
+
+export default async function getSitemapData(id) {
   const sitemapId = Number(id);
   const lastModified = new Date();
 
