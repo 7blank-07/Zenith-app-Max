@@ -719,32 +719,32 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     firstDefined([source.player_id, source.playerid, source.id, fallbackPlayerId], fallbackPlayerId),
     ''
   );
-  const recordId = toText(firstDefined([source.id, source.player_stats_id, source.record_id], ''), '');
-  const name = toText(firstDefined([source.name, source.player_name], 'Unknown Player'));
+  const recordId = toText(firstDefined([source.id, source.player_stats_id, source.record_id, source.recordId], ''), '');
+  const name = toText(firstDefined([source.name, source.player_name, source.playerName], 'Unknown Player'));
   const fullName = toText(firstDefined([source.full_name, source.fullname, source.fullName, source.player_full_name, source.name], ''), '');
   const eventName = toText(firstDefined([source.event_name, source.event, source.program_name, source.eventName], ''), '');
-  const ovr = toInteger(firstDefined([source.ovr, source.overall, source.rating], 0), 0);
-  const position = toText(firstDefined([source.position, source.pos, source.primary_position], ''), '');
-  const alternatePosition = toText(firstDefined([source.alternate_position, source.secondary_position], ''), '');
-  const nation = toText(firstDefined([source.nation_region, source.nation, source.country], ''), '');
-  const club = toText(firstDefined([source.team, source.club], ''), '');
-  const league = toText(firstDefined([source.league], ''), '');
-  const image = toText(firstDefined([source.image, source.image_url, source.card_image, source.player_image], ''), '');
-  const cardBackground = toText(firstDefined([source.card_background, source.cardbackground], ''), '');
-  const playerImage = toText(firstDefined([source.player_image, source.playerimage, source.image, source.image_url], ''), '');
-  const nationFlag = toText(firstDefined([source.nation_flag], ''), '');
-  const clubFlag = toText(firstDefined([source.club_flag], ''), '');
-  const leagueImage = toText(firstDefined([source.league_image], ''), '');
-  const colorRating = toText(firstDefined([source.color_rating, source.colorrating], ''), '');
-  const colorPosition = toText(firstDefined([source.color_position, source.colorposition], ''), '');
-  const colorName = toText(firstDefined([source.color_name, source.colorname], ''), '');
+  const ovr = toInteger(firstDefined([source.ovr, source.overall, source.rating, source.overallrating], 0), 0);
+  const position = toText(firstDefined([source.position, source.pos, source.primary_position, source.primaryPosition], ''), '');
+  const alternatePosition = toText(firstDefined([source.alternate_position, source.secondary_position, source.alternatePosition, source.secondaryPosition], ''), '');
+  const nation = toText(firstDefined([source.nation_region, source.nation, source.country, source.nationName], ''), '');
+  const club = toText(firstDefined([source.team, source.club, source.clubName], ''), '');
+  const league = toText(firstDefined([source.league, source.leagueName], ''), '');
+  const image = toText(firstDefined([source.image, source.image_url, source.card_image, source.player_image, source.playerImage], ''), '');
+  const cardBackground = toText(firstDefined([source.card_background, source.cardbackground, source.cardBackground], ''), '');
+  const playerImage = toText(firstDefined([source.player_image, source.playerimage, source.image, source.image_url, source.playerImage], ''), '');
+  const nationFlag = toText(firstDefined([source.nation_flag, source.nationflag, source.nationFlag], ''), '');
+  const clubFlag = toText(firstDefined([source.club_flag, source.clubflag, source.clubFlag], ''), '');
+  const leagueImage = toText(firstDefined([source.league_image, source.leagueimage, source.leagueImage], ''), '');
+  const colorRating = toText(firstDefined([source.color_rating, source.colorrating, source.colorRating], ''), '');
+  const colorPosition = toText(firstDefined([source.color_position, source.colorposition, source.colorPosition], ''), '');
+  const colorName = toText(firstDefined([source.color_name, source.colorname, source.colorName], ''), '');
   const summary = sanitizeSummary(firstDefined([source.summary, source.description, source.bio], ''));
   const rank = toInteger(firstDefined([source.rank], 0), 0);
-  const isUntradable = toBoolean(firstDefined([source.is_untradable, source.untradable], false));
-  const skillMoves = toInteger(firstDefined([source.skill_moves_stars, source.skill_moves], 0), 0);
-  const weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot], 0), 0);
-  const strongFoot = toInteger(firstDefined([source.strong_foot_stars], 0), 0);
-  const strongFootSide = toText(firstDefined([source.strong_foot_side], ''), '');
+  const isUntradable = toBoolean(firstDefined([source.is_untradable, source.untradable, source.isUntradable], false));
+  const skillMoves = toInteger(firstDefined([source.skill_moves_stars, source.skill_moves, source.skillMoves, source.skillmoves], 0), 0);
+  const weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot, source.weakFoot, source.weakfoot], 0), 0);
+  const strongFoot = toInteger(firstDefined([source.strong_foot_stars, source.strongFoot], 0), 0);
+  const strongFootSide = toText(firstDefined([source.strong_foot_side, source.strongFootSide], ''), '');
   const workRateAttack = toText(
     firstDefined(
       [

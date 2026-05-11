@@ -2,7 +2,7 @@
   position: relative;
   background: rgba(10, 18, 30, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(12px);
@@ -12,158 +12,94 @@
 }
 
 .card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
   border-color: rgba(45, 212, 191, 0.4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(45, 212, 191, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
 .featured {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(8, 15, 26, 0.9));
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(8, 15, 26, 0.9));
   border-color: rgba(45, 212, 191, 0.25);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .rankBadge {
   position: absolute;
-  top: 12px;
-  right: 16px;
-  font-size: 28px;
-  font-weight: 900;
+  top: 10px;
+  right: 12px;
+  font-size: 32px;
+  font-weight: 950;
   font-style: italic;
-  color: rgba(148, 163, 184, 0.15);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1;
-  z-index: 1;
+  z-index: 10;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }
 
 .cardContent {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   flex: 1;
 }
 
 .playerSection {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 16px;
+  margin-bottom: 4px;
 }
 
-.playerImageContainer {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
-}
-
-.cardBg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.8;
-}
-
-.playerImg {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  height: 90%;
-  object-fit: contain;
-  z-index: 2;
-}
-
-.mainInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ovrPos {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.ovr {
-  font-size: 24px;
-  font-weight: 900;
-  color: #fff;
-}
-
-.pos {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #5eead4;
-}
-
-.playerName {
-  font-size: 18px;
-  font-weight: 800;
-  color: #f8fafc;
-  line-height: 1.2;
+/* We use global dashboard-player-card styles, but can tweak dimensions here */
+.card :global(.dashboard-player-card) {
+  margin: 0 auto !important;
 }
 
 .metaSection {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
-.flags {
-  display: flex;
-  gap: 8px;
-}
-
-.flag {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  object-fit: contain;
-}
-
 .archetype {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #5eead4;
   background: rgba(45, 212, 191, 0.1);
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 999px;
+  border: 1px solid rgba(45, 212, 191, 0.2);
 }
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  background: rgba(15, 23, 42, 0.4);
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .statBox {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1px;
 }
 
 .statVal {
-  font-size: 16px;
-  font-weight: 800;
-  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .statLabel {
-  font-size: 10px;
+  font-size: 7px;
   font-weight: 700;
-  color: #64748b;
+  color: #94a3b8;
   text-transform: uppercase;
 }
 
@@ -172,38 +108,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 8px;
   background: rgba(45, 212, 191, 0.1);
   border: 1px solid rgba(45, 212, 191, 0.2);
-  border-radius: 14px;
+  border-radius: 8px;
   color: #5eead4;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
 .cta:hover {
-  background: rgba(45, 212, 191, 0.2);
-  border-color: rgba(45, 212, 191, 0.4);
-  color: #fff;
+  background: #2dd4bf;
+  border-color: #2dd4bf;
+  color: #04111d;
 }
 
-/* Featured overrides */
-.featured .rankBadge {
-  font-size: 40px;
-  color: rgba(45, 212, 191, 0.1);
-}
-
-.featured .playerName {
-  font-size: 22px;
-}
-
-.featured .ovr {
-  font-size: 32px;
-}
-
-.featured .playerImageContainer {
-  width: 100px;
-  height: 100px;
+@media (max-width: 768px) {
+  .cardContent { padding: 12px; gap: 10px; }
+  .rankBadge { font-size: 24px; top: 8px; right: 8px; }
+  .statsGrid { gap: 4px; padding: 8px 4px; }
+  .statVal { font-size: 12px; }
+  .statLabel { font-size: 6px; }
 }

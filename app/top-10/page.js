@@ -18,12 +18,10 @@ export default async function TopTenPage({ searchParams = {} }) {
   const players = playerIds.length > 0 ? await fetchPlayersByIds(playerIds) : [];
 
   const rankings = dbRankings.map(r => {
-    const player = players.find(p => p.playerId === r.playerId);
+    const rId = String(r.playerId || '').trim();
+    const player = players.find(p => String(p.playerId || '').trim() === rId);
     return { ...r, player };
   }).filter(r => r.player);
-
-  const topThree = rankings.slice(0, 3);
-  const remaining = rankings.slice(3);
 
   return (
     <SiteChrome activeView="top-10">
@@ -49,21 +47,8 @@ export default async function TopTenPage({ searchParams = {} }) {
 
         {rankings.length > 0 ? (
           <div className={styles.content}>
-            <section className={styles.topThreeGrid}>
-              {topThree.map((item, idx) => (
-                <div key={item.playerId} className={styles[`rank${idx + 1}`]}>
-                  <PlayerPreviewMiniPlayerCard
-                    player={item.player}
-                    rank={item.rank}
-                    archetype={item.archetype}
-                    isFeatured={true}
-                  />
-                </div>
-              ))}
-            </section>
-
-            <section className={styles.remainingGrid}>
-              {remaining.map((item) => (
+            <div className={styles.rankingsGrid}>
+              {rankings.map((item) => (
                 <PlayerPreviewMiniPlayerCard
                   key={item.playerId}
                   player={item.player}
@@ -71,7 +56,7 @@ export default async function TopTenPage({ searchParams = {} }) {
                   archetype={item.archetype}
                 />
               ))}
-            </section>
+            </div>
           </div>
         ) : (
           <div className={styles.emptyState}>
