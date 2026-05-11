@@ -102,8 +102,8 @@
 
 @media (max-width: 1024px) {
   .rankingsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 }
 
@@ -118,7 +118,7 @@
   
   .posTabs {
     gap: 6px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     padding: 8px;
     border-radius: 16px;
   }
@@ -131,7 +131,13 @@
   }
 
   .rankingsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rankingsGrid {
+    grid-template-columns: 1fr;
   }
 }
