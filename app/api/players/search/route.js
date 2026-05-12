@@ -431,12 +431,12 @@ function filterPayloadBySearch(normalizedPayload, query) {
   };
 }
 
-async function tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts) {
+async function tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, targetPosition = null) {
   const compatibilityQuery = buildPlayersQuery(outgoing);
   const compatibilityUrl = buildEndpointUrl(base, '/api/players', compatibilityQuery);
   try {
     const compatibilityResult = await fetchJson(compatibilityUrl);
-    const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit);
+    const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit, targetPosition);
     if (compatibilityResult.response.ok && normalizedCompatibility && normalizedCompatibility.players.length > 0) {
       return {
         payload: normalizedCompatibility,
@@ -487,7 +487,7 @@ export async function GET(request) {
 
     try {
       const result = await fetchJson(playersUrl);
-      let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
+      let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition);
       
       // Apply local filtering early if we have a search query, to accurately determine if we need fallbacks
       if (normalized && searchQuery) {
@@ -500,7 +500,7 @@ export async function GET(request) {
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
         const fallbackResult = await fetchJson(fallbackUrl);
-        let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit);
+        let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
         
         if (fallbackResult.response.ok && fallbackNormalized) {
           fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
@@ -512,7 +512,7 @@ export async function GET(request) {
 
       // FALLBACK 2: Try compatibility (name_starts_with) if still no results
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
-        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
+        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition);
         if (compatibilityPayload) {
           let compatNormalized = compatibilityPayload.payload;
           compatNormalized = filterPayloadBySearch(compatNormalized, searchQuery);
@@ -528,7 +528,7 @@ export async function GET(request) {
         if (legacyQuery) {
           const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
           const legacyResult = await fetchJson(legacyUrl);
-          let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit);
+          let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
           if (legacyResult.response.ok && normalizedLegacy) {
             normalizedLegacy = filterPayloadBySearch(normalizedLegacy, searchQuery);
             if (normalizedLegacy.players.length > 0) {
@@ -538,20 +538,8 @@ export async function GET(request) {
         }
       }
 
-      // LOCAL FILTER: If a position was requested (and not ignored due to name search), 
-      // filter the results to include Primary OR Alternate position matches.
-      if (normalized && effectivePosition) {
-        normalized.players = normalized.players.filter(player => {
-          const primaryPos = String(player.position || '').toUpperCase();
-          const altPosList = String(player.alternatePosition || '').split(',').map(p => p.trim().toUpperCase());
-          return primaryPos === effectivePosition || altPosList.includes(effectivePosition);
-        });
-        
-        // Update total after local filtering
-        if (normalized.pagination) {
-          normalized.pagination.total = normalized.players.length;
-        }
-      }
+      // Note: Position filtering is now handled INSIDE normalizePlayersPayload via dedupePreferredPlayers(..., targetPosition)
+      // which is more robust as it filters BEFORE deduplicating by playerId.
 
       const normalizedWithColors = result.response.ok && normalized
         ? await enrichPayloadColors(base, normalized, attempts)
@@ -575,7 +563,7 @@ export async function GET(request) {
       attempts.push({ url: playersUrl, status: result.response.status, reason });
 
       if ((result.response.status === 400 || result.response.status === 422) && playersQuery.has('q')) {
-        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
+        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition);
         if (compatibilityPayload) {
           const compatibilityWithColors = await enrichPayloadColors(base, compatibilityPayload.payload, attempts);
           return NextResponse.json(compatibilityWithColors, { status: compatibilityPayload.status });
@@ -589,7 +577,7 @@ export async function GET(request) {
           const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
           try {
             const legacyResult = await fetchJson(legacyUrl);
-            const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit);
+            const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
             if (legacyResult.response.ok && normalizedLegacy) {
               const legacyWithColors = await enrichPayloadColors(base, normalizedLegacy, attempts);
               return NextResponse.json(legacyWithColors, { status: legacyResult.response.status });
