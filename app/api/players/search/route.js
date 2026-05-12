@@ -93,14 +93,21 @@ function getRealnessScore(normalized) {
   return score;
 }
 
-function dedupePreferredPlayers(rows, targetPosition = null) {
-  if (!Array.isArray(rows) || !rows.length) return [];
+function dedupePreferredPlayers(rows, targetPosition = null, isSearchActive = false) {
+  if (!Array.isArray(rows) || !rows.length) {
+    console.log(`[SearchProxy] dedupePreferredPlayers: rows is not an array or empty`);
+    return [];
+  }
   const byId = new Map();
   for (const row of rows) {
     const playerId = resolvePlayerId(row);
     if (!playerId) continue;
     const normalized = normalizePlayerStableRecord(row, playerId);
-    if (isPhantomRecord(normalized)) continue;
+    
+    // CRITICAL: If a search is active, we bypass the phantom check. 
+    // New cards on production might be missing backgrounds/images initially.
+    if (!isSearchActive && isPhantomRecord(normalized)) continue;
+
     if (targetPosition) {
       const primaryPos = String(normalized.position || '').toUpperCase();
       const altPosList = String(normalized.alternatePosition || '').split(',').map(p => p.trim().toUpperCase());
@@ -130,7 +137,9 @@ function dedupePreferredPlayers(rows, targetPosition = null) {
       }
     }
   }
-  return [...byId.values()].map((entry) => entry.normalized);
+  const results = [...byId.values()].map((entry) => entry.normalized);
+  console.log(`[SearchProxy] dedupePreferredPlayers: Input ${rows.length} rows -> Output ${results.length} players (isSearchActive: ${isSearchActive})`);
+  return results;
 }
 
 function readRowColorValue(row, keys) {
@@ -214,9 +223,9 @@ async function enrichPayloadColors(base, normalizedPayload, attempts) {
   };
 }
 
-function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50, targetPosition = null) {
+function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50, targetPosition = null, isSearchActive = false) {
   if (payload && typeof payload === 'object' && Array.isArray(payload.players)) {
-    const dedupedPlayers = dedupePreferredPlayers(payload.players, targetPosition);
+    const dedupedPlayers = dedupePreferredPlayers(payload.players, targetPosition, isSearchActive);
     const pagination = payload.pagination && typeof payload.pagination === 'object' ? payload.pagination : null;
     const total = Number(pagination?.total);
     return {
@@ -233,7 +242,7 @@ function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50
     };
   }
   if (payload && typeof payload === 'object' && Array.isArray(payload.results)) {
-    const dedupedResults = dedupePreferredPlayers(payload.results, targetPosition);
+    const dedupedResults = dedupePreferredPlayers(payload.results, targetPosition, isSearchActive);
     const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : payload.results.length;
     const limit = Number.isFinite(Number(payload.limit)) ? Number(payload.limit) : fallbackLimit;
     const offset = Number.isFinite(Number(payload.offset)) ? Number(payload.offset) : fallbackOffset;
@@ -367,19 +376,30 @@ export async function GET(request) {
   const targetPosition = String(incoming.get('position') || '').trim().toUpperCase();
   const attempts = [];
 
+  console.log(`[SearchProxy] Incoming search: q="${searchQuery}" pos="${targetPosition}"`);
+
   if (searchQuery) {
     outgoing.delete('position');
   }
 
   const effectivePosition = searchQuery ? '' : targetPosition;
+  const candidates = backendCandidates();
+  console.log(`[SearchProxy] Backend candidates: ${candidates.join(', ')}`);
 
-  for (const base of backendCandidates()) {
+  for (const base of candidates) {
     const playersQuery = buildPlayersQuery(outgoing);
     const playersUrl = buildEndpointUrl(base, '/api/players', playersQuery);
+    console.log(`[SearchProxy] Trying URL: ${playersUrl}`);
 
     try {
       const result = await fetchJson(playersUrl);
-      let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition);
+      console.log(`[SearchProxy] Backend Response: ${result.response.status}`);
+      
+      const isSearchActive = !!searchQuery;
+      let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
+      if (normalized) {
+        console.log(`[SearchProxy] Normalized players count: ${normalized.players.length}`);
+      }
       
       if (normalized && searchQuery) {
         normalized = filterPayloadBySearch(normalized, searchQuery);
@@ -389,7 +409,7 @@ export async function GET(request) {
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
         const fallbackResult = await fetchJson(fallbackUrl);
-        let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
+        let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition, true);
         if (fallbackResult.response.ok && fallbackNormalized) {
           fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
           if (fallbackNormalized.players.length > 0) normalized = fallbackNormalized;
@@ -397,7 +417,7 @@ export async function GET(request) {
       }
 
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
-        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition);
+        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition, true);
         if (compatibilityPayload) {
           let compatNormalized = filterPayloadBySearch(compatibilityPayload.payload, searchQuery);
           if (compatNormalized.players.length > 0) normalized = compatNormalized;
@@ -409,7 +429,7 @@ export async function GET(request) {
         if (legacyQuery) {
           const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
           const legacyResult = await fetchJson(legacyUrl);
-          let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
+          let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, true);
           if (legacyResult.response.ok && normalizedLegacy) {
             normalizedLegacy = filterPayloadBySearch(normalizedLegacy, searchQuery);
             if (normalizedLegacy.players.length > 0) normalized = normalizedLegacy;
@@ -435,7 +455,7 @@ export async function GET(request) {
           const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
           try {
             const legacyResult = await fetchJson(legacyUrl);
-            const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
+            const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
             if (legacyResult.response.ok && normalizedLegacy) {
               const legacyWithColors = await enrichPayloadColors(base, normalizedLegacy, attempts);
               return NextResponse.json(legacyWithColors, { status: legacyResult.response.status });
