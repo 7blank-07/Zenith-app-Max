@@ -1220,8 +1220,8 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     return map;
   }, [normalizedPlayers, supplementalPlayers]);
 
-  const searchToolPlayers = useCallback(async ({ query = '', filters = {}, limit = 140, signal } = {}) => {
-    const safeLimit = Math.min(50, Math.max(1, toNumber(limit, 40) || 40));
+  const searchToolPlayers = useCallback(async ({ query = '', filters = {}, limit = 220, signal } = {}) => {
+    const safeLimit = Math.max(1, toNumber(limit, 140) || 140);
     const searchParams = new URLSearchParams({
       limit: String(safeLimit),
       offset: '0',

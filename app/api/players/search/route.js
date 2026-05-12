@@ -333,11 +333,13 @@ function pickSearchParams(incoming) {
       text = text.toUpperCase();
     }
     
-    // Ensure OVR values are valid numbers
+    // Ensure OVR values are valid numbers and capped at 120 (backend limit)
     if (key === 'min_ovr' || key === 'max_ovr' || key === 'rank') {
       const num = parseInt(text, 10);
       if (isNaN(num)) continue;
-      text = String(num);
+      // Backend caps at 120, if we send more it returns 422
+      const capped = key === 'rank' ? num : Math.min(120, num);
+      text = String(capped);
     }
     
     outgoing.append(key, text);
@@ -349,7 +351,8 @@ function pickSearchParams(incoming) {
     outgoing.set('rank', '0');
   }
 
-  const limit = Math.min(50, Math.max(1, Number.parseInt(outgoing.get('limit') || '50', 10) || 50));
+  // INCREASED LIMIT: Allow up to 250 for tools like Squad Builder that need a larger set for local filtering.
+  const limit = Math.min(250, Math.max(1, Number.parseInt(outgoing.get('limit') || '50', 10) || 50));
   outgoing.set('limit', String(limit));
   const directQuery = String(outgoing.get('q') || '').trim();
   const legacyQuery = String(outgoing.get('name_starts_with') || '').trim();
@@ -367,7 +370,9 @@ function buildPlayersQuery(outgoing) {
   const query = new URLSearchParams(outgoing);
   const q = String(query.get('q') || query.get('name_starts_with') || '').trim();
   if (q) {
-    query.set('name_starts_with', q);
+    // Prepend % to turn "starts with" into "contains" on the backend
+    // Backend does: LIKE query% -> becomes LIKE %query%
+    query.set('name_starts_with', `%${q}`);
     query.delete('q');
   }
   return query;
@@ -378,7 +383,8 @@ function buildLegacySearchQuery(outgoing) {
   if (!q) return null;
 
   const query = new URLSearchParams();
-  query.set('name_starts_with', q);
+  // Prepend % to turn "starts with" into "contains" on the backend
+  query.set('name_starts_with', `%${q}`);
   query.set('limit', outgoing.get('limit') || '50');
   query.set('offset', outgoing.get('offset') || '0');
   query.set('rank', outgoing.get('rank') || '0');
@@ -402,7 +408,7 @@ function payloadMatchesSearchFilter(normalizedPayload, query) {
   if (!needle) return true;
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
   if (!rows.length) return false;
-  return rows.some((row) => rowNameSource(row).startsWith(needle));
+  return rows.some((row) => rowNameSource(row).includes(needle));
 }
 
 
@@ -410,7 +416,7 @@ function filterPayloadBySearch(normalizedPayload, query) {
   const needle = normalizeSearchValue(query);
   if (!needle) return normalizedPayload;
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
-  const filteredRows = rows.filter((row) => rowNameSource(row).startsWith(needle));
+  const filteredRows = rows.filter((row) => rowNameSource(row).includes(needle));
   const fallbackPagination = normalizedPayload?.pagination && typeof normalizedPayload.pagination === 'object'
     ? normalizedPayload.pagination
     : {};
@@ -461,16 +467,19 @@ export async function GET(request) {
   const targetPosition = String(incoming.get('position') || '').trim().toUpperCase();
   const attempts = [];
 
-  // If a position is specified, we remove it from the backend query to ensure we get players 
+  // We keep the position filter in outgoing unless we need to do local filtering 
+  // for alternate positions. 
+  const effectivePosition = targetPosition;
+
+  // If we have an effective position, we remove it from the backend query to ensure we get players 
   // who might have it as an ALTERNATE position (since backends often only filter by primary).
   // We will then filter locally.
-  if (targetPosition) {
+  if (effectivePosition) {
     outgoing.delete('position');
-    // If there's no name query, we need to make sure we're getting enough players to filter.
-    if (!searchQuery) {
-      outgoing.set('limit', '100'); // Increase limit for position-only searches
-    }
+    // We increase the limit to make sure we get enough candidates for local filtering.
+    outgoing.set('limit', '150');
   }
+
 
   for (const base of backendCandidates()) {
     const playersQuery = buildPlayersQuery(outgoing, { includeQ: true });
@@ -529,12 +538,13 @@ export async function GET(request) {
         }
       }
 
-      // LOCAL FILTER: If a position was requested, filter the results to include Primary OR Alternate position matches.
-      if (normalized && targetPosition) {
+      // LOCAL FILTER: If a position was requested (and not ignored due to name search), 
+      // filter the results to include Primary OR Alternate position matches.
+      if (normalized && effectivePosition) {
         normalized.players = normalized.players.filter(player => {
           const primaryPos = String(player.position || '').toUpperCase();
           const altPosList = String(player.alternatePosition || '').split(',').map(p => p.trim().toUpperCase());
-          return primaryPos === targetPosition || altPosList.includes(targetPosition);
+          return primaryPos === effectivePosition || altPosList.includes(effectivePosition);
         });
         
         // Update total after local filtering
