@@ -73,21 +73,13 @@ function resolvePlayerId(row) {
 
 function isPhantomRecord(normalized) {
   // Relaxed check: Real cards MUST have a cardBackground and a positive OVR.
-  // recordId is preferred but some older valid cards might have inconsistent mapping.
   if (!normalized.cardBackground || !normalized.ovr || normalized.ovr <= 0) {
     return true;
   }
-
-  // Skip records with obviously fake names or placeholder indicators
   const name = String(normalized.name || '').toLowerCase();
   if (name.includes('test player') || name.includes('placeholder')) return true;
-
   return false;
 }
-
-
-
-
 
 function getRealnessScore(normalized) {
   let score = 0;
@@ -96,63 +88,40 @@ function getRealnessScore(normalized) {
   if (normalized.playerImage) score += 20;
   if (normalized.nationFlag) score += 10;
   if (normalized.clubFlag) score += 10;
-  
-  // Penalize missing critical data
   if (!normalized.club || normalized.club === 'No Club') score -= 20;
   if (!normalized.nation) score -= 20;
-  
   return score;
 }
 
 function dedupePreferredPlayers(rows, targetPosition = null) {
   if (!Array.isArray(rows) || !rows.length) return [];
-
   const byId = new Map();
-
   for (const row of rows) {
     const playerId = resolvePlayerId(row);
     if (!playerId) continue;
-
     const normalized = normalizePlayerStableRecord(row, playerId);
-    
-    // Skip obvious phantoms
     if (isPhantomRecord(normalized)) continue;
-
-    // If we are filtering by a specific position, we should prioritize/keep only cards 
-    // that match that position (Primary or Alternate). 
-    // This prevents a high-OVR card in the WRONG position from "winning" the deduplication 
-    // and then being filtered out later.
     if (targetPosition) {
       const primaryPos = String(normalized.position || '').toUpperCase();
       const altPosList = String(normalized.alternatePosition || '').split(',').map(p => p.trim().toUpperCase());
       const matches = primaryPos === targetPosition || altPosList.includes(targetPosition);
       if (!matches) continue;
     }
-
     const existing = byId.get(playerId);
     if (!existing) {
       byId.set(playerId, { row, normalized });
       continue;
     }
-
-    // Comparison logic:
-    // 1. Prefer higher realness score
-    // 2. If same realness, prefer LOWER rank (base cards are prioritized)
-    // 3. If same rank, prefer higher OVR
     const currentScore = getRealnessScore(existing.normalized);
     const candidateScore = getRealnessScore(normalized);
-
     if (candidateScore > currentScore) {
       byId.set(playerId, { row, normalized });
     } else if (candidateScore === currentScore) {
       const currentRank = Number(existing.normalized.rank || 0);
       const candidateRank = Number(normalized.rank || 0);
-      
       if (candidateRank < currentRank) {
-        // We found a lower rank (more "base" card), prefer it
         byId.set(playerId, { row, normalized });
       } else if (candidateRank === currentRank) {
-        // Same rank, pick the one with better OVR
         const currentOvr = Number(existing.normalized.ovr || 0);
         const candidateOvr = Number(normalized.ovr || 0);
         if (candidateOvr >= currentOvr) {
@@ -161,11 +130,8 @@ function dedupePreferredPlayers(rows, targetPosition = null) {
       }
     }
   }
-
-  // Return the normalized objects instead of raw rows for consistency
   return [...byId.values()].map((entry) => entry.normalized);
 }
-
 
 function readRowColorValue(row, keys) {
   for (const key of keys) {
@@ -191,7 +157,6 @@ function mergeRowColorData(row, colorSource) {
   const fallbackPosition = readRowColorValue(colorSource, ['color_position', 'colorPosition', 'colorposition']);
   const fallbackRating = readRowColorValue(colorSource, ['color_rating', 'colorRating', 'colorrating']);
   if (!fallbackName && !fallbackPosition && !fallbackRating) return row;
-
   return {
     ...row,
     color_name: currentName || fallbackName,
@@ -202,30 +167,18 @@ function mergeRowColorData(row, colorSource) {
 
 async function fetchColorRowsByIdsAtRank(base, ids, rank, attempts) {
   if (!ids.length) return [];
-  const query = new URLSearchParams({
-    ids: ids.join(','),
-    rank: String(rank)
-  });
+  const query = new URLSearchParams({ ids: ids.join(','), rank: String(rank) });
   const url = buildEndpointUrl(base, '/api/players/by-ids', query);
-
   try {
     const result = await fetchJson(url);
     if (!result.response.ok) {
-      attempts.push({
-        url,
-        status: result.response.status,
-        reason: toErrorReason(result.payload, result.details)
-      });
+      attempts.push({ url, status: result.response.status, reason: toErrorReason(result.payload, result.details) });
       return [];
     }
     const rows = Array.isArray(result.payload?.players) ? result.payload.players : [];
     return dedupePreferredPlayers(rows);
   } catch (error) {
-    attempts.push({
-      url,
-      status: 502,
-      reason: error instanceof Error ? error.message : String(error)
-    });
+    attempts.push({ url, status: 502, reason: error instanceof Error ? error.message : String(error) });
     return [];
   }
 }
@@ -233,13 +186,11 @@ async function fetchColorRowsByIdsAtRank(base, ids, rank, attempts) {
 async function enrichPayloadColors(base, normalizedPayload, attempts) {
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
   if (!rows.length) return normalizedPayload;
-
   const unresolvedIds = [...new Set(rows.map(resolvePlayerId).filter(Boolean))].filter((playerId) => {
     const row = rows.find((entry) => resolvePlayerId(entry) === playerId);
     return row ? !hasRowColorData(row) : false;
   });
   if (!unresolvedIds.length) return normalizedPayload;
-
   const colorById = new Map();
   let pendingIds = unresolvedIds;
   for (let rank = 1; rank <= DEFAULT_COLOR_FALLBACK_RANKS && pendingIds.length; rank += 1) {
@@ -251,9 +202,7 @@ async function enrichPayloadColors(base, normalizedPayload, attempts) {
     }
     pendingIds = pendingIds.filter((playerId) => !colorById.has(playerId));
   }
-
   if (!colorById.size) return normalizedPayload;
-
   return {
     ...normalizedPayload,
     players: rows.map((row) => {
@@ -283,7 +232,6 @@ function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50
         : {})
     };
   }
-
   if (payload && typeof payload === 'object' && Array.isArray(payload.results)) {
     const dedupedResults = dedupePreferredPlayers(payload.results, targetPosition);
     const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : payload.results.length;
@@ -300,7 +248,6 @@ function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50
       }
     };
   }
-
   return null;
 }
 
@@ -313,7 +260,6 @@ async function fetchJson(url) {
   });
   const text = await response.text();
   if (!text) return { response, payload: null, details: '' };
-
   try {
     return { response, payload: JSON.parse(text), details: text.slice(0, 500) };
   } catch {
@@ -327,31 +273,16 @@ function pickSearchParams(incoming) {
     if (!ALLOWED_PARAMS.has(key)) continue;
     let text = String(value || '').trim();
     if (!text) continue;
-    
-    // Normalize position to uppercase for consistent backend filtering
-    if (key === 'position') {
-      text = text.toUpperCase();
-    }
-    
-    // Ensure OVR values are valid numbers and capped at 120 (backend limit)
+    if (key === 'position') text = text.toUpperCase();
     if (key === 'min_ovr' || key === 'max_ovr' || key === 'rank') {
       const num = parseInt(text, 10);
       if (isNaN(num)) continue;
-      // Backend caps at 120, if we send more it returns 422
       const capped = key === 'rank' ? num : Math.min(120, num);
       text = String(capped);
     }
-    
     outgoing.append(key, text);
   }
-
-  // DEFAULT: Always search for Rank 0 (base cards) unless explicitly requested otherwise.
-  // This prevents getting rank 5 versions with inflated OVRs (like 120).
-  if (!outgoing.has('rank')) {
-    outgoing.set('rank', '0');
-  }
-
-  // INCREASED LIMIT: Allow up to 250 for tools like Squad Builder that need a larger set for local filtering.
+  if (!outgoing.has('rank')) outgoing.set('rank', '0');
   const limit = Math.min(250, Math.max(1, Number.parseInt(outgoing.get('limit') || '50', 10) || 50));
   outgoing.set('limit', String(limit));
   const directQuery = String(outgoing.get('q') || '').trim();
@@ -365,14 +296,11 @@ function pickSearchParams(incoming) {
   return outgoing;
 }
 
-
 function buildPlayersQuery(outgoing) {
   const query = new URLSearchParams(outgoing);
   const q = String(query.get('q') || query.get('name_starts_with') || '').trim();
   if (q) {
-    // Prepend % to turn "starts with" into "contains" on the backend
-    // Backend does: LIKE query% -> becomes LIKE %query%
-    query.set('name_starts_with', `%${q}`);
+    query.set('name_starts_with', q);
     query.delete('q');
   }
   return query;
@@ -381,10 +309,8 @@ function buildPlayersQuery(outgoing) {
 function buildLegacySearchQuery(outgoing) {
   const q = String(outgoing.get('q') || outgoing.get('name_starts_with') || '').trim();
   if (!q) return null;
-
   const query = new URLSearchParams();
-  // Prepend % to turn "starts with" into "contains" on the backend
-  query.set('name_starts_with', `%${q}`);
+  query.set('q', q);
   query.set('limit', outgoing.get('limit') || '50');
   query.set('offset', outgoing.get('offset') || '0');
   query.set('rank', outgoing.get('rank') || '0');
@@ -392,34 +318,19 @@ function buildLegacySearchQuery(outgoing) {
 }
 
 function normalizeSearchValue(value) {
-  return String(value || '')
-    .trim()
-    .normalize('NFD')
-    .replace(DIACRITIC_MARKS_REGEX, '')
-    .toLowerCase();
+  return String(value || '').trim().normalize('NFD').replace(DIACRITIC_MARKS_REGEX, '').toLowerCase();
 }
 
 function rowNameSource(row) {
   return normalizeSearchValue(row?.name || row?.player_name || '');
 }
 
-function payloadMatchesSearchFilter(normalizedPayload, query) {
-  const needle = normalizeSearchValue(query);
-  if (!needle) return true;
-  const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
-  if (!rows.length) return false;
-  return rows.some((row) => rowNameSource(row).includes(needle));
-}
-
-
 function filterPayloadBySearch(normalizedPayload, query) {
   const needle = normalizeSearchValue(query);
   if (!needle) return normalizedPayload;
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
   const filteredRows = rows.filter((row) => rowNameSource(row).includes(needle));
-  const fallbackPagination = normalizedPayload?.pagination && typeof normalizedPayload.pagination === 'object'
-    ? normalizedPayload.pagination
-    : {};
+  const fallbackPagination = normalizedPayload?.pagination && typeof normalizedPayload.pagination === 'object' ? normalizedPayload.pagination : {};
   return {
     players: filteredRows,
     pagination: {
@@ -438,22 +349,11 @@ async function tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackL
     const compatibilityResult = await fetchJson(compatibilityUrl);
     const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit, targetPosition);
     if (compatibilityResult.response.ok && normalizedCompatibility && normalizedCompatibility.players.length > 0) {
-      return {
-        payload: normalizedCompatibility,
-        status: compatibilityResult.response.status
-      };
+      return { payload: normalizedCompatibility, status: compatibilityResult.response.status };
     }
-    attempts.push({
-      url: compatibilityUrl,
-      status: compatibilityResult.response.status,
-      reason: toErrorReason(compatibilityResult.payload, compatibilityResult.details)
-    });
-  } catch (compatibilityError) {
-    attempts.push({
-      url: compatibilityUrl,
-      status: 502,
-      reason: compatibilityError instanceof Error ? compatibilityError.message : String(compatibilityError)
-    });
+    attempts.push({ url: compatibilityUrl, status: compatibilityResult.response.status, reason: toErrorReason(compatibilityResult.payload, compatibilityResult.details) });
+  } catch (error) {
+    attempts.push({ url: compatibilityUrl, status: 502, reason: error instanceof Error ? error.message : String(error) });
   }
   return null;
 }
@@ -467,62 +367,43 @@ export async function GET(request) {
   const targetPosition = String(incoming.get('position') || '').trim().toUpperCase();
   const attempts = [];
 
-  // We keep the position filter in outgoing unless we need to do local filtering 
-  // for alternate positions. 
-  const effectivePosition = targetPosition;
-
-  // If we have an effective position, we remove it from the backend query to ensure we get players 
-  // who might have it as an ALTERNATE position (since backends often only filter by primary).
-  // We will then filter locally.
-  if (effectivePosition) {
+  if (searchQuery) {
     outgoing.delete('position');
-    // We increase the limit to make sure we get enough candidates for local filtering.
-    outgoing.set('limit', '150');
   }
 
+  const effectivePosition = searchQuery ? '' : targetPosition;
 
   for (const base of backendCandidates()) {
-    const playersQuery = buildPlayersQuery(outgoing, { includeQ: true });
+    const playersQuery = buildPlayersQuery(outgoing);
     const playersUrl = buildEndpointUrl(base, '/api/players', playersQuery);
 
     try {
       const result = await fetchJson(playersUrl);
       let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition);
       
-      // Apply local filtering early if we have a search query, to accurately determine if we need fallbacks
       if (normalized && searchQuery) {
         normalized = filterPayloadBySearch(normalized, searchQuery);
       }
 
-      // FALLBACK 1: If no results found with original filters, try searching by name only
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
-        console.log(`[top-10-search-api] No results with filters. Trying name-only fallback for: ${searchQuery}`);
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
         const fallbackResult = await fetchJson(fallbackUrl);
         let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
-        
         if (fallbackResult.response.ok && fallbackNormalized) {
           fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
-          if (fallbackNormalized.players.length > 0) {
-            normalized = fallbackNormalized;
-          }
+          if (fallbackNormalized.players.length > 0) normalized = fallbackNormalized;
         }
       }
 
-      // FALLBACK 2: Try compatibility (name_starts_with) if still no results
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
         const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition);
         if (compatibilityPayload) {
-          let compatNormalized = compatibilityPayload.payload;
-          compatNormalized = filterPayloadBySearch(compatNormalized, searchQuery);
-          if (compatNormalized.players.length > 0) {
-            normalized = compatNormalized;
-          }
+          let compatNormalized = filterPayloadBySearch(compatibilityPayload.payload, searchQuery);
+          if (compatNormalized.players.length > 0) normalized = compatNormalized;
         }
       }
 
-      // FALLBACK 3: Try legacy search endpoint (/api/players/search) if still no results
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
         const legacyQuery = buildLegacySearchQuery(outgoing);
         if (legacyQuery) {
@@ -531,30 +412,16 @@ export async function GET(request) {
           let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition);
           if (legacyResult.response.ok && normalizedLegacy) {
             normalizedLegacy = filterPayloadBySearch(normalizedLegacy, searchQuery);
-            if (normalizedLegacy.players.length > 0) {
-              normalized = normalizedLegacy;
-            }
+            if (normalizedLegacy.players.length > 0) normalized = normalizedLegacy;
           }
         }
       }
 
-      // Note: Position filtering is now handled INSIDE normalizePlayersPayload via dedupePreferredPlayers(..., targetPosition)
-      // which is more robust as it filters BEFORE deduplicating by playerId.
-
-      const normalizedWithColors = result.response.ok && normalized
-        ? await enrichPayloadColors(base, normalized, attempts)
-        : normalized;
-
+      const normalizedWithColors = result.response.ok && normalized ? await enrichPayloadColors(base, normalized, attempts) : normalized;
 
       if (result.response.ok && normalizedWithColors) {
-        // Final safety check: if we have a search query, ensure we only return matching players
         const finalPayload = searchQuery ? filterPayloadBySearch(normalizedWithColors, searchQuery) : normalizedWithColors;
-        
-        if (searchQuery && finalPayload.players.length === 0) {
-          // If even after all fallbacks we have no matches, we might want to try one last broad search
-          // but for now let's just continue to next backend candidate or return empty
-          if (attempts.length > 0) continue; 
-        } else {
+        if (!(searchQuery && finalPayload.players.length === 0)) {
           return NextResponse.json(finalPayload, { status: result.response.status });
         }
       }
@@ -562,15 +429,6 @@ export async function GET(request) {
       const reason = toErrorReason(result.payload, result.details);
       attempts.push({ url: playersUrl, status: result.response.status, reason });
 
-      if ((result.response.status === 400 || result.response.status === 422) && playersQuery.has('q')) {
-        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition);
-        if (compatibilityPayload) {
-          const compatibilityWithColors = await enrichPayloadColors(base, compatibilityPayload.payload, attempts);
-          return NextResponse.json(compatibilityWithColors, { status: compatibilityPayload.status });
-        }
-      }
-
-      // Some deployments only expose /api/players/search (q=...) and return 422 for /api/players.
       if (result.response.status === 422) {
         const legacyQuery = buildLegacySearchQuery(outgoing);
         if (legacyQuery) {
@@ -582,44 +440,16 @@ export async function GET(request) {
               const legacyWithColors = await enrichPayloadColors(base, normalizedLegacy, attempts);
               return NextResponse.json(legacyWithColors, { status: legacyResult.response.status });
             }
-
-            attempts.push({
-              url: legacyUrl,
-              status: legacyResult.response.status,
-              reason: toErrorReason(legacyResult.payload, legacyResult.details)
-            });
-          } catch (legacyError) {
-            attempts.push({
-              url: legacyUrl,
-              status: 502,
-              reason: legacyError instanceof Error ? legacyError.message : String(legacyError)
-            });
+          } catch (e) {
+            attempts.push({ url: legacyUrl, status: 502, reason: e.message });
           }
         }
       }
-
-      if (result.response.status >= 500 || result.response.status === 404 || result.response.status === 422) {
-        continue;
-      }
     } catch (error) {
-      attempts.push({
-        url: playersUrl,
-        status: 502,
-        reason: error instanceof Error ? error.message : String(error)
-      });
-      continue;
+      attempts.push({ url: playersUrl, status: 502, reason: error.message });
     }
   }
 
-  const configHint = configuredBaseUrl()
-    ? ''
-    : ' Set ZENITH_API_BASE_URL to your FastAPI origin (example: http://127.0.0.1:8000).';
-
-  return NextResponse.json(
-    {
-      error: `Player search backend is unreachable or rejected the request.${configHint}`,
-      attempts
-    },
-    { status: 502 }
-  );
+  const configHint = configuredBaseUrl() ? '' : ' Set ZENITH_API_BASE_URL to your FastAPI origin.';
+  return NextResponse.json({ error: `Player search failed.${configHint}`, attempts }, { status: 502 });
 }
