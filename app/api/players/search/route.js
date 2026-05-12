@@ -378,6 +378,8 @@ export async function GET(request) {
 
   console.log(`[SearchProxy] Incoming search: q="${searchQuery}" pos="${targetPosition}"`);
 
+  // CRITICAL: If a search query is present, we ignore the position filter 
+  // to allow finding players across all positions (as requested by the user).
   if (searchQuery) {
     outgoing.delete('position');
   }
@@ -387,97 +389,98 @@ export async function GET(request) {
   console.log(`[SearchProxy] Backend candidates: ${candidates.join(', ')}`);
 
   for (const base of candidates) {
-    const playersQuery = buildPlayersQuery(outgoing);
-    const playersUrl = buildEndpointUrl(base, '/api/players', playersQuery);
-    console.log(`[SearchProxy] Trying URL: ${playersUrl}`);
+    console.log(`[SearchProxy] Trying candidate: ${base}`);
 
     try {
-      const result = await fetchJson(playersUrl);
-      console.log(`[SearchProxy] Backend Response: ${result.response.status}`);
-      
+      let normalized = null;
+      let responseStatus = 200;
       const isSearchActive = !!searchQuery;
-      let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
-      if (normalized) {
-        console.log(`[SearchProxy] Normalized players count: ${normalized.players.length}`);
-      }
-      
-      if (normalized && searchQuery) {
-        normalized = filterPayloadBySearch(normalized, searchQuery);
+
+      // PHASE 1: Try specialized search endpoint if query is present
+      if (searchQuery) {
+        const legacyQuery = buildLegacySearchQuery(outgoing);
+        if (legacyQuery) {
+          const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
+          console.log(`[SearchProxy] Trying search endpoint: ${legacyUrl}`);
+          const legacyResult = await fetchJson(legacyUrl);
+          responseStatus = legacyResult.response.status;
+          
+          if (legacyResult.response.ok) {
+            normalized = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
+            if (normalized) {
+              normalized = filterPayloadBySearch(normalized, searchQuery);
+              console.log(`[SearchProxy] Search endpoint returned ${normalized.players.length} players`);
+            }
+          } else {
+            attempts.push({ url: legacyUrl, status: responseStatus, reason: toErrorReason(legacyResult.payload, legacyResult.details) });
+          }
+        }
       }
 
-      if ((!normalized || normalized.players.length === 0) && searchQuery) {
+      // PHASE 2: Try standard players endpoint if search failed or no query
+      if (!normalized || normalized.players.length === 0) {
+        const playersQuery = buildPlayersQuery(outgoing);
+        const playersUrl = buildEndpointUrl(base, '/api/players', playersQuery);
+        console.log(`[SearchProxy] Trying players endpoint: ${playersUrl}`);
+        
+        const result = await fetchJson(playersUrl);
+        responseStatus = result.response.status;
+
+        if (result.response.ok) {
+          normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
+          if (normalized && searchQuery) {
+            normalized = filterPayloadBySearch(normalized, searchQuery);
+          }
+          if (normalized) {
+            console.log(`[SearchProxy] Players endpoint returned ${normalized.players.length} players`);
+          }
+        } else {
+          attempts.push({ url: playersUrl, status: responseStatus, reason: toErrorReason(result.payload, result.details) });
+        }
+      }
+
+      // PHASE 3: Fallback to fuzzy search if still no results
+      if (searchQuery && (!normalized || normalized.players.length === 0)) {
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
+        console.log(`[SearchProxy] Trying fuzzy fallback: ${fallbackUrl}`);
+        
         const fallbackResult = await fetchJson(fallbackUrl);
-        let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition, true);
-        if (fallbackResult.response.ok && fallbackNormalized) {
-          fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
-          if (fallbackNormalized.players.length > 0) normalized = fallbackNormalized;
-        }
-      }
-
-      if ((!normalized || normalized.players.length === 0) && searchQuery) {
-        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts, effectivePosition, true);
-        if (compatibilityPayload) {
-          let compatNormalized = filterPayloadBySearch(compatibilityPayload.payload, searchQuery);
-          if (compatNormalized.players.length > 0) normalized = compatNormalized;
-        }
-      }
-
-      if ((!normalized || normalized.players.length === 0) && searchQuery) {
-        const legacyQuery = buildLegacySearchQuery(outgoing);
-        if (legacyQuery) {
-          const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
-          const legacyResult = await fetchJson(legacyUrl);
-          let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, true);
-          if (legacyResult.response.ok && normalizedLegacy) {
-            normalizedLegacy = filterPayloadBySearch(normalizedLegacy, searchQuery);
-            if (normalizedLegacy.players.length > 0) normalized = normalizedLegacy;
-          }
-        }
-      }
-
-      const normalizedWithColors = result.response.ok && normalized ? await enrichPayloadColors(base, normalized, attempts) : normalized;
-
-      if (result.response.ok && normalizedWithColors) {
-        const finalPayload = searchQuery ? filterPayloadBySearch(normalizedWithColors, searchQuery) : normalizedWithColors;
-        
-        // CRITICAL FIX: If the search was successful (status 200) but returned 0 players, 
-        // we should return that empty list to the user instead of letting the loop continue 
-        // and eventually returning a 502 "Search failed" error.
-        if (searchQuery) {
-          return NextResponse.json(finalPayload, { status: result.response.status });
-        }
-        
-        if (finalPayload.players.length > 0) {
-          return NextResponse.json(finalPayload, { status: result.response.status });
-        }
-      }
-
-      const reason = toErrorReason(result.payload, result.details);
-      attempts.push({ url: playersUrl, status: result.response.status, reason });
-
-      if (result.response.status === 422) {
-        const legacyQuery = buildLegacySearchQuery(outgoing);
-        if (legacyQuery) {
-          const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
-          try {
-            const legacyResult = await fetchJson(legacyUrl);
-            const normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
-            if (legacyResult.response.ok && normalizedLegacy) {
-              const legacyWithColors = await enrichPayloadColors(base, normalizedLegacy, attempts);
-              return NextResponse.json(legacyWithColors, { status: legacyResult.response.status });
+        if (fallbackResult.response.ok) {
+          let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition, true);
+          if (fallbackNormalized) {
+            fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
+            if (fallbackNormalized.players.length > 0) {
+              normalized = fallbackNormalized;
+              console.log(`[SearchProxy] Fuzzy fallback returned ${normalized.players.length} players`);
             }
-          } catch (e) {
-            attempts.push({ url: legacyUrl, status: 502, reason: e.message });
           }
         }
       }
+
+      // If we have results, enrich with colors and return
+      if (normalized && normalized.players.length > 0) {
+        const normalizedWithColors = await enrichPayloadColors(base, normalized, attempts);
+        return NextResponse.json(normalizedWithColors, { status: 200 });
+      }
+
+      // If we got a 200 but no players, we continue to the next candidate 
+      // instead of returning an empty list immediately. This solves issues where
+      // one backend (e.g. remote) is empty but another (e.g. local) has data.
+      console.log(`[SearchProxy] Candidate ${base} returned no results, trying next...`);
+
     } catch (error) {
-      attempts.push({ url: playersUrl, status: 502, reason: error.message });
+      console.error(`[SearchProxy] Error with candidate ${base}:`, error);
+      attempts.push({ url: base, status: 502, reason: error.message });
     }
   }
 
+  // If we reach here, no candidate returned results
   const configHint = configuredBaseUrl() ? '' : ' Set ZENITH_API_BASE_URL to your FastAPI origin.';
-  return NextResponse.json({ error: `Player search failed.${configHint}`, attempts }, { status: 502 });
+  return NextResponse.json({ 
+    error: searchQuery ? 'No players found.' : 'Player fetch failed.',
+    attempts,
+    hint: configHint
+  }, { status: searchQuery ? 200 : 502 });
 }
+
