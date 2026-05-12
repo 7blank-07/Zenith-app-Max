@@ -1267,7 +1267,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
               />
             ) : null}
             {player.isUntradable && (
-              <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
+              <div className="card-untradable-badge card-untradable-badge--squad-picker" style={{ pointerEvents: 'none' }}>
                 <img src="/assets/images/untradable_img.png" alt="Untradable" />
               </div>
             )}

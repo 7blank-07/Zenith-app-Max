@@ -214,10 +214,9 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                                 <img src={player.leagueImage} alt="League" className="card-league-flag-home normal-league-flag-home" />
                               )}
                               {player.isUntradable && (
-                                <div className="card-untradable-badge">
+                                <div className="card-untradable-badge card-untradable-badge--players">
                                   <img src="/assets/images/untradable_img.png" alt="Untradable" />
-                                </div>
-                              )}
+                                </div>                              )}
                             </div>
                           </a>
                         </div>

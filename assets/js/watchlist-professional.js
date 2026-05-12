@@ -825,8 +825,8 @@ function createPlayerCardHTML(player) {
   const isUntradableText = String(player.is_untradable ?? player.isuntradable ?? '').toLowerCase();
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
-    ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+    ? `<div class="card-untradable-badge card-untradable-badge--players" style="pointer-events: none;">
+         <img src="/assets/images/untradable_img.png" alt="Untradable">
        </div>`
     : '';
   

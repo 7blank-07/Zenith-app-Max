@@ -3265,11 +3265,10 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                             />
                           ) : null}
                           {player.isUntradable && (
-                            <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
+                            <div className="card-untradable-badge card-untradable-badge--squad-pitch" style={{ right: '18px', pointerEvents: 'none' }}>
                               <img src="/assets/images/untradable_img.png" alt="Untradable" />
                             </div>
-                          )}
-                          <button
+                          )}                          <button
                             className="bench-card-remove"
                             onClick={(event) => {
                               event.stopPropagation();

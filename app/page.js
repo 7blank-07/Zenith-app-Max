@@ -146,7 +146,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
         )}
 
         {player.isUntradable && (
-          <div className="card-untradable-badge">
+          <div className="card-untradable-badge card-untradable-badge--players">
             <img src="/assets/images/untradable_img.png" alt="Untradable" width={16} height={16} loading="lazy" fetchPriority="low" />
           </div>
         )}

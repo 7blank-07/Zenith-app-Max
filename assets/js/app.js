@@ -187,11 +187,11 @@ const RANK_CONFIG = {
     columns: 6,         // ✅ 6 columns per row
     rows: 6,            // ✅ 6 rows total
     ranks: {
-        1: 'assets/images/ranks/green_rank_enhanced_main.webp',
-        2: 'assets/images/ranks/blue_rank_enhanced_main.webp',
-        3: 'assets/images/ranks/purple_rank_enhanced_main.webp',
-        4: 'assets/images/ranks/red_rank_enhanced_main.webp',
-        5: 'assets/images/ranks/gold_rank_enhanced_main.webp',
+        1: '/assets/images/ranks/green_rank_enhanced_main.webp',
+        2: '/assets/images/ranks/blue_rank_enhanced_main.webp',
+        3: '/assets/images/ranks/purple_rank_enhanced_main.webp',
+        4: '/assets/images/ranks/red_rank_enhanced_main.webp',
+        5: '/assets/images/ranks/gold_rank_enhanced_main.webp',
     },
     skillPoints: {
         0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5
@@ -4296,8 +4296,8 @@ function createDashboardPlayerCard(player) {
             <!-- ✅ Untradable badge -->
             ${
                 isUntradable
-                    ? `<div class="card-untradable-badge">
-                           <img src="assets/images/untradable_img.png" alt="Untradable">
+                    ? `<div class="card-untradable-badge card-untradable-badge--players">
+                           <img src="/assets/images/untradable_img.png" alt="Untradable">
                        </div>`
                     : ''
             }
@@ -5097,8 +5097,8 @@ function createPlayerCard(player) {
     const isUntradableText = String(player.is_untradable ?? player.isuntradable ?? '').toLowerCase();
     const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
     const untradableBadgeHTML = isUntradable
-        ? `<div class="card-untradable-badge" style="pointer-events: none;">
-               <img src="assets/images/untradable_img.png" alt="Untradable">
+        ? `<div class="card-untradable-badge card-untradable-badge--players" style="pointer-events: none;">
+               <img src="/assets/images/untradable_img.png" alt="Untradable">
            </div>`
         : '';
 
@@ -5123,7 +5123,7 @@ function createPlayerCard(player) {
 
     if (isUntradable) {
         displayPriceHTML = `
-            <img src="assets/images/untradable-red-flag.png"
+            <img src="/assets/images/untradable-red-flag.png"
                 alt="Non-auctionable"
                 style="height: 18px; width: auto; vertical-align: middle; opacity: 0.95; margin-left: 6px;"
                 title="Non-auctionable">
@@ -5135,7 +5135,7 @@ function createPlayerCard(player) {
 
       displayPriceHTML = `
           <span class="price-inline">
-              <img src="assets/images/background/fc coin img.webp" alt="coin" class="price-icon">
+              <img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon">
               <span class="price-text">${formattedPrice}</span>
           </span>
       `;
@@ -8091,8 +8091,8 @@ function createFilledPlayerCard(player) {
   const isUntradableText = String(player.is_untradable ?? player.isuntradable ?? '').toLowerCase();
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
-    ? `<div class="card-untradable-badge" style="right: 40px; pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+    ? `<div class="card-untradable-badge card-untradable-badge--players" style="right: 40px; pointer-events: none;">
+         <img src="/assets/images/untradable_img.png" alt="Untradable">
        </div>`
     : '';
   card.dataset.playerId = playerId || '';
@@ -8330,8 +8330,8 @@ function renderCompareCustomizationMiniCard(player) {
   const isUntradableText = String(player.is_untradable ?? player.isuntradable ?? '').toLowerCase();
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
-    ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+    ? `<div class="card-untradable-badge card-untradable-badge--players" style="pointer-events: none;">
+         <img src="/assets/images/untradable_img.png" alt="Untradable">
        </div>`
     : '';
 
@@ -9148,8 +9148,8 @@ function createCompareSearchResultItem(player) {
   const isUntradableText = String(player.is_untradable ?? player.isuntradable ?? '').toLowerCase();
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
-    ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+    ? `<div class="card-untradable-badge card-untradable-badge--players" style="pointer-events: none;">
+         <img src="/assets/images/untradable_img.png" alt="Untradable">
        </div>`
     : '';
   item.innerHTML = `

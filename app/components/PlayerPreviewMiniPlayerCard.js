@@ -124,7 +124,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
               )}
 
               {player.isUntradable && (
-                <div className="card-untradable-badge">
+                <div className="card-untradable-badge card-untradable-badge--players">
                   <img src="/assets/images/untradable_img.png" alt="Untradable" width={16} height={16} loading="lazy" />
                 </div>
               )}

@@ -231,7 +231,7 @@ function renderPlayerRow(player) {
     .map((entry) => toText(entry).toUpperCase())
     .filter(Boolean);
   const untradableBadge = player.is_untradable
-    ? '<div class="card-untradable-badge" style="pointer-events: none;"><img src="/assets/images/untradable_img.png" alt="Untradable"></div>'
+    ? '<div class="card-untradable-badge card-untradable-badge--players" style="pointer-events: none;"><img src="/assets/images/untradable_img.png" alt="Untradable"></div>'
     : '';
 
   return `
