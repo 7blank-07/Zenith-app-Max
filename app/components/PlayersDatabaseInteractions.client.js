@@ -427,9 +427,9 @@ function normalizePlayer(player) {
 function getStoredPlayerUniqueId(player) {
   const stored = toText(player?.unique_id || player?.uniqueId);
   if (stored) return stored;
-  const playerId = toText(player?.player_id || player?.playerid || player?.id);
+  const playerId = toText(player?.playerId || player?.player_id || player?.playerid || player?.id);
   const rank = toNumber(player?.rank, 0);
-  const untradable = !!player?.is_untradable || player?.isuntradable === 1;
+  const untradable = !!(player?.is_untradable || player?.isuntradable === 1 || player?.isUntradable);
   return `${playerId}_${rank}_${untradable ? 1 : 0}`;
 }
 

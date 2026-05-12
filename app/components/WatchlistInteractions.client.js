@@ -113,7 +113,7 @@ function writeArrayStorage(key, values) {
 }
 
 function getPlayerId(player) {
-  return toText(player?.player_id || player?.playerid || player?.id);
+  return toText(player?.playerId || player?.player_id || player?.playerid || player?.id);
 }
 
 function getPlayerUniqueId(player) {

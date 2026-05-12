@@ -138,14 +138,14 @@ export default function HomeDashboardInteractions() {
         };
 
         const toPlayerCard = (player) => {
-          const playerId = toText(player?.player_id || player?.playerid || player?.id);
+          const playerId = toText(player?.playerId || player?.player_id || player?.playerid || player?.id);
           if (!playerId) return null;
 
-          const recordId = toText(player?.record_id || player?.recordId || player?.id || playerId);
+          const recordId = toText(player?.recordId || player?.record_id || player?.recordId || player?.id || playerId);
           const name = toText(player?.name, 'Unknown Player');
-          const ovr = toNumber(player?.ovr, 0);
+          const ovr = toNumber(player?.ovr || player?.rating, 0);
           const position = toText(player?.position, 'N/A');
-          const isUntradableText = toText(player?.is_untradable || player?.isuntradable).toLowerCase();
+          const isUntradableText = toText(player?.isUntradable ?? player?.is_untradable ?? player?.isuntradable).toLowerCase();
           const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
           const ovrText = ovr > 0 ? String(ovr) : 'N/A';
 
@@ -156,14 +156,14 @@ export default function HomeDashboardInteractions() {
             ovr,
             position,
             playerPath: buildPlayerPath({ playerId, recordId, name, ovr }),
-            cardBackground: toText(player?.card_background || player?.cardBackground || player?.cardbackground),
-            playerImage: toText(player?.player_image || player?.playerImage || player?.playerimage || player?.image),
-            nationFlag: toText(player?.nation_flag || player?.nationFlag),
-            clubFlag: toText(player?.club_flag || player?.clubFlag),
-            leagueImage: toText(player?.league_image || player?.leagueImage),
-            colorRating: toText(player?.color_rating || player?.colorRating || '#FFFFFF', '#FFFFFF'),
-            colorPosition: toText(player?.color_position || player?.colorPosition || '#FFFFFF', '#FFFFFF'),
-            colorName: toText(player?.color_name || player?.colorName || '#FFFFFF', '#FFFFFF'),
+            cardBackground: toText(player?.cardBackground || player?.card_background || player?.cardbackground),
+            playerImage: toText(player?.playerImage || player?.player_image || player?.playerimage || player?.image),
+            nationFlag: toText(player?.nationFlag || player?.nation_flag),
+            clubFlag: toText(player?.clubFlag || player?.club_flag),
+            leagueImage: toText(player?.leagueImage || player?.league_image),
+            colorRating: toText(player?.colorRating || player?.color_rating || '#FFFFFF', '#FFFFFF'),
+            colorPosition: toText(player?.colorPosition || player?.color_position || '#FFFFFF', '#FFFFFF'),
+            colorName: toText(player?.colorName || player?.color_name || '#FFFFFF', '#FFFFFF'),
             ovrText,
             isUntradable
           };
@@ -203,7 +203,9 @@ export default function HomeDashboardInteractions() {
             ? payload.players
             : Array.isArray(payload?.results)
               ? payload.results
-              : [];
+              : Array.isArray(payload)
+                ? payload
+                : [];
           activeResults = rows.map(toPlayerCard).filter(Boolean);
           selectedDropdownIndex = -1;
 

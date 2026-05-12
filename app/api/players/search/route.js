@@ -368,26 +368,13 @@ function pickSearchParams(incoming) {
 }
 
 
-function buildPlayersQuery(outgoing, { includeQ } = { includeQ: true }) {
+function buildPlayersQuery(outgoing) {
   const query = new URLSearchParams(outgoing);
-  const normalizedSearch = String(query.get('q') || query.get('name_starts_with') || '').trim();
-  if (includeQ) {
-    if (normalizedSearch) {
-      query.set('q', normalizedSearch);
-    } else {
-      query.delete('q');
-    }
-    if (!String(query.get('name_starts_with') || '').trim()) {
-      query.delete('name_starts_with');
-    }
-    return query;
+  const q = String(query.get('q') || query.get('name_starts_with') || '').trim();
+  if (q) {
+    query.set('name_starts_with', q);
+    query.delete('q');
   }
-  if (normalizedSearch) {
-    query.set('name_starts_with', normalizedSearch);
-  } else {
-    query.delete('name_starts_with');
-  }
-  query.delete('q');
   return query;
 }
 
@@ -396,7 +383,7 @@ function buildLegacySearchQuery(outgoing) {
   if (!q) return null;
 
   const query = new URLSearchParams();
-  query.set('q', q);
+  query.set('name_starts_with', q);
   query.set('limit', outgoing.get('limit') || '50');
   query.set('offset', outgoing.get('offset') || '0');
   query.set('rank', outgoing.get('rank') || '0');
@@ -411,22 +398,16 @@ function normalizeSearchValue(value) {
     .toLowerCase();
 }
 
-function rowSearchSource(row) {
-  // Support both raw rows and normalized objects
-  const name = row?.name || row?.player_name || '';
-  const event = row?.eventName || row?.card_name || row?.cardName || '';
-  return normalizeSearchValue(`${name} ${event}`);
+function rowNameSource(row) {
+  return normalizeSearchValue(row?.name || row?.player_name || '');
 }
 
 function payloadMatchesSearchFilter(normalizedPayload, query) {
   const needle = normalizeSearchValue(query);
   if (!needle) return true;
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
-  if (!rows.length) return true;
-  // If ANY row matches the needle, we consider it a match (or every? usually search is inclusive)
-  // The original code used .every which is strange for a search result check
-  // but let's stick to the intent of filtering.
-  return rows.some((row) => rowSearchSource(row).includes(needle));
+  if (!rows.length) return false;
+  return rows.some((row) => rowNameSource(row).startsWith(needle));
 }
 
 
@@ -434,7 +415,7 @@ function filterPayloadBySearch(normalizedPayload, query) {
   const needle = normalizeSearchValue(query);
   if (!needle) return normalizedPayload;
   const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
-  const filteredRows = rows.filter((row) => rowSearchSource(row).includes(needle));
+  const filteredRows = rows.filter((row) => rowNameSource(row).startsWith(needle));
   const fallbackPagination = normalizedPayload?.pagination && typeof normalizedPayload.pagination === 'object'
     ? normalizedPayload.pagination
     : {};
@@ -450,12 +431,12 @@ function filterPayloadBySearch(normalizedPayload, query) {
 }
 
 async function tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts) {
-  const compatibilityQuery = buildPlayersQuery(outgoing, { includeQ: false });
+  const compatibilityQuery = buildPlayersQuery(outgoing);
   const compatibilityUrl = buildEndpointUrl(base, '/api/players', compatibilityQuery);
   try {
     const compatibilityResult = await fetchJson(compatibilityUrl);
     const normalizedCompatibility = normalizePlayersPayload(compatibilityResult.payload, fallbackOffset, fallbackLimit);
-    if (compatibilityResult.response.ok && normalizedCompatibility) {
+    if (compatibilityResult.response.ok && normalizedCompatibility && normalizedCompatibility.players.length > 0) {
       return {
         payload: normalizedCompatibility,
         status: compatibilityResult.response.status
@@ -504,16 +485,52 @@ export async function GET(request) {
       const result = await fetchJson(playersUrl);
       let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
       
-      // FALLBACK: If no results found with original filters, try searching by name only
+      // Apply local filtering early if we have a search query, to accurately determine if we need fallbacks
+      if (normalized && searchQuery) {
+        normalized = filterPayloadBySearch(normalized, searchQuery);
+      }
+
+      // FALLBACK 1: If no results found with original filters, try searching by name only
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
         console.log(`[top-10-search-api] No results with filters. Trying name-only fallback for: ${searchQuery}`);
-        const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit) });
+        const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
         const fallbackResult = await fetchJson(fallbackUrl);
-        const fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit);
+        let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit);
         
-        if (fallbackResult.response.ok && fallbackNormalized && fallbackNormalized.players.length > 0) {
-          normalized = fallbackNormalized;
+        if (fallbackResult.response.ok && fallbackNormalized) {
+          fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
+          if (fallbackNormalized.players.length > 0) {
+            normalized = fallbackNormalized;
+          }
+        }
+      }
+
+      // FALLBACK 2: Try compatibility (name_starts_with) if still no results
+      if ((!normalized || normalized.players.length === 0) && searchQuery) {
+        const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
+        if (compatibilityPayload) {
+          let compatNormalized = compatibilityPayload.payload;
+          compatNormalized = filterPayloadBySearch(compatNormalized, searchQuery);
+          if (compatNormalized.players.length > 0) {
+            normalized = compatNormalized;
+          }
+        }
+      }
+
+      // FALLBACK 3: Try legacy search endpoint (/api/players/search) if still no results
+      if ((!normalized || normalized.players.length === 0) && searchQuery) {
+        const legacyQuery = buildLegacySearchQuery(outgoing);
+        if (legacyQuery) {
+          const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
+          const legacyResult = await fetchJson(legacyUrl);
+          let normalizedLegacy = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit);
+          if (legacyResult.response.ok && normalizedLegacy) {
+            normalizedLegacy = filterPayloadBySearch(normalizedLegacy, searchQuery);
+            if (normalizedLegacy.players.length > 0) {
+              normalized = normalizedLegacy;
+            }
+          }
         }
       }
 
@@ -537,15 +554,16 @@ export async function GET(request) {
 
 
       if (result.response.ok && normalizedWithColors) {
-        if (searchQuery && playersQuery.has('q') && !payloadMatchesSearchFilter(normalizedWithColors, searchQuery)) {
-          const compatibilityPayload = await tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackLimit, attempts);
-          if (compatibilityPayload) {
-            const compatibilityWithColors = await enrichPayloadColors(base, compatibilityPayload.payload, attempts);
-            return NextResponse.json(compatibilityWithColors, { status: compatibilityPayload.status });
-          }
-          return NextResponse.json(filterPayloadBySearch(normalizedWithColors, searchQuery), { status: result.response.status });
+        // Final safety check: if we have a search query, ensure we only return matching players
+        const finalPayload = searchQuery ? filterPayloadBySearch(normalizedWithColors, searchQuery) : normalizedWithColors;
+        
+        if (searchQuery && finalPayload.players.length === 0) {
+          // If even after all fallbacks we have no matches, we might want to try one last broad search
+          // but for now let's just continue to next backend candidate or return empty
+          if (attempts.length > 0) continue; 
+        } else {
+          return NextResponse.json(finalPayload, { status: result.response.status });
         }
-        return NextResponse.json(normalizedWithColors, { status: result.response.status });
       }
 
       const reason = toErrorReason(result.payload, result.details);
