@@ -72,9 +72,9 @@ function resolvePlayerId(row) {
 }
 
 function isPhantomRecord(normalized) {
-  // MANDATORY: Real cards MUST have both a recordId and cardBackground
-  // This is the strongest signal for "Not a placeholder" in the production DB.
-  if (!normalized.recordId || !normalized.cardBackground) {
+  // Relaxed check: Real cards MUST have a cardBackground and a positive OVR.
+  // recordId is preferred but some older valid cards might have inconsistent mapping.
+  if (!normalized.cardBackground || !normalized.ovr || normalized.ovr <= 0) {
     return true;
   }
 
@@ -82,9 +82,7 @@ function isPhantomRecord(normalized) {
   const name = String(normalized.name || '').toLowerCase();
   if (name.includes('test player') || name.includes('placeholder')) return true;
 
-  // CRITICAL FIX: The user reported searching for players returns "fake" 120 OVR versions.
-  // In the current database, a 120 OVR at Rank 0 is almost certainly a data error or phantom.
-  // We filter these out to ensure only legitimate base cards (Rank 0) are shown.
+  // CRITICAL: Filter out "fake" 120 OVR cards that often appear in raw data exports.
   if (Number(normalized.ovr) >= 120 && Number(normalized.rank || 0) === 0) {
     return true;
   }
@@ -111,7 +109,7 @@ function getRealnessScore(normalized) {
   return score;
 }
 
-function dedupePreferredPlayers(rows) {
+function dedupePreferredPlayers(rows, targetPosition = null) {
   if (!Array.isArray(rows) || !rows.length) return [];
 
   const byId = new Map();
@@ -124,6 +122,17 @@ function dedupePreferredPlayers(rows) {
     
     // Skip obvious phantoms
     if (isPhantomRecord(normalized)) continue;
+
+    // If we are filtering by a specific position, we should prioritize/keep only cards 
+    // that match that position (Primary or Alternate). 
+    // This prevents a high-OVR card in the WRONG position from "winning" the deduplication 
+    // and then being filtered out later.
+    if (targetPosition) {
+      const primaryPos = String(normalized.position || '').toUpperCase();
+      const altPosList = String(normalized.alternatePosition || '').split(',').map(p => p.trim().toUpperCase());
+      const matches = primaryPos === targetPosition || altPosList.includes(targetPosition);
+      if (!matches) continue;
+    }
 
     const existing = byId.get(playerId);
     if (!existing) {
@@ -261,9 +270,9 @@ async function enrichPayloadColors(base, normalizedPayload, attempts) {
   };
 }
 
-function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50) {
+function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50, targetPosition = null) {
   if (payload && typeof payload === 'object' && Array.isArray(payload.players)) {
-    const dedupedPlayers = dedupePreferredPlayers(payload.players);
+    const dedupedPlayers = dedupePreferredPlayers(payload.players, targetPosition);
     const pagination = payload.pagination && typeof payload.pagination === 'object' ? payload.pagination : null;
     const total = Number(pagination?.total);
     return {
@@ -281,7 +290,7 @@ function normalizePlayersPayload(payload, fallbackOffset = 0, fallbackLimit = 50
   }
 
   if (payload && typeof payload === 'object' && Array.isArray(payload.results)) {
-    const dedupedResults = dedupePreferredPlayers(payload.results);
+    const dedupedResults = dedupePreferredPlayers(payload.results, targetPosition);
     const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : payload.results.length;
     const limit = Number.isFinite(Number(payload.limit)) ? Number(payload.limit) : fallbackLimit;
     const offset = Number.isFinite(Number(payload.offset)) ? Number(payload.offset) : fallbackOffset;
@@ -473,7 +482,19 @@ export async function GET(request) {
   const fallbackOffset = Number.parseInt(outgoing.get('offset') || '0', 10) || 0;
   const fallbackLimit = Number.parseInt(outgoing.get('limit') || '50', 10) || 50;
   const searchQuery = String(outgoing.get('q') || '').trim();
+  const targetPosition = String(incoming.get('position') || '').trim().toUpperCase();
   const attempts = [];
+
+  // If a position is specified, we remove it from the backend query to ensure we get players 
+  // who might have it as an ALTERNATE position (since backends often only filter by primary).
+  // We will then filter locally.
+  if (targetPosition) {
+    outgoing.delete('position');
+    // If there's no name query, we need to make sure we're getting enough players to filter.
+    if (!searchQuery) {
+      outgoing.set('limit', '100'); // Increase limit for position-only searches
+    }
+  }
 
   for (const base of backendCandidates()) {
     const playersQuery = buildPlayersQuery(outgoing, { includeQ: true });
@@ -483,7 +504,7 @@ export async function GET(request) {
       const result = await fetchJson(playersUrl);
       let normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit);
       
-      // FALLBACK: If no results found with position/ovr filters, try searching by name only
+      // FALLBACK: If no results found with original filters, try searching by name only
       if ((!normalized || normalized.players.length === 0) && searchQuery) {
         console.log(`[top-10-search-api] No results with filters. Trying name-only fallback for: ${searchQuery}`);
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit) });
@@ -493,6 +514,20 @@ export async function GET(request) {
         
         if (fallbackResult.response.ok && fallbackNormalized && fallbackNormalized.players.length > 0) {
           normalized = fallbackNormalized;
+        }
+      }
+
+      // LOCAL FILTER: If a position was requested, filter the results to include Primary OR Alternate position matches.
+      if (normalized && targetPosition) {
+        normalized.players = normalized.players.filter(player => {
+          const primaryPos = String(player.position || '').toUpperCase();
+          const altPosList = String(player.alternatePosition || '').split(',').map(p => p.trim().toUpperCase());
+          return primaryPos === targetPosition || altPosList.includes(targetPosition);
+        });
+        
+        // Update total after local filtering
+        if (normalized.pagination) {
+          normalized.pagination.total = normalized.players.length;
         }
       }
 
