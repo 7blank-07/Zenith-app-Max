@@ -389,7 +389,7 @@ export async function GET(request) {
   console.log(`[SearchProxy] Backend candidates: ${candidates.join(', ')}`);
 
   for (const base of candidates) {
-    console.log(`[SearchProxy] Trying candidate: ${base}`);
+    console.log(`[SearchProxy] Trying candidate: ${base} (searchQuery="${searchQuery}")`);
 
     try {
       let normalized = null;
@@ -401,7 +401,7 @@ export async function GET(request) {
         const legacyQuery = buildLegacySearchQuery(outgoing);
         if (legacyQuery) {
           const legacyUrl = buildEndpointUrl(base, '/api/players/search', legacyQuery);
-          console.log(`[SearchProxy] Trying search endpoint: ${legacyUrl}`);
+          console.log(`[SearchProxy] [${base}] Trying search endpoint: ${legacyUrl}`);
           const legacyResult = await fetchJson(legacyUrl);
           responseStatus = legacyResult.response.status;
           
@@ -409,10 +409,12 @@ export async function GET(request) {
             normalized = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
             if (normalized) {
               normalized = filterPayloadBySearch(normalized, searchQuery);
-              console.log(`[SearchProxy] Search endpoint returned ${normalized.players.length} players`);
+              console.log(`[SearchProxy] [${base}] Search endpoint returned ${normalized.players.length} players`);
             }
           } else {
-            attempts.push({ url: legacyUrl, status: responseStatus, reason: toErrorReason(legacyResult.payload, legacyResult.details) });
+            const reason = toErrorReason(legacyResult.payload, legacyResult.details);
+            console.warn(`[SearchProxy] [${base}] Search endpoint failed (${responseStatus}): ${reason}`);
+            attempts.push({ url: legacyUrl, status: responseStatus, reason });
           }
         }
       }
@@ -421,7 +423,7 @@ export async function GET(request) {
       if (!normalized || normalized.players.length === 0) {
         const playersQuery = buildPlayersQuery(outgoing);
         const playersUrl = buildEndpointUrl(base, '/api/players', playersQuery);
-        console.log(`[SearchProxy] Trying players endpoint: ${playersUrl}`);
+        console.log(`[SearchProxy] [${base}] Trying players endpoint: ${playersUrl}`);
         
         const result = await fetchJson(playersUrl);
         responseStatus = result.response.status;
@@ -432,10 +434,12 @@ export async function GET(request) {
             normalized = filterPayloadBySearch(normalized, searchQuery);
           }
           if (normalized) {
-            console.log(`[SearchProxy] Players endpoint returned ${normalized.players.length} players`);
+            console.log(`[SearchProxy] [${base}] Players endpoint returned ${normalized.players.length} players`);
           }
         } else {
-          attempts.push({ url: playersUrl, status: responseStatus, reason: toErrorReason(result.payload, result.details) });
+          const reason = toErrorReason(result.payload, result.details);
+          console.warn(`[SearchProxy] [${base}] Players endpoint failed (${responseStatus}): ${reason}`);
+          attempts.push({ url: playersUrl, status: responseStatus, reason });
         }
       }
 
@@ -443,7 +447,7 @@ export async function GET(request) {
       if (searchQuery && (!normalized || normalized.players.length === 0)) {
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
-        console.log(`[SearchProxy] Trying fuzzy fallback: ${fallbackUrl}`);
+        console.log(`[SearchProxy] [${base}] Trying fuzzy fallback: ${fallbackUrl}`);
         
         const fallbackResult = await fetchJson(fallbackUrl);
         if (fallbackResult.response.ok) {
@@ -452,22 +456,23 @@ export async function GET(request) {
             fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
             if (fallbackNormalized.players.length > 0) {
               normalized = fallbackNormalized;
-              console.log(`[SearchProxy] Fuzzy fallback returned ${normalized.players.length} players`);
+              console.log(`[SearchProxy] [${base}] Fuzzy fallback returned ${normalized.players.length} players`);
             }
           }
+        } else {
+           const reason = toErrorReason(fallbackResult.payload, fallbackResult.details);
+           attempts.push({ url: fallbackUrl, status: fallbackResult.response.status, reason });
         }
       }
 
       // If we have results, enrich with colors and return
       if (normalized && normalized.players.length > 0) {
+        console.log(`[SearchProxy] [${base}] SUCCESS: Found ${normalized.players.length} players. Enriching colors...`);
         const normalizedWithColors = await enrichPayloadColors(base, normalized, attempts);
         return NextResponse.json(normalizedWithColors, { status: 200 });
       }
 
-      // If we got a 200 but no players, we continue to the next candidate 
-      // instead of returning an empty list immediately. This solves issues where
-      // one backend (e.g. remote) is empty but another (e.g. local) has data.
-      console.log(`[SearchProxy] Candidate ${base} returned no results, trying next...`);
+      console.log(`[SearchProxy] [${base}] Candidate returned no results, trying next...`);
 
     } catch (error) {
       console.error(`[SearchProxy] Error with candidate ${base}:`, error);

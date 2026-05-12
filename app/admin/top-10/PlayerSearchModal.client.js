@@ -26,7 +26,7 @@ export default function PlayerSearchModal({ position, onSelect, onClose }) {
       });
       
       console.log(`[PlayerSearchModal] Searching for: ${query} (${position}) OVR: ${minOvr}-${maxOvr}`);
-      const res = await fetch(`/api/players/search?${params.toString()}`);
+      const res = await fetch(`/internal-api/players/search?${params.toString()}`);
       
       if (!res.ok) {
         throw new Error(`Search failed with status: ${res.status}`);
