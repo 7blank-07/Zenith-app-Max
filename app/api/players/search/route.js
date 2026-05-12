@@ -82,11 +82,6 @@ function isPhantomRecord(normalized) {
   const name = String(normalized.name || '').toLowerCase();
   if (name.includes('test player') || name.includes('placeholder')) return true;
 
-  // CRITICAL: Filter out "fake" 120 OVR cards that often appear in raw data exports.
-  if (Number(normalized.ovr) >= 120 && Number(normalized.rank || 0) === 0) {
-    return true;
-  }
-  
   return false;
 }
 
