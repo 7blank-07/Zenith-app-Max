@@ -441,7 +441,15 @@ export async function GET(request) {
 
       if (result.response.ok && normalizedWithColors) {
         const finalPayload = searchQuery ? filterPayloadBySearch(normalizedWithColors, searchQuery) : normalizedWithColors;
-        if (!(searchQuery && finalPayload.players.length === 0)) {
+        
+        // CRITICAL FIX: If the search was successful (status 200) but returned 0 players, 
+        // we should return that empty list to the user instead of letting the loop continue 
+        // and eventually returning a 502 "Search failed" error.
+        if (searchQuery) {
+          return NextResponse.json(finalPayload, { status: result.response.status });
+        }
+        
+        if (finalPayload.players.length > 0) {
           return NextResponse.json(finalPayload, { status: result.response.status });
         }
       }

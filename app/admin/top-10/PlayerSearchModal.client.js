@@ -108,6 +108,11 @@ export default function PlayerSearchModal({ position, onSelect, onClose }) {
         <div className={styles.resultsList}>
           {isSearching ? (
             <div className={styles.loading}>Searching players...</div>
+          ) : error ? (
+            <div className={styles.error}>
+              <p><strong>Search Error:</strong> {error}</p>
+              <p className={styles.errorHint}>Please check the backend API status or your network connection.</p>
+            </div>
           ) : results.length > 0 ? (
             results.map((player) => (
               <button
