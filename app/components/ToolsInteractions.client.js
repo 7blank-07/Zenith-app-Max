@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
+import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { normalizeSearchText } from './search-normalization';
 import SquadExportCapture from './SquadExportCapture.client';
 import { buildExportFallbackPlayers, buildExportMediaMap, clearExportMediaCache, waitForExportLoadState } from './squad-export-media';
@@ -3060,7 +3061,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                               ) : null}
                               {player.isUntradable && (
                                 <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch">
-                                  <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                                  <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" />
                                 </div>
                               )}
                               <button
@@ -3160,7 +3161,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           )}
                           {player.isUntradable && (
                             <div className="card-untradable-badge card-untradable-badge--squad-picker" style={{ pointerEvents: 'none' }}>
-                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                              <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" />
                             </div>
                           )}
                         </div>
@@ -3266,7 +3267,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           ) : null}
                           {player.isUntradable && (
                             <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
-                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                              <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" />
                             </div>
                           )}
                           <button

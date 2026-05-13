@@ -545,7 +545,7 @@ function renderPlayerPicker() {
     const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
     const untradableBadgeHTML = isUntradable
       ? `<div class="card-untradable-badge" style="pointer-events: none;">
-           <img src="assets/images/untradable_img.png" alt="Untradable">
+           <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
          </div>`
       : '';
 
@@ -3181,7 +3181,7 @@ function buildSquadPreviewCardMarkup(player, slotLabel, slotId, options = {}) {
     const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
     const untradableBadgeHTML = isUntradable
           ? `<div class="card-untradable-badge ${includeRemoveButton ? 'with-remove' : 'no-remove'}">
-              <img src="assets/images/untradable_img.png" alt="Untradable">
+              <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
             </div>`
           : '';
 
@@ -3229,7 +3229,7 @@ function buildSquadBenchCardMarkup(player, benchIndex, options = {}) {
     const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
     const untradableBadgeHTML = isUntradable
         ? `<div class="card-untradable-badge" style="right: ${includeRemoveButton ? '18px' : '-1px'}; pointer-events: none;">
-               <img src="assets/images/untradable_img.png" alt="Untradable">
+               <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
            </div>`
         : '';
 
@@ -4456,7 +4456,7 @@ function renderCustomizationMiniCard(player) {
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
     ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+         <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
        </div>`
     : '';
 

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './PlayerPreviewMiniPlayerCard.module.css';
 import { getStatAccentColor } from './player-skill-stats-utils';
+import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { getOptimizedZenithUrl } from '../../src/lib/image-optimization.mjs';
 
@@ -125,7 +126,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
 
               {player.isUntradable && (
                 <div className="card-untradable-badge">
-                  <img src="/assets/images/untradable_img.png" alt="Untradable" width={16} height={16} loading="lazy" />
+                  <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" width={16} height={16} loading="lazy" />
                 </div>
               )}
             </div>

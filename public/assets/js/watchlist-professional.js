@@ -826,7 +826,7 @@ function createPlayerCardHTML(player) {
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
     ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+         <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
        </div>`
     : '';
   

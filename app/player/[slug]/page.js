@@ -10,6 +10,7 @@ import {
 import { buildPlayerPath, buildPlayerSlug } from '../../../src/lib/player-slug.mjs';
 import { getPlayerPrerenderLimit } from '../../../src/lib/server/prerender-rollout.mjs';
 import { fetchPlayersByIds, readTopPlayerIds } from '../../../src/lib/server/top-players.mjs';
+import { UNTRADABLE_CARD_BADGE_URL } from '../../components/image-asset-urls';
 import { getPlayerCardVariant, parseRank } from '../../components/player-detail-utils';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
@@ -215,7 +216,7 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                               )}
                               {player.isUntradable && (
                                 <div className="card-untradable-badge">
-                                  <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                                  <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" />
                                 </div>
                               )}
                             </div>

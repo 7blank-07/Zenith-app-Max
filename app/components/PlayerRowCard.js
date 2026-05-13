@@ -1,3 +1,5 @@
+import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
+
 function getInitials(name) {
   const words = String(name ?? '')
     .trim()
@@ -83,7 +85,7 @@ export default function PlayerRowCard({ player }) {
 
         {player.isUntradable && (
           <div className="card-untradable-badge card-untradable-badge--players" style={{ pointerEvents: 'none' }}>
-            <img src="/assets/images/untradable_img.png" alt="Untradable" width={12} height={12} loading="lazy" />
+            <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" width={12} height={12} loading="lazy" />
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
+import { UNTRADABLE_CARD_BADGE_URL, UNTRADABLE_PRICE_FLAG_URL } from './image-asset-urls';
 import { normalizeSearchText } from './search-normalization';
 
 const SEARCH_PAGE_SIZE = 50;
@@ -573,7 +574,7 @@ function renderPlayerCard(player) {
 
         {player.isUntradable && (
           <div className="card-untradable-badge card-untradable-badge--players" style={{ pointerEvents: 'none' }}>
-            <img src="/assets/images/untradable_img.png" alt="Untradable" />
+            <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" />
           </div>
         )}
       </div>
@@ -1563,7 +1564,7 @@ export default function PlayersDatabaseInteractions({
                       <div className="player-price player-row-price">
                         {player.isUntradable ? (
                           <img
-                            src="/assets/images/untradable-red-flag.png"
+                            src={UNTRADABLE_PRICE_FLAG_URL}
                             alt="Non-auctionable"
                             className="player-row-tradability-icon"
                             title="Non-auctionable"

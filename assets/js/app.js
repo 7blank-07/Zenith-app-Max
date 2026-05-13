@@ -4297,7 +4297,7 @@ function createDashboardPlayerCard(player) {
             ${
                 isUntradable
                     ? `<div class="card-untradable-badge">
-                           <img src="assets/images/untradable_img.png" alt="Untradable">
+                           <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
                        </div>`
                     : ''
             }
@@ -5098,7 +5098,7 @@ function createPlayerCard(player) {
     const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
     const untradableBadgeHTML = isUntradable
         ? `<div class="card-untradable-badge" style="pointer-events: none;">
-               <img src="assets/images/untradable_img.png" alt="Untradable">
+               <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
            </div>`
         : '';
 
@@ -5123,7 +5123,7 @@ function createPlayerCard(player) {
 
     if (isUntradable) {
         displayPriceHTML = `
-            <img src="assets/images/untradable-red-flag.png"
+            <img src="https://images.zenithfcm.com/common_23_noauction.png"
                 alt="Non-auctionable"
                 style="height: 18px; width: auto; vertical-align: middle; opacity: 0.95; margin-left: 6px;"
                 title="Non-auctionable">
@@ -8092,7 +8092,7 @@ function createFilledPlayerCard(player) {
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
     ? `<div class="card-untradable-badge" style="right: 40px; pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+         <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
        </div>`
     : '';
   card.dataset.playerId = playerId || '';
@@ -8331,7 +8331,7 @@ function renderCompareCustomizationMiniCard(player) {
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
     ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+         <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
        </div>`
     : '';
 
@@ -9149,7 +9149,7 @@ function createCompareSearchResultItem(player) {
   const isUntradable = isUntradableText === 'true' || isUntradableText === '1' || isUntradableText === 'yes';
   const untradableBadgeHTML = isUntradable
     ? `<div class="card-untradable-badge" style="pointer-events: none;">
-         <img src="assets/images/untradable_img.png" alt="Untradable">
+         <img src="https://images.zenithfcm.com/untradable-flag-player-card.png" alt="Untradable">
        </div>`
     : '';
   item.innerHTML = `

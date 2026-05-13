@@ -7,6 +7,7 @@ import {
   normalizeExportAssetUrl,
   resolvePlayerFromMap
 } from './squad-export-media';
+import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 
 const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fzenithfcm.com';
 
@@ -129,7 +130,7 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer }) {
             )}
             {player.isUntradable && (
               <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch">
-                <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
               </div>
             )}
           </div>
@@ -212,7 +213,7 @@ function ExportBenchCell({ player, index, exportMediaByPlayer }) {
             )}
             {player.isUntradable && (
               <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
-                <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
               </div>
             )}
           </div>

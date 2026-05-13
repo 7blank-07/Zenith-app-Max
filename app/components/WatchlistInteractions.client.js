@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
+import { UNTRADABLE_CARD_BADGE_URL, UNTRADABLE_PRICE_FLAG_URL } from './image-asset-urls';
 import { normalizeSearchText } from './search-normalization';
 
 function toNumber(value, fallback = 0) {
@@ -217,7 +218,7 @@ function renderPlayerRow(player) {
   const metaText = metaParts.length ? metaParts.join(' • ') : toText(player.position || 'Unknown');
   const formattedPrice = formatPrice(player.price);
   const priceMarkup = player.is_untradable
-    ? `<img src="/assets/images/untradable-red-flag.png"
+    ? `<img src="${UNTRADABLE_PRICE_FLAG_URL}"
         alt="Non-auctionable"
         style="height: 18px; width: auto; vertical-align: middle; opacity: 0.95; margin-left: 6px;"
         title="Non-auctionable">`
@@ -231,7 +232,7 @@ function renderPlayerRow(player) {
     .map((entry) => toText(entry).toUpperCase())
     .filter(Boolean);
   const untradableBadge = player.is_untradable
-    ? '<div class="card-untradable-badge" style="pointer-events: none;"><img src="/assets/images/untradable_img.png" alt="Untradable"></div>'
+    ? `<div class="card-untradable-badge" style="pointer-events: none;"><img src="${UNTRADABLE_CARD_BADGE_URL}" alt="Untradable"></div>`
     : '';
 
   return `
