@@ -6931,14 +6931,14 @@ watchlist-view .view-content {
     padding: 0.5rem 0;
 }
 
-.dashboard-player-card {
-    position: relative;
-    width: 60%;
-    aspect-ratio: 3/4;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 8px;
-    overflow: hidden;
+.dashboard-player-card {.card-untradable-badge {
+    position: absolute;
+    top: 15px;
+    right: -3px;
+    width: 21px;
+    height: 58px;
+    scale: 1.6;
+    z-index: 5;
 }
 
 .dashboard-player-card:hover {
@@ -6948,11 +6948,12 @@ watchlist-view .view-content {
 
 .card-untradable-badge {
     position: absolute;
-    top: -2px;
-    right: 7px;
-    width: 16px;
-    height: 16px;
-    z-index: 5; 
+    top: 15px;
+    right: -3px;
+    width: 21px;
+    height: 58px;
+    scale: 1.6;
+    z-index: 5;
 }
 
 
