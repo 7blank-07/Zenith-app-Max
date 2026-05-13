@@ -11,6 +11,7 @@ import { fetchLatestPlayers } from '../src/lib/server/top-players.mjs';
 import { getHomepageFeaturedStream } from '../src/lib/server/streams/repository.mjs';
 import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponents';
 import { getOptimizedZenithUrl } from '../src/lib/image-optimization.mjs';
+import { UNTRADABLE_BADGE_IMAGE_URL } from './components/static-image-urls';
 
 const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
   ssr: true
@@ -147,7 +148,7 @@ function renderDashboardPlayerCard(player, key, index = 0) {
 
         {player.isUntradable && (
           <div className="card-untradable-badge">
-            <img src="/assets/images/untradable_img.png" alt="Untradable" width={16} height={16} loading="lazy" fetchPriority="low" />
+            <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" width={16} height={16} loading="lazy" fetchPriority="low" />
           </div>
         )}
       </div>

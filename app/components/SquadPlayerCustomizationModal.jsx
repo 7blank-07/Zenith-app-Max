@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { fetchApiJson as fetchPlayerApiJson } from './player-skill-stats-utils';
 import { RANK_SPRITES } from './player-detail-utils';
+import { RANK_SIMPLE_ICON_URLS, UNTRADABLE_BADGE_IMAGE_URL } from './static-image-urls';
 
 const RANK_OPTIONS = Object.freeze([
-  { rank: 1, label: 'Green', icon: '/assets/images/rank_simple/green_rank_simple.png' },
-  { rank: 2, label: 'Blue', icon: '/assets/images/rank_simple/blue_rank_simple.png' },
-  { rank: 3, label: 'Purple', icon: '/assets/images/rank_simple/purple_rank_simple.png' },
-  { rank: 4, label: 'Red', icon: '/assets/images/rank_simple/red_rank_simple.png' },
-  { rank: 5, label: 'Orange', icon: '/assets/images/rank_simple/orange_gold_simple.png' }
+  { rank: 1, label: 'Green', icon: RANK_SIMPLE_ICON_URLS[1] },
+  { rank: 2, label: 'Blue', icon: RANK_SIMPLE_ICON_URLS[2] },
+  { rank: 3, label: 'Purple', icon: RANK_SIMPLE_ICON_URLS[3] },
+  { rank: 4, label: 'Red', icon: RANK_SIMPLE_ICON_URLS[4] },
+  { rank: 5, label: 'Orange', icon: RANK_SIMPLE_ICON_URLS[5] }
 ]);
 
 const TRAINING_LEVEL_OPTIONS = Object.freeze([
@@ -1268,7 +1269,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
             ) : null}
             {player.isUntradable && (
               <div className="card-untradable-badge" style={{ pointerEvents: 'none' }}>
-                <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" />
               </div>
             )}
           </div>

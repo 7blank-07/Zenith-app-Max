@@ -6,6 +6,7 @@ import { normalizeSearchText } from './search-normalization';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { buildLegacyStatsModel, resolveLegacyStatValue, toNumber } from './player-skill-stats-utils';
 import { RANK_SPRITES } from './player-detail-utils';
+import { UNTRADABLE_BADGE_IMAGE_URL } from './static-image-urls';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -499,7 +500,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
 
                           {player.isUntradable && (
                             <div className="card-untradable-badge card-untradable-badge--compare-selected" style={{ pointerEvents: 'none' }}>
-                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                              <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" />
                             </div>
                           )}
                         </div>
@@ -626,7 +627,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                         )}
                         {player.isUntradable && (
                           <div className="card-untradable-badge card-untradable-badge--compare-search" style={{ pointerEvents: 'none' }}>
-                            <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                            <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" />
                           </div>
                         )}
                       </div>

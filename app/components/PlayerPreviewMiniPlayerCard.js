@@ -4,6 +4,7 @@ import styles from './PlayerPreviewMiniPlayerCard.module.css';
 import { getStatAccentColor } from './player-skill-stats-utils';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { getOptimizedZenithUrl } from '../../src/lib/image-optimization.mjs';
+import { UNTRADABLE_BADGE_IMAGE_URL } from './static-image-urls';
 
 const STAT_MAPPING = {
   ST: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
@@ -125,7 +126,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
 
               {player.isUntradable && (
                 <div className="card-untradable-badge">
-                  <img src="/assets/images/untradable_img.png" alt="Untradable" width={16} height={16} loading="lazy" />
+                  <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" width={16} height={16} loading="lazy" />
                 </div>
               )}
             </div>

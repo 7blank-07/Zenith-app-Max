@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { normalizeSearchText } from './search-normalization';
+import { RANK_SPRITES } from './player-detail-utils';
+import { UNTRADABLE_BADGE_IMAGE_URL } from './static-image-urls';
 import SquadExportCapture from './SquadExportCapture.client';
 import { buildExportFallbackPlayers, buildExportMediaMap, clearExportMediaCache, waitForExportLoadState } from './squad-export-media';
 
@@ -809,14 +811,6 @@ const POSITION_PENALTIES = Object.freeze({
     rwb: -15,
     gk: -18
   })
-});
-
-const RANK_SPRITES = Object.freeze({
-  1: '/assets/images/ranks/green_rank_enhanced_main.webp',
-  2: '/assets/images/ranks/blue_rank_enhanced_main.webp',
-  3: '/assets/images/ranks/purple_rank_enhanced_main.webp',
-  4: '/assets/images/ranks/red_rank_enhanced_main.webp',
-  5: '/assets/images/ranks/gold_rank_enhanced_main.webp'
 });
 
 function normalizeTool(value) {
@@ -3060,7 +3054,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                               ) : null}
                               {player.isUntradable && (
                                 <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch">
-                                  <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                                  <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" />
                                 </div>
                               )}
                               <button
@@ -3160,7 +3154,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           )}
                           {player.isUntradable && (
                             <div className="card-untradable-badge card-untradable-badge--squad-picker" style={{ pointerEvents: 'none' }}>
-                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                              <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" />
                             </div>
                           )}
                         </div>
@@ -3266,7 +3260,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           ) : null}
                           {player.isUntradable && (
                             <div className="card-untradable-badge" style={{ right: '18px', pointerEvents: 'none' }}>
-                              <img src="/assets/images/untradable_img.png" alt="Untradable" />
+                              <img src={UNTRADABLE_BADGE_IMAGE_URL} alt="Untradable" />
                             </div>
                           )}
                           <button

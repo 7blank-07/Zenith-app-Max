@@ -1,3 +1,5 @@
+import { RANK_SPRITE_IMAGE_URLS } from './static-image-urls';
+
 export function parseRank(rankValue) {
   const parsed = Number.parseInt(String(rankValue ?? '0'), 10);
   if (!Number.isFinite(parsed)) return 0;
@@ -92,10 +94,4 @@ export const RANK_COLORS = Object.freeze({
   5: '#FFB86B'
 });
 
-export const RANK_SPRITES = Object.freeze({
-  1: '/assets/images/ranks/green_rank_enhanced_main.webp',
-  2: '/assets/images/ranks/blue_rank_enhanced_main.webp',
-  3: '/assets/images/ranks/purple_rank_enhanced_main.webp',
-  4: '/assets/images/ranks/red_rank_enhanced_main.webp',
-  5: '/assets/images/ranks/gold_rank_enhanced_main.webp'
-});
+export const RANK_SPRITES = RANK_SPRITE_IMAGE_URLS;
