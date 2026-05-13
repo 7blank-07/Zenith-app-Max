@@ -8,7 +8,7 @@ const publicAssetsDir = path.join(root, 'public', 'assets');
 const sourceIndexPath = path.join(root, 'index.html');
 const generatedBodyPath = path.join(root, 'src', 'lib', 'legacy-body.html');
 const legacyBundlePath = path.join(publicAssetsDir, 'js', 'legacy-app.bundle.mjs');
-const shouldSyncLegacyCss = process.env.SYNC_LEGACY_CSS === '1';
+const shouldSyncLegacyCss = process.env.SYNC_LEGACY_CSS !== '0';
 
 const orderedLegacyScripts = [
   'assets/js/data/config.js',

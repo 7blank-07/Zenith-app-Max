@@ -15,7 +15,6 @@
     "rollout:status": "node scripts/rollout-status.mjs",
     "db:migrate:blog": "node scripts/db/run-blog-migrations.mjs",
     "db:seed:blog-users": "node scripts/db/seed-blog-users.mjs",
-    "legacy:sync-css": "powershell -NoProfile -Command \"$env:SYNC_LEGACY_CSS='1'; node scripts/prepare-legacy.mjs\"",
     "test:price": "node scripts/test-price-snapshot-utils.mjs"
   },
   "dependencies": {

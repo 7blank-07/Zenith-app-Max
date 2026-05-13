@@ -12191,3 +12191,69 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
     height: 7px;
   }
 }
+
+/* ============================================================
+   RANK SELECTOR MOBILE & TABLET FIX
+   ============================================================ */
+
+/* Ensure grid is responsive and fits within modal */
+#squad-player-customization-modal .squad-rank-boxes-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+}
+
+/* Ensure boxes are visible and correctly sized */
+#squad-player-customization-modal .squad-rank-box {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 4px !important;
+    min-height: 80px !important;
+    height: auto !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Ensure icons are ALWAYS visible and correctly sized */
+#squad-player-customization-modal .rank-icon {
+    display: block !important;
+    visibility: visible !important;
+    width: 38px !important;
+    height: auto !important;
+    aspect-ratio: 48 / 54 !important;
+    object-fit: contain !important;
+    margin-bottom: 6px !important;
+    opacity: 1 !important;
+}
+
+/* Mobile specific grid (stack icons) */
+@media (max-width: 600px) {
+    #squad-player-customization-modal .squad-rank-boxes-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+    
+    #squad-player-customization-modal .squad-rank-box {
+        min-height: 70px !important;
+    }
+    
+    #squad-player-customization-modal .rank-icon {
+        width: 32px !important;
+    }
+}
+
+/* Handle tiny devices */
+@media (max-width: 360px) {
+    #squad-player-customization-modal .squad-rank-boxes-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
