@@ -9193,217 +9193,72 @@ body.stats-open #squad-builder-modal {
   margin-bottom: 7px;
 }
 
+/* Consolidated Untradable Badge Styles for Tools */
 .card-untradable-badge {
-    position: absolute;
-    pointer-events: none;
-    margin-right: 1px;
-    margin-bottom: 4px;
-    z-index: 10;
-    width: 20px;
-    height: 20px;
+    position: absolute !important;
+    top: 4px !important;
+    right: 4px !important;
+    width: 20px !important;
+    height: 20px !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+    display: block !important;
+    visibility: visible !important;
+    margin: 0 !important;
+    transform: none !important;
 }
 
-.card-untradable-badge.card-untradable-badge--players {
-    top: 1px;
-    right: 0;
-    width: 18px !important;
-    height: 18px !important;
-    margin-right: 0;
-    margin-bottom: 0;
-    z-index: 10;
+.card-untradable-badge img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
 }
 
-.card-untradable-badge.card-untradable-badge--players img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+/* Modifiers for specific tool contexts */
+.card-untradable-badge--players,
+.card-untradable-badge--squad-picker,
+.card-untradable-badge--compare-search,
+.card-untradable-badge--compare-selected,
+.card-untradable-badge--squad-pitch {
+    /* Uses robust base styles, but ensures specific placement if needed */
 }
 
-.card-untradable-badge.card-untradable-badge--squad-picker {
-    top: 3px;
-    right: 0;
-    width: 17px;
-    height: 17px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-    z-index: 10;
-}
-
-.card-untradable-badge.card-untradable-badge--squad-picker img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-}
-
-.card-untradable-badge.card-untradable-badge--compare-search {
-    top: 2px;
-    right: 4px;
-    width: 15px;
-    height: 15px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-    z-index: 10;
-}
-
-.card-untradable-badge.card-untradable-badge--compare-search img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-}
-
-.card-untradable-badge.card-untradable-badge--compare-selected {
-    top: 1px;
-    right: 0;
-    width: 19px;
-    height: 19px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-    z-index: 10;
-}
-
-.card-untradable-badge.card-untradable-badge--squad-pitch {
-    top: 1px;
-    right: 0;
-    width: 19px;
-    height: 19px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-    z-index: 10;
-}
-
-
-@media (max-width: 768px){
+@media (max-width: 768px) {
   .card-untradable-badge {
-    position: absolute;
-    pointer-events: none;
-    margin-right: 5px;
-    margin-bottom: 4px;
-    z-index: 10;
-    width: 15px;
-    height: 15px;
-}
-
-  .card-untradable-badge.card-untradable-badge--players {
-    top: 1px;
-    right: 0;
-    width: 18px !important;
-    height: 18px !important;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--squad-picker {
-    top: 3px;
-    right: 0;
-    width: 15px;
-    height: 15px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--compare-search {
-    top: 2px;
-    right: 4px;
-    width: 12px;
-    height: 12px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--compare-selected {
-    top: 1px;
-    right: 0;
-    width: 17px;
-    height: 17px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--squad-pitch {
-    top: 1px;
-    right: 0;
-    width: 17px;
-    height: 17px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
+    top: 2px !important;
+    right: 2px !important;
+    width: 16px !important;
+    height: 16px !important;
   }
 }
 
-@media (max-width: 480px) {
-  .card-untradable-badge {
-    position: absolute;
-    pointer-events: none;
-
-    top: -1px;        /* push it above */
-    right: 9px;       /* adjust horizontal if needed */
-
-    width: 7px;       /* slightly smaller */
-    height: 7px;
-
-    z-index: 10;
-  }
-
-  .card-untradable-badge.card-untradable-badge--players {
-    top: 1px;
-    right: 0;
-    width: 18px !important;
-    height: 18px !important;
-    margin-right: 0;
-    margin-bottom: 0;
-    transform: none;
-  }
-
-  .card-untradable-badge.card-untradable-badge--squad-picker {
-    top: 3px;
-    right: 0;
-    width: 15px;
-    height: 15px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--compare-search {
-    top: 2px;
-    right: 4px;
-    width: 12px;
-    height: 12px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--compare-selected {
-    top: 1px;
-    right: 0;
-    width: 17px;
-    height: 17px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .card-untradable-badge.card-untradable-badge--squad-pitch {
-    top: 1px;
-    right: 0;
-    width: 17px;
-    height: 17px;
-    transform: none;
-    margin-right: 0;
-    margin-bottom: 0;
-  }
+/* Consolidated Rank Icon Styles for Customization Modal */
+#squad-player-customization-modal .rank-icon,
+.squad-rank-box img,
+.rank-icon {
+    display: block !important;
+    visibility: visible !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    object-fit: contain !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) !important;
 }
+
+@media (max-width: 600px) {
+    #squad-player-customization-modal .rank-icon,
+    .squad-rank-box img {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+    }
+}
+
 
 
 .picker-squad-card-flag-nation.hero-icon-squad-nation-flag{
