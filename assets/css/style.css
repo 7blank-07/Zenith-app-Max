@@ -184,9 +184,9 @@ html, body {
 [data-color-scheme="light"] {
   color-scheme: light;
 
-  --color-graphite-900: #E8EEF2;
-  --color-graphite-800: #F1F5F9;
-  --color-graphite-700: #E2E8F0;
+  --color-graphite-900: #FAF8F6;
+  --color-graphite-800: #F5F3F0;
+  --color-graphite-700: #EFE9E0;
 
   --color-teal-500: #008F7A;
   --color-teal-600: #007C6B;
@@ -206,14 +206,14 @@ html, body {
   --color-warning-rgb: 185, 107, 18;
   --color-info-rgb: 100, 116, 139;
 
-  --color-bg-1: #E8EEF2;
-  --color-bg-2: #F1F5F9;
+  --color-bg-1: #FAF8F6;
+  --color-bg-2: #F5F3F0;
   --color-bg-3: rgba(var(--color-success-rgb), 0.1);
   --color-bg-4: rgba(var(--color-error-rgb), 0.1);
-  --color-bg-5: #E2E8F0;
+  --color-bg-5: #EFE9E0;
   --color-bg-6: rgba(var(--color-warning-rgb), 0.12);
-  --color-bg-7: #EEF4F8;
-  --color-bg-8: #F1F5F9;
+  --color-bg-7: #F9F7F4;
+  --color-bg-8: #F5F3F0;
 
   --color-background: var(--color-graphite-900);
   --color-surface: var(--color-graphite-800);
@@ -11898,31 +11898,31 @@ body {
 }
 
 [data-color-scheme="light"] body {
-  background-color: #E8EEF2;
+  background-color: #FAF8F6;
   background-image:
-    radial-gradient(circle at 12% -8%, rgba(0, 143, 122, 0.14), transparent 34rem),
-    radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.1), transparent 36rem),
-    radial-gradient(circle at 54% 118%, rgba(0, 143, 122, 0.08), transparent 42rem),
-    linear-gradient(115deg, rgba(15, 32, 42, 0.032) 0 1px, transparent 1px 74px),
-    linear-gradient(180deg, #E8EEF2 0%, #E2E8F0 48%, #D8E1E8 100%);
+    radial-gradient(circle at 12% -8%, rgba(0, 143, 122, 0.08), transparent 34rem),
+    radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.06), transparent 36rem),
+    radial-gradient(circle at 54% 118%, rgba(0, 143, 122, 0.05), transparent 42rem),
+    linear-gradient(115deg, rgba(15, 32, 42, 0.015) 0 1px, transparent 1px 74px),
+    linear-gradient(180deg, #FAF8F6 0%, #F5F3F0 45%, #F0EEEB 100%);
 }
 
 @media (max-width: 1024px) {
   [data-color-scheme="light"] body {
     background-image:
-      radial-gradient(circle at 8% -10%, rgba(0, 143, 122, 0.12), transparent 28rem),
-      radial-gradient(circle at 100% 6%, rgba(37, 99, 235, 0.08), transparent 30rem),
-      radial-gradient(circle at 48% 112%, rgba(0, 143, 122, 0.07), transparent 34rem),
-      linear-gradient(180deg, #E8EEF2 0%, #E2E8F0 50%, #D8E1E8 100%);
+      radial-gradient(circle at 8% -10%, rgba(0, 143, 122, 0.08), transparent 28rem),
+      radial-gradient(circle at 100% 6%, rgba(37, 99, 235, 0.06), transparent 30rem),
+      radial-gradient(circle at 48% 112%, rgba(0, 143, 122, 0.05), transparent 34rem),
+      linear-gradient(180deg, #FAF8F6 0%, #F5F3F0 50%, #F0EEEB 100%);
   }
 }
 
 @media (max-width: 640px) {
   [data-color-scheme="light"] body {
     background-image:
-      radial-gradient(circle at 0% 0%, rgba(0, 143, 122, 0.12), transparent 20rem),
-      radial-gradient(circle at 100% 4%, rgba(37, 99, 235, 0.08), transparent 22rem),
-      linear-gradient(180deg, #E8EEF2 0%, #E2E8F0 48%, #D8E1E8 100%);
+      radial-gradient(circle at 0% 0%, rgba(0, 143, 122, 0.08), transparent 20rem),
+      radial-gradient(circle at 100% 4%, rgba(37, 99, 235, 0.06), transparent 22rem),
+      linear-gradient(180deg, #FAF8F6 0%, #F5F3F0 48%, #F0EEEB 100%);
   }
 }
 
