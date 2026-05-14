@@ -8,6 +8,7 @@ export default function PlayerSearchModal({ position, onSelect, onClose }) {
   const [query, setQuery] = useState('');
   const [minOvr, setMinOvr] = useState('80');
   const [maxOvr, setMaxOvr] = useState('120');
+  const [auctionableOnly, setAuctionableOnly] = useState(false);
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
@@ -24,8 +25,12 @@ export default function PlayerSearchModal({ position, onSelect, onClose }) {
         rank: '0', // Always search for base cards (Rank 0) to avoid 120 OVR "fake" versions
         limit: '20'
       });
+
+      if (auctionableOnly) {
+        params.set('is_untradable', '0');
+      }
       
-      console.log(`[PlayerSearchModal] Searching for: ${query} (${position}) OVR: ${minOvr}-${maxOvr}`);
+      console.log(`[PlayerSearchModal] Searching for: ${query} (${position}) OVR: ${minOvr}-${maxOvr} Auctionable: ${auctionableOnly}`);
       const res = await fetch(`/internal-api/players/search?${params.toString()}`);
       
       if (!res.ok) {
@@ -53,7 +58,7 @@ export default function PlayerSearchModal({ position, onSelect, onClose }) {
     } finally {
       setIsSearching(false);
     }
-  }, [query, position, minOvr, maxOvr]);
+  }, [query, position, minOvr, maxOvr, auctionableOnly]);
 
 
   useEffect(() => {
@@ -102,6 +107,22 @@ export default function PlayerSearchModal({ position, onSelect, onClose }) {
                 onChange={(e) => setMaxOvr(e.target.value)}
               />
             </div>
+          </div>
+          <div className={commonStyles.field} style={{ marginTop: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label className={commonStyles.label}>Auctionable Only</label>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={auctionableOnly}
+                  onChange={(e) => setAuctionableOnly(e.target.checked)}
+                />
+                <span className="toggle-slider" />
+              </label>
+            </div>
+            <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px', marginBottom: 0 }}>
+              <span>{auctionableOnly ? 'Only With Prices' : 'All Players'}</span>
+            </p>
           </div>
         </div>
 

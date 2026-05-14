@@ -323,6 +323,12 @@ function buildLegacySearchQuery(outgoing) {
   query.set('limit', outgoing.get('limit') || '50');
   query.set('offset', outgoing.get('offset') || '0');
   query.set('rank', outgoing.get('rank') || '0');
+  
+  // Preserve filters for specialized search endpoint
+  if (outgoing.has('min_ovr')) query.set('min_ovr', outgoing.get('min_ovr'));
+  if (outgoing.has('max_ovr')) query.set('max_ovr', outgoing.get('max_ovr'));
+  if (outgoing.has('is_untradable')) query.set('is_untradable', outgoing.get('is_untradable'));
+  
   return query;
 }
 
@@ -334,18 +340,48 @@ function rowNameSource(row) {
   return normalizeSearchValue(row?.name || row?.player_name || '');
 }
 
-function filterPayloadBySearch(normalizedPayload, query) {
-  const needle = normalizeSearchValue(query);
-  if (!needle) return normalizedPayload;
-  const rows = Array.isArray(normalizedPayload?.players) ? normalizedPayload.players : [];
-  const filteredRows = rows.filter((row) => rowNameSource(row).includes(needle));
-  const fallbackPagination = normalizedPayload?.pagination && typeof normalizedPayload.pagination === 'object' ? normalizedPayload.pagination : {};
+/**
+ * Robustly applies filters (name, OVR, auctionable) to the results.
+ * This acts as a safeguard in case backend candidates ignore these parameters.
+ */
+function refineNormalizedPayload(normalizedPayload, criteria) {
+  if (!normalizedPayload || !Array.isArray(normalizedPayload.players)) return normalizedPayload;
+  
+  const { query, minOvr, maxOvr, isUntradable } = criteria;
+  let rows = normalizedPayload.players;
+
+  // 1. Filter by Name (Search Query) - uses fuzzy check
+  if (query) {
+    const needle = normalizeSearchValue(query);
+    rows = rows.filter((row) => rowNameSource(row).includes(needle));
+  }
+
+  // 2. Enforce OVR constraints
+  if (minOvr !== null && minOvr !== undefined && !isNaN(minOvr)) {
+    rows = rows.filter((row) => Number(row.ovr) >= minOvr);
+  }
+  if (maxOvr !== null && maxOvr !== undefined && !isNaN(maxOvr)) {
+    rows = rows.filter((row) => Number(row.ovr) <= maxOvr);
+  }
+
+  // 3. Enforce Auctionable status (is_untradable)
+  // We accept both '0'/'1' strings and 0/1 numbers
+  if (isUntradable !== null && isUntradable !== undefined) {
+    const targetUntradable = String(isUntradable) === '1';
+    rows = rows.filter((row) => {
+      // row.isUntradable comes from normalizePlayerStableRecord (boolean)
+      const actualUntradable = row.isUntradable === true || row.is_untradable === 1 || row.is_untradable === '1';
+      return actualUntradable === targetUntradable;
+    });
+  }
+
+  const pagination = normalizedPayload.pagination || {};
   return {
-    players: filteredRows,
+    ...normalizedPayload,
+    players: rows,
     pagination: {
-      total: filteredRows.length,
-      limit: Number.isFinite(Number(fallbackPagination.limit)) ? Number(fallbackPagination.limit) : filteredRows.length,
-      offset: Number.isFinite(Number(fallbackPagination.offset)) ? Number(fallbackPagination.offset) : 0,
+      ...pagination,
+      total: rows.length,
       has_more: false
     }
   };
@@ -374,9 +410,17 @@ export async function GET(request) {
   const fallbackLimit = Number.parseInt(outgoing.get('limit') || '50', 10) || 50;
   const searchQuery = String(outgoing.get('q') || '').trim();
   const targetPosition = String(incoming.get('position') || '').trim().toUpperCase();
+  
+  const filterCriteria = {
+    query: searchQuery,
+    minOvr: outgoing.has('min_ovr') ? parseInt(outgoing.get('min_ovr'), 10) : null,
+    maxOvr: outgoing.has('max_ovr') ? parseInt(outgoing.get('max_ovr'), 10) : null,
+    isUntradable: outgoing.has('is_untradable') ? outgoing.get('is_untradable') : null
+  };
+
   const attempts = [];
 
-  console.log(`[SearchProxy] Incoming search: q="${searchQuery}" pos="${targetPosition}"`);
+  console.log(`[SearchProxy] Incoming search: q="${searchQuery}" pos="${targetPosition}" criteria=`, filterCriteria);
 
   // CRITICAL: If a search query is present, we ignore the position filter 
   // to allow finding players across all positions (as requested by the user).
@@ -408,8 +452,8 @@ export async function GET(request) {
           if (legacyResult.response.ok) {
             normalized = normalizePlayersPayload(legacyResult.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
             if (normalized) {
-              normalized = filterPayloadBySearch(normalized, searchQuery);
-              console.log(`[SearchProxy] [${base}] Search endpoint returned ${normalized.players.length} players`);
+              normalized = refineNormalizedPayload(normalized, filterCriteria);
+              console.log(`[SearchProxy] [${base}] Search endpoint returned ${normalized.players.length} players after refinement`);
             }
           } else {
             const reason = toErrorReason(legacyResult.payload, legacyResult.details);
@@ -430,11 +474,9 @@ export async function GET(request) {
 
         if (result.response.ok) {
           normalized = normalizePlayersPayload(result.payload, fallbackOffset, fallbackLimit, effectivePosition, isSearchActive);
-          if (normalized && searchQuery) {
-            normalized = filterPayloadBySearch(normalized, searchQuery);
-          }
           if (normalized) {
-            console.log(`[SearchProxy] [${base}] Players endpoint returned ${normalized.players.length} players`);
+            normalized = refineNormalizedPayload(normalized, filterCriteria);
+            console.log(`[SearchProxy] [${base}] Players endpoint returned ${normalized.players.length} players after refinement`);
           }
         } else {
           const reason = toErrorReason(result.payload, result.details);
@@ -446,6 +488,11 @@ export async function GET(request) {
       // PHASE 3: Fallback to fuzzy search if still no results
       if (searchQuery && (!normalized || normalized.players.length === 0)) {
         const fallbackQuery = new URLSearchParams({ q: searchQuery, limit: String(fallbackLimit), rank: '0' });
+        // Add filters to fuzzy fallback too
+        if (outgoing.has('min_ovr')) fallbackQuery.set('min_ovr', outgoing.get('min_ovr'));
+        if (outgoing.has('max_ovr')) fallbackQuery.set('max_ovr', outgoing.get('max_ovr'));
+        if (outgoing.has('is_untradable')) fallbackQuery.set('is_untradable', outgoing.get('is_untradable'));
+
         const fallbackUrl = buildEndpointUrl(base, '/api/players', fallbackQuery);
         console.log(`[SearchProxy] [${base}] Trying fuzzy fallback: ${fallbackUrl}`);
         
@@ -453,10 +500,10 @@ export async function GET(request) {
         if (fallbackResult.response.ok) {
           let fallbackNormalized = normalizePlayersPayload(fallbackResult.payload, fallbackOffset, fallbackLimit, effectivePosition, true);
           if (fallbackNormalized) {
-            fallbackNormalized = filterPayloadBySearch(fallbackNormalized, searchQuery);
+            fallbackNormalized = refineNormalizedPayload(fallbackNormalized, filterCriteria);
             if (fallbackNormalized.players.length > 0) {
               normalized = fallbackNormalized;
-              console.log(`[SearchProxy] [${base}] Fuzzy fallback returned ${normalized.players.length} players`);
+              console.log(`[SearchProxy] [${base}] Fuzzy fallback returned ${normalized.players.length} players after refinement`);
             }
           }
         } else {
