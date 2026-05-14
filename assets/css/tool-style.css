@@ -12200,3 +12200,86 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .picker-card-m
     height: 7px;
   }
 }
+
+/* Public tool pages: app-level light mode keeps the tool layout intact while lifting surrounding chrome. */
+[data-color-scheme="light"] main.main-content.main-content--compare {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 143, 122, 0.12), transparent 42%),
+    radial-gradient(circle at 82% 100%, rgba(37, 99, 235, 0.08), transparent 48%),
+    linear-gradient(180deg, #F8FBFD 0%, #EEF4F8 100%);
+}
+
+[data-color-scheme="light"] .squad-page-shell,
+[data-color-scheme="light"] .compare-modal,
+[data-color-scheme="light"] .compare-search-modal,
+[data-color-scheme="light"] .squad-filter-panel,
+[data-color-scheme="light"] .squad-customization-modal,
+[data-color-scheme="light"] .squad-player-picker {
+  background: linear-gradient(135deg, #F8FBFD 0%, #EAF2F8 50%, #F8FBFD 100%) !important;
+  color: #10202A !important;
+  border-color: rgba(15, 32, 42, 0.12) !important;
+  box-shadow: 0 18px 44px rgba(15, 32, 42, 0.12) !important;
+}
+
+[data-color-scheme="light"] .squad-header,
+[data-color-scheme="light"] .compare-header,
+[data-color-scheme="light"] .compare-search-header,
+[data-color-scheme="light"] .squad-picker-header,
+[data-color-scheme="light"] .squad-filter-panel-header {
+  border-color: rgba(15, 32, 42, 0.12) !important;
+}
+
+[data-color-scheme="light"] .squad-header h2,
+[data-color-scheme="light"] .compare-header h2,
+[data-color-scheme="light"] .compare-search-header h3,
+[data-color-scheme="light"] .compare-stats-header h3,
+[data-color-scheme="light"] .squad-filter-panel-header h4 {
+  color: #10202A !important;
+}
+
+[data-color-scheme="light"] .squad-input,
+[data-color-scheme="light"] .squad-select,
+[data-color-scheme="light"] .squad-picker-search,
+[data-color-scheme="light"] .compare-search-input,
+[data-color-scheme="light"] .compare-view-toggle,
+[data-color-scheme="light"] .compare-player-card.empty-state,
+[data-color-scheme="light"] .compare-search-result-item,
+[data-color-scheme="light"] .squad-filter-btn,
+[data-color-scheme="light"] .squad-stats-btn {
+  background: rgba(255, 255, 255, 0.76) !important;
+  border-color: rgba(15, 32, 42, 0.13) !important;
+  color: #18303B !important;
+}
+
+[data-color-scheme="light"] .squad-select option {
+  background: #FFFFFF;
+  color: #18303B;
+}
+
+[data-color-scheme="light"] .squad-stat-label,
+[data-color-scheme="light"] .squad-hint,
+[data-color-scheme="light"] .compare-stats-subtitle,
+[data-color-scheme="light"] .compare-search-result-info p {
+  color: #5E7180 !important;
+}
+
+[data-color-scheme="light"] .squad-btn,
+[data-color-scheme="light"] .squad-theme-btn,
+[data-color-scheme="light"] .compare-stats-btn,
+[data-color-scheme="light"] .compare-close-btn,
+[data-color-scheme="light"] .compare-search-close {
+  background: rgba(0, 143, 122, 0.09) !important;
+  border-color: rgba(0, 143, 122, 0.24) !important;
+  color: #007C6B !important;
+}
+
+[data-color-scheme="light"] .squad-btn:hover,
+[data-color-scheme="light"] .squad-theme-btn:hover,
+[data-color-scheme="light"] .compare-stats-btn:hover,
+[data-color-scheme="light"] .compare-stats-btn.active,
+[data-color-scheme="light"] .compare-close-btn:hover,
+[data-color-scheme="light"] .compare-search-close:hover {
+  background: rgba(0, 143, 122, 0.15) !important;
+  border-color: rgba(0, 143, 122, 0.34) !important;
+  color: #00685C !important;
+}

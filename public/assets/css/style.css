@@ -47,6 +47,7 @@
   --color-surface: var(--color-graphite-800);
   --color-text: var(--color-text-primary);
   --color-text-secondary: var(--color-text-muted);
+  --color-heading: var(--color-white);
 
   --color-primary: var(--color-teal-500);
   --color-primary-hover: var(--color-teal-600);
@@ -61,6 +62,17 @@
 
   --color-card-border: rgba(255, 255, 255, 0.06);
   --color-card-border-inner: rgba(255, 255, 255, 0.04);
+  --color-header-bg: rgba(14, 17, 20, 0.85);
+  --color-mobile-nav-bg: rgba(14, 17, 20, 0.95);
+  --color-dropdown-bg: var(--color-graphite-900);
+  --color-dropdown-text: #d4d4d4;
+  --color-dropdown-hover-bg: rgba(var(--color-teal-rgb), 0.12);
+  --color-dropdown-hover-text: var(--color-white);
+  --color-theme-toggle-bg: rgba(255, 255, 255, 0.05);
+  --color-theme-toggle-hover-bg: rgba(var(--color-teal-rgb), 0.12);
+  --color-theme-toggle-text: var(--color-text-primary);
+  --color-theme-toggle-border: var(--color-border);
+  --color-mobile-nav-text: var(--color-white);
 
   --color-error: var(--color-status-error);
   --color-success: var(--color-status-success);
@@ -157,67 +169,93 @@ html, body {
 
 @font-face {
     font-family: "CruyffSans";
-    src: url("assets/fonts/CruyffSansCondensed-Bold.woff2") format("woff2");
+    src: url("/assets/fonts/CruyffSansCondensed-Bold.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
 
 
-/* Dark mode colors - Enforced Graphite Teal Pro */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Identical to default root because Graphite is dark-first */
-    --color-background: var(--color-graphite-900);
-    --color-surface: var(--color-graphite-800);
-    --color-text: var(--color-text-primary);
-    --color-text-secondary: var(--color-text-muted);
-
-    --color-primary: var(--color-teal-500);
-    --color-primary-hover: var(--color-teal-600);
-    --color-primary-active: var(--color-teal-700);
-
-    --color-border: rgba(255, 255, 255, 0.08);
-    --color-card-border: rgba(255, 255, 255, 0.06);
-    --color-select-caret: rgba(230, 238, 242, 0.8);
-  }
+/* Theme palettes */
+[data-color-scheme="dark"] {
+  color-scheme: dark;
 }
 
-/* Force Graphite Theme on Data Attributes */
-[data-color-scheme="dark"],
 [data-color-scheme="light"] {
-  /* Override "light" scheme to use Graphite because the palette is dark-only */
+  color-scheme: light;
+
+  --color-graphite-900: #F4F7FB;
+  --color-graphite-800: #FFFFFF;
+  --color-graphite-700: #EAF0F6;
+
+  --color-teal-500: #008F7A;
+  --color-teal-600: #007C6B;
+  --color-teal-700: #00685C;
+
+  --color-status-success: #178A45;
+  --color-status-error: #D64545;
+  --color-status-warning: #B96B12;
+  --color-status-info: #64748B;
+  --color-elite: #2563EB;
+
+  --color-text-primary: #10202A;
+  --color-text-muted: #5E7180;
+  --color-teal-rgb: 0, 143, 122;
+  --color-success-rgb: 23, 138, 69;
+  --color-error-rgb: 214, 69, 69;
+  --color-warning-rgb: 185, 107, 18;
+  --color-info-rgb: 100, 116, 139;
+
+  --color-bg-1: #F4F7FB;
+  --color-bg-2: #FFFFFF;
+  --color-bg-3: rgba(var(--color-success-rgb), 0.1);
+  --color-bg-4: rgba(var(--color-error-rgb), 0.1);
+  --color-bg-5: #EAF0F6;
+  --color-bg-6: rgba(var(--color-warning-rgb), 0.12);
+  --color-bg-7: #F8FAFC;
+  --color-bg-8: #FFFFFF;
+
   --color-background: var(--color-graphite-900);
   --color-surface: var(--color-graphite-800);
   --color-text: var(--color-text-primary);
   --color-text-secondary: var(--color-text-muted);
+  --color-heading: #0F202A;
   --color-primary: var(--color-teal-500);
   --color-primary-hover: var(--color-teal-600);
   --color-primary-active: var(--color-teal-700);
-  --color-secondary: rgba(255, 255, 255, 0.05);
-  --color-secondary-hover: rgba(255, 255, 255, 0.08);
-  --color-secondary-active: rgba(255, 255, 255, 0.12);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-btn-primary-text: var(--color-graphite-900);
-  --color-card-border: rgba(255, 255, 255, 0.06);
+  --color-secondary: rgba(15, 32, 42, 0.055);
+  --color-secondary-hover: rgba(15, 32, 42, 0.085);
+  --color-secondary-active: rgba(15, 32, 42, 0.12);
+  --color-border: rgba(15, 32, 42, 0.12);
+  --color-btn-primary-text: #FFFFFF;
+  --color-card-border: rgba(15, 32, 42, 0.1);
+  --color-card-border-inner: rgba(15, 32, 42, 0.08);
+  --color-header-bg: rgba(255, 255, 255, 0.88);
+  --color-mobile-nav-bg: rgba(255, 255, 255, 0.94);
+  --color-dropdown-bg: #FFFFFF;
+  --color-dropdown-text: #233540;
+  --color-dropdown-hover-bg: rgba(var(--color-teal-rgb), 0.09);
+  --color-dropdown-hover-text: #0F202A;
+  --color-theme-toggle-bg: rgba(15, 32, 42, 0.055);
+  --color-theme-toggle-hover-bg: rgba(var(--color-teal-rgb), 0.11);
+  --color-theme-toggle-text: #18303B;
+  --color-theme-toggle-border: rgba(15, 32, 42, 0.13);
+  --color-mobile-nav-text: #334756;
+  --color-focus-ring: rgba(var(--color-teal-rgb), 0.28);
+  --color-select-caret: rgba(15, 32, 42, 0.8);
 
-  /* Utilities */
-  --color-error: var(--color-status-error);
-  --color-success: var(--color-status-success);
-  --color-warning: var(--color-status-warning);
-  --color-info: var(--color-status-info);
-
-  /* RGB Maps */
-  --color-teal-rgb: 0, 194, 168;
-  --color-success-rgb: 59, 214, 113;
-  --color-error-rgb: 255, 107, 107;
-  --color-warning-rgb: 255, 184, 107;
-  --color-info-rgb: 152, 160, 166;
+  --shadow-xs: 0 1px 2px rgba(15, 32, 42, 0.08);
+  --shadow-sm: 0 1px 2px rgba(15, 32, 42, 0.08);
+  --shadow-md: 0 10px 24px rgba(15, 32, 42, 0.12), 0 2px 6px rgba(15, 32, 42, 0.08);
+  --shadow-lg: 0 18px 40px rgba(15, 32, 42, 0.14), 0 6px 16px rgba(15, 32, 42, 0.08);
+  --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2310202A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  --select-caret-dark: var(--select-caret-light);
 }
 
-/* Force H2/Headings elements to always be white */
+/* Base heading color follows the active theme. */
 h1, h2, h3, h4, h5, h6 {
-  color: #FFFFFF !important;
+  color: var(--color-heading);
 }
 
 /* Base styles */
@@ -277,7 +315,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
-  color: #FFFFFF; /* Graphite Headings */
+  color: var(--color-heading); /* Graphite Headings */
   letter-spacing: var(--letter-spacing-tight);
 }
 
@@ -763,12 +801,13 @@ select.form-control {
 
 /* Header */
 .header {
-  background: rgba(14, 17, 20, 0.85); /* Graphite 900 with opacity */
+  background: var(--color-header-bg); /* Graphite 900 with opacity */
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 1000;
+  box-shadow: var(--shadow-xs);
 }
 
 .header-content {
@@ -838,8 +877,8 @@ select.form-control {
 
 
 .nav-link:hover {
-  color: #00C2A8;
-  background-color: rgba(0, 194, 168, 0.05);
+  color: var(--color-primary);
+  background-color: rgba(var(--color-teal-rgb), 0.06);
   transform: translateY(-2px);
   text-shadow: 0 0 10px rgba(0,194,168,0.35);
 }
@@ -850,12 +889,52 @@ select.form-control {
   gap: 12px;
 }
 
+.theme-toggle-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--color-theme-toggle-border);
+  background: var(--color-theme-toggle-bg);
+  color: var(--color-theme-toggle-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-theme-toggle-hover-bg);
+  border-color: rgba(var(--color-teal-rgb), 0.34);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.theme-toggle-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
+}
+
 .search-container-header {
   position: relative;
 }
 
 .search-input-header {
-  background: var(--color-graphite-800); /* Surface color */
+  background: var(--color-surface); /* Surface color */
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 4px 12px;
@@ -891,7 +970,7 @@ select.form-control {
 .avatar-circle:hover {
   transform: scale(1.1);
   border-color: var(--color-teal-500);
-  background: rgba(0, 194, 168, 0.1);
+  background: rgba(var(--color-teal-rgb), 0.1);
 }
 
 /* Main Content */
@@ -2214,7 +2293,7 @@ main.players-main-content {
   align-items: stretch;
   justify-content: space-between;
   gap: clamp(4px, 1.6vw, 8px);
-  background: rgba(14, 17, 20, 0.95); /* Graphite 900 */
+  background: var(--color-mobile-nav-bg); /* Graphite 900 */
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--color-border);
   box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.28);
@@ -2235,7 +2314,7 @@ main.players-main-content {
   gap: 3px;
   background: transparent;
   border: none;
-  color: #FFFFFF;
+  color: var(--color-mobile-nav-text);
   padding: 7px 4px;
   border-radius: 12px;
   cursor: pointer;
@@ -2269,8 +2348,8 @@ main.players-main-content {
 
 .mobile-nav-btn.active {
   color: var(--color-teal-500);
-  background: rgba(0, 194, 168, 0.15);
-  box-shadow: inset 0 0 0 1px rgba(0, 194, 168, 0.22);
+  background: rgba(var(--color-teal-rgb), 0.15);
+  box-shadow: inset 0 0 0 1px rgba(var(--color-teal-rgb), 0.22);
 }
 
 .mobile-nav .tools-btn {
@@ -2293,7 +2372,7 @@ main.players-main-content {
 }
 
 .mobile-nav .tools-btn:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-secondary-hover);
 }
 
 /* Responsive */
@@ -2853,14 +2932,14 @@ main.players-main-content {
   opacity: 1 !important;
 }
 
-/* Force navigation, titles, and filters to be white/primary */
+/* Keep navigation, titles, and filters aligned with the active theme. */
 .section-title,
 .filters-header h3,
 .view-header h1,
 .section-header h2,
 .market-section-title,
 h1, h3, h4, h5, h6 {
-  color: #FFFFFF !important; /* Pure white headings for readability */
+  color: var(--color-heading) !important;
   background: none !important;
   -webkit-background-clip: unset !important;
   -webkit-text-fill-color: unset !important;
@@ -2874,7 +2953,7 @@ h1, h3, h4, h5, h6 {
 
 /* Database header */
 .database-layout h3 {
-  color: #FFFFFF !important;
+  color: var(--color-heading) !important;
 }
 
 /* FIRST BADGE FOR TEAL PRO 5 */
@@ -10976,6 +11055,30 @@ watchlist-view .view-content {
   border: 1px solid rgba(255,255,255,0.15) !important;
 }
 
+[data-color-scheme="light"] .filters-sidebar,
+[data-color-scheme="light"] .players-grid .player-row,
+[data-color-scheme="light"] .players-grid .player-card,
+[data-color-scheme="light"] #watchlist-view .player-row,
+[data-color-scheme="light"] #watchlist-view .player-card {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(15, 32, 42, 0.12) !important;
+  box-shadow: 0 14px 34px rgba(15, 32, 42, 0.08) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-color-scheme="light"] .filters-sidebar .filter-label,
+[data-color-scheme="light"] .filters-sidebar label,
+[data-color-scheme="light"] .filters-sidebar h3,
+[data-color-scheme="light"] .players-grid .player-info-name,
+[data-color-scheme="light"] #watchlist-view .player-info-name {
+  color: var(--color-text-primary) !important;
+}
+
+[data-color-scheme="light"] .filters-sidebar .clear-filters,
+[data-color-scheme="light"] .filters-sidebar button {
+  color: var(--color-primary);
+}
+
 
 .players-grid {
   background: transparent !important;
@@ -12645,6 +12748,35 @@ body {
   }
 }
 
+[data-color-scheme="light"] body {
+  background-color: #F4F7FB;
+  background-image:
+    radial-gradient(circle at 12% -8%, rgba(0, 143, 122, 0.14), transparent 34rem),
+    radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.1), transparent 36rem),
+    radial-gradient(circle at 54% 118%, rgba(0, 143, 122, 0.08), transparent 42rem),
+    linear-gradient(115deg, rgba(15, 32, 42, 0.032) 0 1px, transparent 1px 74px),
+    linear-gradient(180deg, #F8FBFD 0%, #F2F7FA 48%, #EEF4F8 100%);
+}
+
+@media (max-width: 1024px) {
+  [data-color-scheme="light"] body {
+    background-image:
+      radial-gradient(circle at 8% -10%, rgba(0, 143, 122, 0.12), transparent 28rem),
+      radial-gradient(circle at 100% 6%, rgba(37, 99, 235, 0.08), transparent 30rem),
+      radial-gradient(circle at 48% 112%, rgba(0, 143, 122, 0.07), transparent 34rem),
+      linear-gradient(180deg, #F8FBFD 0%, #F2F7FA 50%, #EEF4F8 100%);
+  }
+}
+
+@media (max-width: 640px) {
+  [data-color-scheme="light"] body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(0, 143, 122, 0.12), transparent 20rem),
+      radial-gradient(circle at 100% 4%, rgba(37, 99, 235, 0.08), transparent 22rem),
+      linear-gradient(180deg, #F9FBFD 0%, #F2F7FA 48%, #EEF4F8 100%);
+  }
+}
+
 /* ── Tools Dropdown ── */
 .tools-dropdown-wrapper {
     position: relative;
@@ -12664,10 +12796,10 @@ body {
     top: calc(100% + 6px);
     right: 0;
     min-width: 200px;
-    background: var(--color-graphite-900, #0E1114);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--color-dropdown-bg, #0E1114);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    box-shadow: var(--shadow-lg);
     z-index: 9999;
     overflow: hidden;
     animation: fadeInDown 0.15s ease;
@@ -12683,7 +12815,7 @@ body {
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    color: #d4d4d4;
+    color: var(--color-dropdown-text);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -12691,20 +12823,20 @@ body {
 }
 
 .tools-dropdown-item:hover {
-    background: rgba(99, 102, 241, 0.15);
-    color: #fff;
+    background: var(--color-dropdown-hover-bg);
+    color: var(--color-dropdown-hover-text);
 }
 
 .tools-dropdown-item:focus-visible {
-    background: rgba(99, 102, 241, 0.18);
-    color: #fff;
+    background: var(--color-dropdown-hover-bg);
+    color: var(--color-dropdown-hover-text);
     outline: none;
 }
 
 /* Active tool gets highlighted */
 .tools-dropdown-item.active {
-    color: #6366F1;
-    background: rgba(99,102,241,0.1);
+    color: var(--color-primary);
+    background: rgba(var(--color-teal-rgb), 0.1);
 }
 
 .player-view-card-nation-flag.hero-icon-players-nation-flag{

@@ -1,5 +1,6 @@
 import MarketNavLink from './MarketNavLink.client';
 import SiteFooter from './SiteFooter';
+import ThemeToggle from './ThemeToggle.client';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -88,6 +89,7 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
           </nav>
 
           <div className="header-actions">
+            <ThemeToggle />
             <div className="user-avatar">
               <div className="avatar-circle">FC</div>
             </div>

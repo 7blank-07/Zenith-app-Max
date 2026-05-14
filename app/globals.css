@@ -13,6 +13,13 @@ footer.zenith-footer {
   font-family: inherit;
 }
 
+[data-color-scheme="light"] footer.zenith-footer {
+  background: linear-gradient(180deg, #ffffff 0%, #eef4f8 100%);
+  border-top-color: rgba(0, 143, 122, 0.18);
+  color: #334756;
+  box-shadow: 0 -18px 50px rgba(15, 32, 42, 0.08);
+}
+
 footer.zenith-footer .zenith-footer-inner {
   max-width: 1240px;
   margin: 0 auto;
@@ -40,6 +47,10 @@ footer.zenith-footer .zenith-footer-brand {
   color: #ffffff;
 }
 
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-brand {
+  color: #10202a;
+}
+
 footer.zenith-footer .zenith-footer-logo {
   width: 36px;
   height: 36px;
@@ -55,11 +66,22 @@ footer.zenith-footer .zenith-footer-brand-name {
   -webkit-text-fill-color: transparent;
 }
 
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-brand-name {
+  background: linear-gradient(90deg, #10202a, #008f7a);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 footer.zenith-footer .zenith-footer-description {
   font-size: 0.95rem;
   line-height: 1.6;
   color: #94a3a8;
   margin: 0;
+}
+
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-description,
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-link {
+  color: #5e7180;
 }
 
 footer.zenith-footer .zenith-footer-socials {
@@ -81,11 +103,23 @@ footer.zenith-footer .zenith-footer-social-link {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-social-link {
+  background: rgba(15, 32, 42, 0.055);
+  color: #5e7180;
+  border-color: rgba(15, 32, 42, 0.1);
+}
+
 footer.zenith-footer .zenith-footer-social-link:hover {
   background: rgba(0, 194, 168, 0.15);
   color: #00c2a8;
   border-color: rgba(0, 194, 168, 0.3);
   transform: translateY(-2px);
+}
+
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-social-link:hover {
+  background: rgba(0, 143, 122, 0.1);
+  color: #008f7a;
+  border-color: rgba(0, 143, 122, 0.28);
 }
 
 footer.zenith-footer .zenith-footer-links-container {
@@ -108,6 +142,10 @@ footer.zenith-footer .zenith-footer-nav-title {
   letter-spacing: 1px;
   color: #FFFFFF;
   margin: 0;
+}
+
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-nav-title {
+  color: #10202a;
 }
 
 footer.zenith-footer .zenith-footer-nav-list {
@@ -133,6 +171,10 @@ footer.zenith-footer .zenith-footer-link:hover {
   padding-left: 4px;
 }
 
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-link:hover {
+  color: #008f7a;
+}
+
 footer.zenith-footer .zenith-footer-sub {
   margin-top: 40px;
   padding: 30px 0;
@@ -141,12 +183,22 @@ footer.zenith-footer .zenith-footer-sub {
   text-align: center;
 }
 
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-sub {
+  background: rgba(15, 32, 42, 0.045);
+  border-top-color: rgba(15, 32, 42, 0.08);
+}
+
 footer.zenith-footer .zenith-footer-copyright {
   display: block;
   font-size: 0.85rem;
   font-weight: 500;
   color: #6a7c82;
   margin-bottom: 12px;
+}
+
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-copyright,
+[data-color-scheme="light"] footer.zenith-footer .zenith-footer-legal-text {
+  color: #6b7f8c;
 }
 
 footer.zenith-footer .zenith-footer-legal-text {
@@ -221,6 +273,12 @@ footer.zenith-footer .zenith-footer-legal-text {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.26);
 }
 
+[data-color-scheme="light"] .zenith-static-page {
+  border-color: rgba(15, 32, 42, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 251, 253, 0.92) 100%);
+  box-shadow: 0 14px 38px rgba(15, 32, 42, 0.1);
+}
+
 .zenith-static-page-header h1 {
   margin: 0;
   color: #edf7f9;
@@ -228,11 +286,19 @@ footer.zenith-footer .zenith-footer-legal-text {
   line-height: 1.2;
 }
 
+[data-color-scheme="light"] .zenith-static-page-header h1 {
+  color: #10202a;
+}
+
 .zenith-static-page-header p {
   margin: 10px 0 0;
   max-width: 80ch;
   color: #b5c5cb;
   line-height: 1.6;
+}
+
+[data-color-scheme="light"] .zenith-static-page-header p {
+  color: #5e7180;
 }
 
 .zenith-static-page-grid {
@@ -249,10 +315,19 @@ footer.zenith-footer .zenith-footer-legal-text {
   background: rgba(16, 31, 38, 0.5);
 }
 
+[data-color-scheme="light"] .zenith-static-page-card {
+  border-color: rgba(15, 32, 42, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .zenith-static-page-card h2 {
   margin: 0 0 8px;
   color: #eaf4f7;
   font-size: 1.05rem;
+}
+
+[data-color-scheme="light"] .zenith-static-page-card h2 {
+  color: #10202a;
 }
 
 .zenith-static-page-content p,
@@ -262,9 +337,18 @@ footer.zenith-footer .zenith-footer-legal-text {
   line-height: 1.6;
 }
 
+[data-color-scheme="light"] .zenith-static-page-content p,
+[data-color-scheme="light"] .zenith-static-page-content ul {
+  color: #405461;
+}
+
 .zenith-static-page-content a {
   color: #2dd5c0;
   text-decoration: none;
+}
+
+[data-color-scheme="light"] .zenith-static-page-content a {
+  color: #008f7a;
 }
 
 .zenith-static-page-content a:hover {

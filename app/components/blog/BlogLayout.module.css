@@ -844,3 +844,60 @@
     height: auto;
   }
 }
+
+:global([data-color-scheme="light"]) .title,
+:global([data-color-scheme="light"]) .sectionTitle,
+:global([data-color-scheme="light"]) .articleTitle,
+:global([data-color-scheme="light"]) .cardTitle,
+:global([data-color-scheme="light"]) .sideCardTitle,
+:global([data-color-scheme="light"]) .relatedTitle {
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .description,
+:global([data-color-scheme="light"]) .sectionDescription,
+:global([data-color-scheme="light"]) .cardExcerpt,
+:global([data-color-scheme="light"]) .articleExcerpt,
+:global([data-color-scheme="light"]) .articleBody,
+:global([data-color-scheme="light"]) .emptyState,
+:global([data-color-scheme="light"]) .unavailableState {
+  color: #5e7180;
+}
+
+:global([data-color-scheme="light"]) .categoryTab {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(15, 32, 42, 0.12);
+  color: #405461;
+}
+
+:global([data-color-scheme="light"]) .categoryTab:hover {
+  border-color: rgba(0, 143, 122, 0.34);
+}
+
+:global([data-color-scheme="light"]) .categoryTabActive {
+  background: rgba(0, 143, 122, 0.1);
+  color: #008f7a;
+  box-shadow: 0 14px 30px rgba(0, 143, 122, 0.12);
+}
+
+:global([data-color-scheme="light"]) .featuredCard,
+:global([data-color-scheme="light"]) .card,
+:global([data-color-scheme="light"]) .sideCard,
+:global([data-color-scheme="light"]) .articleHero,
+:global([data-color-scheme="light"]) .articleBody,
+:global([data-color-scheme="light"]) .emptyState,
+:global([data-color-scheme="light"]) .unavailableState,
+:global([data-color-scheme="light"]) .relatedCard {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 251, 253, 0.82));
+  border-color: rgba(15, 32, 42, 0.1);
+  box-shadow: 0 18px 42px rgba(15, 32, 42, 0.1);
+}
+
+:global([data-color-scheme="light"]) .featuredMedia,
+:global([data-color-scheme="light"]) .cardMedia,
+:global([data-color-scheme="light"]) .articleCover,
+:global([data-color-scheme="light"]) .relatedMedia {
+  background:
+    radial-gradient(circle at top left, rgba(0, 143, 122, 0.16), transparent 38%),
+    linear-gradient(135deg, rgba(233, 242, 248, 0.94), rgba(217, 228, 237, 0.94));
+}

@@ -14,6 +14,7 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
+const colorSchemeBootstrapScript = `(function(){try{var key='zenith-color-scheme';var saved=window.localStorage.getItem(key);var theme=saved==='light'?'light':'dark';var root=document.documentElement;root.dataset.colorScheme=theme;root.style.colorScheme=theme;}catch(error){document.documentElement.dataset.colorScheme='dark';document.documentElement.style.colorScheme='dark';}})();`;
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
@@ -33,8 +34,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} data-color-scheme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: colorSchemeBootstrapScript
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){var p=window.location.pathname||'';var isArabic=(p==='/ae/kod-fifa'||p.indexOf('/ae/kod-fifa/')===0);if(isArabic){var root=document.documentElement;root.lang='ar';root.dir='rtl';}})();`

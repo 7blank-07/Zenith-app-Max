@@ -264,3 +264,47 @@
 .detailValue {
   font-weight: 500;
 }
+
+:global([data-color-scheme="light"]) .hubContainer,
+:global([data-color-scheme="light"]) .streamLayout {
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .heroMeta,
+:global([data-color-scheme="light"]) .cardMeta,
+:global([data-color-scheme="light"]) .detailLabel {
+  color: #5e7180;
+}
+
+:global([data-color-scheme="light"]) .videoWrapper,
+:global([data-color-scheme="light"]) .cardThumbnail {
+  background: #e7eef5;
+  box-shadow: 0 14px 34px rgba(15, 32, 42, 0.12);
+}
+
+:global([data-color-scheme="light"]) .sectionTitle,
+:global([data-color-scheme="light"]) .streamSidebarTitle,
+:global([data-color-scheme="light"]) .detailRow {
+  border-color: rgba(15, 32, 42, 0.12);
+}
+
+:global([data-color-scheme="light"]) .card,
+:global([data-color-scheme="light"]) .streamSidebar,
+:global([data-color-scheme="light"]) .streamDetails {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(15, 32, 42, 0.1);
+  box-shadow: 0 14px 34px rgba(15, 32, 42, 0.1);
+}
+
+:global([data-color-scheme="light"]) .card:hover {
+  box-shadow: 0 16px 36px rgba(15, 32, 42, 0.14);
+}
+
+:global([data-color-scheme="light"]) .btnSecondary {
+  background: rgba(15, 32, 42, 0.08);
+  color: #18303b;
+}
+
+:global([data-color-scheme="light"]) .btnSecondary:hover {
+  background: rgba(15, 32, 42, 0.13);
+}

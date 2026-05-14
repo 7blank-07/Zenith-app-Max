@@ -149,3 +149,40 @@
     max-width: none;
   }
 }
+
+:global([data-color-scheme="light"]) .section {
+  border-color: rgba(0, 143, 122, 0.18);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(239, 246, 250, 0.78));
+  box-shadow: 0 14px 30px rgba(15, 32, 42, 0.1);
+}
+
+:global([data-color-scheme="light"]) .eyebrow {
+  color: #008f7a;
+}
+
+:global([data-color-scheme="light"]) .title {
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .subtext,
+:global([data-color-scheme="light"]) .empty {
+  color: #5e7180;
+}
+
+:global([data-color-scheme="light"]) .codeValue {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(0, 143, 122, 0.3);
+  color: #007c6b;
+  box-shadow: none;
+}
+
+:global([data-color-scheme="light"]) .copyButton {
+  background: rgba(0, 143, 122, 0.09);
+  border-color: rgba(0, 143, 122, 0.24);
+  color: #007c6b;
+}
+
+:global([data-color-scheme="light"]) .copyButton:hover {
+  background: rgba(0, 143, 122, 0.15);
+  border-color: rgba(0, 143, 122, 0.34);
+}

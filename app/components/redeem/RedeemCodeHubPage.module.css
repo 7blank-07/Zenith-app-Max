@@ -502,3 +502,102 @@
     font-size: 1.5rem;
   }
 }
+
+:global([data-color-scheme="light"]) .breadcrumbs {
+  color: #6b7f8c;
+}
+
+:global([data-color-scheme="light"]) .breadcrumbs a {
+  color: #008f7a;
+}
+
+:global([data-color-scheme="light"]) .breadcrumbs a:hover {
+  color: #00685c;
+}
+
+:global([data-color-scheme="light"]) .header {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 250, 0.94));
+  border-color: rgba(0, 143, 122, 0.18);
+  box-shadow: 0 18px 42px rgba(15, 32, 42, 0.11);
+}
+
+:global([data-color-scheme="light"]) .header::after {
+  background: radial-gradient(circle at top right, rgba(0, 143, 122, 0.1) 0%, transparent 60%);
+}
+
+:global([data-color-scheme="light"]) .title,
+:global([data-color-scheme="light"]) .sectionTitle,
+:global([data-color-scheme="light"]) .cardTitle,
+:global([data-color-scheme="light"]) .faqTitle,
+:global([data-color-scheme="light"]) .faq summary {
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .description,
+:global([data-color-scheme="light"]) .linkPanelTitle,
+:global([data-color-scheme="light"]) .scope,
+:global([data-color-scheme="light"]) .cardFooter span,
+:global([data-color-scheme="light"]) .faq p {
+  color: #5e7180;
+}
+
+:global([data-color-scheme="light"]) .updatedAt,
+:global([data-color-scheme="light"]) .label {
+  color: #6b7f8c;
+}
+
+:global([data-color-scheme="light"]) .dashboard,
+:global([data-color-scheme="light"]) .card,
+:global([data-color-scheme="light"]) .faq details {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(15, 32, 42, 0.1);
+  box-shadow: 0 14px 34px rgba(15, 32, 42, 0.09);
+}
+
+:global([data-color-scheme="light"]) .links a {
+  background: rgba(15, 32, 42, 0.055);
+  border-color: rgba(15, 32, 42, 0.11);
+  color: #405461;
+  box-shadow: none;
+}
+
+:global([data-color-scheme="light"]) .links a:hover,
+:global([data-color-scheme="light"]) .links a.activeLink {
+  background: rgba(0, 143, 122, 0.1);
+  border-color: #008f7a;
+  color: #008f7a;
+  box-shadow: 0 8px 20px rgba(0, 143, 122, 0.12);
+}
+
+:global([data-color-scheme="light"]) .links a.activeLink {
+  background: linear-gradient(135deg, #008f7a 0%, #00685c 100%);
+  color: #ffffff;
+}
+
+:global([data-color-scheme="light"]) .input,
+:global([data-color-scheme="light"]) .select,
+:global([data-color-scheme="light"]) .codeButton {
+  background: #ffffff;
+  border-color: rgba(15, 32, 42, 0.14);
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .button {
+  color: #ffffff;
+}
+
+:global([data-color-scheme="light"]) .cardFooter,
+:global([data-color-scheme="light"]) .faq details[open] {
+  border-color: rgba(15, 32, 42, 0.1);
+}
+
+:global([data-color-scheme="light"]) .cardFooter strong {
+  color: #405461;
+}
+
+@media (max-width: 1024px) {
+  :global([data-color-scheme="light"]) .breadcrumbs,
+  :global([data-color-scheme="light"]) .dashboard {
+    background: rgba(255, 255, 255, 0.78);
+  }
+}

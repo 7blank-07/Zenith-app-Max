@@ -374,3 +374,73 @@
     font-size: 12px;
   }
 }
+
+:global([data-color-scheme="light"]) .eyebrow,
+:global([data-color-scheme="light"]) .categoryBadge,
+:global([data-color-scheme="light"]) .emptyLink {
+  border-color: rgba(0, 143, 122, 0.2);
+  background: rgba(0, 143, 122, 0.08);
+  color: #008f7a;
+}
+
+:global([data-color-scheme="light"]) .categoryTab {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(15, 32, 42, 0.12);
+  color: #405461;
+}
+
+:global([data-color-scheme="light"]) .categoryTab:hover,
+:global([data-color-scheme="light"]) .categoryTab:focus-visible {
+  color: #008f7a;
+  border-color: rgba(0, 143, 122, 0.3);
+}
+
+:global([data-color-scheme="light"]) .categoryTabActive {
+  background: rgba(0, 143, 122, 0.1);
+  color: #008f7a;
+}
+
+:global([data-color-scheme="light"]) .featuredCard,
+:global([data-color-scheme="light"]) .compactCard,
+:global([data-color-scheme="light"]) .sidePanel,
+:global([data-color-scheme="light"]) .emptyPanel {
+  background:
+    radial-gradient(circle at top left, rgba(0, 143, 122, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 251, 253, 0.82));
+  border-color: rgba(15, 32, 42, 0.1);
+  box-shadow: 0 18px 42px rgba(15, 32, 42, 0.1);
+}
+
+:global([data-color-scheme="light"]) .featuredMedia,
+:global([data-color-scheme="light"]) .compactMedia {
+  background: linear-gradient(135deg, rgba(233, 242, 248, 0.94), rgba(217, 228, 237, 0.94));
+}
+
+:global([data-color-scheme="light"]) .featuredTitle,
+:global([data-color-scheme="light"]) .compactTitle,
+:global([data-color-scheme="light"]) .sidePanelHeader h3,
+:global([data-color-scheme="light"]) .subsectionHeader h3,
+:global([data-color-scheme="light"]) .emptyPanel h3,
+:global([data-color-scheme="light"]) .channelButton {
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .featuredExcerpt,
+:global([data-color-scheme="light"]) .compactExcerpt,
+:global([data-color-scheme="light"]) .channelButton small,
+:global([data-color-scheme="light"]) .subsectionHeader p,
+:global([data-color-scheme="light"]) .emptyPanel p {
+  color: #5e7180;
+}
+
+:global([data-color-scheme="light"]) .channelButton {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(15, 32, 42, 0.1);
+}
+
+:global([data-color-scheme="light"]) .channelButton:hover,
+:global([data-color-scheme="light"]) .channelButton:focus-visible,
+:global([data-color-scheme="light"]) .channelButtonActive {
+  background: rgba(0, 143, 122, 0.09);
+  border-color: rgba(0, 143, 122, 0.26);
+}
