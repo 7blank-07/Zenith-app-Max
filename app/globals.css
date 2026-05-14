@@ -14,7 +14,7 @@ footer.zenith-footer {
 }
 
 [data-color-scheme="light"] footer.zenith-footer {
-  background: linear-gradient(180deg, #ffffff 0%, #eef4f8 100%);
+  background: linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%);
   border-top-color: rgba(0, 143, 122, 0.18);
   color: #334756;
   box-shadow: 0 -18px 50px rgba(15, 32, 42, 0.08);
@@ -275,7 +275,7 @@ footer.zenith-footer .zenith-footer-legal-text {
 
 [data-color-scheme="light"] .zenith-static-page {
   border-color: rgba(15, 32, 42, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 251, 253, 0.92) 100%);
+  background: linear-gradient(180deg, rgba(241, 245, 249, 0.94) 0%, rgba(226, 232, 240, 0.92) 100%);
   box-shadow: 0 14px 38px rgba(15, 32, 42, 0.1);
 }
 
@@ -317,7 +317,7 @@ footer.zenith-footer .zenith-footer-legal-text {
 
 [data-color-scheme="light"] .zenith-static-page-card {
   border-color: rgba(15, 32, 42, 0.1);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(241, 245, 249, 0.72);
 }
 
 .zenith-static-page-card h2 {
