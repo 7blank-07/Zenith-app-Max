@@ -1,56 +1,12 @@
-Implement an “Auctionable Only” filter in Admin Panel → Top 10, matching the exact behavior already used on the Players page, without modifying anything unrelated.
+Right now we are using assets/images/background/zenith_bg.webp this as background for web app
+but some people have recommended me not to use it's not looking good and professional, so I want
+to change background to beautiful, professional, better looking, good
+it should perfectly fit on mobile, tablet, desktop and other devices perfectly,
+like when fitting all element on all pages of web app should stay just like how they are because UI
+should not mess up so be careful here.
 
-Core Requirements
-Add an Auctionable Only toggle/filter to Admin Panel Top 10.
-Reuse the same filtering logic and UX pattern from the Players page.
-Ensure OVR filters (Min OVR + Max OVR) sync perfectly with Auctionable Only:
-If Auctionable Only = ON → show only auctionable players.
-If Auctionable Only = ON + Min OVR = 100 → show only auctionable players with OVR ≥ 100.
-If Auctionable Only = ON + Max OVR = 110 → show only auctionable players with OVR ≤ 110.
-If Auctionable Only = ON + Min OVR + Max OVR → all conditions must apply together.
-If Auctionable Only = OFF → behavior remains unchanged (all players filtered only by OVR if set).
-Do not change any unrelated Admin Panel Top 10 functionality, layout, or existing filters.
-Implementation Guidance
-Inspect the Players page filter implementation.
-Copy/reuse:
-state management
-query params / API params
-backend filtering logic
-frontend toggle behavior
-Keep code consistent with existing architecture.
-Avoid duplicate logic where possible.
-Testing Requirements (Mandatory)
-
-Perform full testing to verify:
-
-Functional Cases
-Auctionable OFF + no OVR → all players
-Auctionable ON + no OVR → only auctionable
-Auctionable ON + Min OVR only
-Auctionable ON + Max OVR only
-Auctionable ON + Min + Max
-Auctionable OFF + Min + Max
-Edge cases:
-No auctionable players in range
-Exact boundary values
-Invalid min/max combinations
-Playwright Testing
-
-Use Playwright (optional but preferred) to:
-
-Toggle Auctionable Only
-Set Min/Max OVR
-Verify returned list always matches filters
-Confirm no non-auctionable player appears when toggle is ON
-Confirm OVR constraints always apply correctly
-Success Criteria
-Zero regression
-Filter logic identical to Players page
-Admin Panel Top 10 filters are perfectly synchronized
-Clean code
-Fully tested and production-safe
-Final Deliverables
-Feature implementation
-Filter sync validation
-Full test coverage
-Playwright E2E verification (if possible)
+at last check if it is looking beautiful, professional, much better if yes then great if not fix it.
+your standards should be production ready for checking how it is looking, and if it is fitting on all devices perfectly without any mess up and didn't messed up UI.
+we want background to be top tier, it should look perfect for web app.
+ff
+First make a wonderful plan after making plan tell me to implement plan. 

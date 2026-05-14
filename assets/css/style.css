@@ -10294,17 +10294,14 @@ watchlist-view .view-content {
 
 
 
-/* ===== BACKGROUND IMAGE FOR HOME, MARKET, WATCHLIST, PLAYER DETAIL VIEWS ===== */
+/* ===== APP BACKGROUND FOR HOME, MARKET, WATCHLIST, PLAYER DETAIL VIEWS ===== */
 
 /* Home View (Dashboard) */
 #dashboard-view {
   position: relative !important;
   min-height: 100vh !important;
-  background-image: url("../images/background/zenith_bg.webp");
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: fixed !important;
+  background: transparent !important;
+  background-image: none !important;
   width: 100vw !important;
   margin-left: calc(-50vw + 50%) !important;
   padding-left: calc(50vw - 50%) !important;
@@ -10316,10 +10313,8 @@ watchlist-view .view-content {
 #market-view {
   position: relative !important;
   min-height: 100vh !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: fixed !important;
+  background: transparent !important;
+  background-image: none !important;
   width: 100vw !important;
   margin-left: calc(-50vw + 50%) !important;
   padding-left: calc(50vw - 50%) !important;
@@ -10335,10 +10330,8 @@ watchlist-view .view-content {
 #watchlist-view {
   position: relative !important;
   min-height: 100vh !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: fixed !important;
+  background: transparent !important;
+  background-image: none !important;
   width: 100vw !important;
   margin-left: calc(-50vw + 50%) !important;
   padding-left: calc(50vw - 50%) !important;
@@ -10373,11 +10366,8 @@ watchlist-view .view-content {
 #database-view {
   position: relative !important;
   min-height: 100vh !important;
-  background-image: url("../images/background/zenith_bg.webp");
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: fixed !important;
+  background: transparent !important;
+  background-image: none !important;
 }
 
 /* Ensure content is above overlay */
@@ -11742,7 +11732,7 @@ body.overflow-hidden {
   }
 }
 
-/* Global background coverage for Home/Database */
+/* Global app background coverage */
 html,
 body {
   min-height: 100%;
@@ -11750,12 +11740,27 @@ body {
 
 body {
   min-height: 100vh;
-  background-color: var(--color-background);
-  background-image: url("../images/background/zenith_bg.webp");
-  background-size: cover;
-  background-position: center;
+  background-color: #071014;
+  background-image:
+    radial-gradient(circle at 16% -8%, rgba(0, 194, 168, 0.24), transparent 34rem),
+    radial-gradient(circle at 88% 8%, rgba(77, 168, 255, 0.18), transparent 36rem),
+    radial-gradient(circle at 54% 118%, rgba(0, 145, 130, 0.18), transparent 42rem),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 74px),
+    linear-gradient(180deg, #091418 0%, #0d1318 48%, #080d11 100%);
+  background-size:
+    auto,
+    auto,
+    auto,
+    74px 74px,
+    auto;
+  background-position:
+    center top,
+    center top,
+    center bottom,
+    center top,
+    center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: fixed, fixed, fixed, fixed, fixed;
 }
 
 #dashboard-view,
@@ -11766,6 +11771,27 @@ body {
 
 #database-view::before {
   content: none !important;
+}
+
+@media (max-width: 1024px) {
+  body {
+    background-image:
+      radial-gradient(circle at 8% -10%, rgba(0, 194, 168, 0.2), transparent 28rem),
+      radial-gradient(circle at 100% 6%, rgba(77, 168, 255, 0.14), transparent 30rem),
+      radial-gradient(circle at 48% 112%, rgba(0, 145, 130, 0.14), transparent 34rem),
+      linear-gradient(180deg, #091418 0%, #0c1318 50%, #080d11 100%);
+    background-size: auto;
+    background-attachment: scroll;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(0, 194, 168, 0.18), transparent 20rem),
+      radial-gradient(circle at 100% 4%, rgba(77, 168, 255, 0.12), transparent 22rem),
+      linear-gradient(180deg, #081318 0%, #0c1217 48%, #070d11 100%);
+  }
 }
 
 /* ── Tools Dropdown ── */

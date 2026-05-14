@@ -10028,6 +10028,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-header 
   --squad-blue-soft-rgb: 37, 99, 235;
   --squad-border-rgb: 255, 255, 255;
   --squad-focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.38);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -10299,6 +10302,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
   --squad-sidebar-width: 380px;
   --squad-main-gap: 40px;
   --squad-panel-height: clamp(610px, calc(var(--squadbuilder-viewport-height, 100vh) - 210px), 710px);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: auto;
   min-height: 0;
   padding: 0;
@@ -10312,6 +10318,9 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .squad-body {
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-main-grid {
   grid-column: 1;
   grid-row: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: auto;
   min-height: 0;
   display: grid;
