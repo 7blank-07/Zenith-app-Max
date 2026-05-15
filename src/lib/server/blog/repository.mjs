@@ -30,6 +30,7 @@ import {
   INSERT_BLOG_CATEGORY_QUERY,
   INSERT_BLOG_QUERY,
   INSERT_BLOG_TAG_RELATION_QUERY,
+  LIST_ACTIVE_BLOG_CATEGORIES_QUERY,
   LIST_BLOG_CATEGORIES_QUERY,
   LIST_BLOG_TAGS_QUERY,
   UPDATE_BLOG_QUERY,
@@ -321,6 +322,11 @@ async function syncBlogTags(client, blogId, tags) {
 
 export async function listBlogCategories(options = {}) {
   const result = await queryWithExecutor(LIST_BLOG_CATEGORIES_QUERY, options);
+  return result.rows.map((row) => serializeBlogCategoryRow(row));
+}
+
+export async function listActiveBlogCategories(options = {}) {
+  const result = await queryWithExecutor(LIST_ACTIVE_BLOG_CATEGORIES_QUERY, options);
   return result.rows.map((row) => serializeBlogCategoryRow(row));
 }
 

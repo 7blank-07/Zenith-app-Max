@@ -7,6 +7,7 @@ import {
 import { getBlogEnvironment } from './env.mjs';
 import {
   getPublishedBlogByCategoryAndSlug,
+  listActiveBlogCategories,
   listBlogCategories,
   listFeaturedBlogs,
   listPublishedBlogs,
@@ -145,7 +146,7 @@ function buildUnavailableCollectionState({ page, title, description, categories,
 export async function getBlogIndexPageData({ searchParams = {}, rawEnv = process.env } = {}) {
   const page = parsePage(searchParams);
   const availability = getBlogPublicAvailability(rawEnv);
-  const categories = availability.isConfigured ? await listBlogCategories() : getFallbackCategories();
+  const categories = availability.isConfigured ? await listActiveBlogCategories() : getFallbackCategories();
 
   if (!availability.isConfigured) {
     return buildUnavailableCollectionState({

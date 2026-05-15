@@ -20,14 +20,12 @@ function getCategoryHref(category) {
 }
 
 function buildVisibleCategories(posts, categories) {
-  const used = new Set(
-    (Array.isArray(posts) ? posts : [])
-      .map((post) => toText(post?.category?.slug).toLowerCase())
-      .filter(Boolean)
-  );
-
-  const fromCategories = (Array.isArray(categories) ? categories : []).filter((category) => used.has(toText(category?.slug).toLowerCase()));
-  if (fromCategories.length) return fromCategories;
+  if (Array.isArray(categories) && categories.length > 0) {
+    return categories.map(cat => ({
+      ...cat,
+      slug: toText(cat.slug).toLowerCase()
+    }));
+  }
 
   return (Array.isArray(posts) ? posts : []).reduce((accumulator, post) => {
     const slug = toText(post?.category?.slug).toLowerCase();
@@ -128,11 +126,11 @@ export default function HomeLatestBlogsSection({ posts = [], categories = [], av
   const [activeCategory, setActiveCategory] = useState('all');
 
   const filteredPosts = useMemo(() => {
-    if (activeCategory === 'all') return posts;
-    return posts.filter((post) => toText(post?.category?.slug).toLowerCase() === activeCategory);
+    if (activeCategory === 'all') return posts.slice(0, 8);
+    return posts.filter((post) => toText(post?.category?.slug).toLowerCase() === activeCategory).slice(0, 8);
   }, [activeCategory, posts]);
 
-  const featuredPost = filteredPosts[0] || posts[0] || null;
+  const featuredPost = filteredPosts[0] || null;
   const railPosts = filteredPosts.slice(1, 3);
   const gridPosts = filteredPosts.slice(3, 7);
   const selectedCategoryName =

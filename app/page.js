@@ -24,7 +24,7 @@ const HomeDashboardInteractions = dynamic(() => import('./components/HomeDashboa
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
 const HOME_SECTION_LIMIT = 12;
-const HOME_BLOG_LIMIT = 8;
+const HOME_BLOG_LIMIT = 40;
 
 function getHomeCardVariant(player) {
   return player.leagueImage ? 'normal' : 'hero';

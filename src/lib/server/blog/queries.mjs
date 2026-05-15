@@ -156,6 +156,14 @@ export const LIST_BLOG_CATEGORIES_QUERY = `
   ORDER BY name ASC
 `;
 
+export const LIST_ACTIVE_BLOG_CATEGORIES_QUERY = `
+  SELECT DISTINCT c.id, c.name, c.slug, c.description, c.created_at, c.updated_at
+  FROM blog_categories c
+  INNER JOIN blogs b ON b.category_id = c.id
+  WHERE b.status = 'published'
+  ORDER BY c.name ASC
+`;
+
 export const GET_BLOG_CATEGORY_BY_ID_QUERY = `
   SELECT id, name, slug, description, created_at, updated_at
   FROM blog_categories

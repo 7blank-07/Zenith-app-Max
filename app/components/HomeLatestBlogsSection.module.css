@@ -42,12 +42,22 @@
 
 .categoryTabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
   margin-top: 22px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categoryTabs::-webkit-scrollbar {
+  display: none;
 }
 
 .categoryTab {
+  flex-shrink: 0;
   min-height: 40px;
   padding: 0 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -326,11 +336,7 @@
 
 @media (max-width: 1100px) {
   .categoryTabs {
-    overflow-x: auto;
-    padding-bottom: 8px;
     margin-right: -20px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
   }
 
   .categoryTabs::-webkit-scrollbar {
@@ -339,24 +345,94 @@
 
   .editorialGrid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
 
+  /* Featured card remains a "Hero" but with cleaner proportions */
   .featuredMedia {
-    min-height: 280px;
+    min-height: 240px;
   }
 
   .featuredTitle {
-    font-size: clamp(24px, 5vw, 32px);
+    font-size: 24px;
+    font-weight: 800;
   }
 
-  .cardsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .featuredExcerpt {
+    display: none; /* Cleaner look on mobile */
+  }
+
+  /* Compact Cards become "List Items" (Futbin style) */
+  .compactCard {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
     gap: 16px;
+    padding: 12px;
+    background: rgba(20, 24, 28, 0.6);
+    border-radius: 16px;
+  }
+
+  .compactMediaLink {
+    flex-shrink: 0;
+    width: 120px;
+    height: 80px;
+  }
+
+  .compactMedia {
+    width: 100%;
+    height: 100%;
+    min-height: unset;
+    border-radius: 12px;
+  }
+
+  .compactBody {
+    padding: 0;
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
+  }
+
+  .compactTitle {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .compactExcerpt,
+  .compactCard .categoryBadge {
+    display: none; /* Hide to match Futbin list style */
   }
 
   .sidePanel {
-    padding: 24px;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+  }
+
+  .sidePanelHeader {
+    padding: 0 4px;
+  }
+
+  .sideStack {
+    gap: 12px;
+  }
+
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .subsectionHeader {
+    margin-top: 32px;
   }
 }
 
@@ -410,51 +486,24 @@
 }
 
 @media (max-width: 767px) {
-  .sectionHeader {
-    gap: 14px;
-  }
-
   .featuredMedia {
-    min-height: 220px;
-  }
-
-  .featuredTitle {
-    font-size: 26px;
-  }
-
-  .cardsGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .sidePanel {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .featuredBody,
-  .compactBody,
-  .sidePanel,
-  .emptyPanel {
-    padding: 20px;
+    min-height: 200px;
   }
 
   .featuredTitle {
     font-size: 22px;
   }
 
+  .compactMediaLink {
+    width: 100px;
+    height: 68px;
+  }
+
+  .compactBody {
+    min-height: 68px;
+  }
+
   .compactTitle {
-    font-size: 18px;
-  }
-
-  .categoryTabs {
-    gap: 8px;
-  }
-
-  .categoryTab {
-    min-height: 38px;
-    padding: 0 16px;
-    font-size: 13px;
+    font-size: 14px;
   }
 }
