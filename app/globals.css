@@ -360,6 +360,14 @@ footer.zenith-footer .zenith-footer-legal-text {
   padding-left: 18px;
 }
 
+/* Light Theme CSS Variables */
+[data-color-scheme="light"] {
+  --color-panel: rgba(255, 255, 255, 0.9);
+  --color-panel-background: rgba(254, 249, 243, 0.92);
+  --color-background: #f8f6f2;
+  --color-surface: rgba(255, 255, 255, 0.88);
+}
+
 /* Redeem Page Full Width Mobile/Tablet */
 @media (max-width: 1024px) {
   .main-content.redeem-main-content {

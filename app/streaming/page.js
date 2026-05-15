@@ -32,7 +32,7 @@ export default async function StreamingHubPage({ searchParams }) {
 
   return (
     <SiteChrome activeView="streaming">
-      <main className="main-content" style={{ backgroundColor: '#000', minHeight: '100vh', paddingTop: '2rem' }}>
+      <main className="main-content" style={{ backgroundColor: 'var(--color-background, #000)', minHeight: '100vh', paddingTop: '2rem' }}>
         <div className={styles.hubContainer}>
           
           {heroStream ? (

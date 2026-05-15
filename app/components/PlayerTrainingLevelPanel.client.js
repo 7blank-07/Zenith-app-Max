@@ -64,7 +64,7 @@ export default function PlayerTrainingLevelPanel({ playerId, position, rank = 0 
   return (
     <div
       style={{
-        background: 'rgba(20,24,28)',
+        background: 'var(--color-panel-background, rgba(20,24,28,0.98))',
         border: '1px solid rgba(0,194,168,0.12)',
         borderRadius: '10px',
         padding: '16px'

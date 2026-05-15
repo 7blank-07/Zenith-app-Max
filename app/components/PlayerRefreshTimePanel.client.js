@@ -208,7 +208,7 @@ export default function PlayerRefreshTimePanel({ playerId }) {
       className="player-refresh-container"
       style={{
         background: 'var(--color-graphite-800)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid var(--player-detail-sub-panel-border)',
         borderRadius: 'var(--radius-lg)',
         padding: '20px',
         marginTop: '20px'
@@ -294,7 +294,7 @@ export default function PlayerRefreshTimePanel({ playerId }) {
               >
                 Upcoming Refreshes
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '8px 12px' }}>
+              <div style={{ background: 'var(--player-detail-sub-panel-bg)', borderRadius: '8px', padding: '8px 12px' }}>
                 {upcomingTexts.map((entry, index) => (
                   <div
                     key={`${playerId}-upcoming-${entry}-${index}`}

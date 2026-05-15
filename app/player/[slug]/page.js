@@ -149,9 +149,9 @@ export default async function PlayerDetailPage({ params, searchParams }) {
             maxWidth: 'none',
             margin: '0',
             padding: '0 0 32px',
-            background: 'rgba(20, 24, 28, 0.5)',
+            background: 'var(--player-detail-shell-bg)',
             backdropFilter: 'blur(25px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            border: '1px solid var(--player-detail-shell-border)',
             minHeight: '100vh',
             borderRadius: '0'
           }}

@@ -206,7 +206,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
           <div
             className="player-summary-panel"
             style={{
-              background: 'var(--color-graphite-800, #14181C)',
+              background: 'var(--color-panel, rgba(20,24,28,0.98))',
               border: '1px solid rgba(0,194,168,0.15)',
               borderRadius: 'var(--radius-lg, 12px)',
               padding: '32px',
@@ -298,8 +298,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
               <div
                 style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--player-detail-sub-panel-bg)',
+                  border: '1px solid var(--player-detail-sub-panel-border)',
                   borderRadius: 'var(--radius-base, 8px)',
                   padding: '14px',
                   textAlign: 'center'
@@ -312,8 +312,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               </div>
               <div
                 style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--player-detail-sub-panel-bg)',
+                  border: '1px solid var(--player-detail-sub-panel-border)',
                   borderRadius: 'var(--radius-base, 8px)',
                   padding: '14px',
                   textAlign: 'center'
@@ -328,8 +328,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
 
             <div
               style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'var(--player-detail-sub-panel-bg)',
+                border: '1px solid var(--player-detail-sub-panel-border)',
                 borderRadius: 'var(--radius-base, 8px)',
                 padding: '16px',
                 marginBottom: '20px'
@@ -412,8 +412,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
 
           <div
             style={{
-              background: 'var(--color-graphite-800, #14181C)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--color-panel, rgba(20,24,28,0.98))',
+              border: '1px solid var(--player-detail-sub-panel-border)',
               borderRadius: 'var(--radius-lg, 12px)',
               padding: '18px'
             }}
@@ -453,8 +453,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 zIndex: 'auto',
                 width: '100%',
                 height: 'auto',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'var(--player-detail-sub-panel-bg)',
+                border: '1px solid var(--player-detail-sub-panel-border)',
                 color: 'var(--color-text-muted, #98A0A6)',
                 padding: '16px 24px',
                 borderRadius: 'var(--radius-base, 10px)',
@@ -488,7 +488,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               className="player-rank-panel"
               style={{
                 background: 'var(--color-graphite-800)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid var(--player-detail-sub-panel-border)',
                 borderRadius: 'var(--radius-lg)',
                 padding: '16px'
               }}
@@ -533,8 +533,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                       onClick={() => handleRankChange(rankNum)}
                       style={{
                         position: 'relative',
-                        background: 'rgba(255,255,255,0.03)',
-                        border: `2px solid ${isSelected ? `${rankColor}66` : 'rgba(255,255,255,0.08)'}`,
+                        background: 'var(--player-detail-sub-panel-bg)',
+                        border: `2px solid ${isSelected ? `${rankColor}66` : 'var(--player-detail-sub-panel-border)'}`,
                         borderRadius: '14px',
                         padding: '16px 12px',
                         cursor: 'pointer',

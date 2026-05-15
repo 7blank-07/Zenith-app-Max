@@ -25,13 +25,13 @@ export default function RankTrainingSimulator({ baseOvr = 0, initialRank = 0 }) 
   }, [baseOvr, targetRank, trainingLevel]);
 
   return (
-    <section style={{ marginTop: '14px', padding: '14px', borderRadius: '10px', border: '1px solid #d5d8dc' }}>
-      <h3 style={{ margin: 0, fontSize: '16px' }}>Rank & Training Simulator</h3>
-      <p style={{ marginTop: '8px', marginBottom: '10px' }}>
+    <section style={{ marginTop: '14px', padding: '14px', borderRadius: '10px', border: '1px solid var(--color-border-subtle, #d5d8dc)' }}>
+      <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--color-text-primary, #1f2328)' }}>Rank & Training Simulator</h3>
+      <p style={{ marginTop: '8px', marginBottom: '10px', color: 'var(--color-text-secondary, #57606a)' }}>
         Local estimate only (no server write): projected OVR <strong>{projectedOvr}</strong>
       </p>
 
-      <label style={{ display: 'block', marginBottom: '8px' }}>
+      <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-primary, #1f2328)' }}>
         Target Rank: {targetRank}
         <input
           type="range"
@@ -44,7 +44,7 @@ export default function RankTrainingSimulator({ baseOvr = 0, initialRank = 0 }) 
         />
       </label>
 
-      <label style={{ display: 'block' }}>
+      <label style={{ display: 'block', color: 'var(--color-text-primary, #1f2328)' }}>
         Training Level: {trainingLevel}
         <input
           type="range"

@@ -226,7 +226,7 @@ export default async function HomePage() {
                     Streaming Hub
                   </Link>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--color-surface, #111)', border: '1px solid var(--color-card-border, transparent)', padding: '1rem', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--color-surface, rgba(20,24,28,0.95))', border: '1px solid var(--color-card-border, transparent)', padding: '1rem', borderRadius: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--color-heading, #fff)' }}>{featuredStream.title}</h3>
                     <StreamBadge status={featuredStream.status} />

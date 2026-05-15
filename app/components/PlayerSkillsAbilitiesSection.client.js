@@ -345,7 +345,7 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                     </div>
                   ) : (
                     <div className="skill-actions">
-                      {currentLevel >= maxLevel ? <div className="max-level-badge">MAX LEVEL</div> : <small style={{ color: '#98A0A6' }}>Tap to adjust</small>}
+                      {currentLevel >= maxLevel ? <div className="max-level-badge">MAX LEVEL</div> : <small style={{ color: 'var(--color-text-muted)' }}>Tap to adjust</small>}
                     </div>
                   )}
                 </div>
@@ -381,9 +381,9 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
               </div>
             </div>
             <div className="boosts-container">
-              {skillModalLoading && <p style={{ color: '#98A0A6' }}>Loading skill details...</p>}
+              {skillModalLoading && <p style={{ color: 'var(--color-text-muted)' }}>Loading skill details...</p>}
               {!skillModalLoading && !!skillModalError && <p style={{ color: '#FF6B6B' }}>{skillModalError}</p>}
-              {!skillModalLoading && !skillModalError && !skillBoostLevels.length && <p style={{ color: '#98A0A6' }}>No boost data available</p>}
+              {!skillModalLoading && !skillModalError && !skillBoostLevels.length && <p style={{ color: 'var(--color-text-muted)' }}>No boost data available</p>}
               {!skillModalLoading &&
                 !skillModalError &&
                 skillBoostLevels.map((boost) => {

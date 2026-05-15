@@ -82,6 +82,12 @@
   --color-focus-ring: rgba(var(--color-teal-rgb), 0.4);
   --color-select-caret: rgba(230, 238, 242, 0.8);
 
+  /* Player Detail Shell Tokens */
+  --player-detail-shell-bg: rgba(20, 24, 28, 0.5);
+  --player-detail-shell-border: rgba(255, 255, 255, 0.15);
+  --player-detail-sub-panel-bg: rgba(255, 255, 255, 0.03);
+  --player-detail-sub-panel-border: rgba(255, 255, 255, 0.08);
+
   /* Common style patterns */
   --focus-ring: 0 0 0 3px var(--color-focus-ring);
   --focus-outline: 2px solid var(--color-primary);
@@ -244,7 +250,13 @@ html, body {
   --color-focus-ring: rgba(var(--color-teal-rgb), 0.28);
   --color-select-caret: rgba(15, 32, 42, 0.8);
 
-  --shadow-xs: 0 1px 2px rgba(15, 32, 42, 0.08);
+  /* Player Detail Shell Tokens - Light */
+  --player-detail-shell-bg: rgba(255, 251, 248, 0.7);
+  --player-detail-shell-border: rgba(15, 32, 42, 0.15);
+  --player-detail-sub-panel-bg: rgba(15, 32, 42, 0.06);
+  --player-detail-sub-panel-border: rgba(15, 32, 42, 0.3);
+
+  --shadow-xs: 0 1px 2px rgba(15, 32, 42, 0.12);
   --shadow-sm: 0 1px 2px rgba(15, 32, 42, 0.08);
   --shadow-md: 0 10px 24px rgba(15, 32, 42, 0.12), 0 2px 6px rgba(15, 32, 42, 0.08);
   --shadow-lg: 0 18px 40px rgba(15, 32, 42, 0.14), 0 6px 16px rgba(15, 32, 42, 0.08);
@@ -3223,17 +3235,35 @@ h1, h3, h4, h5, h6 {
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
-
+ 
 .player-row-watchlist:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #9e1717;
   border-color: var(--color-teal-500);
 }
-
+ 
 .player-row-watchlist.active {
   background: #0E1114;
   color: #9e1717;
   border-color: transparent;
+}
+
+[data-color-scheme="light"] .player-row-watchlist {
+  background: rgba(0, 143, 122, 0.08);
+  border: 1px solid rgba(0, 143, 122, 0.2);
+  color: #008f7a;
+}
+
+[data-color-scheme="light"] .player-row-watchlist:hover {
+  background: rgba(0, 143, 122, 0.12);
+  color: #008f7a;
+  border-color: rgba(0, 143, 122, 0.4);
+}
+
+[data-color-scheme="light"] .player-row-watchlist.active {
+  background: rgba(0, 143, 122, 0.15);
+  color: #008f7a;
+  border-color: rgba(0, 143, 122, 0.3);
 }
 
 
@@ -8128,23 +8158,45 @@ watchlist-view .view-content {
   padding: 14px 16px;
   gap: 10px;
 }
-
+ 
 #dashboard-view .home-utility-search .search-box:focus-within {
   border-color: rgba(34, 211, 238, 0.85);
   box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.13);
 }
-
+ 
 #dashboard-view .home-utility-search .search-box .search-icon {
   color: rgba(125, 211, 252, 0.78);
 }
-
+ 
 #dashboard-view .home-utility-search .search-box .search-input {
   color: #e0f2fe;
   font-size: 15px;
 }
-
+ 
 #dashboard-view .home-utility-search .search-box .search-input::placeholder {
   color: rgba(186, 230, 253, 0.56);
+}
+
+[data-color-scheme="light"] #dashboard-view .home-utility-search .search-box {
+  border: 1px solid rgba(0, 143, 122, 0.24);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+[data-color-scheme="light"] #dashboard-view .home-utility-search .search-box:focus-within {
+  border-color: rgba(0, 143, 122, 0.48);
+  box-shadow: 0 0 0 3px rgba(0, 143, 122, 0.1);
+}
+
+[data-color-scheme="light"] #dashboard-view .home-utility-search .search-box .search-icon {
+  color: rgba(0, 143, 122, 0.65);
+}
+
+[data-color-scheme="light"] #dashboard-view .home-utility-search .search-box .search-input {
+  color: #10202a;
+}
+
+[data-color-scheme="light"] #dashboard-view .home-utility-search .search-box .search-input::placeholder {
+  color: rgba(94, 113, 128, 0.6);
 }
 
 #dashboard-view .home-utility-redeem-shell {
@@ -9282,13 +9334,10 @@ watchlist-view .view-content {
 
 /* ==================== SKILLS SECTION ==================== */
 .player-skills-section {
-    background: var(--color-graphite-800); /* #14181C - Surface color */
-    /* OR use this for elevated look: */
-    /* background: var(--color-graphite-700); */ /* #1B2126 - Elevated */
-
+    background: var(--player-detail-sub-panel-bg);
     padding: 15px;
     border-radius: 12px;
-    border: 1px solid rgba(0, 194, 168, 0.15); /* Optional: teal border like rank section */
+    border: 1px solid var(--player-detail-sub-panel-border);
     margin-bottom: 20px;
 }
 
@@ -9300,8 +9349,8 @@ watchlist-view .view-content {
 }
 
 .skill-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--player-detail-sub-panel-bg);
+  border: 1px solid var(--player-detail-sub-panel-border);
   border-radius: 12px;
   padding: 12px;
   text-align: center;
@@ -9473,8 +9522,8 @@ watchlist-view .view-content {
 
 
 .skill-modal-content {
-  background: #14181C;
-  border: 1px solid rgba(0, 194, 168, 0.3);
+  background: var(--color-graphite-800);
+  border: 1px solid var(--player-detail-sub-panel-border);
   border-radius: 16px;
   padding: 30px;
   max-width: 600px;
@@ -9502,19 +9551,23 @@ watchlist-view .view-content {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #E6EEF2;
+  background: var(--player-detail-sub-panel-bg);
+  border: 1px solid var(--player-detail-sub-panel-border);
+  color: var(--color-text-primary);
   font-size: 24px;
   width: 35px;
   height: 35px;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  z-index: 10;
+  transition: all 0.2s ease;
 }
 
 .modal-close-btn:hover {
-  background: rgba(255, 107, 107, 0.3);
+  background: var(--player-detail-sub-panel-border);
   transform: rotate(90deg);
 }
 
@@ -9736,15 +9789,15 @@ watchlist-view .view-content {
 }
 
 .player-detail-profile-item {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--player-detail-sub-panel-bg);
+  border: 1px solid var(--player-detail-sub-panel-border);
   border-radius: 10px;
   padding: 10px 12px;
 }
 
 .player-detail-profile-item h4 {
   margin: 0 0 4px;
-  color: #98a0a6;
+  color: var(--color-text-muted);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -9752,7 +9805,7 @@ watchlist-view .view-content {
 
 .player-detail-profile-item p {
   margin: 0;
-  color: #e6eef2;
+  color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 700;
 }
@@ -9779,8 +9832,8 @@ watchlist-view .view-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--player-detail-sub-panel-bg);
+  border: 1px solid var(--player-detail-sub-panel-border);
   border-radius: 8px;
   padding: 8px 10px;
 }
@@ -9793,14 +9846,14 @@ watchlist-view .view-content {
 }
 
 .player-detail-profile-media-item span {
-  color: #e6eef2;
+  color: var(--color-text-primary);
   font-size: 12px;
   font-weight: 600;
 }
 
 .player-detail-profile-summary {
   margin: 0;
-  color: var(--color-text-muted, #98a0a6);
+  color: var(--color-text-muted);
   line-height: 1.65;
 }
 
@@ -13241,5 +13294,78 @@ body {
     width: 11px;
     height: 11px;
   }
+}
+
+/* ============================================================
+   LIGHT THEME PLAYER DETAILS SPECIFIC FIXES
+   ============================================================ */
+
+[data-color-scheme="light"] .player-detail-shell {
+  background: rgba(255, 251, 248, 0.85) !important;
+}
+
+[data-color-scheme="light"] .player-skills-section {
+  background: rgba(15, 32, 42, 0.04) !important;
+  border-color: rgba(15, 32, 42, 0.15) !important;
+}
+
+[data-color-scheme="light"] .skill-card {
+  background: #FFFFFF !important;
+  border-color: rgba(15, 32, 42, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(15, 32, 42, 0.06) !important;
+}
+
+[data-color-scheme="light"] .skill-card:hover {
+  background: #F0F9F8 !important;
+  border-color: var(--color-teal-500) !important;
+}
+
+[data-color-scheme="light"] .player-watchlist-btn {
+  border: 1.5px solid rgba(15, 32, 42, 0.28) !important;
+  background: #FFFFFF !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-color-scheme="light"] .player-watchlist-btn:hover {
+  background: rgba(15, 32, 42, 0.04) !important;
+  border-color: rgba(15, 32, 42, 0.45) !important;
+}
+
+[data-color-scheme="light"] .skill-name {
+  color: var(--color-text-primary) !important;
+}
+
+[data-color-scheme="light"] .modal-close-btn {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(15, 32, 42, 0.15) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-color-scheme="light"] .skill-modal-content {
+  background: #FFFFFF !important;
+  box-shadow: 0 20px 60px rgba(15, 32, 42, 0.12) !important;
+}
+
+[data-color-scheme="light"] .boost-level-section {
+  background: rgba(15, 32, 42, 0.02) !important;
+  border-color: rgba(15, 32, 42, 0.08) !important;
+}
+
+[data-color-scheme="light"] .boost-level-section.selected {
+  background: rgba(0, 194, 168, 0.06) !important;
+  border-color: rgba(0, 194, 168, 0.45) !important;
+}
+
+[data-color-scheme="light"] .boost-stat {
+  background: rgba(0, 194, 168, 0.06) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-color-scheme="light"] .player-detail-profile-item h4 {
+  color: var(--color-text-muted) !important;
+}
+
+[data-color-scheme="light"] .player-detail-profile-item p {
+  color: var(--color-text-primary) !important;
 }
 

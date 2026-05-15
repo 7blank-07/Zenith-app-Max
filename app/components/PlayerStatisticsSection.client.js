@@ -98,7 +98,7 @@ export default function PlayerStatisticsSection({
                 className="player-detail-stat-card"
                 style={{
                   background: 'var(--color-graphite-800, #14181C)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: '1px solid var(--player-detail-sub-panel-border)',
                   borderLeft: '4px solid #00C2A8',
                   borderRadius: 'var(--radius-lg, 12px)',
                   padding: '20px',
@@ -116,7 +116,7 @@ export default function PlayerStatisticsSection({
                     gap: '12px',
                     marginBottom: '16px',
                     paddingBottom: '12px',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)'
+                    borderBottom: '1px solid var(--player-detail-sub-panel-border)'
                   }}
                 >
                   <h3
@@ -153,7 +153,7 @@ export default function PlayerStatisticsSection({
                           style={{
                             textAlign: 'left',
                             padding: '7px 0',
-                            borderBottom: '1px solid rgba(255,255,255,0.08)',
+                            borderBottom: '1px solid var(--player-detail-sub-panel-border)',
                             color: 'var(--color-text-muted, #98A0A6)',
                             fontWeight: 600,
                             width: '72%'
@@ -165,7 +165,7 @@ export default function PlayerStatisticsSection({
                           style={{
                             textAlign: 'right',
                             padding: '7px 0',
-                            borderBottom: '1px solid rgba(255,255,255,0.08)',
+                            borderBottom: '1px solid var(--player-detail-sub-panel-border)',
                             color: getStatAccentColor(row.value),
                             fontWeight: 800
                           }}

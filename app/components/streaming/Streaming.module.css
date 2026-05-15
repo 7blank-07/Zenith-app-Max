@@ -308,3 +308,15 @@
 :global([data-color-scheme="light"]) .btnSecondary:hover {
   background: rgba(15, 32, 42, 0.13);
 }
+
+:global([data-color-scheme="light"]) .hubContainer {
+  background: #fafaf8;
+}
+
+:global([data-color-scheme="light"]) .sectionTitle {
+  color: #10202a;
+}
+
+:global([data-color-scheme="light"]) .cardTitle {
+  color: #10202a;
+}
