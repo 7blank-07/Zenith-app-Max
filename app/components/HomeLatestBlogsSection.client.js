@@ -20,23 +20,35 @@ function getCategoryHref(category) {
 }
 
 function buildVisibleCategories(posts, categories) {
+  let result = [];
   if (Array.isArray(categories) && categories.length > 0) {
-    return categories.map(cat => ({
+    result = categories.map(cat => ({
       ...cat,
       slug: toText(cat.slug).toLowerCase()
     }));
+  } else {
+    result = (Array.isArray(posts) ? posts : []).reduce((accumulator, post) => {
+      const slug = toText(post?.category?.slug).toLowerCase();
+      if (!slug || accumulator.some((category) => category.slug === slug)) return accumulator;
+      accumulator.push({
+        slug,
+        name: toText(post?.category?.name, 'Blogs'),
+        description: ''
+      });
+      return accumulator;
+    }, []);
   }
 
-  return (Array.isArray(posts) ? posts : []).reduce((accumulator, post) => {
-    const slug = toText(post?.category?.slug).toLowerCase();
-    if (!slug || accumulator.some((category) => category.slug === slug)) return accumulator;
-    accumulator.push({
-      slug,
-      name: toText(post?.category?.name, 'Blogs'),
-      description: ''
-    });
-    return accumulator;
-  }, []);
+  const preferredOrder = ['reviews', 'top-10', 'playstyles', 'event-guides', 'event-guide'];
+  return result.sort((a, b) => {
+    const aIndex = preferredOrder.indexOf(a.slug);
+    const bIndex = preferredOrder.indexOf(b.slug);
+
+    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    return 0;
+  });
 }
 
 function BlogFeatureCard({ post }) {
