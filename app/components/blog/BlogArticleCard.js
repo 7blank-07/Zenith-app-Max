@@ -8,7 +8,7 @@ function getArticleHref(post) {
   return `/blogs/${encodeURIComponent(post.category?.slug || 'news')}/${encodeURIComponent(post.slug)}`;
 }
 
-export default function BlogArticleCard({ post, showTags = true }) {
+export default function BlogArticleCard({ post, showTags = false }) {
   if (!post) return null;
 
   const articleHref = getArticleHref(post);

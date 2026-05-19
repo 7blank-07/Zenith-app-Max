@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import AuthorByline from './AuthorByline';
-import BlogTagPills from './BlogTagPills';
 import OptimizedCoverImage from './OptimizedCoverImage';
 import styles from './BlogLayout.module.css';
 
@@ -17,7 +16,6 @@ export default function BlogArticleHero({ article }) {
         <h1 className={styles.articleTitle}>{article.title}</h1>
         {article.subtitle ? <p className={styles.articleSubtitle}>{article.subtitle}</p> : null}
         <AuthorByline author={article.author} publishedAt={article.publishedAt || article.createdAt} readingTime={article.readingTime} />
-        <BlogTagPills tags={article.tags} />
       </div>
 
       <div className={styles.articleCover}>
