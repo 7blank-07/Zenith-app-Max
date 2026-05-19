@@ -10,7 +10,7 @@ const ToolsInteractions = nextDynamic(() => import('../components/ToolsInteracti
       <p>Loading Tools Hub...</p>
     </div>
   ),
-  ssr: false
+  ssr: true
 });
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;

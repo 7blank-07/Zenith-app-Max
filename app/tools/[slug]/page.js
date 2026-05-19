@@ -12,7 +12,7 @@ const ToolsInteractions = nextDynamic(() => import('../../components/ToolsIntera
       <p>Loading Tool...</p>
     </div>
   ),
-  ssr: false
+  ssr: true
 });
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;

@@ -1,10 +1,10 @@
 import '../globals.css';
+import '../../assets/css/tool-style.css';
+import '../../assets/css/watchlist-styles.css';
 
 export default function ToolsLayout({ children }) {
   return (
     <>
-      <link rel="stylesheet" href="/assets/css/tool-style.css" />
-      <link rel="stylesheet" href="/assets/css/watchlist-styles.css" />
       {children}
     </>
   );
