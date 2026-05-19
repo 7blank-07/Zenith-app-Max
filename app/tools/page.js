@@ -3,7 +3,15 @@ import SiteChrome from '../components/SiteChrome';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getToolsData } from './tools-data';
 
-const ToolsInteractions = nextDynamic(() => import('../components/ToolsInteractions.client'));
+const ToolsInteractions = nextDynamic(() => import('../components/ToolsInteractions.client'), {
+  loading: () => (
+    <div className="tool-loading-placeholder">
+      <div className="loading-spinner"></div>
+      <p>Loading Tools Hub...</p>
+    </div>
+  ),
+  ssr: false
+});
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
@@ -46,7 +54,6 @@ export default async function ToolsHubPage() {
 
   return (
     <SiteChrome activeView="tools">
-      <link rel="stylesheet" href="/assets/css/tool-style.css" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
