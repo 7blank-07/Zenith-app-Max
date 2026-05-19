@@ -19,7 +19,7 @@ export default function PopularArticles({ posts = [] }) {
         {posts.map((post, index) => (
           <li key={post.id} className={styles.sideCardItem}>
             <span className={styles.smallMeta}>
-              #{index + 1} • {post.views || 0} views
+              #{index + 1}
             </span>
             <Link href={getArticleHref(post)} className={styles.popularLink}>
               {post.title}
