@@ -6,6 +6,7 @@ import ImageCacheServiceWorker from './components/ImageCacheServiceWorker.client
 import HtmlLanguageController from './components/HtmlLanguageController.client';
 import RouteProgress from './components/RouteProgress.client';
 import WebVitalsReporter from './components/WebVitalsReporter.client';
+import GoogleAdSenseTrigger from './components/GoogleAdSenseTrigger.client';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -50,10 +51,17 @@ export default function RootLayout({ children }) {
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />
         <link rel="apple-touch-icon" href="/assets/images/zenith_logo_main.png" />
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
       </head>
       <body>
         <Suspense fallback={null}>
           <RouteProgress />
+          <GoogleAdSenseTrigger />
         </Suspense>
         <HtmlLanguageController />
         {children}
@@ -72,12 +80,6 @@ export default function RootLayout({ children }) {
             gtag('config', 'G-BN8W9Y5DC8');
           `}
         </Script>
-        <Script
-          id="adsbygoogle"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
-          strategy="lazyOnload"
-          crossOrigin="anonymous"
-        />
         <Script
           id="simple-analytics"
           src="https://scripts.simpleanalyticscdn.com/latest.js"
