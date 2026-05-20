@@ -38,6 +38,23 @@ function ensureList(payload) {
   return [];
 }
 
+async function parseJsonResponse(response, context) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    const sanitized = text.replace(/[\u0000-\u001F]/g, '');
+    if (sanitized === text) throw error;
+
+    try {
+      console.warn(`[top-players] Sanitized invalid control characters in ${context} JSON response`);
+      return JSON.parse(sanitized);
+    } catch {
+      throw error;
+    }
+  }
+}
+
 function ensurePositiveInteger(value, fallback) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
@@ -141,7 +158,7 @@ async function fetchRowsByIdsAtRank(baseUrl, ids, rank, chunkSize) {
         throw new Error(`Failed to fetch /players/by-ids (${response.status}): ${details || response.statusText}`);
       }
 
-      const payload = await response.json();
+      const payload = await parseJsonResponse(response, '/players/by-ids');
       return ensureList(payload);
     })
   );
@@ -346,7 +363,7 @@ export async function fetchLatestPlayers(options = {}) {
       throw new Error(`Failed to fetch latest /players (${response.status}): ${details || response.statusText}`);
     }
 
-    const payload = await response.json();
+    const payload = await parseJsonResponse(response, 'latest /players');
     const rows = ensureList(payload);
     const byId = new Map();
     for (const row of rows) {
@@ -462,7 +479,7 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
         throw new Error(`Failed to fetch /players metadata (${response.status}): ${details || response.statusText}`);
       }
 
-      const payload = await response.json();
+      const payload = await parseJsonResponse(response, '/players metadata');
       const rows = ensureList(payload);
       const total = Number(payload?.pagination?.total);
       const hasMore = payload?.pagination?.has_more;

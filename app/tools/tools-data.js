@@ -33,6 +33,37 @@ export function serializeToolPlayer(player) {
   };
 }
 
+function uniqueSorted(values) {
+  return [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((left, right) =>
+    left.localeCompare(right)
+  );
+}
+
+function inferSquadFilterOptions(players) {
+  const positions = [];
+  const skillMoves = new Set();
+
+  players.forEach((player) => {
+    if (player.position) positions.push(String(player.position).toUpperCase());
+    String(player.alternatePosition || '')
+      .split(/[|,/]/)
+      .map((position) => position.trim().toUpperCase())
+      .filter((position) => position && position !== '0')
+      .forEach((position) => positions.push(position));
+
+    const skillMoveValue = Number(player.skillMoves);
+    if (Number.isFinite(skillMoveValue) && skillMoveValue > 0) skillMoves.add(skillMoveValue);
+  });
+
+  return {
+    positions: uniqueSorted(positions),
+    leagues: uniqueSorted(players.map((player) => player.league)),
+    clubs: uniqueSorted(players.map((player) => player.club)),
+    nations: uniqueSorted(players.map((player) => player.nation)),
+    skillMoves: [...skillMoves].sort((left, right) => right - left)
+  };
+}
+
 export async function getToolsData(isWatchlistTool) {
   let toolPlayers = [];
   let squadFilterOptions = {
@@ -45,18 +76,30 @@ export async function getToolsData(isWatchlistTool) {
 
   if (!isWatchlistTool) {
     const topIds = await readTopPlayerIds(TOOLS_PLAYER_POOL_LIMIT);
-    const [players, filterMetadata] = await Promise.all([
+    const [playersResult, filterMetadataResult] = await Promise.allSettled([
       fetchPlayersByIds(topIds, { rank: 0 }),
       fetchAllPlayerFilterMetadata({ rank: 0 })
     ]);
-    toolPlayers = players.map(serializeToolPlayer);
-    squadFilterOptions = {
-      positions: filterMetadata.positions,
-      leagues: filterMetadata.leagues,
-      clubs: filterMetadata.clubs,
-      nations: filterMetadata.nations,
-      skillMoves: filterMetadata.skillMoves
-    };
+
+    if (playersResult.status === 'fulfilled') {
+      toolPlayers = playersResult.value.map(serializeToolPlayer);
+    } else {
+      console.warn('[tools-data] Failed to fetch initial tool players:', playersResult.reason);
+    }
+
+    if (filterMetadataResult.status === 'fulfilled') {
+      const filterMetadata = filterMetadataResult.value;
+      squadFilterOptions = {
+        positions: filterMetadata.positions,
+        leagues: filterMetadata.leagues,
+        clubs: filterMetadata.clubs,
+        nations: filterMetadata.nations,
+        skillMoves: filterMetadata.skillMoves
+      };
+    } else {
+      console.warn('[tools-data] Failed to fetch full filter metadata; using player pool fallback:', filterMetadataResult.reason);
+      squadFilterOptions = inferSquadFilterOptions(toolPlayers);
+    }
   }
 
   return { toolPlayers, squadFilterOptions };
