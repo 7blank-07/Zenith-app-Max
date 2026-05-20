@@ -1,4 +1,4 @@
-Right now we are using assets/images/background/zenith_bg.webp this as background for web app
+ Right now we are using assets/images/background/zenith_bg.webp this as background for web app
 but some people have recommended me not to use it's not looking good and professional, so I want
 to change background to beautiful, professional, better looking, good
 it should perfectly fit on mobile, tablet, desktop and other devices perfectly,
