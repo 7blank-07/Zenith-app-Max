@@ -11639,7 +11639,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
 
 main.main-content.main-content--squadbuilder #squad-builder-modal .squad-slot .preview-card-inner .preview-card-player-img {
   top: auto;
-  bottom: 2%;
+  bottom: -11%;
   left: 50%;
   width: 124%;
   height: 124%;
