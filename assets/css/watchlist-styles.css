@@ -336,6 +336,67 @@
    PLAYER ROW CARD - COMPLETE STYLING
    ========================================== */
 
+/* Watchlist mini card uses homepage preview styling */
+#watchlist-players-grid .player-row-card {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#watchlist-players-grid .player-row-card .dashboard-player-card {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+#watchlist-players-grid .player-row-card .dashboard-player-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+#watchlist-players-grid .player-row-card .card-container {
+    width: 100%;
+    height: 100%;
+}
+
+#watchlist-players-grid .player-row-card .card-ovr {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+#watchlist-players-grid .player-row-card .card-position {
+    font-size: 0.6rem;
+    line-height: 0.9;
+    letter-spacing: -0.3px;
+}
+
+#watchlist-players-grid .player-row-card .card-player-name {
+    font-size: 0.62rem;
+    line-height: 0.95;
+    letter-spacing: -0.3px;
+    transform: scaleY(1);
+}
+
+#watchlist-players-grid .player-row-card .card-nation-flag-home,
+#watchlist-players-grid .player-row-card .card-club-flag-home,
+#watchlist-players-grid .player-row-card .card-league-flag-home {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+#watchlist-players-grid .player-row-card .card-untradable-badge {
+    top: 4px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    scale: 1;
+}
+
 
 
 
@@ -1095,7 +1156,73 @@
     z-index: 10;
     width: 15px;
     height: 15px;
+ }
 }
+
+@media (max-width: 768px) {
+  #watchlist-players-grid .player-row-card .card-ovr {
+    font-size: 0.85rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-position {
+    font-size: 0.55rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-player-name {
+    font-size: 0.56rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-nation-flag-home,
+  #watchlist-players-grid .player-row-card .card-club-flag-home,
+  #watchlist-players-grid .player-row-card .card-league-flag-home {
+    width: 11px;
+    height: 11px;
+  }
+
+  #watchlist-players-grid .player-row-card .card-untradable-badge {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  #watchlist-players-grid .player-row-card .card-ovr {
+    font-size: 0.8rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-position {
+    font-size: 0.5rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-player-name {
+    font-size: 0.52rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-nation-flag-home,
+  #watchlist-players-grid .player-row-card .card-club-flag-home,
+  #watchlist-players-grid .player-row-card .card-league-flag-home {
+    width: 10px;
+    height: 10px;
+  }
+
+  #watchlist-players-grid .player-row-card .card-untradable-badge {
+    width: 9px;
+    height: 9px;
+  }
+}
+
+@media (max-width: 360px) {
+  #watchlist-players-grid .player-row-card .card-ovr {
+    font-size: 0.76rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-position {
+    font-size: 0.48rem;
+  }
+
+  #watchlist-players-grid .player-row-card .card-player-name {
+    font-size: 0.5rem;
+  }
 }
 
 @media (max-width: 480px){
