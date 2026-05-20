@@ -12,6 +12,7 @@ import { getHomepageFeaturedStream } from '../src/lib/server/streams/repository.
 import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponents';
 import { getOptimizedZenithUrl } from '../src/lib/image-optimization.mjs';
 import { UNTRADABLE_CARD_BADGE_URL } from './components/image-asset-urls';
+import AdsenseAd from './components/AdsenseAd';
 
 const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
   ssr: true
@@ -245,6 +246,8 @@ export default async function HomePage() {
               </div>
               <div id="latest-players-grid">{latestPlayers.map((player, index) => renderDashboardPlayerCard(player, `latest-${player.playerId}`, index))}</div>
             </section>
+
+            <AdsenseAd slot="9409697139" />
 
             {shouldRenderLatestBlogs ? (
               <HomeLatestBlogsSection
