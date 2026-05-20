@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
+import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 
 function escapeHtml(value) {
   return String(value || '')
@@ -12,16 +13,6 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
-}
-
-function getInitials(name) {
-  const words = String(name || '')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  if (!words.length) return '?';
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return `${words[0][0]}${words[1][0]}`.toUpperCase();
 }
 
 export default function HomeDashboardInteractions() {
@@ -69,48 +60,65 @@ export default function HomeDashboardInteractions() {
 
           results.forEach((player) => {
             const variant = player.leagueImage ? 'normal' : 'hero';
+            const cardBackground = escapeHtml(player.cardBackground || 'https://via.placeholder.com/300x400');
+            const playerImage = escapeHtml(player.playerImage || 'https://via.placeholder.com/256');
+            const playerName = escapeHtml(player.name || 'Unknown');
+            const playerPosition = escapeHtml(player.position || 'N/A');
+            const ovrText = escapeHtml(player.ovrText);
+            const ratingColor = escapeHtml(player.colorRating || '#FFFFFF');
+            const positionColor = escapeHtml(player.colorPosition || '#FFFFFF');
+            const nameColor = escapeHtml(player.colorName || '#FFFFFF');
+            const untradableBadgeUrl = escapeHtml(UNTRADABLE_CARD_BADGE_URL);
             const row = document.createElement('div');
             row.className = 'dropdown-player-row';
             row.setAttribute('data-player-id', player.playerId);
             row.innerHTML = `
               <div class="dropdown-player-card">
-                <div class="squad-custom-mini-card dropdown-mini-card">
-                   <img src="${escapeHtml(player.cardBackground || 'https://via.placeholder.com/120x160')}" alt="Card Background" class="squad-custom-card-bg" width="60" height="80">
-                   ${
-                     player.playerImage
-                       ? `<img src="${escapeHtml(player.playerImage)}" alt="${escapeHtml(player.name)}" class="squad-custom-card-player-img" width="80" height="80">
-                          <span class="player-initials" style="display:none">${escapeHtml(getInitials(player.name))}</span>`
-                      : `<span class="player-initials">${escapeHtml(getInitials(player.name))}</span>`
-                  }
-                  <div class="squad-custom-card-ovr" style="color: ${escapeHtml(player.colorRating || '#FFFFFF')}">${escapeHtml(player.ovrText)}</div>
-                  <div class="squad-custom-card-position" style="color: ${escapeHtml(player.colorPosition || '#FFFFFF')}">${escapeHtml(player.position || 'N/A')}</div>
-                  <div class="squad-custom-card-name" style="color: ${escapeHtml(player.colorName || '#FFFFFF')}">${escapeHtml(player.name || 'Unknown')}</div>
-                  ${
-                    player.nationFlag
-                      ? `<img src="${escapeHtml(player.nationFlag)}" alt="Nation" class="dropdown-card-flag-nation ${variant === 'normal' ? 'normal-dropdown-nation-flag' : 'hero-icon-dropdown-nation-flag'}" width="14" height="14">`
-                      : ''
-                  }
-                  ${
-                    player.clubFlag
-                      ? `<img src="${escapeHtml(player.clubFlag)}" alt="Club" class="dropdown-card-flag-club ${variant === 'normal' ? 'normal-dropdown-club-flag' : 'hero-icon-dropdown-club-flag'}" width="14" height="14">`
-                      : ''
-                  }
-                  ${
-                    variant === 'normal' && player.leagueImage
-                      ? `<img src="${escapeHtml(player.leagueImage)}" alt="League" class="dropdown-card-flag-league normal-dropdown-league-flag" width="14" height="14">`
-                      : ''
-                  }
+                <div class="dashboard-player-card">
+                  <div class="card-container">
+                    <img src="${cardBackground}" alt="Card Background" class="card-background-img" width="300" height="400" loading="lazy">
+                    <img src="${playerImage}" alt="${playerName}" class="player-image-img" width="256" height="256" loading="lazy">
+                    <div class="card-ovr" style="color: ${ratingColor}">${ovrText}</div>
+                    <div class="card-position" style="color: ${positionColor}">${playerPosition}</div>
+                    <div class="card-player-name" style="color: ${nameColor}">${playerName}</div>
+                    ${
+                      player.nationFlag
+                        ? `<img src="${escapeHtml(player.nationFlag)}" alt="Nation" class="card-nation-flag-home ${
+                          variant === 'normal' ? 'normal-nation-flag-home' : 'hero-icon-nation-flag-home'
+                        }" width="18" height="18" loading="lazy">`
+                        : ''
+                    }
+                    ${
+                      player.clubFlag
+                        ? `<img src="${escapeHtml(player.clubFlag)}" alt="Club" class="card-club-flag-home ${
+                          variant === 'normal' ? 'normal-club-flag-home' : 'hero-icon-club-flag-home'
+                        }" width="18" height="18" loading="lazy">`
+                        : ''
+                    }
+                    ${
+                      variant === 'normal' && player.leagueImage
+                        ? `<img src="${escapeHtml(player.leagueImage)}" alt="League" class="card-league-flag-home normal-league-flag-home" width="18" height="18" loading="lazy">`
+                        : ''
+                    }
+                    ${
+                      player.isUntradable
+                        ? `<div class="card-untradable-badge card-untradable-badge--players">
+                            <img src="${untradableBadgeUrl}" alt="Untradable" width="16" height="16" loading="lazy">
+                          </div>`
+                        : ''
+                    }
+                  </div>
                 </div>
               </div>
               <div class="dropdown-player-info">
-                <div class="dropdown-player-name">${escapeHtml(player.name || 'Unknown')}</div>
+                <div class="dropdown-player-name">${playerName}</div>
                 <span class="dropdown-player-badge ${player.isUntradable ? 'non-auctionable' : 'auctionable'}">
                   ${player.isUntradable ? '🔴 Non-auctionable' : '✅ Auctionable'}
                 </span>
               </div>
                <div class="dropdown-player-stats">
-                 <div class="dropdown-player-ovr">${escapeHtml(player.ovrText)}</div>
-                 <div class="dropdown-player-position">${escapeHtml(player.position || 'N/A')}</div>
+                 <div class="dropdown-player-ovr">${ovrText}</div>
+                 <div class="dropdown-player-position">${playerPosition}</div>
                </div>
              `;
 
