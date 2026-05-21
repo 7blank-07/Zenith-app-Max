@@ -21,7 +21,7 @@ function toLowerText(value) {
 
 function readAttributeStatValue(player, key, fallbackKey) {
   const attributes = player?.attributes && typeof player.attributes === 'object' ? player.attributes : {};
-  const value = attributes?.[key] ?? attributes?.[fallbackKey] ?? player?.[key] ?? player?.[fallbackKey];
+  const value = attributes?.[key] ?? player?.[key] ?? attributes?.[fallbackKey] ?? player?.[fallbackKey];
   return toNumber(value, 0);
 }
 
@@ -541,6 +541,8 @@ export default function WatchlistInteractions() {
     };
 
     const hasMissingPrimaryStats = (player) => {
+      const attributes = player?.attributes && typeof player.attributes === 'object' ? player.attributes : {};
+      if (toNumber(attributes?.dribbling_head, 0) <= 0) return true;
       const stats = buildPrimaryStatPatch(player);
       return Object.values(stats).every((value) => value <= 0);
     };

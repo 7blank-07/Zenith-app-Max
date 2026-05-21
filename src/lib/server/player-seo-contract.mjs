@@ -620,7 +620,7 @@ function buildLegacyStyleAttributeCategories(source, position) {
     {
       key: 'dribbling',
       name: 'Dribbling',
-      mainValue: calculateDribbling(finalStat),
+      mainValue: finalStat('dribbling_head', 'dribbling'),
       substats: [
         { label: 'Dribbling', value: finalStat('dribbling') },
         { label: 'Balance', value: finalStat('balance') },
