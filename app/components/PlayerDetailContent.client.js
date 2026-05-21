@@ -110,7 +110,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   const pacStat = readAttributeStat(record, 'pace');
   const shoStat = readAttributeStat(record, 'shooting');
   const pasStat = readAttributeStat(record, 'passing');
-  const driStat = readAttributeStat(record, 'dribbling');
+  const driStat = toNumber(record?.attributes?.dribbling_head ?? record?.dribbling_head ?? record?.attributes?.dribbling ?? record?.dribbling, 0);
   const defStat = readAttributeStat(record, 'defending');
   const phyStat = readAttributeStat(record, 'physical');
 

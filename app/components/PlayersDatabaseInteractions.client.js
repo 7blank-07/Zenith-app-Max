@@ -417,7 +417,7 @@ function normalizePlayer(player) {
     pac: toNumber(attributes?.pace ?? player?.pace, 0),
     sho: toNumber(attributes?.shooting ?? player?.shooting, 0),
     pas: toNumber(attributes?.passing ?? player?.passing, 0),
-    dri: toNumber(attributes?.dribbling ?? player?.dribbling, 0),
+    dri: toNumber(attributes?.dribbling_head ?? player?.dribbling_head ?? attributes?.dribbling ?? player?.dribbling, 0),
     def: toNumber(attributes?.defending ?? player?.defending, 0),
     phy: toNumber(attributes?.physical ?? player?.physical, 0),
     attributes,

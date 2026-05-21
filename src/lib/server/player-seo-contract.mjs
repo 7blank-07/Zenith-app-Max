@@ -333,6 +333,7 @@ function extractAttributes(source) {
     shooting: toNullableInteger(source.shooting),
     passing: toNullableInteger(source.passing),
     dribbling: toNullableInteger(source.dribbling),
+    dribbling_head: toNullableInteger(source.dribbling_head),
     defending: toNullableInteger(source.defending),
     physical: toNullableInteger(source.physical),
     acceleration: toNullableInteger(source.acceleration),

@@ -171,7 +171,7 @@ function normalizeWatchlistPlayer(player) {
     pace: readAttributeStatValue(parsedPlayer, 'pace', 'pac'),
     shooting: readAttributeStatValue(parsedPlayer, 'shooting', 'sho'),
     passing: readAttributeStatValue(parsedPlayer, 'passing', 'pas'),
-    dribbling: readAttributeStatValue(parsedPlayer, 'dribbling', 'dri'),
+    dribbling: readAttributeStatValue(parsedPlayer, 'dribbling_head', 'dribbling'),
     defending: readAttributeStatValue(parsedPlayer, 'defending', 'def'),
     physical: readAttributeStatValue(parsedPlayer, 'physical', 'phy'),
     price: Number(parsedPlayer.price) || 0,
@@ -207,7 +207,7 @@ function buildPrimaryStatPatch(player) {
     pace: readAttributeStatValue(player, 'pace', 'pac'),
     shooting: readAttributeStatValue(player, 'shooting', 'sho'),
     passing: readAttributeStatValue(player, 'passing', 'pas'),
-    dribbling: readAttributeStatValue(player, 'dribbling', 'dri'),
+    dribbling: readAttributeStatValue(player, 'dribbling_head', 'dribbling'),
     defending: readAttributeStatValue(player, 'defending', 'def'),
     physical: readAttributeStatValue(player, 'physical', 'phy')
   };
