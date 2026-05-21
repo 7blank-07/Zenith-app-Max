@@ -1563,14 +1563,6 @@ export default function PlayersDatabaseInteractions({
                           {player.ovr || 'N/A'} • {player.position || 'N/A'}
                         </div>
                       </div>
-                      <div className="player-row-info-mobile">
-                        <span className="player-row-position-text player-row-position-text--primary">{player.position || 'N/A'}</span>
-                        {player.alternatePositions.map((position) => (
-                          <span key={`${player.uniqueId}-mobile-${position}`} className="player-row-position-text">
-                            {position}
-                          </span>
-                        ))}
-                      </div>
                       <div className="player-price player-row-price">
                         {player.isUntradable ? (
                           <img
