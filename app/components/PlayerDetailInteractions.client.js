@@ -69,27 +69,28 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     const normalizedRank = toNumber(currentRank, 0);
     const normalizedBaseOvr = toNumber(baseOvr, 0);
 
-    const watchlistButton = root.querySelector('[data-watchlist-toggle]');
     let watchlist = readWatchlist();
     let watchlistPlayers = readWatchlistPlayers();
 
-    const getWatchlistPlayerSnapshot = (uniqueId) => {
-      if (!watchlistButton) return null;
+    const getWatchlistPlayerSnapshot = (button, uniqueId) => {
+      if (!button) return null;
       const parsed = parseUniqueId(uniqueId);
-      const resolvedPlayerId = watchlistButton.getAttribute('data-player-id') || parsed.playerId || String(playerId || '');
-      const resolvedRecordId = watchlistButton.getAttribute('data-record-id') || '';
+      const resolvedPlayerId = button.getAttribute('data-player-id') || parsed.playerId || String(playerId || '');
+      const resolvedRecordId = button.getAttribute('data-record-id') || '';
       if (!resolvedPlayerId) return null;
-      const rankValue = toNumber(watchlistButton.getAttribute('data-rank'), parsed.rank);
-      const isUntradable = String(watchlistButton.getAttribute('data-untradable') || '')
+      
+      const rankValue = toNumber(button.getAttribute('data-rank'), parsed.rank);
+      const isUntradable = String(button.getAttribute('data-untradable') || '')
         .trim()
         .toLowerCase();
       const normalizedUntradable = isUntradable === '1' || isUntradable === 'true' ? 1 : parsed.untradable ? 1 : 0;
-      const pace = toNumber(watchlistButton.getAttribute('data-pac'), 0);
-      const shooting = toNumber(watchlistButton.getAttribute('data-sho'), 0);
-      const passing = toNumber(watchlistButton.getAttribute('data-pas'), 0);
-      const dribbling = toNumber(watchlistButton.getAttribute('data-dri'), 0);
-      const defending = toNumber(watchlistButton.getAttribute('data-def'), 0);
-      const physical = toNumber(watchlistButton.getAttribute('data-phy'), 0);
+      
+      const pace = toNumber(button.getAttribute('data-pac'), 0);
+      const shooting = toNumber(button.getAttribute('data-sho'), 0);
+      const passing = toNumber(button.getAttribute('data-pas'), 0);
+      const dribbling = toNumber(button.getAttribute('data-dri'), 0);
+      const defending = toNumber(button.getAttribute('data-def'), 0);
+      const physical = toNumber(button.getAttribute('data-phy'), 0);
       const resolvedUniqueId = uniqueId || `${resolvedPlayerId}_${rankValue}_${normalizedUntradable}`;
 
       return {
@@ -98,60 +99,60 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
         record_id: resolvedRecordId,
         playerid: resolvedPlayerId,
         id: resolvedPlayerId,
-        name: watchlistButton.getAttribute('data-player-name') || 'Unknown',
-        position: watchlistButton.getAttribute('data-position') || '',
-        team: watchlistButton.getAttribute('data-team') || watchlistButton.getAttribute('data-club') || '',
-        club: watchlistButton.getAttribute('data-club') || watchlistButton.getAttribute('data-team') || '',
-        league: watchlistButton.getAttribute('data-league') || '',
-        nation_region: watchlistButton.getAttribute('data-nation') || '',
-        nation: watchlistButton.getAttribute('data-nation') || '',
-        event: watchlistButton.getAttribute('data-event') || '',
-        ovr: toNumber(watchlistButton.getAttribute('data-ovr'), normalizedBaseOvr + normalizedRank),
-        overallrating: toNumber(watchlistButton.getAttribute('data-ovr'), normalizedBaseOvr + normalizedRank),
-        rating: toNumber(watchlistButton.getAttribute('data-ovr'), normalizedBaseOvr + normalizedRank),
+        name: button.getAttribute('data-player-name') || 'Unknown',
+        position: button.getAttribute('data-position') || '',
+        team: button.getAttribute('data-team') || button.getAttribute('data-club') || '',
+        club: button.getAttribute('data-club') || button.getAttribute('data-team') || '',
+        league: button.getAttribute('data-league') || '',
+        nation_region: button.getAttribute('data-nation') || '',
+        nation: button.getAttribute('data-nation') || '',
+        event: button.getAttribute('data-event') || '',
+        ovr: toNumber(button.getAttribute('data-ovr'), normalizedBaseOvr + normalizedRank),
+        overallrating: toNumber(button.getAttribute('data-ovr'), normalizedBaseOvr + normalizedRank),
+        rating: toNumber(button.getAttribute('data-ovr'), normalizedBaseOvr + normalizedRank),
         rank: rankValue,
         is_untradable: normalizedUntradable === 1,
         isuntradable: normalizedUntradable,
-        skill_moves: toNumber(watchlistButton.getAttribute('data-skill'), 0),
-        skillmoves: toNumber(watchlistButton.getAttribute('data-skill'), 0),
+        skill_moves: toNumber(button.getAttribute('data-skill'), 0),
+        skillmoves: toNumber(button.getAttribute('data-skill'), 0),
         pace,
         shooting,
         passing,
         dribbling,
         defending,
         physical,
-        price: toNumber(watchlistButton.getAttribute('data-price'), 0),
-        card_background: watchlistButton.getAttribute('data-card-background') || '',
-        cardbackground: watchlistButton.getAttribute('data-card-background') || '',
-        player_image: watchlistButton.getAttribute('data-player-image') || '',
-        playerimage: watchlistButton.getAttribute('data-player-image') || '',
-        nation_flag: watchlistButton.getAttribute('data-nation-flag') || '',
-        nationflag: watchlistButton.getAttribute('data-nation-flag') || '',
-        club_flag: watchlistButton.getAttribute('data-club-flag') || '',
-        clubflag: watchlistButton.getAttribute('data-club-flag') || '',
-        league_image: watchlistButton.getAttribute('data-league-image') || '',
-        color_name: watchlistButton.getAttribute('data-color-name') || '#FFFFFF',
-        colorname: watchlistButton.getAttribute('data-color-name') || '#FFFFFF',
-        color_rating: watchlistButton.getAttribute('data-color-rating') || '#FFB86B',
-        colorrating: watchlistButton.getAttribute('data-color-rating') || '#FFB86B',
-        color_position: watchlistButton.getAttribute('data-color-position') || '#FFFFFF',
-        colorposition: watchlistButton.getAttribute('data-color-position') || '#FFFFFF',
-        alternate_position: watchlistButton.getAttribute('data-alternate-position') || '',
-        alternateposition: watchlistButton.getAttribute('data-alternate-position') || ''
+        price: toNumber(button.getAttribute('data-price'), 0),
+        card_background: button.getAttribute('data-card-background') || '',
+        cardbackground: button.getAttribute('data-card-background') || '',
+        player_image: button.getAttribute('data-player-image') || '',
+        playerimage: button.getAttribute('data-player-image') || '',
+        nation_flag: button.getAttribute('data-nation-flag') || '',
+        nationflag: button.getAttribute('data-nation-flag') || '',
+        club_flag: button.getAttribute('data-club-flag') || '',
+        clubflag: button.getAttribute('data-club-flag') || '',
+        league_image: button.getAttribute('data-league-image') || '',
+        color_name: button.getAttribute('data-color-name') || '#FFFFFF',
+        colorname: button.getAttribute('data-color-name') || '#FFFFFF',
+        color_rating: button.getAttribute('data-color-rating') || '#FFB86B',
+        colorrating: button.getAttribute('data-color-rating') || '#FFB86B',
+        color_position: button.getAttribute('data-color-position') || '#FFFFFF',
+        colorposition: button.getAttribute('data-color-position') || '#FFFFFF',
+        alternate_position: button.getAttribute('data-alternate-position') || '',
+        alternateposition: button.getAttribute('data-alternate-position') || ''
       };
     };
 
-    const upsertWatchlistPlayer = (uniqueId) => {
-      const snapshot = getWatchlistPlayerSnapshot(uniqueId);
+    const upsertWatchlistPlayer = (button, uniqueId) => {
+      const snapshot = getWatchlistPlayerSnapshot(button, uniqueId);
       if (!snapshot) return;
       const existingIndex = watchlistPlayers.findIndex((player) => getStoredPlayerUniqueId(player) === uniqueId);
       if (existingIndex === -1) {
         watchlistPlayers = [...watchlistPlayers, snapshot];
-        return;
+      } else {
+        watchlistPlayers = watchlistPlayers.map((player, index) =>
+          index === existingIndex ? { ...player, ...snapshot } : player
+        );
       }
-      watchlistPlayers = watchlistPlayers.map((player, index) =>
-        index === existingIndex ? { ...player, ...snapshot } : player
-      );
     };
 
     const removeWatchlistPlayer = (uniqueId) => {
@@ -159,43 +160,53 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
     };
 
     const syncWatchlistButton = () => {
-      if (!watchlistButton) return;
-      const uniqueId = watchlistButton.getAttribute('data-unique-id') || '';
+      const btn = root.querySelector('[data-watchlist-toggle]');
+      if (!btn) return;
+      const uniqueId = btn.getAttribute('data-unique-id') || '';
       const active = !!uniqueId && watchlist.includes(uniqueId);
-      watchlistButton.style.background = active ? 'rgba(0,194,168,0.15)' : 'transparent';
-      watchlistButton.style.borderColor = active ? 'var(--color-teal-500, #00C2A8)' : 'rgba(255,255,255,0.15)';
-      watchlistButton.style.color = active ? 'var(--color-teal-500, #00C2A8)' : 'var(--color-text-muted, #98A0A6)';
-      watchlistButton.setAttribute('aria-label', active ? 'In watchlist' : 'Add to watchlist');
-      watchlistButton.setAttribute('aria-pressed', active ? 'true' : 'false');
-      const label = watchlistButton.querySelector('[data-watchlist-label]');
+      
+      btn.style.background = active ? 'rgba(0,194,168,0.15)' : 'transparent';
+      btn.style.borderColor = active ? 'var(--color-teal-500, #00C2A8)' : 'rgba(255,255,255,0.15)';
+      btn.style.color = active ? 'var(--color-teal-500, #00C2A8)' : 'var(--color-text-muted, #98A0A6)';
+      btn.setAttribute('aria-label', active ? 'In watchlist' : 'Add to watchlist');
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      
+      const label = btn.querySelector('[data-watchlist-label]');
       if (label) label.textContent = active ? 'In Watchlist' : 'Add to Watchlist';
-      const icon = watchlistButton.querySelector('svg');
+      
+      const icon = btn.querySelector('svg');
       if (icon) icon.setAttribute('fill', active ? 'currentColor' : 'none');
     };
 
     const handleWatchlistToggle = (event) => {
+      const btn = event.target.closest('[data-watchlist-toggle]');
+      if (!btn) return;
+      
       event.preventDefault();
-      if (!watchlistButton) return;
-      const uniqueId = watchlistButton.getAttribute('data-unique-id') || '';
+      const uniqueId = btn.getAttribute('data-unique-id') || '';
       if (!uniqueId) return;
+      
+      // Always re-read to avoid race conditions with other components
+      watchlist = readWatchlist();
+      watchlistPlayers = readWatchlistPlayers();
+
       if (watchlist.includes(uniqueId)) {
         watchlist = watchlist.filter((entry) => entry !== uniqueId);
         removeWatchlistPlayer(uniqueId);
       } else {
-        watchlist = [...watchlist, uniqueId];
-        upsertWatchlistPlayer(uniqueId);
+        watchlist = [...new Set([...watchlist, uniqueId])];
+        upsertWatchlistPlayer(btn, uniqueId);
       }
+      
       writeWatchlist(watchlist);
       writeWatchlistPlayers(watchlistPlayers);
       window.dispatchEvent(new Event('watchlist-updated'));
       syncWatchlistButton();
     };
 
-    if (watchlistButton) {
-      watchlistButton.addEventListener('click', handleWatchlistToggle);
-      cleanup.push(() => watchlistButton.removeEventListener('click', handleWatchlistToggle));
-      syncWatchlistButton();
-    }
+    // Use delegated listener on root to survive re-renders of the button
+    root.addEventListener('click', handleWatchlistToggle);
+    cleanup.push(() => root.removeEventListener('click', handleWatchlistToggle));
 
     const handleStorageChange = (event) => {
       if (!event.key || (event.key !== 'watchlist' && event.key !== 'watchlistPlayers')) return;
@@ -203,22 +214,28 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
       watchlistPlayers = readWatchlistPlayers();
       syncWatchlistButton();
     };
+
     const handleWatchlistUpdated = () => {
       watchlist = readWatchlist();
       watchlistPlayers = readWatchlistPlayers();
       syncWatchlistButton();
     };
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('watchlist-updated', handleWatchlistUpdated);
     cleanup.push(() => window.removeEventListener('storage', handleStorageChange));
     cleanup.push(() => window.removeEventListener('watchlist-updated', handleWatchlistUpdated));
 
-    const handleBack = () => router.push('/players');
-    const backButton = root.querySelector('[data-go-back]');
-    if (backButton) {
-      backButton.addEventListener('click', handleBack);
-      cleanup.push(() => backButton.removeEventListener('click', handleBack));
-    }
+    // Initial sync
+    syncWatchlistButton();
+
+    const handleBack = (event) => {
+      if (event.target.closest('[data-go-back]')) {
+        router.push('/players');
+      }
+    };
+    root.addEventListener('click', handleBack);
+    cleanup.push(() => root.removeEventListener('click', handleBack));
 
     return () => {
       cleanup.forEach((dispose) => dispose());
@@ -227,3 +244,4 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
 
   return null;
 }
+

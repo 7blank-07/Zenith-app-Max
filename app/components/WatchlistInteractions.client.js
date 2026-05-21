@@ -438,23 +438,39 @@ export default function WatchlistInteractions() {
     const syncSources = () => {
       const idSet = new Set(watchlistIds);
       const idList = [...idSet];
-      watchlistPlayers = watchlistPlayers.filter((player) => {
+      
+      // Filter out players no longer in the ID list
+      let nextWatchlistPlayers = watchlistPlayers.filter((player) => {
         const uniqueId = getPlayerUniqueId(player);
-        if (idSet.has(uniqueId)) return true;
-        const playerId = getPlayerId(player);
-        if (!playerId) return false;
-        return idList.some((watchlistId) => watchlistId.startsWith(`${playerId}_`));
+        return idSet.has(uniqueId);
       });
 
-      const represented = new Set(watchlistPlayers.map((player) => getPlayerUniqueId(player)));
+      // Add placeholders for IDs that don't have player objects
+      const represented = new Set(nextWatchlistPlayers.map((player) => getPlayerUniqueId(player)));
+      let changed = nextWatchlistPlayers.length !== watchlistPlayers.length;
+
       idList.forEach((watchlistId) => {
-        if (represented.has(watchlistId)) return;
-        watchlistPlayers.push(buildPlaceholderPlayer(watchlistId));
+        if (!represented.has(watchlistId)) {
+          nextWatchlistPlayers.push(buildPlaceholderPlayer(watchlistId));
+          changed = true;
+        }
       });
 
-      writeArrayStorage('watchlist', [...idSet]);
-      writeArrayStorage('watchlistPlayers', watchlistPlayers);
+      watchlistPlayers = nextWatchlistPlayers;
+
+      // Only write if something actually changed to avoid event loops
+      const storedWatchlist = readArrayStorage('watchlist');
+      const storedPlayers = readArrayStorage('watchlistPlayers');
+      
+      const watchlistChanged = JSON.stringify(storedWatchlist) !== JSON.stringify(idList);
+      const playersChanged = JSON.stringify(storedPlayers) !== JSON.stringify(watchlistPlayers);
+
+      if (watchlistChanged || playersChanged) {
+        if (watchlistChanged) writeArrayStorage('watchlist', idList);
+        if (playersChanged) writeArrayStorage('watchlistPlayers', watchlistPlayers);
+      }
     };
+
 
     const updateFilterOptions = () => {
       const positions = uniqueSorted(watchlistPlayers.map((player) => player.position));
@@ -717,14 +733,24 @@ export default function WatchlistInteractions() {
     };
 
     const refreshFromStorage = () => {
-      watchlistIds = readArrayStorage('watchlist').map((entry) => toText(entry)).filter(Boolean);
-      watchlistPlayers = readArrayStorage('watchlistPlayers').map(normalizeWatchlistPlayer);
+      const nextIds = readArrayStorage('watchlist').map((entry) => toText(entry)).filter(Boolean);
+      const nextPlayers = readArrayStorage('watchlistPlayers').map(normalizeWatchlistPlayer);
+      
+      const idsChanged = JSON.stringify(watchlistIds) !== JSON.stringify(nextIds);
+      const playersChanged = JSON.stringify(watchlistPlayers) !== JSON.stringify(nextPlayers);
+      
+      if (!idsChanged && !playersChanged && filteredPlayers.length > 0) return;
+
+      watchlistIds = nextIds;
+      watchlistPlayers = nextPlayers;
+      
       syncSources();
       updateFilterOptions();
       applyFilters();
       hydrateTradablePrices();
       hydrateMissingStats();
     };
+
 
     const handleGridClick = (event) => {
       const watchlistButton = event.target.closest('.player-row-watchlist');

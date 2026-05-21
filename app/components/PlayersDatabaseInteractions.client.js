@@ -734,9 +734,20 @@ export default function PlayersDatabaseInteractions({
   ]);
 
   useEffect(() => {
-    setWatchlist(readArrayStorage('watchlist').map((entry) => toText(entry)).filter(Boolean));
-    setWatchlistPlayers(readArrayStorage('watchlistPlayers'));
-    setStorageHydrated(true);
+    const hydrate = () => {
+      setWatchlist(readArrayStorage('watchlist').map((entry) => toText(entry)).filter(Boolean));
+      setWatchlistPlayers(readArrayStorage('watchlistPlayers'));
+      setStorageHydrated(true);
+    };
+    hydrate();
+
+    window.addEventListener('watchlist-updated', hydrate);
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'watchlist' || event.key === 'watchlistPlayers') hydrate();
+    });
+    return () => {
+      window.removeEventListener('watchlist-updated', hydrate);
+    };
   }, []);
 
   useEffect(() => {
@@ -757,11 +768,22 @@ export default function PlayersDatabaseInteractions({
     });
   }, [mobileFilters.ratingMin, mobileFilters.ratingMax]);
 
+  // Combined effect for persisting state to avoid redundant writes and ensure sync
   useEffect(() => {
     if (!storageHydrated) return;
-    writeArrayStorage('watchlist', watchlist);
-    writeArrayStorage('watchlistPlayers', watchlistPlayers);
-    window.dispatchEvent(new Event('watchlist-updated'));
+    
+    const storedWatchlist = readArrayStorage('watchlist');
+    const storedPlayers = readArrayStorage('watchlistPlayers');
+    
+    // Only write if there's a meaningful change to avoid infinite loops with other components
+    const watchlistChanged = JSON.stringify(storedWatchlist) !== JSON.stringify(watchlist);
+    const playersChanged = JSON.stringify(storedPlayers) !== JSON.stringify(watchlistPlayers);
+    
+    if (watchlistChanged || playersChanged) {
+      writeArrayStorage('watchlist', watchlist);
+      writeArrayStorage('watchlistPlayers', watchlistPlayers);
+      window.dispatchEvent(new Event('watchlist-updated'));
+    }
   }, [storageHydrated, watchlist, watchlistPlayers]);
 
   const watchedIds = useMemo(() => new Set(watchlist), [watchlist]);
@@ -1093,12 +1115,6 @@ export default function PlayersDatabaseInteractions({
     });
   };
 
-  const persistWatchlistState = useCallback((nextWatchlist, nextWatchlistPlayers) => {
-    writeArrayStorage('watchlist', nextWatchlist);
-    writeArrayStorage('watchlistPlayers', nextWatchlistPlayers);
-    window.dispatchEvent(new Event('watchlist-updated'));
-  }, []);
-
   const toggleWatchlist = (event, player) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1106,23 +1122,17 @@ export default function PlayersDatabaseInteractions({
     const resolvedPrice = getResolvedPrice(player);
 
     if (watchedIds.has(uniqueId)) {
-      const nextWatchlist = watchlist.filter((entry) => entry !== uniqueId);
-      const nextWatchlistPlayers = watchlistPlayers.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId);
-      setWatchlist(nextWatchlist);
-      setWatchlistPlayers(nextWatchlistPlayers);
-      persistWatchlistState(nextWatchlist, nextWatchlistPlayers);
-      return;
+      setWatchlist((prev) => prev.filter((entry) => entry !== uniqueId));
+      setWatchlistPlayers((prev) => prev.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId));
+    } else {
+      setWatchlist((prev) => [...new Set([...prev, uniqueId])]);
+      setWatchlistPlayers((prev) => [
+        ...prev.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId),
+        buildWatchlistSnapshot(player, resolvedPrice)
+      ]);
     }
-
-    const nextWatchlist = [...new Set([...watchlist, uniqueId])];
-    const nextWatchlistPlayers = [
-      ...watchlistPlayers.filter((entry) => getStoredPlayerUniqueId(entry) !== uniqueId),
-      buildWatchlistSnapshot(player, resolvedPrice)
-    ];
-    setWatchlist(nextWatchlist);
-    setWatchlistPlayers(nextWatchlistPlayers);
-    persistWatchlistState(nextWatchlist, nextWatchlistPlayers);
   };
+
 
   const openMobileFilters = () => {
     setMobileFilters({ ...filters });
