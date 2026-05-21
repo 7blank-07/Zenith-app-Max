@@ -84,6 +84,12 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
         .trim()
         .toLowerCase();
       const normalizedUntradable = isUntradable === '1' || isUntradable === 'true' ? 1 : parsed.untradable ? 1 : 0;
+      const pace = toNumber(watchlistButton.getAttribute('data-pac'), 0);
+      const shooting = toNumber(watchlistButton.getAttribute('data-sho'), 0);
+      const passing = toNumber(watchlistButton.getAttribute('data-pas'), 0);
+      const dribbling = toNumber(watchlistButton.getAttribute('data-dri'), 0);
+      const defending = toNumber(watchlistButton.getAttribute('data-def'), 0);
+      const physical = toNumber(watchlistButton.getAttribute('data-phy'), 0);
       const resolvedUniqueId = uniqueId || `${resolvedPlayerId}_${rankValue}_${normalizedUntradable}`;
 
       return {
@@ -108,6 +114,12 @@ export default function PlayerDetailInteractions({ playerId, currentRank = 0, ba
         isuntradable: normalizedUntradable,
         skill_moves: toNumber(watchlistButton.getAttribute('data-skill'), 0),
         skillmoves: toNumber(watchlistButton.getAttribute('data-skill'), 0),
+        pace,
+        shooting,
+        passing,
+        dribbling,
+        defending,
+        physical,
         price: toNumber(watchlistButton.getAttribute('data-price'), 0),
         card_background: watchlistButton.getAttribute('data-card-background') || '',
         cardbackground: watchlistButton.getAttribute('data-card-background') || '',

@@ -19,6 +19,12 @@ function toLowerText(value) {
   return normalizeSearchText(value);
 }
 
+function readAttributeStatValue(player, key, fallbackKey) {
+  const attributes = player?.attributes && typeof player.attributes === 'object' ? player.attributes : {};
+  const value = attributes?.[key] ?? attributes?.[fallbackKey] ?? player?.[key] ?? player?.[fallbackKey];
+  return toNumber(value, 0);
+}
+
 function toFileName(value) {
   const text = toText(value);
   if (!text) return '';
@@ -162,12 +168,12 @@ function normalizeWatchlistPlayer(player) {
     rank: toNumber(parsedPlayer.rank ?? parsedUnique.rank, 0),
     is_untradable: normalizeBoolean(parsedPlayer.is_untradable ?? parsedPlayer.isuntradable ?? parsedUnique.untradable),
     skillmoves: toNumber(parsedPlayer.skillmoves || parsedPlayer.skill_moves || parsedPlayer.skill, 0),
-    pace: toNumber(parsedPlayer.pace ?? parsedPlayer.pac, 0),
-    shooting: toNumber(parsedPlayer.shooting ?? parsedPlayer.sho, 0),
-    passing: toNumber(parsedPlayer.passing ?? parsedPlayer.pas, 0),
-    dribbling: toNumber(parsedPlayer.dribbling ?? parsedPlayer.dri, 0),
-    defending: toNumber(parsedPlayer.defending ?? parsedPlayer.def, 0),
-    physical: toNumber(parsedPlayer.physical ?? parsedPlayer.phy, 0),
+    pace: readAttributeStatValue(parsedPlayer, 'pace', 'pac'),
+    shooting: readAttributeStatValue(parsedPlayer, 'shooting', 'sho'),
+    passing: readAttributeStatValue(parsedPlayer, 'passing', 'pas'),
+    dribbling: readAttributeStatValue(parsedPlayer, 'dribbling', 'dri'),
+    defending: readAttributeStatValue(parsedPlayer, 'defending', 'def'),
+    physical: readAttributeStatValue(parsedPlayer, 'physical', 'phy'),
     price: Number(parsedPlayer.price) || 0,
     card_background: toText(parsedPlayer.card_background || parsedPlayer.cardbackground),
     player_image: toText(parsedPlayer.player_image || parsedPlayer.playerimage),
@@ -194,6 +200,17 @@ function buildPlaceholderPlayer(uniqueId) {
 
 function uniqueSorted(values) {
   return [...new Set(values.map((entry) => toText(entry)).filter(Boolean))].sort((left, right) => left.localeCompare(right));
+}
+
+function buildPrimaryStatPatch(player) {
+  return {
+    pace: readAttributeStatValue(player, 'pace', 'pac'),
+    shooting: readAttributeStatValue(player, 'shooting', 'sho'),
+    passing: readAttributeStatValue(player, 'passing', 'pas'),
+    dribbling: readAttributeStatValue(player, 'dribbling', 'dri'),
+    defending: readAttributeStatValue(player, 'defending', 'def'),
+    physical: readAttributeStatValue(player, 'physical', 'phy')
+  };
 }
 
 function renderPlayerRow(player) {
@@ -386,6 +403,7 @@ export default function WatchlistInteractions() {
     let watchlistPlayers = readArrayStorage('watchlistPlayers').map(normalizeWatchlistPlayer);
     let filteredPlayers = [];
     let priceHydrationRun = 0;
+    let statsHydrationRun = 0;
 
     const getActiveFilterCount = () => {
       let count = 0;
@@ -522,6 +540,69 @@ export default function WatchlistInteractions() {
       }
     };
 
+    const hasMissingPrimaryStats = (player) => {
+      const stats = buildPrimaryStatPatch(player);
+      return Object.values(stats).every((value) => value <= 0);
+    };
+
+    const hydrateMissingStats = async () => {
+      const runId = ++statsHydrationRun;
+      const targets = watchlistPlayers.filter((player) => getPlayerId(player) && hasMissingPrimaryStats(player));
+      if (!targets.length) return;
+
+      const updates = new Map();
+      const batchSize = 10;
+
+      for (let index = 0; index < targets.length; index += batchSize) {
+        const batch = targets.slice(index, index + batchSize);
+        const batchResults = await Promise.all(
+          batch.map(async (player) => {
+            const playerId = getPlayerId(player);
+            if (!playerId) return null;
+            const rank = toNumber(player.rank, 0);
+            try {
+              const response = await fetch(
+                `/api/player-detail?id=${encodeURIComponent(playerId)}&rank=${encodeURIComponent(rank)}`,
+                { cache: 'no-store' }
+              );
+              if (!response.ok) return null;
+              const payload = await response.json();
+              const record = payload?.record;
+              if (!record) return null;
+              const statsPatch = buildPrimaryStatPatch(record);
+              if (!Object.values(statsPatch).some((value) => value > 0)) return null;
+              return [getPlayerUniqueId(player), statsPatch];
+            } catch {
+              return null;
+            }
+          })
+        );
+
+        if (runId !== statsHydrationRun) return;
+        batchResults.forEach((entry) => {
+          if (!entry) return;
+          const [uniqueId, statsPatch] = entry;
+          updates.set(uniqueId, statsPatch);
+        });
+      }
+
+      if (!updates.size || runId !== statsHydrationRun) return;
+
+      let changed = false;
+      watchlistPlayers = watchlistPlayers.map((player) => {
+        const uniqueId = getPlayerUniqueId(player);
+        const patch = updates.get(uniqueId);
+        if (!patch) return player;
+        changed = true;
+        return { ...player, ...patch };
+      });
+
+      if (changed) {
+        writeArrayStorage('watchlistPlayers', watchlistPlayers);
+        applyFilters();
+      }
+    };
+
     const renderActiveChips = () => {
       if (!activeFilters) return;
       const chips = [];
@@ -640,6 +721,7 @@ export default function WatchlistInteractions() {
       updateFilterOptions();
       applyFilters();
       hydrateTradablePrices();
+      hydrateMissingStats();
     };
 
     const handleGridClick = (event) => {

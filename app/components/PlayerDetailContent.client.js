@@ -28,6 +28,16 @@ import {
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerSlug } from '../../src/lib/player-slug.mjs';
 
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function readAttributeStat(record, key) {
+  const attributes = record?.attributes && typeof record.attributes === 'object' ? record.attributes : {};
+  return toNumber(attributes?.[key] ?? record?.[key], 0);
+}
+
 function buildRankPath(playerSlug, playerId, rank) {
   const pathSegment = String(playerSlug || playerId || '').trim();
   const encodedPathSegment = encodeURIComponent(pathSegment);
@@ -97,6 +107,12 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
     is_untradable: record?.isUntradable
   });
   const isAuctionable = !record?.isUntradable;
+  const pacStat = readAttributeStat(record, 'pace');
+  const shoStat = readAttributeStat(record, 'shooting');
+  const pasStat = readAttributeStat(record, 'passing');
+  const driStat = readAttributeStat(record, 'dribbling');
+  const defStat = readAttributeStat(record, 'defending');
+  const phyStat = readAttributeStat(record, 'physical');
 
   const profileTraitItems = useMemo(
     () => buildProfileOverviewItems(record?.traits, record?.traitImages, 'Trait', 'profile-trait'),
@@ -436,6 +452,12 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               data-event={record?.eventName || record?.event || ''}
               data-skill={record?.skillMoves || 0}
               data-price={record?.price || 0}
+              data-pac={pacStat}
+              data-sho={shoStat}
+              data-pas={pasStat}
+              data-dri={driStat}
+              data-def={defStat}
+              data-phy={phyStat}
               data-card-background={cardBackground}
               data-player-image={cardImage}
               data-nation-flag={record?.nationFlag || ''}
