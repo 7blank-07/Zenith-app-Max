@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://images.zenithfcm.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="/assets/css/style.css" />
+        <link rel="stylesheet" href={`/assets/css/style.css?v=${Date.now()}`} />
         <link rel="icon" type="image/png" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />

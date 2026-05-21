@@ -165,6 +165,34 @@ async function parseJsonResponse(response, context) {
   }
 }
 
+async function fetchWithRetry(url, context, maxAttempts = 3) {
+  let attempt = 0;
+  while (attempt < maxAttempts) {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' }
+      });
+
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(`Failed to fetch ${context} (${response.status}): ${details || response.statusText}`);
+      }
+
+      return await parseJsonResponse(response, context);
+    } catch (error) {
+      attempt += 1;
+      if (attempt >= maxAttempts) throw error;
+      const delay = attempt * 1000;
+      console.warn(`[top-players] Fetch failed for ${context}, retrying in ${delay}ms...`, {
+        url,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 function ensurePositiveInteger(value, fallback) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
@@ -249,31 +277,26 @@ function resolveEventText(row, normalizedRow) {
   return '';
 }
 
-async function fetchRowsByIdsAtRank(baseUrl, ids, rank, chunkSize) {
+async function fetchRowsByIdsAtRank(baseUrl, ids, rank, chunkSize, concurrency = DEFAULT_FILTER_FETCH_CONCURRENCY) {
   const chunks = splitIntoChunks(ids, chunkSize);
-  const rowsPerChunk = await Promise.all(
-    chunks.map(async (chunk) => {
-      const query = new URLSearchParams({
-        ids: chunk.join(','),
-        rank: String(rank)
-      });
-      const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
-      const response = await fetch(requestUrl, {
-        method: 'GET',
-        headers: { Accept: 'application/json' }
-      });
+  const results = [];
 
-      if (!response.ok) {
-        const details = await response.text();
-        throw new Error(`Failed to fetch /players/by-ids (${response.status}): ${details || response.statusText}`);
-      }
+  for (let i = 0; i < chunks.length; i += concurrency) {
+    const batch = chunks.slice(i, i + concurrency);
+    const batchResults = await Promise.all(
+      batch.map(async (chunk) => {
+        const query = new URLSearchParams({
+          ids: chunk.join(','),
+          rank: String(rank)
+        });
+        const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
+        return ensureList(await fetchWithRetry(requestUrl, '/players/by-ids'));
+      })
+    );
+    results.push(...batchResults.flat());
+  }
 
-      const payload = await parseJsonResponse(response, '/players/by-ids');
-      return ensureList(payload);
-    })
-  );
-
-  return rowsPerChunk.flat();
+  return results;
 }
 
 async function fetchColorFallbackById(baseUrl, unresolvedIds, chunkSize, maxFallbackRank) {
@@ -463,17 +486,7 @@ export async function fetchLatestPlayers(options = {}) {
       order: 'desc'
     });
     const requestUrl = `${baseUrl}/players?${query.toString()}`;
-    const response = await fetch(requestUrl, {
-      method: 'GET',
-      headers: { Accept: 'application/json' }
-    });
-
-    if (!response.ok) {
-      const details = await response.text();
-      throw new Error(`Failed to fetch latest /players (${response.status}): ${details || response.statusText}`);
-    }
-
-    const payload = await parseJsonResponse(response, 'latest /players');
+    const payload = await fetchWithRetry(requestUrl, 'latest /players');
     const rows = ensureList(payload);
     const byId = new Map();
     for (const row of rows) {
@@ -580,17 +593,7 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
         order: 'desc'
       });
       const requestUrl = `${baseUrl}/players?${query.toString()}`;
-      const response = await fetch(requestUrl, {
-        method: 'GET',
-        headers: { Accept: 'application/json' }
-      });
-
-      if (!response.ok) {
-        const details = await response.text();
-        throw new Error(`Failed to fetch /players metadata (${response.status}): ${details || response.statusText}`);
-      }
-
-      const payload = await parseJsonResponse(response, '/players metadata');
+      const payload = await fetchWithRetry(requestUrl, '/players metadata');
       const rows = ensureList(payload);
       const total = Number(payload?.pagination?.total);
       const hasMore = payload?.pagination?.has_more;

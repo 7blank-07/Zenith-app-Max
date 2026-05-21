@@ -901,15 +901,9 @@ select.form-control {
   padding: 26px; /*26 can be better */
 }
 
-.players-main-content {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0 !important;
-}
-
-body:has(.nav-link.active[href="/players"]) main.main-content,
-main.players-main-content {
+/* Players Page: Full width on mobile/tablet, constrained with margins on desktop */
+.players-main-content,
+body:has(.nav-link.active[href="/players"]) main.main-content {
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -13312,5 +13306,27 @@ body {
   #watchlist-view #watchlist-players-grid .player-row-stats.player-card-stats-row .stat-pill {
     width: 100% !important;
     min-width: 0 !important;
+  }
+}
+
+/* FINAL DESKTOP OVERRIDE: Provide breathing room and center the database layout */
+@media (min-width: 1024px) {
+  /* Outermost container for the players page */
+  .players-main-content,
+  body:has(.nav-link.active[href="/players"]) main.main-content {
+    padding: 0 32px !important; /* 32px breathing room on each side */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+
+  /* The grid layout containing filters and rows */
+  .players-main-content .database-layout,
+  body:has(.nav-link.active[href="/players"]) .database-layout {
+    max-width: 1400px !important; /* Cap the width on ultra-wide screens */
+    margin: 0 auto !important;    /* Center everything */
+    width: 100% !important;
+    display: grid !important;     /* Ensure it stays a grid */
   }
 }
