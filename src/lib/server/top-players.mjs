@@ -20,6 +20,10 @@ let playerFilterMetadataCache = {
   inFlight: null
 };
 
+const loggedSanitizationContexts = new Set();
+const loggedFallbackContexts = new Set();
+const SHOULD_LOG_SANITIZATION = process.env.ZENITH_SANITIZE_LOGS === '1';
+
 const playersByIdsCache = new Map();
 const latestPlayersCache = new Map();
 
@@ -38,18 +42,124 @@ function ensureList(payload) {
   return [];
 }
 
+function sanitizeJsonText(text) {
+  const escapeMap = {
+    0x08: '\\b',
+    0x09: '\\t',
+    0x0a: '\\n',
+    0x0c: '\\f',
+    0x0d: '\\r'
+  };
+  const isControl = (code) => code <= 0x1f || (code >= 0x7f && code <= 0x9f);
+  const escapeControl = (code) => escapeMap[code] || `\\u${code.toString(16).padStart(4, '0')}`;
+  const validEscapes = ['"', '\\', '/', 'b', 'f', 'n', 'r', 't'];
+  const isWhitespace = (char) => char === ' ' || char === '\n' || char === '\r' || char === '\t';
+  const isLikelyStringTerminator = (startIndex) => {
+    for (let index = startIndex + 1; index < text.length; index += 1) {
+      const char = text[index];
+      if (isWhitespace(char)) continue;
+      return char === ':' || char === ',' || char === '}' || char === ']';
+    }
+    return true;
+  };
+
+  let output = '';
+  let inString = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const code = text.charCodeAt(index);
+
+    if (!inString) {
+      if (char === '"') {
+        inString = true;
+        output += char;
+        continue;
+      }
+      if (isControl(code)) {
+        output += code === 0x09 || code === 0x0a || code === 0x0d ? char : ' ';
+        continue;
+      }
+      output += char;
+      continue;
+    }
+
+    if (char === '"') {
+      if (isLikelyStringTerminator(index)) {
+        inString = false;
+        output += char;
+      } else {
+        output += '\\"';
+      }
+      continue;
+    }
+
+    if (char === '\\') {
+      const nextIndex = index + 1;
+      if (nextIndex >= text.length) {
+        output += '\\\\';
+        break;
+      }
+
+      const nextChar = text[nextIndex];
+      if (nextChar === 'u') {
+        const hex = text.slice(nextIndex + 1, nextIndex + 5);
+        if (/^[0-9a-fA-F]{4}$/.test(hex)) {
+          output += `\\u${hex}`;
+          index = nextIndex + 4;
+          continue;
+        }
+        output += '\\\\';
+        continue;
+      }
+
+      if (validEscapes.includes(nextChar)) {
+        output += `\\${nextChar}`;
+        index = nextIndex;
+        continue;
+      }
+
+      output += '\\\\';
+      continue;
+    }
+
+    output += isControl(code) ? escapeControl(code) : char;
+  }
+
+  return output;
+}
+
+function stripControlCharacters(text) {
+  return text.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+}
+
 async function parseJsonResponse(response, context) {
   const text = await response.text();
   try {
     return JSON.parse(text);
   } catch (error) {
-    const sanitized = text.replace(/[\u0000-\u001F]/g, '');
+    const sanitized = sanitizeJsonText(text);
     if (sanitized === text) throw error;
 
     try {
-      console.warn(`[top-players] Sanitized invalid control characters in ${context} JSON response`);
+      if (SHOULD_LOG_SANITIZATION && !loggedSanitizationContexts.has(`sanitize:${context}`)) {
+        loggedSanitizationContexts.add(`sanitize:${context}`);
+        console.warn(`[top-players] Sanitized invalid control characters in ${context} JSON response`);
+      }
       return JSON.parse(sanitized);
     } catch {
+      const stripped = stripControlCharacters(text);
+      if (stripped !== text) {
+        try {
+          if (SHOULD_LOG_SANITIZATION && !loggedSanitizationContexts.has(`strip:${context}`)) {
+            loggedSanitizationContexts.add(`strip:${context}`);
+            console.warn(`[top-players] Stripped invalid control characters in ${context} JSON response`);
+          }
+          return JSON.parse(stripped);
+        } catch {
+          throw error;
+        }
+      }
       throw error;
     }
   }
@@ -421,6 +531,7 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
   const maxPages = ensurePositiveInteger(options.maxPages, DEFAULT_FILTER_MAX_PAGES);
   const fetchConcurrency = ensurePositiveInteger(options.fetchConcurrency, DEFAULT_FILTER_FETCH_CONCURRENCY);
   const cacheTtlMs = ensurePositiveInteger(options.cacheTtlMs, DEFAULT_FILTER_CACHE_TTL_MS);
+  const fallbackCount = ensurePositiveInteger(options.fallbackCount, Math.min(pageSize * 2, 1500));
   const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
   const cacheKey = `${baseUrl}|${rank}|${pageSize}|${maxPages}`;
   const now = Date.now();
@@ -490,41 +601,61 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
       };
     };
 
-    const firstPage = await fetchPageRows(0);
-    if (firstPage.rows.length) {
-      collectRows(firstPage.rows);
-    }
+    try {
+      const firstPage = await fetchPageRows(0);
+      if (firstPage.rows.length) {
+        collectRows(firstPage.rows);
+      }
 
-    const computedTotalPages = firstPage.total ? Math.ceil(firstPage.total / pageSize) : null;
-    const effectiveMaxPages = Math.min(maxPages, computedTotalPages || maxPages);
-    const firstPageStops = !firstPage.rows.length || firstPage.rows.length < pageSize || firstPage.hasMore === false;
+      const computedTotalPages = firstPage.total ? Math.ceil(firstPage.total / pageSize) : null;
+      const effectiveMaxPages = Math.min(maxPages, computedTotalPages || maxPages);
+      const firstPageStops = !firstPage.rows.length || firstPage.rows.length < pageSize || firstPage.hasMore === false;
 
-    if (!firstPageStops) {
-      for (let pageStart = 1; pageStart < effectiveMaxPages; pageStart += fetchConcurrency) {
-        const batchPages = [];
-        const pageUpperBound = Math.min(effectiveMaxPages, pageStart + fetchConcurrency);
-        for (let page = pageStart; page < pageUpperBound; page += 1) {
-          batchPages.push(page);
-        }
-
-        const batchResults = await Promise.all(batchPages.map((page) => fetchPageRows(page)));
-        let shouldStop = false;
-
-        for (const result of batchResults) {
-          if (!result.rows.length) {
-            shouldStop = true;
-            break;
+      if (!firstPageStops) {
+        for (let pageStart = 1; pageStart < effectiveMaxPages; pageStart += fetchConcurrency) {
+          const batchPages = [];
+          const pageUpperBound = Math.min(effectiveMaxPages, pageStart + fetchConcurrency);
+          for (let page = pageStart; page < pageUpperBound; page += 1) {
+            batchPages.push(page);
           }
 
-          collectRows(result.rows);
+          const batchResults = await Promise.all(batchPages.map((page) => fetchPageRows(page)));
+          let shouldStop = false;
 
-          if (result.rows.length < pageSize || result.hasMore === false) {
-            shouldStop = true;
-            break;
+          for (const result of batchResults) {
+            if (!result.rows.length) {
+              shouldStop = true;
+              break;
+            }
+
+            collectRows(result.rows);
+
+            if (result.rows.length < pageSize || result.hasMore === false) {
+              shouldStop = true;
+              break;
+            }
           }
-        }
 
-        if (shouldStop) break;
+          if (shouldStop) break;
+        }
+      }
+    } catch (error) {
+      if (SHOULD_LOG_SANITIZATION && !loggedFallbackContexts.has(cacheKey)) {
+        loggedFallbackContexts.add(cacheKey);
+        console.warn('[top-players] Falling back to top player pool for filter metadata:', {
+          reason: error instanceof Error ? error.message : String(error)
+        });
+      }
+      try {
+        const fallbackIds = await readTopPlayerIds(fallbackCount);
+        if (fallbackIds.length) {
+          const fallbackRows = await fetchPlayersByIds(fallbackIds, { rank });
+          collectRows(fallbackRows);
+        }
+      } catch (fallbackError) {
+        console.warn('[top-players] Filter metadata fallback failed:', {
+          reason: fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+        });
       }
     }
 
