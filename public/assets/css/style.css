@@ -10382,6 +10382,12 @@ watchlist-view .view-content {
     margin-left: 5px;
 }
 
+.player-row-tradability-icon {
+    height: 18px;
+    width: auto;
+    vertical-align: middle;
+}
+
 .price-text {
     font-size: 1rem;
     font-weight: 500;
