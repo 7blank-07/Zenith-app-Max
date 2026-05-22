@@ -4,7 +4,7 @@ What we did step-by-step:
 
 1. Exported the full Supabase PostgreSQL database locally using pg_dump from PostgreSQL 17.
 
-2. Initial restore failed because:
+2. Initial restore failed because::
 
 * Supabase dump was PG17 format
 * VPS PostgreSQL version is 14
