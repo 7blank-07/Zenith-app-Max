@@ -1,16 +1,13 @@
-## This is api.py backup the real api.py is on vps this is just exact clone as backup so you can read and understand
-how real api.py is in vps
-
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, List
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
 import unicodedata
 import re
 
-app = FastAPI(title="Zenith FC Mobile API", version="1.0.0")
+app = FastAPI(title="Zenith FC Mobile API", version="1.1.0")
 
 # Enable CORS for frontend
 app.add_middleware(
@@ -21,10 +18,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database configuration
+# Database configurations
 DB_CONFIG = {
     'host': 'localhost',
     'database': 'zenith_data',
+    'user': 'zenith_bot',
+    'password': 'zenith6Z@',
+    'port': 5432
+}
+
+MARKET_DB_CONFIG = {
+    'host': 'localhost',
+    'database': 'zenith_market',
     'user': 'zenith_bot',
     'password': 'zenith6Z@',
     'port': 5432
@@ -48,13 +53,46 @@ def clean_name(s: str) -> str:
 # ==================== DATABASE ====================
 
 def get_db_connection():
-    """Create database connection with dict cursor"""
+    """Create database connection for business data with dict cursor"""
     try:
         conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
         return conn
     except Exception as e:
         print(f"Database connection error: {e}")
         raise HTTPException(status_code=500, detail="Database connection failed")
+
+def get_market_db_connection():
+    """Create database connection for market data with dict cursor"""
+    try:
+        conn = psycopg2.connect(**MARKET_DB_CONFIG, cursor_factory=RealDictCursor)
+        return conn
+    except Exception as e:
+        print(f"Market database connection error: {e}")
+        raise HTTPException(status_code=500, detail="Market database connection failed")
+
+def fetch_prices_batch(player_ids: List[str], rank: int = 0):
+    """Fetch prices for a batch of players from zenith_market"""
+    if not player_ids:
+        return {}
+    
+    try:
+        conn = get_market_db_connection()
+        cur = conn.cursor()
+        
+        # Use the latest_prices view for efficiency
+        price_col = f"price{rank}"
+        # ✅ SQL AUDIT: Added list wrapper check for safety
+        query = f"SELECT asset_id, {price_col} as price FROM latest_prices WHERE asset_id IN %s"
+        cur.execute(query, (tuple(player_ids),))
+        
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return {str(row['asset_id']): row['price'] for row in rows}
+    except Exception as e:
+        print(f"[ERROR] Batch price fetch failed: {e}")
+        return {}
 
 # ==================== HEALTH CHECK ====================
 
@@ -63,7 +101,7 @@ def root():
     return {
         "status": "online",
         "app": "Zenith FC Mobile API",
-        "version": "1.0.0"
+        "version": "1.1.0"
     }
 
 @app.get("/health")
@@ -77,10 +115,27 @@ def health_check():
         cur.close()
         conn.close()
 
+        # Also check market DB
+        try:
+            market_conn = get_market_db_connection()
+            market_cur = market_conn.cursor()
+            market_cur.execute("SELECT COUNT(*) as count FROM price_snapshots")
+            market_result = market_cur.fetchone()
+            market_cur.close()
+            market_conn.close()
+            market_status = "connected"
+            snapshot_count = market_result['count']
+        except Exception as market_e:
+            print(f"Market health check error: {market_e}")
+            market_status = f"error: {str(market_e)}"
+            snapshot_count = 0
+
         return {
             "status": "healthy",
             "database": "connected",
-            "total_players": result['count']
+            "market_database": market_status,
+            "total_players": result['count'],
+            "total_price_snapshots": snapshot_count
         }
     except Exception as e:
         return {
@@ -107,6 +162,7 @@ def get_players(
     is_untradable: Optional[int] = Query(None, description="Filter by tradable status (0=tradable, 1=untradable)"),
     sort_by: Optional[str] = Query(None, description="Sort field: ovr"),
     order: Optional[str] = Query(None, description="Sort direction: asc or desc"),
+    include_price: bool = Query(True, description="Whether to include price in response")
 ):
 
     """
@@ -251,17 +307,14 @@ def get_players(
         if is_untradable == 0:
             # Show tradable players (empty or NULL)
             query += " AND (is_untradable = '' OR is_untradable IS NULL)"
-            print(f"[DEBUG] Added tradable filter (empty/null)")
         else:
             # Show untradable players ("True")
             query += " AND is_untradable = 'True'"
             params.append('True')
-            print(f"[DEBUG] Added untradable filter (True)")
 
 
 
     sort_direction = 'ASC' if order == 'asc' else 'DESC'
-    print(f"[DEBUG] Sorting by ovr {sort_direction}")
     if position:
         query += f" ORDER BY CASE WHEN position = %s THEN 0 ELSE 1 END ASC, ovr {sort_direction}, name ASC LIMIT %s OFFSET %s"
         params.extend([position.upper(), limit, offset])
@@ -270,21 +323,21 @@ def get_players(
         params.extend([limit, offset])
 
 
-    print(f"[DEBUG] Final query: {query}")  # ✅ ADD THIS
-    print(f"[DEBUG] Params: {params}")      # ✅ ADD THIS
-
     try:
         cur.execute(query, params)
-        players = cur.fetchall()
-        print(f"[DEBUG] Successfully fetched {len(players)} players")  # ✅ ADD THIS
+        players = [dict(p) for p in cur.fetchall()]
     except Exception as e:
-        print(f"[ERROR] Query failed: {e}")  # ✅ ADD THIS
-        print(f"[ERROR] Query was: {query}")
-        print(f"[ERROR] Params were: {params}")
         cur.close()
         conn.close()
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
+    # Add prices if requested
+    if include_price:
+        resolved_rank = rank if rank is not None else 0
+        player_ids = [str(p['player_id']) for p in players if not p.get('is_untradable') or p['is_untradable'] != 'True']
+        prices = fetch_prices_batch(player_ids, resolved_rank)
+        for p in players:
+            p['price'] = prices.get(str(p['player_id']))
 
     # Get total count for pagination (with same filters)
     count_query = "SELECT COUNT(*) as total FROM player_stats WHERE rank = COALESCE(%s, rank)"
@@ -333,16 +386,10 @@ def get_players(
             count_params.append('True')
 
 
-
-    print(f"[DEBUG] Count query: {count_query}")  # ✅ ADD THIS
-    print(f"[DEBUG] Count params: {count_params}")  # ✅ ADD THIS
-
     try:
         cur.execute(count_query, count_params)
         total = cur.fetchone()['total']
-        print(f"[DEBUG] Total count: {total}")  # ✅ ADD THIS
     except Exception as e:
-        print(f"[ERROR] Count query failed: {e}")  # ✅ ADD THIS
         cur.close()
         conn.close()
         raise HTTPException(status_code=500, detail=f"Count query failed: {str(e)}")
@@ -352,7 +399,7 @@ def get_players(
     conn.close()
 
     return {
-        "players": [dict(p) for p in players],
+        "players": players,
         "pagination": {
             "total": total,
             "limit": limit,
@@ -364,10 +411,11 @@ def get_players(
 
 @app.get("/api/players/search")
 def search_players(
-    q: str = Query(..., min_length=1, description="Search query (name starts with)"),
+    q: Optional[str] = Query("", description="Search query (name starts with)"),
     limit: int = Query(20, le=100),
     offset: int = Query(0, ge=0, description="Pagination offset"),
-    rank: int = Query(0, description="Filter by rank")
+    rank: int = Query(0, description="Filter by rank"),
+    include_price: bool = Query(True, description="Whether to include price in response")
 ):
     """
     Search players by name (starts with). Returns matching players sorted by overall rating.
@@ -375,8 +423,6 @@ def search_players(
     """
     conn = get_db_connection()
     cur = conn.cursor()
-
-    # ✅ ACCENT-INSENSITIVE: Use unaccent for both search term and database name
 
     cur.execute("""
         SELECT
@@ -476,7 +522,14 @@ def search_players(
     """, (f"{q}%", rank, limit, offset))
 
 
-    results = cur.fetchall()
+    results = [dict(r) for r in cur.fetchall()]
+
+    # Add prices if requested
+    if include_price:
+        player_ids = [str(r['player_id']) for r in results if not r.get('is_untradable') or r['is_untradable'] != 'True']
+        prices = fetch_prices_batch(player_ids, rank)
+        for r in results:
+            r['price'] = prices.get(str(r['player_id']))
 
     # Get total count
     cur.execute("""
@@ -491,7 +544,7 @@ def search_players(
     conn.close()
 
     return {
-        "results": [dict(r) for r in results],
+        "results": results,
         "count": len(results),
         "total": total,
         "has_more": (offset + limit) < total
@@ -500,7 +553,8 @@ def search_players(
 @app.get("/api/players/by-ids")
 def get_players_by_ids(
     ids: str = Query(..., description="Comma-separated player IDs"),
-    rank: int = Query(0, ge=0, le=5)
+    rank: int = Query(0, ge=0, le=5),
+    include_price: bool = Query(True, description="Whether to include price in response")
 ):
     conn = get_db_connection()
     cur = conn.cursor()
@@ -509,26 +563,30 @@ def get_players_by_ids(
     if not id_list:
         raise HTTPException(status_code=400, detail="No valid IDs provided")
 
-    print(f"[DEBUG] Fetching players by IDs: {id_list}, rank={rank}")
-
     cur.execute("""
         SELECT * FROM player_stats
         WHERE player_id = ANY(%s) AND rank = %s
     """, (id_list, rank))
 
-    players = cur.fetchall()
+    players = [dict(p) for p in cur.fetchall()]
     cur.close()
     conn.close()
 
-    print(f"[DEBUG] Found {len(players)} players by IDs")
+    # Add prices if requested
+    if include_price:
+        player_ids = [str(p['player_id']) for p in players if not p.get('is_untradable') or p['is_untradable'] != 'True']
+        prices = fetch_prices_batch(player_ids, rank)
+        for p in players:
+            p['price'] = prices.get(str(p['player_id']))
 
-    return {"players": [dict(p) for p in players]}
+    return {"players": players}
 
 
 @app.get("/api/players/{player_id}")
 def get_player_detail(
     player_id: int,
-    rank: int = Query(0, ge=0, le=5, description="Player rank (0-5)")
+    rank: int = Query(0, ge=0, le=5, description="Player rank (0-5)"),
+    include_price: bool = Query(True, description="Whether to include price in response")
 ):
     """Get complete player details including all stats and available skills."""
     conn = get_db_connection()
@@ -540,11 +598,18 @@ def get_player_detail(
         WHERE player_id = %s AND rank = %s
     """, (player_id, rank))
 
-    player = cur.fetchone()
-    if not player:
+    player_row = cur.fetchone()
+    if not player_row:
         cur.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Player not found")
+
+    player = dict(player_row)
+
+    # Add price if requested
+    if include_price and (not player.get('is_untradable') or player['is_untradable'] != 'True'):
+        prices = fetch_prices_batch([str(player_id)], rank)
+        player['price'] = prices.get(str(player_id))
 
     # Get available skills
     cur.execute("""
@@ -567,17 +632,15 @@ def get_player_detail(
 
     skills = cur.fetchall()
 
-    # ✅ Calculate available points dynamically (rank = points)
-    # Rank 0 = 0 points, Rank 1 = 1 point, etc.
     available_points = rank
 
     cur.close()
     conn.close()
 
     return {
-        "player": dict(player),
+        "player": player,
         "skills": [dict(s) for s in skills],
-        "available_skill_points": available_points  # ✅ Now correct
+        "available_skill_points": available_points
     }
 
 
@@ -607,7 +670,6 @@ def get_skill_boosts(skill_id: int):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # ✅ FIX: Use DISTINCT ON to get only one row per level_number
     cur.execute("""
         SELECT DISTINCT ON (level_number)
             level_number,
@@ -682,9 +744,6 @@ def get_teams():
 
     teams = [dict(row) for row in cur.fetchall()]
 
-    # Debug log
-    print(f"[API] Returning {len(teams)} teams")
-
     cur.close()
     conn.close()
 
@@ -707,9 +766,6 @@ def get_leagues():
     """)
 
     leagues = [dict(row) for row in cur.fetchall()]
-
-    # Debug log
-    print(f"[API] Returning {len(leagues)} leagues")
 
     cur.close()
     conn.close()
@@ -817,14 +873,13 @@ def get_training_boosts(
     cur = conn.cursor()
 
     try:
-        # ✅ FIX: Get ONLY the specific level row (not BETWEEN 1 AND level)
         cur.execute("""
             SELECT * FROM position_training_calc
             WHERE position = %s
             AND training_level = %s
         """, (position.upper(), level))
 
-        row = cur.fetchone()  # ← Get single row, not fetchall()
+        row = cur.fetchone()
 
         if not row:
             cur.close()
@@ -836,14 +891,11 @@ def get_training_boosts(
                 "message": "No training data found for this position"
             }
 
-        # ✅ Extract boosts directly - NO SUMMING needed!
         boosts = {}
         for key, value in dict(row).items():
-            # Skip metadata columns
             if key in ['id', 'position', 'training_level']:
                 continue
 
-            # Add boost value
             if value is not None:
                 try:
                     boosts[key] = int(value)
@@ -862,7 +914,6 @@ def get_training_boosts(
     except Exception as e:
         cur.close()
         conn.close()
-        print(f"[ERROR] Training boosts: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/skills/allocations/{user_id}/{player_id}")
@@ -915,7 +966,6 @@ def upgrade_skill(
     cur = conn.cursor()
 
     try:
-        # 1. Get available points for this rank
         cur.execute("""
             SELECT available_points
             FROM player_skills_meta
@@ -925,7 +975,6 @@ def upgrade_skill(
         meta = cur.fetchone()
         available_points = meta['available_points'] if meta else rank
 
-        # 2. Get current allocations
         cur.execute("""
             SELECT skill_id, skill_level
             FROM user_skill_allocations
@@ -935,14 +984,12 @@ def upgrade_skill(
         current_allocations = cur.fetchall()
         total_spent = sum(a['skill_level'] for a in current_allocations)
 
-        # 3. Get current level of this skill
         current_level = 0
         for a in current_allocations:
             if a['skill_id'] == skill_id:
                 current_level = a['skill_level']
                 break
 
-        # 4. Calculate points needed
         points_needed = new_level - current_level
 
         if points_needed <= 0:
@@ -951,7 +998,6 @@ def upgrade_skill(
         if total_spent + points_needed > available_points:
             raise HTTPException(status_code=400, detail=f"Not enough skill points. Available: {available_points - total_spent}")
 
-        # 5. Check prerequisites
         cur.execute("""
             SELECT prerequisite_skill_id, prerequisite_level
             FROM player_available_skills
@@ -964,7 +1010,6 @@ def upgrade_skill(
             prereq_id = skill_info['prerequisite_skill_id']
             prereq_level = skill_info['prerequisite_level']
 
-            # Check if user has the prerequisite at required level
             prereq_met = False
             for a in current_allocations:
                 if a['skill_id'] == prereq_id and a['skill_level'] >= prereq_level:
@@ -974,7 +1019,6 @@ def upgrade_skill(
             if not prereq_met:
                 raise HTTPException(status_code=400, detail=f"Prerequisite not met. Need skill {prereq_id} at level {prereq_level}")
 
-        # 6. Insert or update allocation
         cur.execute("""
             INSERT INTO user_skill_allocations (user_id, player_id, rank, skill_id, skill_level)
             VALUES (%s, %s, %s, %s, %s)
@@ -1035,6 +1079,4 @@ def reset_skills(
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting Zenith API on http://0.0.0.0:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
-

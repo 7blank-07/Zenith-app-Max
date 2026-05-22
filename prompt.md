@@ -1,55 +1,70 @@
-Aadar@Blank MINGW64 /c/project-files/Zenith-app-Max (home-search-dropdown)
-$ npm run build
+We successfully migrated the FC Mobile market database from Supabase to the VPS PostgreSQL server.
 
-> zenith-app-max@1.0.0 prebuild
-> node scripts/prepare-legacy.mjs
+What we did step-by-step:
 
-[prepare-legacy] Done: public assets, body HTML, and legacy bundle generated (CSS preserved).
+1. Exported the full Supabase PostgreSQL database locally using pg_dump from PostgreSQL 17.
 
-> zenith-app-max@1.0.0 build
-> next build
+2. Initial restore failed because:
 
-  ▲ Next.js 14.2.35
-  - Environments: .env.local
+* Supabase dump was PG17 format
+* VPS PostgreSQL version is 14
+* custom dump format was incompatible
 
-   Creating an optimized production build ...
- ✓ Compiled successfully
-   Skipping validation of types
-   Skipping linting
-   Collecting page data  ..TypeError: fetch failed
-    at node:internal/deps/undici/undici:14902:13
-    at async C:\project-files\Zenith-app-Max\.next\server\chunks\7744.js:1:2876
-    at async Promise.all (index 84)
-    at async g (C:\project-files\Zenith-app-Max\.next\server\chunks\7744.js:1:2740)
-    at async C:\project-files\Zenith-app-Max\.next\server\chunks\7744.js:1:4661
-    at async $ (C:\project-files\Zenith-app-Max\.next\server\chunks\7744.js:1:5106)
-    at async Object.f [as generateStaticParams] (C:\project-files\Zenith-app-Max\.next\server\app\player\[slug]\page.js:1:34110)
-    at async buildParams (C:\project-files\Zenith-app-Max\node_modules\next\dist\build\utils.js:1026:40)
-    at async C:\project-files\Zenith-app-Max\node_modules\next\dist\build\utils.js:1043:33
-    at async C:\project-files\Zenith-app-Max\node_modules\next\dist\build\utils.js:1178:114 {
-  [cause]: SocketError: other side closed
-      at TLSSocket.<anonymous> (node:internal/deps/undici/undici:6408:28)
-      at TLSSocket.emit (node:events:536:35)
-      at endReadableNT (node:internal/streams/readable:1698:12)
-      at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
-    code: 'UND_ERR_SOCKET',
-    socket: {
-      localAddress: '10.26.30.185',
-      localPort: 50640,
-      remoteAddress: '104.21.64.214',
-      remotePort: 443,
-      remoteFamily: 'IPv4',
-      timeout: undefined,
-      bytesWritten: 1312,
-      bytesRead: 0
-    },
-    [Symbol(undici.error.UND_ERR)]: true,
-    [Symbol(undici.error.UND_ERR_SOCKET)]: true
-  }
-}
+3. Re-created the backup as a plain SQL dump instead of custom binary format.
 
-> Build error occurred
-Error: Failed to collect page data for /player/[slug]
-    at C:\project-files\Zenith-app-Max\node_modules\next\dist\build\utils.js:1269:15 {
-  type: 'Error'
-}
+4. Compressed and transferred the SQL dump to VPS using SCP.
+
+5. Created a dedicated PostgreSQL database on VPS:
+
+* database: zenith_market
+
+6. Restored schema/tables/views/functions into zenith_market.
+
+7. Fixed ownership + permissions:
+
+* changed table owners to zenith_bot
+* granted privileges correctly
+
+8. Imported all important market data tables:
+
+* all_cards
+* player_refresh_data
+* price_snapshots
+* card_scraper_progress
+
+9. Fixed PostgreSQL extension issues:
+
+* installed unaccent extension
+* recreated broken trigger functions
+
+10. Re-imported failed COPY sections for:
+
+* player_refresh_data
+* price_snapshots
+
+11. Refreshed materialized views:
+
+* refresh_table
+* unique_players_cache
+
+12. Verified final row counts:
+
+* all_cards → 44,923
+* player_refresh_data → 16,351
+* price_snapshots → 1,191,900
+* refresh_table → 10,277
+* unique_players_cache → 9,910
+
+13. Verified latest_prices view works correctly.
+
+14. Created final VPS production backup:
+
+* /home/blank/zenith_market_final_working_backup.sql
+
+Current architecture:
+
+* zenith_data → app/business DB
+* zenith_market → FC market DB
+
+Next step:
+Replace Supabase market queries in the app with direct PostgreSQL queries using pg + MARKET_DATABASE_URL.
