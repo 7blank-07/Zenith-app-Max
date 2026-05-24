@@ -28,6 +28,8 @@ import {
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerSlug } from '../../src/lib/player-slug.mjs';
 
+import { useRouter } from 'next/navigation';
+
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -60,6 +62,7 @@ async function fetchLocalPlayerRecord(playerId, rank, signal) {
 }
 
 export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) {
+  const router = useRouter();
   const normalizedInitialRank = parseRank(initialRank);
   const [record, setRecord] = useState(initialRecord);
   const [selectedRank, setSelectedRank] = useState(normalizedInitialRank);
@@ -141,8 +144,9 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   const updateBrowserPath = useCallback((nextRank) => {
     if (typeof window === 'undefined') return;
     const nextPath = buildRankPath(playerSlug, playerId, nextRank);
-    window.history.replaceState(window.history.state, '', nextPath);
-  }, [playerId, playerSlug]);
+    // Use router.replace instead of window.history.replaceState to keep Next.js state in sync
+    router.replace(nextPath, { scroll: false });
+  }, [playerId, playerSlug, router]);
 
   const handleRankChange = useCallback(
     async (nextRankValue) => {
