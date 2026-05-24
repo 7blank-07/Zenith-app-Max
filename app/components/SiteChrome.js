@@ -55,13 +55,10 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
             <Link href="/blogs" data-link="" data-nav-link="" className={getNavClass(activeView, 'blogs')}>
               Blogs
             </Link>
-            <Link href="/streaming" data-link="" data-nav-link="" className={getNavClass(activeView, 'streaming')}>
-              Streaming
-            </Link>
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
               <button
-                className={`tools-btn${activeView === 'tools' || activeView === 'market' ? ' active' : ''}`}
+                className={`tools-btn${activeView === 'tools' || activeView === 'market' || activeView === 'streaming' || activeView === 'partners' ? ' active' : ''}`}
                 id="tools-dropdown-btn"
                 type="button"
                 aria-haspopup="true"
@@ -83,6 +80,12 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 <MarketNavLink href="/market" data-link="" data-nav-link="" className="tools-dropdown-item">
                   📈 Market
                 </MarketNavLink>
+                <Link href="/streaming" data-link="" data-nav-link="" className="tools-dropdown-item">
+                  🎥 Streaming
+                </Link>
+                <Link href="/partners" data-link="" data-nav-link="" className="tools-dropdown-item">
+                  🤝 Partners
+                </Link>
               </div>
             </div>
           </nav>

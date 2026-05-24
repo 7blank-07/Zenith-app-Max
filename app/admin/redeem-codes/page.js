@@ -9,6 +9,7 @@ import {
   getRedeemDashboardCounts,
   listAdminRedeemCodes
 } from '../../../src/lib/server/redeem-codes/repository.mjs';
+import { getPartnerDashboardCounts } from '../../../src/lib/server/partners/repository.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,9 +48,10 @@ export default async function AdminRedeemCodesPage({ searchParams = {} }) {
   const status = readSearchParam(searchParams, 'status');
   const notice = readSearchParam(searchParams, 'notice');
 
-  const [blogCounts, counts, list] = await Promise.all([
+  const [blogCounts, counts, partnerCounts, list] = await Promise.all([
     getBlogDashboardCounts(blogScope),
     getRedeemDashboardCounts(),
+    getPartnerDashboardCounts(),
     listAdminRedeemCodes({
       page,
       search,
@@ -64,7 +66,7 @@ export default async function AdminRedeemCodesPage({ searchParams = {} }) {
       description="Publish active FC Mobile redeem codes, archive expired entries, and keep regional pages fresh."
       currentPath="/admin/redeem-codes"
       user={user}
-      counts={{ ...blogCounts, ...counts }}
+      counts={{ ...blogCounts, ...counts, partnersTotal: partnerCounts.total }}
       notice={notice}
     >
       <AdminRedeemCodeTable

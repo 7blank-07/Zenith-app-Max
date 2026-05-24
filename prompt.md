@@ -1,70 +1,278 @@
-We successfully migrated the FC Mobile market database from Supabase to the VPS PostgreSQL server.
+Create a complete Partners Management System for ZenithFCM by following and reusing the EXISTING project architecture, tech stack, admin panel structure, authentication system, database setup, UI patterns, and component system already present in the codebase.
 
-What we did step-by-step:
+IMPORTANT:
+Before generating code:
+- Analyze the current project structure
+- Detect the framework and stack automatically
+- Reuse existing admin layouts/components
+- Reuse existing database patterns/models
+- Reuse existing authentication system
+- Match existing styling and conventions
+- Do NOT introduce a different architecture or unnecessary dependencies
 
-1. Exported the full Supabase PostgreSQL database locally using pg_dump from PostgreSQL 17.
+==================================================
+CONTEXT
+==================================================
 
-2. Initial restore failed because::
+ZenithFCM already has:
+- Admin dashboard
+- Redeem code system
+- Blogs system
+- Top 10 system
+- Streaming system
 
-* Supabase dump was PG17 format
-* VPS PostgreSQL version is 14
-* custom dump format was incompatible
+Existing admin route:
+- /admin
 
-3. Re-created the backup as a plain SQL dump instead of custom binary format.
+The new Partners system must integrate naturally into the existing admin ecosystem.
 
-4. Compressed and transferred the SQL dump to VPS using SCP.
+==================================================
+PUBLIC PAGE
+==================================================
 
-5. Created a dedicated PostgreSQL database on VPS:
+Create:
+- /partners
 
-* database: zenith_market
+Purpose:
+Display official ZenithFCM partners, creators, streamers, Discord communities, promoters, and ecosystem supporters.
 
-6. Restored schema/tables/views/functions into zenith_market.
+The page should feel premium, modern, creator-focused, and zenith FC Mobile themed.
 
-7. Fixed ownership + permissions:
+==================================================
+PAGE SECTIONS
+==================================================
 
-* changed table owners to zenith_bot
-* granted privileges correctly
+1. HERO SECTION
+- Title:
+  "Official ZenithFCM Partners"
 
-8. Imported all important market data tables:
+- Subtitle:
+  "Creators, streamers, communities, and ecosystem partners supporting ZenithFCM."
 
-* all_cards
-* player_refresh_data
-* price_snapshots
-* card_scraper_progress
+2. FEATURED PARTNERS SECTION
+- Optional section at top
+- Larger premium cards
+- Smooth glow effects
+- Horizontally highlighted layout
 
-9. Fixed PostgreSQL extension issues:
+3. FILTER SYSTEM
+Tabs:
+- All
+- YouTube
+- TikTok
+- X/Twitter
+- Discord
+- Website
 
-* installed unaccent extension
-* recreated broken trigger functions
+4. SEARCH SYSTEM
+Allow searching by:
+- name
+- username
+- bio
 
-10. Re-imported failed COPY sections for:
+5. PARTNERS GRID
+Responsive modern grid layout.
 
-* player_refresh_data
-* price_snapshots
+==================================================
+PARTNER CARD REQUIREMENTS
+==================================================
 
-11. Refreshed materialized views:
+Cards should dynamically render only available data.
 
-* refresh_table
-* unique_players_cache
+Required fields:
+- name
+- platform
+- social_url
 
-12. Verified final row counts:
+Optional fields:
+- username
+- bio
+- avatar/logo
+- follower_count
+- featured
+- verified
+- display_order
 
-* all_cards → 44,923
-* player_refresh_data → 16,351
-* price_snapshots → 1,191,900
-* refresh_table → 10,277
-* unique_players_cache → 9,910
+Examples:
+- If bio is empty, do not render bio section
+- If follower_count is missing, hide it
+- If avatar is missing, generate fallback initials/avatar
+- If verified is false, hide verified badge
+- If featured is false, use standard card style
 
-13. Verified latest_prices view works correctly.
+Each card may include:
+- Avatar/logo
+- Name
+- Username
+- Platform icon
+- Bio
+- Follower/subscriber count
+- Verified badge
+- Featured badge
+- Visit button
 
-14. Created final VPS production backup:
+==================================================
+CARD DESIGN
+==================================================
 
-* /home/blank/zenith_market_final_working_backup.sql
+Use:
+- Glassmorphism effects
+- Smooth hover animations
+- Glow borders
+- Subtle scaling effects
+- Premium dark UI
+- Mobile-first responsive design
 
-Current architecture:
+The page should feel inspired by creator ecosystem pages like RenderZ creators while remaining unique to ZenithFCM branding.
 
-* zenith_data → app/business DB
-* zenith_market → FC market DB
+==================================================
+CTA SECTION
+==================================================
 
-Next step:
-Replace Supabase market queries in the app with direct PostgreSQL queries using pg + MARKET_DATABASE_URL.
+Add optional:
+"Become a ZenithFCM Partner"
+
+Button can link to:
+- Discord
+- Contact page
+- Application form
+
+==================================================
+ADMIN PANEL INTEGRATION
+==================================================
+
+Integrate inside existing:
+- /admin
+
+Add:
+- "Partners" to existing admin sidebar/navigation
+
+Create:
+- /admin/partners
+
+IMPORTANT:
+- Reuse current admin authentication
+- Reuse current admin layouts/components
+- Match existing admin UI patterns
+
+==================================================
+ADMIN FEATURES
+==================================================
+
+Inside /admin/partners create:
+
+1. PARTNERS TABLE
+Columns:
+- Avatar
+- Name
+- Platform
+- Featured
+- Verified
+- Created At
+- Actions
+
+2. ADD PARTNER
+Modal or dedicated page form
+
+3. EDIT PARTNER
+
+4. DELETE PARTNER
+Include confirmation modal
+
+5. QUICK TOGGLES
+Allow quick toggle for:
+- Featured
+- Verified
+
+6. DISPLAY ORDER SYSTEM
+Allow sorting/reordering partners
+
+7. ADMIN UX
+Include:
+- Toast notifications
+- Loading states
+- Skeleton loaders
+- Empty states
+- Proper error handling
+
+==================================================
+DATABASE
+==================================================
+
+Create or extend the existing database structure appropriately for partners.
+
+Suggested structure:
+
+partners
+- id
+- name
+- username
+- platform
+- bio
+- avatar_url
+- follower_count
+- social_url
+- featured
+- verified
+- display_order
+- created_at
+
+Platform types:
+- youtube
+- tiktok
+- twitter
+- discord
+- website
+
+Only enforce required validation for:
+- name
+- platform
+- social_url
+
+Everything else should remain optional.
+
+==================================================
+SEO
+==================================================
+
+Add proper SEO metadata for:
+- /partners
+
+Include:
+- title
+- description
+- OpenGraph
+- Twitter metadata
+
+==================================================
+PERFORMANCE
+==================================================
+
+- Lazy load images
+- Optimize rendering
+- Mobile optimized
+- Fast loading
+- Production-ready
+
+==================================================
+CODE QUALITY
+==================================================
+
+- Production-ready architecture
+- Modular reusable components
+- Proper typing
+- Scalable structure
+- Clean code
+- Consistent with existing project standards
+- Reusable UI patterns
+- Avoid duplicate logic
+
+==================================================
+IMPORTANT FINAL REQUIREMENTS
+==================================================
+
+- Follow the existing ZenithFCM architecture strictly
+- Do NOT rewrite existing systems
+- Integrate cleanly into current admin/dashboard setup
+- Keep the UI premium and modern
+- Ensure the system is flexible enough for creators, Discord servers, streamers, websites, and future partner types

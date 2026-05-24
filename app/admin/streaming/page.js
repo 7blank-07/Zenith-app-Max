@@ -3,6 +3,7 @@ import AdminStreamTable from '../../components/admin/streaming/AdminStreamTable'
 import { requireBlogSessionUser } from '../../../src/lib/server/blog/auth.mjs';
 import { getBlogDashboardCounts } from '../../../src/lib/server/blog/repository.mjs';
 import { getStreamDashboardCounts, listAdminStreams } from '../../../src/lib/server/streams/repository.mjs';
+import { getPartnerDashboardCounts } from '../../../src/lib/server/partners/repository.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,14 +30,20 @@ export default async function AdminStreamingPage({ searchParams = {} }) {
   const status = readSearchParam(searchParams, 'status');
   const notice = readSearchParam(searchParams, 'notice');
 
-  const [blogCounts, streamCounts, list] = await Promise.all([
+  const [blogCounts, streamCounts, partnerCounts, list] = await Promise.all([
     getBlogDashboardCounts(blogScope),
     getStreamDashboardCounts(),
+    getPartnerDashboardCounts(),
     listAdminStreams({ page, search, status })
   ]);
 
   // Rename total to streamingTotal so the AdminSidebar can pick it up
-  const counts = { ...blogCounts, ...streamCounts, streamingTotal: streamCounts.total };
+  const counts = { 
+    ...blogCounts, 
+    ...streamCounts, 
+    streamingTotal: streamCounts.total,
+    partnersTotal: partnerCounts.total
+  };
 
   return (
     <AdminShell
