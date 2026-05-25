@@ -25,7 +25,12 @@ export default function BlogArticleBody({ article }) {
       return (
         <>
           <div className={styles.prose} dangerouslySetInnerHTML={{ __html: firstPart }} />
-          <AdsenseAd slot="8501446743" style={{ margin: '40px 0' }} />
+          <AdsenseAd 
+            slot="3526268926" 
+            layout="in-article" 
+            format="fluid" 
+            style={{ margin: '40px 0' }} 
+          />
           <div className={styles.prose} dangerouslySetInnerHTML={{ __html: secondPart }} />
         </>
       );

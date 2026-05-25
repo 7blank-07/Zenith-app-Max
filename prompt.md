@@ -1,89 +1,87 @@
-Implement production-ready Google AdSense ads for the Redeem Codes page in my Next.js App Router project.
+Optimize the blog article monetization structure in my Next.js App Router project by replacing the existing mid-article Display ad with a production-ready Google AdSense In-article ad.
 
 Context:
+- Site: ZenithFCM
+- Publisher ID: ca-pub-4474200951186936
+- Existing reusable AdsenseAd component already supports:
+  - display ads
+  - multiplex ads
+  - fluid/in-feed ads
+  - responsive layouts
+  - hydration-safe initialization
+  - route transition safety
+  - CLS protection
 
-* Site: ZenithFCM
-* Publisher ID: ca-pub-4474200951186936
-* Auto Ads are already limited/minimal
-* A reusable AdsenseAd component already exists and supports:
+Current blog article monetization:
+1. Top Display Ad → KEEP
+2. Mid Display Ad → REMOVE/REPLACE
+3. Bottom Multiplex Ad → KEEP
 
-  * display ads
-  * multiplex ads
-  * fluid/in-feed ads
-  * layoutKey support
-  * responsive layouts
-  * hydration-safe initialization
-  * route transition safety
-  * CLS protection
+New Ad Unit:
+- Name: zenith_blog_inarticle
+- Format: In-article
+- Slot: 3526268926
 
-Existing ad units:
-
-1. zenith_redeem_active
-
-   * Format: Display
-   * Slot: 3323774708
-
-2. zenith_redeem_latest
-
-   * Format: Display
-   * Slot: 2010693034
+Ad Code Characteristics:
+- data-ad-layout="in-article"
+- data-ad-format="fluid"
 
 Goal:
-Add subtle, premium monetization to the Redeem Codes page without harming UX, readability, performance, or the utility-first experience.
+Replace the current mid-display ad with a cleaner, higher-RPM In-article ad optimized for 600–800+ word FC Mobile editorial articles.
 
 Tasks:
 
-1. Analyze the Redeem Codes page structure and identify the best insertion points.
+1. Analyze the current blog article rendering structure and identify the existing mid-display ad insertion point.
 
-2. Insert:
+2. Remove the current mid-display ad implementation:
+- slot 8501446743
+- any related wrappers only if no longer needed
 
-* one responsive display ad below the Active Codes section
-* one responsive display ad below the Latest Codes section
+3. Insert the new In-article ad:
+- deep enough into article content to feel natural
+- not too early in the article
+- not immediately after the intro/title
+- preserve readability and editorial flow
 
-3. Preserve premium UX:
+4. Ensure the In-article ad:
+- renders responsively
+- behaves correctly on mobile and desktop
+- preserves premium gaming/editorial aesthetics
+- avoids CLS/layout shift
+- integrates naturally inside long-form content
 
-* no ads above the redeem hero/title area
-* no ads between individual code items
-* no multiplex ads here
-* no intrusive layout changes
-* no CLS issues
+5. Preserve existing monetization structure:
+- KEEP top display ad
+- KEEP bottom multiplex ad
 
-4. Ensure:
+6. Ensure:
+- safe App Router behavior
+- no duplicate ad initialization
+- React Strict Mode compatibility
+- hydration-safe rendering
+- proper spacing/margins
+- dark-theme compatibility
 
-* responsive rendering
-* clean spacing
-* dark-theme compatibility
-* safe App Router behavior
-* no duplicate ad initialization
-* React Strict Mode compatibility
+7. If necessary:
+- extend the AdsenseAd component carefully to support:
+  - data-ad-layout="in-article"
+  - fluid in-article rendering
 
-5. Ads should feel subtle and secondary:
+8. Do NOT:
+- add extra ads
+- stack multiple ads together
+- place the in-article ad too aggressively
+- break article formatting/layout
+- reduce readability
 
-* use stable spacing
-* do not interrupt code scanning/copying behavior
-* keep the page utility-first and trustworthy
-
-6. If necessary:
-
-* extend the existing AdsenseAd component carefully
-* use wrappers/full-width containers where needed
-* maintain clean mobile and desktop alignment
-
-7. Do NOT:
-
-* place ads too aggressively
-* place ads before the first code block
-* break the redeem flow
-* modify unrelated styling or business logic
-
-8. Return:
-
-* all modified files
-* exact insertion points
-* full implementation details
-* any CLS prevention improvements
-* any spacing/styling changes
+9. Return:
+- all modified files
+- exact insertion logic
+- implementation details
+- any AdsenseAd component changes
+- CLS prevention improvements
+- spacing/styling updates
 
 Important:
-The Redeem Codes page should feel like a useful FC Mobile utility page, not an ad-heavy blog.
-Ads should be minimal, contextual, and premium.
+ZenithFCM articles should still feel premium and editorial-focused.
+This optimization should improve monetization while preserving user experience and clean reading flow.
