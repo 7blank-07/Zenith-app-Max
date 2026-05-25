@@ -256,6 +256,19 @@ export default async function HomePage() {
                 availability={blogPageData?.availability || null}
               />
             ) : null}
+
+            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+              <AdsenseAd 
+                slot="3543266554" 
+                format="fluid" 
+                layoutKey="-fb+5w+4e-db+86" 
+                style={{ margin: '32px 0' }} 
+              />
+            </div>
+
+            <div style={{ maxWidth: '1400px', margin: '48px auto 0', padding: '0 24px' }}>
+              <AdsenseAd slot="3122944241" format="autorelaxed" />
+            </div>
           </div>
         </main>
         <HomeDashboardInteractions />

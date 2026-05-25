@@ -1,11 +1,11 @@
-Implement production-ready Google AdSense In-feed ads for the Player Database pages in my Next.js App Router project.
+Implement production-ready Google AdSense ads for the Redeem Codes page in my Next.js App Router project.
 
 Context:
 
 * Site: ZenithFCM
 * Publisher ID: ca-pub-4474200951186936
-* Auto Ads already work
-* A reusable AdsenseAd component already exists and already supports:
+* Auto Ads are already limited/minimal
+* A reusable AdsenseAd component already exists and supports:
 
   * display ads
   * multiplex ads
@@ -16,74 +16,74 @@ Context:
   * route transition safety
   * CLS protection
 
-Existing ad unit:
+Existing ad units:
 
-* zenith_playerdb_infeed
-* Format: In-feed
-* Slot: 1523077644
-* Layout Key: -fb+5w+4e-db+86
+1. zenith_redeem_active
 
-Important design note:
-For the Player Database pages, use the "image on the side" style for the in-feed ad because the layout is horizontal/list-based and this will blend better than image-above.
+   * Format: Display
+   * Slot: 3323774708
+
+2. zenith_redeem_latest
+
+   * Format: Display
+   * Slot: 2010693034
 
 Goal:
-Add subtle, premium In-feed monetization to the Player Database pages without harming usability, scrolling performance, filtering UX, or the premium utility feel.
+Add subtle, premium monetization to the Redeem Codes page without harming UX, readability, performance, or the utility-first experience.
 
 Tasks:
 
-1. Analyze the Player Database layout and identify the safest insertion strategy.
+1. Analyze the Redeem Codes page structure and identify the best insertion points.
 
 2. Insert:
 
-* one In-feed ad after every 12–15 player rows/cards
-* choose the cleanest frequency based on mobile UX and database density
+* one responsive display ad below the Active Codes section
+* one responsive display ad below the Latest Codes section
 
-3. Ensure the ads:
+3. Preserve premium UX:
 
-* visually blend with the player list/grid
-* remain subtle
-* preserve utility-focused UX
-* do not interrupt filtering/searching behavior
-* do not break scrolling rhythm
-* avoid CLS/layout shift
+* no ads above the redeem hero/title area
+* no ads between individual code items
+* no multiplex ads here
+* no intrusive layout changes
+* no CLS issues
 
-4. Preserve premium gaming utility aesthetics:
+4. Ensure:
 
-* no aggressive ad density
-* no spammy stacking
+* responsive rendering
+* clean spacing
 * dark-theme compatibility
-* smooth responsive behavior
-
-5. Ensure:
-
-* fluid format support
-* layoutKey rendering
 * safe App Router behavior
 * no duplicate ad initialization
 * React Strict Mode compatibility
 
-6. Use:
+5. Ads should feel subtle and secondary:
 
-* existing card/list wrappers if appropriate
-* responsive spacing
-* full-width wrappers only if needed
+* use stable spacing
+* do not interrupt code scanning/copying behavior
+* keep the page utility-first and trustworthy
+
+6. If necessary:
+
+* extend the existing AdsenseAd component carefully
+* use wrappers/full-width containers where needed
+* maintain clean mobile and desktop alignment
 
 7. Do NOT:
 
-* place ads too frequently
-* inject ads inside filters/search bars
-* interrupt important interactions
-* place ads inside compare/squad-builder functionality
-* break virtualization/performance optimizations if used
+* place ads too aggressively
+* place ads before the first code block
+* break the redeem flow
+* modify unrelated styling or business logic
 
 8. Return:
 
 * all modified files
-* exact insertion logic
+* exact insertion points
 * full implementation details
-* any performance considerations
 * any CLS prevention improvements
+* any spacing/styling changes
 
 Important:
-The Player Database is a premium utility/productivity surface.
-Ads should feel subtle and secondary, not like a spammy marketplace.
+The Redeem Codes page should feel like a useful FC Mobile utility page, not an ad-heavy blog.
+Ads should be minimal, contextual, and premium.

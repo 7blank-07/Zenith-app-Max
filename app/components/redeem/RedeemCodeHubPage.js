@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CopyCodeButton from './CopyCodeButton.client';
+import AdsenseAd from '../AdsenseAd';
 import styles from './RedeemCodeHubPage.module.css';
 
 const DEFAULT_COPY = Object.freeze({
@@ -164,31 +165,37 @@ export default function RedeemCodeHubPage({ pageData }) {
       ) : (
         <>
           {section.showActive && (
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>{copy.activeTitle}</h2>
-                <span className={styles.sectionMeta}>{`${activeCodes.length} ${copy.activeCountSuffix}`}</span>
-              </div>
-              {activeCodes.length ? (
-                <div className={styles.cards}>{activeCodes.map((entry) => renderCodeCard(entry, locale, copy))}</div>
-              ) : (
-                <p className={styles.empty}>{copy.activeEmpty}</p>
-              )}
-            </section>
+            <>
+              <section className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>{copy.activeTitle}</h2>
+                  <span className={styles.sectionMeta}>{`${activeCodes.length} ${copy.activeCountSuffix}`}</span>
+                </div>
+                {activeCodes.length ? (
+                  <div className={styles.cards}>{activeCodes.map((entry) => renderCodeCard(entry, locale, copy))}</div>
+                ) : (
+                  <p className={styles.empty}>{copy.activeEmpty}</p>
+                )}
+              </section>
+              <AdsenseAd slot="3323774708" style={{ margin: '20px 0 40px' }} />
+            </>
           )}
 
           {section.showLatest && (
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>{route.todayOnly ? copy.latestTodayTitle : copy.latestTitle}</h2>
-                <span className={styles.sectionMeta}>{`${latestCodes.length} ${copy.latestCountSuffix}`}</span>
-              </div>
-              {latestCodes.length ? (
-                <div className={styles.cards}>{latestCodes.map((entry) => renderCodeCard(entry, locale, copy))}</div>
-              ) : (
-                <p className={styles.empty}>{copy.latestEmpty}</p>
-              )}
-            </section>
+            <>
+              <section className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>{route.todayOnly ? copy.latestTodayTitle : copy.latestTitle}</h2>
+                  <span className={styles.sectionMeta}>{`${latestCodes.length} ${copy.latestCountSuffix}`}</span>
+                </div>
+                {latestCodes.length ? (
+                  <div className={styles.cards}>{latestCodes.map((entry) => renderCodeCard(entry, locale, copy))}</div>
+                ) : (
+                  <p className={styles.empty}>{copy.latestEmpty}</p>
+                )}
+              </section>
+              <AdsenseAd slot="2010693034" style={{ margin: '20px 0 40px' }} />
+            </>
           )}
 
           {section.showExpired && (
