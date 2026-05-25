@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import PlayerDetailContent from '../../components/PlayerDetailContent.client';
 import SiteChrome from '../../components/SiteChrome';
+import AdsenseAd from '../../components/AdsenseAd';
 import {
   PLAYER_PAGE_REVALIDATE_SECONDS,
   resolvePlayerIdentifiersFromSlug,
@@ -161,6 +162,8 @@ export default async function PlayerDetailPage({ params, searchParams }) {
           </div>
 
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 24px 24px' }}>
+            <AdsenseAd slot="4666143513" format="autorelaxed" />
+
             <section style={{ marginTop: '20px' }}>
               <h2 style={{ marginBottom: '10px' }}>Related Players</h2>
               {!relatedPlayers.length && <p style={{ marginTop: 0 }}>No related players available.</p>}

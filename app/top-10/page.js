@@ -1,7 +1,9 @@
+import React from 'react';
 import SiteChrome from '../components/SiteChrome';
 import { getTopTenRankings } from '../../src/lib/server/top-10/repository.mjs';
 import { fetchPlayersByIds } from '../../src/lib/server/top-players.mjs';
 import PlayerPreviewMiniPlayerCard from '../components/PlayerPreviewMiniPlayerCard';
+import AdsenseAd from '../components/AdsenseAd';
 import styles from './TopTen.module.css';
 import Link from 'next/link';
 
@@ -49,13 +51,28 @@ export default async function TopTenPage({ searchParams = {} }) {
           <div className={styles.content}>
             <div className={styles.rankingsGrid}>
               {rankings.map((item) => (
-                <PlayerPreviewMiniPlayerCard
-                  key={item.playerId}
-                  player={item.player}
-                  rank={item.rank}
-                  archetype={item.archetype}
-                />
+                <React.Fragment key={item.playerId}>
+                  <PlayerPreviewMiniPlayerCard
+                    player={item.player}
+                    rank={item.rank}
+                    archetype={item.archetype}
+                  />
+                  {item.rank === 5 && (
+                    <div style={{ gridColumn: '1 / -1', margin: '12px 0' }}>
+                      <AdsenseAd 
+                        slot="9548907329" 
+                        format="fluid" 
+                        layoutKey="-6t+ed+2i-1n-4w" 
+                        style={{ margin: '0' }}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
+            </div>
+
+            <div style={{ maxWidth: '1240px', margin: '48px auto 0', width: '100%' }}>
+              <AdsenseAd slot="4153110413" format="autorelaxed" />
             </div>
           </div>
         ) : (

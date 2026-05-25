@@ -8,6 +8,7 @@ import PlayerRefreshTimePanel from './PlayerRefreshTimePanel.client';
 import PlayerSkillsAbilitiesSection from './PlayerSkillsAbilitiesSection.client';
 import PlayerStatisticsSection from './PlayerStatisticsSection.client';
 import PlayerTrainingLevelPanel from './PlayerTrainingLevelPanel.client';
+import AdsenseAd from './AdsenseAd';
 import dynamic from 'next/dynamic';
 
 const PlayerPriceHistorySection = dynamic(() => import('./PlayerPriceHistorySection.client'), {
@@ -624,6 +625,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
           <PlayerSkillsAbilitiesSection playerId={playerId} currentRank={selectedRank} />
 
           <PlayerPriceHistorySection playerId={playerId} rank={selectedRank} isAuctionable={isAuctionable} />
+          <AdsenseAd slot="7867021922" style={{ marginTop: '24px' }} />
         </div>
       </section>
 
@@ -638,6 +640,10 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
         ]}
         profileSummary={profileSummary}
       />
+
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+        <AdsenseAd slot="8605388527" style={{ margin: '0 0 32px 0' }} />
+      </div>
 
       <PlayerDetailInteractions playerId={playerId} currentRank={selectedRank} baseOvr={record?.ovr} />
     </>

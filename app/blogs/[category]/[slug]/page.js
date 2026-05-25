@@ -3,6 +3,7 @@ import SiteChrome from '../../../components/SiteChrome';
 import BlogArticleBody from '../../../components/blog/BlogArticleBody';
 import BlogArticleHero from '../../../components/blog/BlogArticleHero';
 import RelatedArticles from '../../../components/blog/RelatedArticles';
+import AdsenseAd from '../../../components/AdsenseAd';
 import styles from '../../../components/blog/BlogLayout.module.css';
 import { buildBlogPostingSchema, buildBreadcrumbListSchema, serializeJsonLd } from '../../../../src/lib/server/blog/schema.mjs';
 import {
@@ -77,9 +78,18 @@ export default async function BlogArticlePage({ params }) {
             <>
               <BlogArticleHero article={pageData.post} />
 
+              <div className="article-top-ad-wrapper" style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+                <AdsenseAd slot="8823360464" style={{ margin: '20px 0 40px' }} />
+              </div>
+
               <div className={styles.articleShell}>
                 <div className={styles.articleMain}>
                   <BlogArticleBody article={pageData.post} />
+                  
+                  <section className="article-footer-ads" style={{ marginTop: '60px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)', marginBottom: '20px', textAlign: 'center' }}>Recommended for you</h3>
+                    <AdsenseAd slot="7171367449" format="autorelaxed" />
+                  </section>
                 </div>
 
                 <div className={styles.articleSidebar}>

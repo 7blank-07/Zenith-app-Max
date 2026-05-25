@@ -1,34 +1,89 @@
-Act as a Senior Next.js, React, and Google AdSense technical auditor. Inspect my codebase repository to verify if Google AdSense Auto Ads are fully integrated and optimized specifically for mobile devices. 
+Implement production-ready Google AdSense In-feed ads for the Player Database pages in my Next.js App Router project.
 
+Context:
 
+* Site: ZenithFCM
+* Publisher ID: ca-pub-4474200951186936
+* Auto Ads already work
+* A reusable AdsenseAd component already exists and already supports:
 
-Check for the following 4 implementations and flag any errors, omissions, or partial configurations:
+  * display ads
+  * multiplex ads
+  * fluid/in-feed ads
+  * layoutKey support
+  * responsive layouts
+  * hydration-safe initialization
+  * route transition safety
+  * CLS protection
 
+Existing ad unit:
 
+* zenith_playerdb_infeed
+* Format: In-feed
+* Slot: 1523077644
+* Layout Key: -fb+5w+4e-db+86
 
-1. ROUTER / SPA HOOK CHECK: Verify if there is a global useEffect hook tracking route changes (using either next/navigation 'usePathname'/'useSearchParams' for App Router, or next/router events for Pages Router). It must correctly call (window.adsbygoogle = window.adsbygoogle || []).push({}); on every client-side page transition to prevent ads from breaking on mobile navigation.
+Important design note:
+For the Player Database pages, use the "image on the side" style for the in-feed ad because the layout is horizontal/list-based and this will blend better than image-above.
 
+Goal:
+Add subtle, premium In-feed monetization to the Player Database pages without harming usability, scrolling performance, filtering UX, or the premium utility feel.
 
+Tasks:
 
-2. SCRIPT LOADING STRATEGY: Ensure the main AdSense script is injected using the official 'next/script' component (not raw HTML script tags) with the strategy set to 'afterInteractive' or 'lazyOnload'. Verify that the 'crossOrigin="anonymous"' prop is present.
+1. Analyze the Player Database layout and identify the safest insertion strategy.
 
+2. Insert:
 
+* one In-feed ad after every 12–15 player rows/cards
+* choose the cleanest frequency based on mobile UX and database density
 
-3. HYDRATION AND LAYOUT VALIDATION: Scan components that conditionally render based on mobile screens (e.g., checks for window width or mobile breakpoints). Ensure they do not cause server/client hydration mismatches that compress parent layouts to 0px width/height during the initial AdSense DOM scan.
+3. Ensure the ads:
 
+* visually blend with the player list/grid
+* remain subtle
+* preserve utility-focused UX
+* do not interrupt filtering/searching behavior
+* do not break scrolling rhythm
+* avoid CLS/layout shift
 
+4. Preserve premium gaming utility aesthetics:
 
-4. CONTAINER STYLING: Verify that common ad insertion target areas or parent wrappers do not use conflicting flex/grid properties that lack explicitly defined minimum dimensions (like missing 'w-full' or 'min-h-[100px]').
+* no aggressive ad density
+* no spammy stacking
+* dark-theme compatibility
+* smooth responsive behavior
 
+5. Ensure:
 
+* fluid format support
+* layoutKey rendering
+* safe App Router behavior
+* no duplicate ad initialization
+* React Strict Mode compatibility
 
-Provide a strict point-by-point report:
+6. Use:
 
-- PASSED: What is perfectly implemented.
+* existing card/list wrappers if appropriate
+* responsive spacing
+* full-width wrappers only if needed
 
-- FAILED: Exact lines of code or components that are missing the fix or implemented incorrectly.
+7. Do NOT:
 
-- ACTION REQUIRED: The exact code snippets needed to fix the failures.
+* place ads too frequently
+* inject ads inside filters/search bars
+* interrupt important interactions
+* place ads inside compare/squad-builder functionality
+* break virtualization/performance optimizations if used
 
+8. Return:
 
+* all modified files
+* exact insertion logic
+* full implementation details
+* any performance considerations
+* any CLS prevention improvements
 
+Important:
+The Player Database is a premium utility/productivity surface.
+Ads should feel subtle and secondary, not like a spammy marketplace.

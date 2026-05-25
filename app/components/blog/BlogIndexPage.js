@@ -1,8 +1,10 @@
+import React from 'react';
 import BlogArticleCard from './BlogArticleCard';
 import BlogCategoryTabs from './BlogCategoryTabs';
 import BlogPagination from './BlogPagination';
 import FeaturedArticles from './FeaturedArticles';
 import PopularArticles from './PopularArticles';
+import AdsenseAd from '../AdsenseAd';
 import styles from './BlogLayout.module.css';
 
 function buildBasePath(activeCategorySlug, activeTag) {
@@ -58,8 +60,20 @@ export default function BlogIndexPage({
             <div className={styles.contentColumn}>
               {posts.length ? (
                 <div className={styles.cardsGrid}>
-                  {posts.map((post) => (
-                    <BlogArticleCard key={post.id} post={post} />
+                  {posts.map((post, index) => (
+                    <React.Fragment key={post.id}>
+                      <BlogArticleCard post={post} />
+                      {(index + 1) % 6 === 0 && (
+                        <div className={styles.card} style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                          <AdsenseAd 
+                            slot="6836325526" 
+                            format="fluid" 
+                            layoutKey="-6t+ed+2i-1n-4w" 
+                            style={{ margin: '0', minHeight: '380px' }}
+                          />
+                        </div>
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
               ) : (

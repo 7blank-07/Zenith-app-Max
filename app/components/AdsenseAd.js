@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -16,9 +16,14 @@ import { usePathname } from 'next/navigation';
  * - Publisher ID: ca-pub-4474200951186936
  * 
  * @param {string} slot - The 10-digit AdSense Slot ID
+ * @param {string} format - The ad format (auto, rectangle, horizontal, vertical, autorelaxed, fluid)
+ * @param {string} layoutKey - For In-feed ads (data-ad-layout-key)
+ * @param {boolean} responsive - Whether the ad is responsive
+ * @param {object} style - Custom styles for the container
  */
-export default function AdsenseAd({ slot }) {
+export default function AdsenseAd({ slot, format = 'auto', layoutKey = '', responsive = true, style = {} }) {
   const pathname = usePathname();
+  const initialized = useRef(false);
 
   useEffect(() => {
     // Only initialize in the browser
@@ -30,6 +35,7 @@ export default function AdsenseAd({ slot }) {
         if (window.adsbygoogle) {
           // Push a new ad request
           (window.adsbygoogle = window.adsbygoogle || []).push({});
+          initialized.current = true;
         }
       } catch (err) {
         // Silently handle errors like 'All ins elements already filled' or 'Script not loaded'
@@ -37,10 +43,16 @@ export default function AdsenseAd({ slot }) {
           console.warn('[AdSense] Ad request failed or already filled:', err);
         }
       }
-    }, 150);
+    }, 200);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      initialized.current = false;
+    };
   }, [pathname, slot]); // Re-initialize on route change to refresh the ad
+
+  // Reserve space based on format to reduce CLS
+  const defaultMinHeight = format === 'autorelaxed' ? '500px' : format === 'fluid' ? '120px' : '280px';
 
   return (
     <div 
@@ -48,19 +60,21 @@ export default function AdsenseAd({ slot }) {
       style={{ 
         margin: '32px 0', 
         textAlign: 'center', 
-        minHeight: '100px', 
+        minHeight: style.minHeight || defaultMinHeight, 
         overflow: 'hidden',
         width: '100%',
-        clear: 'both'
+        clear: 'both',
+        ...style
       }}
     >
       <ins
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{ display: 'block', minWidth: '250px' }}
         data-ad-client="ca-pub-4474200951186936"
         data-ad-slot={slot}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-format={format}
+        {...(layoutKey ? { 'data-ad-layout-key': layoutKey } : {})}
+        data-full-width-responsive={responsive ? 'true' : 'false'}
       />
     </div>
   );

@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import AdsenseAd from './AdsenseAd';
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { UNTRADABLE_CARD_BADGE_URL, UNTRADABLE_PRICE_FLAG_URL } from './image-asset-urls';
@@ -1527,95 +1528,120 @@ export default function PlayersDatabaseInteractions({
             ) : null}
 
             <div className="players-grid players-grid--database" id="players-grid" style={{ background: 'transparent', minHeight: '60vh' }}>
-              {visiblePlayers.map((player) => {
+              {visiblePlayers.map((player, index) => {
                 const resolvedPrice = getResolvedPrice(player);
                 const hasPrice = resolvedPrice > 0;
                 const isWatchlisted = watchedIds.has(player.uniqueId);
                 return (
-                  <div
-                    key={player.uniqueId}
-                    className="player-row"
-                    data-player-id={player.playerId}
-                    data-unique-id={player.uniqueId}
-                    data-name={player.name}
-                    data-position={player.position}
-                    data-league={player.league}
-                    data-club={player.club}
-                    data-nation={player.nation}
-                    data-event={player.event}
-                    data-ovr={player.ovr}
-                    data-skill={player.skillMoves}
-                    data-pac={player.pac}
-                    data-sho={player.sho}
-                    data-pas={player.pas}
-                    data-dri={player.dri}
-                    data-def={player.def}
-                    data-phy={player.phy}
-                    data-price={resolvedPrice}
-                    onClick={() => handlePlayerRowClick(player)}
-                  >
-                    {renderPlayerCard(player)}
+                  <React.Fragment key={player.uniqueId}>
+                    <div
+                      className="player-row"
+                      data-player-id={player.playerId}
+                      data-unique-id={player.uniqueId}
+                      data-name={player.name}
+                      data-position={player.position}
+                      data-league={player.league}
+                      data-club={player.club}
+                      data-nation={player.nation}
+                      data-event={player.event}
+                      data-ovr={player.ovr}
+                      data-skill={player.skillMoves}
+                      data-pac={player.pac}
+                      data-sho={player.sho}
+                      data-pas={player.pas}
+                      data-dri={player.dri}
+                      data-def={player.def}
+                      data-phy={player.phy}
+                      data-price={resolvedPrice}
+                      onClick={() => handlePlayerRowClick(player)}
+                    >
+                      {renderPlayerCard(player)}
 
-                    <div className="player-row-info">
-                      <div className="player-row-info-desktop">
-                        <div className="player-info-name">{player.name}</div>
-                        <div className="player-info-meta">
-                          {player.ovr || 'N/A'} • {player.position || 'N/A'}
+                      <div className="player-row-info">
+                        <div className="player-row-info-desktop">
+                          <div className="player-info-name">{player.name}</div>
+                          <div className="player-info-meta">
+                            {player.ovr || 'N/A'} • {player.position || 'N/A'}
+                          </div>
                         </div>
-                      </div>
-                      <div className="player-price player-row-price">
-                        {player.isUntradable ? (
-                          <img
-                            src={UNTRADABLE_PRICE_FLAG_URL}
-                            alt="Non-auctionable"
-                            className="player-row-tradability-icon"
-                            title="Non-auctionable"
-                          />
-                        ) : (
-                          <span className="price-inline player-row-price-inline">
-                            <img src="/assets/images/background/fc coin img.webp" alt="coin" className="price-icon" />
-                            <span className="price-text">{hasPrice ? formatPrice(resolvedPrice) : 'No data'}</span>
-                          </span>
+                        <div className="player-price player-row-price">
+                          {player.isUntradable ? (
+                            <img
+                              src={UNTRADABLE_PRICE_FLAG_URL}
+                              alt="Non-auctionable"
+                              className="player-row-tradability-icon"
+                              title="Non-auctionable"
+                            />
+                          ) : (
+                            <span className="price-inline player-row-price-inline">
+                              <img src="/assets/images/background/fc coin img.webp" alt="coin" className="price-icon" />
+                              <span className="price-text">{hasPrice ? formatPrice(resolvedPrice) : 'No data'}</span>
+                            </span>
+                          )}
+                        </div>
+                        {!!player.alternatePositions.length && (
+                          <div className="player-info-secondary player-info-secondary--desktop">
+                            {player.alternatePositions.map((position) => (
+                              <span key={`${player.uniqueId}-${position}`} className="secondary-position-badge">
+                                {position}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
-                      {!!player.alternatePositions.length && (
-                        <div className="player-info-secondary player-info-secondary--desktop">
-                          {player.alternatePositions.map((position) => (
-                            <span key={`${player.uniqueId}-${position}`} className="secondary-position-badge">
-                              {position}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="player-row-stats player-card-stats-row">
-                      {BASE_ROW_STATS.map((stat) => (
-                        <div key={`${player.uniqueId}-${stat.key}`} className="stat-pill">
-                          <div className="stat-pill-value">{formatStatValue(player[stat.key])}</div>
-                          <div className="stat-pill-label">{stat.label}</div>
-                        </div>
-                      ))}
-                      {selectedStatDefinitions.map((statDefinition) => (
-                        <div key={`${player.uniqueId}-${statDefinition.id}`} className="stat-pill">
-                          <div className="stat-pill-value">{getCustomStatValue(player, statDefinition)}</div>
-                          <div className="stat-pill-label">{statDefinition.pillLabel || statDefinition.label}</div>
-                        </div>
-                      ))}
-                    </div>
+                      <div className="player-row-stats player-card-stats-row">
+                        {BASE_ROW_STATS.map((stat) => (
+                          <div key={`${player.uniqueId}-${stat.key}`} className="stat-pill">
+                            <div className="stat-pill-value">{formatStatValue(player[stat.key])}</div>
+                            <div className="stat-pill-label">{stat.label}</div>
+                          </div>
+                        ))}
+                        {selectedStatDefinitions.map((statDefinition) => (
+                          <div key={`${player.uniqueId}-${statDefinition.id}`} className="stat-pill">
+                            <div className="stat-pill-value">{getCustomStatValue(player, statDefinition)}</div>
+                            <div className="stat-pill-label">{statDefinition.pillLabel || statDefinition.label}</div>
+                          </div>
+                        ))}
+                      </div>
 
-                    <button
-                      className="player-row-watchlist"
-                      data-unique-id={player.uniqueId}
-                      aria-label={`Toggle watchlist for ${player.name}`}
-                      type="button"
-                      onClick={(event) => toggleWatchlist(event, player)}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill={isWatchlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </button>
-                  </div>
+                      <button
+                        className="player-row-watchlist"
+                        data-unique-id={player.uniqueId}
+                        aria-label={`Toggle watchlist for ${player.name}`}
+                        type="button"
+                        onClick={(event) => toggleWatchlist(event, player)}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill={isWatchlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      </button>
+                    </div>
+                    {(index + 1) % 15 === 0 && (
+                      <div 
+                        className="player-row adsense-row" 
+                        style={{ 
+                          minHeight: '120px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          background: 'rgba(20,24,28,0.3)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          padding: '12px',
+                          cursor: 'default',
+                          gridColumn: '1 / -1'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <AdsenseAd 
+                          slot="1523077644" 
+                          format="fluid" 
+                          layoutKey="-fb+5w+4e-db+86" 
+                          style={{ margin: '0', minHeight: '100px', width: '100%' }}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
