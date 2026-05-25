@@ -157,7 +157,7 @@ html, body {
 
 @font-face {
     font-family: "CruyffSans";
-    src: url("assets/fonts/CruyffSansCondensed-Bold.woff2") format("woff2");
+    src: url("../fonts/CruyffSansCondensed-Bold.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;

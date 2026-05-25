@@ -81,10 +81,6 @@ export default async function ToolSlugPage({ params }) {
   const isWatchlistTool = initialTool === 'watchlist';
   const { toolPlayers, squadFilterOptions } = await getToolsData(isWatchlistTool);
 
-  const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}${
-    initialTool === 'compare' ? ' main-content--compare' : ''
-  }`;
-
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -109,6 +105,10 @@ export default async function ToolSlugPage({ params }) {
       }
     ]
   };
+
+  const mainContentClassName = `main-content${initialTool === 'squadbuilder' ? ' main-content--squadbuilder' : ''}${
+    initialTool === 'compare' ? ' main-content--compare' : ''
+  }`;
 
   return (
     <SiteChrome activeView="tools">

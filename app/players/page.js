@@ -1,5 +1,6 @@
 import PlayersDatabaseInteractions from '../components/PlayersDatabaseInteractions.client';
 import SiteChrome from '../components/SiteChrome';
+import '../../assets/css/watchlist-styles.css';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-contract.mjs';
 import { getPrerenderRolloutState } from '../../src/lib/server/prerender-rollout.mjs';
@@ -81,7 +82,6 @@ export default async function PlayersPage({ searchParams = {} }) {
 
   return (
     <SiteChrome activeView="players">
-      <link rel="stylesheet" href="/assets/css/watchlist-styles.css" />
       <main className="players-main-content players-grid--database">
         <PlayersDatabaseInteractions
           players={players}
