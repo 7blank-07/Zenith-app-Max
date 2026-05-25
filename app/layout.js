@@ -1,5 +1,4 @@
 import './globals.css';
-import '../assets/css/style.css';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
 import { Suspense } from 'react';
@@ -51,6 +50,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />
         <link rel="apple-touch-icon" href="/assets/images/zenith_logo_main.png" />
+        <link rel="stylesheet" href="/assets/css/style.css" precedence="default" />
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
