@@ -20,6 +20,16 @@ export const metadata = {
   metadataBase: new URL(siteUrl),
   title: 'Zenith - FC Mobile Database',
   description: 'Zenith FC Mobile tools and database',
+  icons: {
+    icon: [
+      { url: '/icon.png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+  },
   alternates: {
     canonical: '/'
   },
@@ -46,10 +56,6 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://images.zenithfcm.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        <link rel="icon" type="image/png" href="/assets/images/zenith_logo_main.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/zenith_logo_main.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/zenith_logo_main.png" />
-        <link rel="apple-touch-icon" href="/assets/images/zenith_logo_main.png" />
         <link rel="stylesheet" href="/assets/css/style.css" precedence="default" />
         <Script
           async
