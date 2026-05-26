@@ -349,41 +349,59 @@ function refineNormalizedPayload(normalizedPayload, criteria) {
   
   const { query, minOvr, maxOvr, isUntradable } = criteria;
   let rows = normalizedPayload.players;
+  let filtered = false;
 
   // 1. Filter by Name (Search Query) - uses fuzzy check
   if (query) {
     const needle = normalizeSearchValue(query);
+    const originalCount = rows.length;
     rows = rows.filter((row) => rowNameSource(row).includes(needle));
+    if (rows.length !== originalCount) filtered = true;
   }
 
   // 2. Enforce OVR constraints
   if (minOvr !== null && minOvr !== undefined && !isNaN(minOvr)) {
+    const originalCount = rows.length;
     rows = rows.filter((row) => Number(row.ovr) >= minOvr);
+    if (rows.length !== originalCount) filtered = true;
   }
   if (maxOvr !== null && maxOvr !== undefined && !isNaN(maxOvr)) {
+    const originalCount = rows.length;
     rows = rows.filter((row) => Number(row.ovr) <= maxOvr);
+    if (rows.length !== originalCount) filtered = true;
   }
 
   // 3. Enforce Auctionable status (is_untradable)
-  // We accept both '0'/'1' strings and 0/1 numbers
   if (isUntradable !== null && isUntradable !== undefined) {
+    const originalCount = rows.length;
     const targetUntradable = String(isUntradable) === '1';
     rows = rows.filter((row) => {
-      // row.isUntradable comes from normalizePlayerStableRecord (boolean)
       const actualUntradable = row.isUntradable === true || row.is_untradable === 1 || row.is_untradable === '1';
       return actualUntradable === targetUntradable;
     });
+    if (rows.length !== originalCount) filtered = true;
   }
 
   const pagination = normalizedPayload.pagination || {};
+  
+  // If we filtered locally, we can't trust the backend's total/has_more anymore
+  // for this specific page of results.
+  if (filtered) {
+    return {
+      ...normalizedPayload,
+      players: rows,
+      pagination: {
+        ...pagination,
+        total: rows.length,
+        has_more: false
+      }
+    };
+  }
+
+  // If no local filtering happened, PRESERVE the original metadata
   return {
     ...normalizedPayload,
-    players: rows,
-    pagination: {
-      ...pagination,
-      total: rows.length,
-      has_more: false
-    }
+    players: rows
   };
 }
 
