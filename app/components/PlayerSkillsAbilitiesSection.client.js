@@ -78,17 +78,25 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
     [normalizedPlayerId]
   );
 
+  const lastPlayerIdRef = useRef(normalizedPlayerId);
+
   useEffect(() => {
-    setSkillsLoading(true);
-    setSkillsLoadMessage('Loading skills...');
-    setAvailableSkills([]);
+    const isSamePlayer = lastPlayerIdRef.current === normalizedPlayerId;
+    lastPlayerIdRef.current = normalizedPlayerId;
+
+    if (!isSamePlayer) {
+      setSkillsLoading(true);
+      setSkillsLoadMessage('Loading skills...');
+      setAvailableSkills([]);
+      setSkillLevelsById({});
+      setSkillBoostCatalogById({});
+      setActiveSkillDetail(null);
+      setSkillBoostLevels([]);
+      setSkillModalLoading(false);
+      setSkillModalError('');
+    }
+    
     setSkillPointBudget(Math.max(0, normalizedRank));
-    setSkillLevelsById({});
-    setSkillBoostCatalogById({});
-    setActiveSkillDetail(null);
-    setSkillBoostLevels([]);
-    setSkillModalLoading(false);
-    setSkillModalError('');
     skillRequestSequenceRef.current += 1;
 
     if (!normalizedPlayerId) {
@@ -109,17 +117,35 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
         if (!isActive) return;
         const fetchedSkills = Array.isArray(payload?.skills) ? payload.skills : [];
         const fetchedBudget = Math.max(0, toNumber(payload?.available_skill_points, normalizedRank));
+        
         setAvailableSkills(fetchedSkills);
         setSkillPointBudget(fetchedBudget);
-        setSkillLevelsById((current) => pruneLockedSkillLevels(current, fetchedSkills));
+        
+        // Only prune if player changed, otherwise keep selected levels
+        if (!isSamePlayer) {
+            setSkillLevelsById((current) => pruneLockedSkillLevels(current, fetchedSkills));
+        } else {
+            // Re-apply budget logic if points were reduced
+            setSkillLevelsById((current) => {
+                const spending = Object.values(current).reduce((sum, val) => sum + toNumber(val, 0), 0);
+                if (spending > fetchedBudget) {
+                    // Reset if over budget
+                    return {};
+                }
+                return current;
+            });
+        }
+
         setSkillsLoadMessage(fetchedSkills.length ? '' : 'No skills available');
         setSkillsLoading(false);
       } catch (error) {
         if (!isActive || error?.name === 'AbortError') return;
         console.error('[player-detail] Failed to load skills:', error);
-        setAvailableSkills([]);
+        if (!isSamePlayer) {
+            setAvailableSkills([]);
+            setSkillLevelsById({});
+        }
         setSkillPointBudget(Math.max(0, normalizedRank));
-        setSkillLevelsById({});
         setSkillsLoadMessage('Failed to load skills');
         setSkillsLoading(false);
       }
