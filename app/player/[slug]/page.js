@@ -124,7 +124,18 @@ export default async function PlayerDetailPage({ params, searchParams }) {
     }
   })();
   const canonicalSlug = buildPlayerSlug(record) || String(record?.playerId || '').trim();
-  if (canonicalSlug && incomingSlug !== canonicalSlug) {
+  
+  // Custom: Only redirect if the actual Player (Asset ID) has changed.
+  // The suffix is usually [AssetIDSuffix(4)][RecordIDSuffix(3)].
+  const getPlayerIdSuffix = (s) => {
+      const parts = s.split('-');
+      const suffix = parts[parts.length - 1];
+      return suffix.substring(0, 4); // The 6807 part
+  };
+  
+  const isSamePlayer = getPlayerIdSuffix(incomingSlug) === getPlayerIdSuffix(canonicalSlug);
+
+  if (canonicalSlug && incomingSlug !== canonicalSlug && !isSamePlayer) {
     const canonicalPath = rank > 0
       ? `/player/${encodeURIComponent(canonicalSlug)}?rank=${rank}`
       : `/player/${encodeURIComponent(canonicalSlug)}`;

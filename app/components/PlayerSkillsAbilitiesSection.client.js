@@ -127,12 +127,21 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
         } else {
             // Re-apply budget logic if points were reduced
             setSkillLevelsById((current) => {
-                const spending = Object.values(current).reduce((sum, val) => sum + toNumber(val, 0), 0);
-                if (spending > fetchedBudget) {
-                    // Reset if over budget
-                    return {};
+                let spending = Object.values(current).reduce((sum, val) => sum + toNumber(val, 0), 0);
+                if (spending <= fetchedBudget) return current;
+
+                // Prune skills from the end until budget is met
+                const next = { ...current };
+                const keys = Object.keys(next).reverse();
+                for (const key of keys) {
+                    while (next[key] > 0 && spending > fetchedBudget) {
+                        next[key] -= 1;
+                        spending -= 1;
+                    }
+                    if (next[key] === 0) delete next[key];
+                    if (spending <= fetchedBudget) break;
                 }
-                return current;
+                return next;
             });
         }
 

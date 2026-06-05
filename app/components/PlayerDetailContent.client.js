@@ -71,10 +71,19 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   const requestControllerRef = useRef(null);
   const requestSequenceRef = useRef(0);
 
+    const lastProcessedPlayerId = useRef(String(initialRecord?.playerId || ''));
+
   useEffect(() => {
-    setRecord(initialRecord);
-    setSelectedRank(parseRank(initialRank));
-    setIsRankLoading(false);
+    const nextPlayerId = String(initialRecord?.playerId || '');
+    const isSamePlayer = lastProcessedPlayerId.current === nextPlayerId;
+    lastProcessedPlayerId.current = nextPlayerId;
+
+    if (!isSamePlayer) {
+        setRecord(initialRecord);
+        setSelectedRank(parseRank(initialRank));
+        setIsRankLoading(false);
+    }
+    
     requestSequenceRef.current += 1;
     if (requestControllerRef.current) {
       requestControllerRef.current.abort();
@@ -143,11 +152,19 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   );
 
   const updateBrowserPath = useCallback((nextRank) => {
-    if (typeof window === 'undefined') return;
-    const nextPath = buildRankPath(playerSlug, playerId, nextRank);
-    // Use router.replace instead of window.history.replaceState to keep Next.js state in sync
-    router.replace(nextPath, { scroll: false });
-  }, [playerId, playerSlug, router]);
+    if (typeof window === "undefined") return;
+    const searchParams = new URLSearchParams(window.location.search);
+    if (nextRank > 0) {
+      searchParams.set('rank', nextRank);
+    } else {
+      searchParams.delete('rank');
+    }
+    const nextSearch = searchParams.toString() ? "?" + searchParams.toString() : "";
+    
+    // Low-level replaceState avoids Next.js router from seeing the path segment changes 
+    // and triggering a full page re-mount/reload.
+    window.history.replaceState(null, "", window.location.pathname + nextSearch);
+  }, []);
 
   const handleRankChange = useCallback(
     async (nextRankValue) => {
