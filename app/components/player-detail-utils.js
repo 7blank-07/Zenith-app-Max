@@ -65,17 +65,19 @@ export function buildProfileOverviewItems(names, images, fallbackPrefix, idPrefi
 }
 
 export function formatWorkRateText(value) {
-  const text = String(value || '')
-    .trim()
-    .replace(/[_-]+/g, ' ');
+    const s = String(value ?? '').trim();
+    if (s === '2') return 'High';
+    if (s === '1') return 'Low';
+    if (s === '0') return 'Medium';
 
-  if (!text) return 'Unknown';
+    const text = s.replace(/[_-]+/g, ' ');
+    if (!text) return 'Unknown';
 
-  return text
-    .split(/\s+/)
-    .map((part) => `${part[0]?.toUpperCase() || ''}${part.slice(1).toLowerCase()}`)
-    .join(' ');
-}
+    return text
+      .split(/\s+/)
+      .map((part) => `${part[0]?.toUpperCase() || ''}${part.slice(1).toLowerCase()}`)
+      .join(' ');
+  }
 
 export function formatProfileValue(value, fallback = 'Unknown') {
   if (value === null || value === undefined) return fallback;

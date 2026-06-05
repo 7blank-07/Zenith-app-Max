@@ -112,8 +112,13 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   const cardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_main.png';
   const cardImage = record?.playerImage || record?.image || '';
   const profileSummary = record?.summary || `${record?.name || 'Player'} profile and latest market context from Zenith.`;
-  const workRateAttackLabel = formatWorkRateText(record?.workRateAttack);
-  const workRateDefenseLabel = formatWorkRateText(record?.workRateDefense);
+  
+  
+    
+    console.log('[DEBUG] record.workRateAttack:', record?.workRateAttack, typeof record?.workRateAttack);
+    const wrMap = { '2': 'High', '1': 'Low', '0': 'Medium', 2: 'High', 1: 'Low', 0: 'Medium' };
+    const workRateAttackLabel = wrMap[record?.workRateAttack] || formatWorkRateText(record?.workRateAttack);
+    const workRateDefenseLabel = wrMap[record?.workRateDefense] || formatWorkRateText(record?.workRateDefense);
   const watchlistUniqueId = getPlayerUniqueId({
     playerId,
     rank: selectedRank,
@@ -373,6 +378,11 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 marginBottom: '20px'
               }}
             >
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Club</span>
+                  <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>{record?.club || 'Unknown'}</span>
+                </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>League</span>
                 <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>{record?.league || 'Unknown'}</span>
