@@ -797,7 +797,7 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const price = toNullableInteger(firstDefined([source.price, source.latest_price, source.market_price], null));
   const attributes = extractAttributes(source);
 
-  return {
+    const record = {
     playerId,
     recordId,
     name,
@@ -838,6 +838,13 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     price,
     attributes
   };
+
+  if (record.nation) record.nation = String(record.nation).replace(/NationName_/gi, "").replace(/^54$/, "Brazil").replace(/^49$/, "Uruguay").replace(/^18$/, "France").replace(/^14$/, "England").replace(/_/g, " ").trim();
+  if (record.club) record.club = String(record.club).replace(/TeamName_/gi, "").replace(/^114154$/, "Icons").replace(/_/g, " ").trim();
+  if (record.eventName) record.eventName = String(record.eventName).replace(/PROGRAM_/gi, "").replace(/ICONS/gi, "Icon").replace(/_/g, " ").trim();
+  if (record.traits) record.traits = record.traits.map(t => String(t).replace(/trait_name_|skillmove_name_|celebration_name_/gi, "").replace(/_/g, " ").trim());
+
+  return record;
 }
 
 export function buildPlayerAttributeSections(playerRecord) {
@@ -971,42 +978,22 @@ export function buildPlayerSeoMetadata(playerRecord, options = {}) {
 }
 
 export async function fetchPlayerStableRecord(playerId, options = {}) {
-  if (playerId === undefined || playerId === null || playerId === '') {
-    throw new Error('playerId is required');
-  }
-
   const rank = options.rank ?? 0;
-  const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
-  const endpoint = `${baseUrl}/players/${encodeURIComponent(playerId)}?rank=${encodeURIComponent(rank)}`;
-  const payload = await fetchApiJson(endpoint, options);
-  const normalizedPayload = normalizeApiPayload(payload);
-  const record = normalizePlayerStableRecord(normalizedPayload, playerId);
-  if (hasPlayerColorData(record) || rank !== 0 || options.colorFallbackRanks === 0) {
-    return record;
-  }
-
-  const maxFallbackRank = Number.isFinite(Number(options.colorFallbackRanks))
-    ? Math.max(1, Math.floor(Number(options.colorFallbackRanks)))
-    : 5;
-
-  for (let fallbackRank = 1; fallbackRank <= maxFallbackRank; fallbackRank += 1) {
-    try {
-      const fallbackEndpoint = `${baseUrl}/players/${encodeURIComponent(playerId)}?rank=${encodeURIComponent(fallbackRank)}`;
-      const fallbackPayload = await fetchApiJson(fallbackEndpoint, options);
-      const normalizedFallbackPayload = normalizeApiPayload(fallbackPayload);
-      const fallbackRecord = normalizePlayerStableRecord(normalizedFallbackPayload, playerId);
-      if (!hasPlayerColorData(fallbackRecord)) continue;
-      return mergePlayerColorData(record, fallbackRecord);
-    } catch (error) {
-      console.warn('[player-seo-contract] Failed color fallback rank fetch:', {
-        playerId: String(playerId),
-        fallbackRank,
-        reason: error instanceof Error ? error.message : String(error)
-      });
+  const dbPool = getPlayerSlugResolverPool();
+  try {
+    const dbResult = await dbPool.query('SELECT * FROM player_stats WHERE player_id::text = $1 AND rank = $2', [String(playerId), rank]);
+    if (dbResult.rows.length > 0) {
+      return normalizePlayerStableRecord(dbResult.rows[0], playerId);
     }
+  } catch (e) { }
+  const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
+  const endpoint = baseUrl + '/players/' + encodeURIComponent(playerId) + '?rank=' + encodeURIComponent(rank);
+  try {
+    const payload = await fetchApiJson(endpoint, options);
+    return normalizePlayerStableRecord(normalizeApiPayload(payload), playerId);
+  } catch (e) {
+    throw e;
   }
-
-  return record;
 }
 
 function getPlayerSlugResolverClient() {
