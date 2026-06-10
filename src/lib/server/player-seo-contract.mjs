@@ -1083,7 +1083,7 @@ function getPlayerSlugResolverPool() {
   if (!globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY]) {
     globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY] = new Pool({
       connectionString,
-      max: 4,
+      max: 20,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000
     });
@@ -1251,3 +1251,4 @@ export async function resolvePlayerProfileContract(playerId, options = {}) {
     relatedPlayers
   };
 }
+
