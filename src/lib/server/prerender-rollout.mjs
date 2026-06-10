@@ -1,9 +1,9 @@
-const MAX_PRERENDER_LIMIT = 10000;
+const MAX_PRERENDER_LIMIT = 2000;
 
 const PRERENDER_TIER_LIMITS = Object.freeze({
   '1k': 1000,
-  '5k': 5000,
-  '10k': 10000
+  '5k': 2000,
+  '10k': 2000
 });
 
 function normalizeTier(value) {
@@ -12,8 +12,8 @@ function normalizeTier(value) {
     .toLowerCase()
     .replace(/^tier[-_]?/, '');
   if (normalized === '1k' || normalized === '1000') return '1k';
-  if (normalized === '5k' || normalized === '5000') return '5k';
-  if (normalized === '10k' || normalized === '10000') return '10k';
+  if (normalized === '5k' || normalized === '2000') return '5k';
+  if (normalized === '10k' || normalized === '2000') return '10k';
   return null;
 }
 
@@ -30,7 +30,7 @@ export function getPlayerPrerenderLimit() {
   const explicitLimit = parseExplicitLimit();
   if (explicitLimit) return explicitLimit;
 
-  return MAX_PRERENDER_LIMIT;
+  return 500;
 }
 
 export function getPrerenderRolloutState() {
@@ -45,3 +45,4 @@ export function getPrerenderRolloutState() {
     maxLimit: MAX_PRERENDER_LIMIT
   };
 }
+
