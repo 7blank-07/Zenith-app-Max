@@ -135,3 +135,26 @@ export async function fetchTrainingBoostsForPosition(position, trainingLevel) {
     boosts
   };
 }
+
+export async function fetchPlayerPlaystyles(playerId) {
+  const pool = getPlayerSkillDataPool();
+  const normalizedPlayerId = toText(playerId);
+
+  const result = await pool.query(
+    `
+      SELECT
+        pp.playstyle_name,
+        pp.level,
+        pc.description,
+        pc.icon_level_1,
+        pc.icon_level_2
+      FROM player_playstyles pp
+      LEFT JOIN playstyles_catalog pc ON pp.playstyle_name = pc.name
+      WHERE pp.player_id::text = $1
+      ORDER BY pp.level DESC, pp.playstyle_name ASC
+    `,
+    [normalizedPlayerId]
+  );
+
+  return Array.isArray(result.rows) ? result.rows : [];
+}

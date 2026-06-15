@@ -6,6 +6,7 @@ import PlayerDetailInteractions from './PlayerDetailInteractions.client';
 import PlayerMarketValue from './PlayerMarketValue.client';
 import PlayerRefreshTimePanel from './PlayerRefreshTimePanel.client';
 import PlayerSkillsAbilitiesSection from './PlayerSkillsAbilitiesSection.client';
+import PlayerPlaystylesSection from './PlayerPlaystylesSection.client';
 import PlayerStatisticsSection from './PlayerStatisticsSection.client';
 import PlayerTrainingLevelPanel from './PlayerTrainingLevelPanel.client';
 import AdsenseAd from './AdsenseAd';
@@ -650,6 +651,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
           </div>
 
           <PlayerSkillsAbilitiesSection playerId={playerId} currentRank={selectedRank} />
+          <PlayerPlaystylesSection playerId={playerId} currentRank={selectedRank} />
 
           <PlayerPriceHistorySection playerId={playerId} rank={selectedRank} isAuctionable={isAuctionable} />
           <AdsenseAd slot="7867021922" style={{ marginTop: '24px' }} />
