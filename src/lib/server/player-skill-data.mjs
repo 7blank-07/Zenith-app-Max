@@ -151,7 +151,10 @@ export async function fetchPlayerPlaystyles(playerId) {
       FROM player_playstyles pp
       LEFT JOIN playstyles_catalog pc ON pp.playstyle_name = pc.name
       WHERE pp.player_id::text = $1
-      ORDER BY pp.level DESC, pp.playstyle_name ASC
+      AND pp.playstyle_name != 'None'
+      AND (pc.description NOT ILIKE 'trait_desc_%' OR pc.description IS NULL)
+      ORDER BY pp.level DESC, pc.playstyle_id ASC
+      LIMIT 2
     `,
     [normalizedPlayerId]
   );
