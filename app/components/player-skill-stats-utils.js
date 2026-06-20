@@ -362,7 +362,7 @@ export function buildLegacyStatsModel(player, options = {}) {
       {
         key: 'dribbling',
         name: 'Dribbling',
-        mainValue: finalStat('dribbling_head', 'dribbling'),
+        mainValue: calculateDribbling(finalStat),
         substats: [
           { label: 'Dribbling', value: finalStat('dribbling') },
           { label: 'Balance', value: finalStat('balance') },
