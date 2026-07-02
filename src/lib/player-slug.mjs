@@ -31,18 +31,27 @@ export function slugifyPlayerName(name) {
 
 export function buildPlayerSlug(playerLike) {
   const source = playerLike && typeof playerLike === 'object' ? playerLike : {};
-  const playerId = toDigits(source.playerId ?? source.player_id ?? source.playerid);
-  const recordId = toDigits(source.recordId ?? source.record_id ?? source.id);
+  const rawId = toText(source.playerId ?? source.player_id ?? source.playerid);
+  
+  if (!rawId) return '';
 
-  if (!playerId) return '';
+  const namePart = slugifyPlayerName(source.name);
+  const ovrPart = String(Math.max(0, toInteger(source.ovr, 0)));
+  
+  // If it's a UUID/hex string (32+ chars)
+  if (/^[a-f0-9]{32}$/i.test(rawId)) {
+    return `${namePart}-${ovrPart}-${rawId}`;
+  }
+
+  // Legacy behavior
+  const playerId = toDigits(rawId);
+  const recordId = toDigits(source.recordId ?? source.record_id ?? source.id);
   if (!recordId) return playerId;
 
   const playerIdSuffix = right(playerId, 4);
   const recordIdSuffix = right(recordId, 3);
   if (playerIdSuffix.length !== 4 || recordIdSuffix.length !== 3) return playerId;
 
-  const namePart = slugifyPlayerName(source.name);
-  const ovrPart = String(Math.max(0, toInteger(source.ovr, 0)));
   return `${namePart}-${ovrPart}-${playerIdSuffix}${recordIdSuffix}`;
 }
 
@@ -74,10 +83,28 @@ export function parsePlayerSlug(slugValue) {
       playerId: legacyDigits,
       playerIdSuffix: right(legacyDigits, 4),
       recordIdSuffix: right(legacyDigits, 3),
-      isLegacyId: true
+      isLegacyId: true,
+      uuid: null
     };
   }
 
+  // Try matching the new UUID format: name-ovr-uuid (32 chars)
+  const uuidMatch = decoded.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)-(\d+)-([a-f0-9]{32})$/i);
+  if (uuidMatch) {
+    const [, nameSlugRaw, ovrRaw, uuidRaw] = uuidMatch;
+    return {
+      slug: decoded,
+      nameSlug: toText(nameSlugRaw).toLowerCase(),
+      ovr: toInteger(ovrRaw, 0),
+      playerId: uuidRaw,
+      playerIdSuffix: '',
+      recordIdSuffix: '',
+      isLegacyId: false,
+      uuid: uuidRaw
+    };
+  }
+
+  // Try matching the legacy format: name-ovr-7digits
   const match = decoded.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)-(\d+)-(\d{7})$/i);
   if (!match) return null;
 
@@ -89,6 +116,7 @@ export function parsePlayerSlug(slugValue) {
     playerId: '',
     playerIdSuffix: suffixRaw.slice(0, 4),
     recordIdSuffix: suffixRaw.slice(4),
-    isLegacyId: false
+    isLegacyId: false,
+    uuid: null
   };
 }

@@ -47,6 +47,8 @@ export function getMarketPool(rawEnv = process.env) {
 }
 
 export async function runMarketQuery(text, values = []) {
+  console.log('[market-db] MARKET_DATABASE_URL:', process.env.MARKET_DATABASE_URL);
+  console.log('[market-db] DATABASE_URL:', process.env.DATABASE_URL);
   const pool = getMarketPool();
   return pool.query(text, values);
 }

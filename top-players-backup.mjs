@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { hasPlayerColorData, mergePlayerColorData, normalizePlayerStableRecord, preferPlayerStableRecord, getPlayerSlugResolverPool } from './player-seo-contract.mjs';
+import { hasPlayerColorData, mergePlayerColorData, normalizePlayerStableRecord, preferPlayerStableRecord } from './player-seo-contract.mjs';
 
 const TOP_PLAYERS_PATH = path.join(process.cwd(), 'src', 'data', 'top-players.json');
 const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
@@ -278,25 +278,22 @@ function resolveEventText(row, normalizedRow) {
 }
 
 async function fetchRowsByIdsAtRank(baseUrl, ids, rank, chunkSize, concurrency = DEFAULT_FILTER_FETCH_CONCURRENCY) {
-  if (!ids.length) return [];
-  const pool = getPlayerSlugResolverPool();
-  if (!pool) return [];
-
-  const results = [];
   const chunks = splitIntoChunks(ids, chunkSize);
+  const results = [];
 
-  for (const chunk of chunks) {
-    try {
-      const query = await pool.query(
-        `SELECT * FROM vision_players WHERE player_id = ANY($1::varchar[])`,
-        [chunk]
-      );
-      if (Array.isArray(query.rows)) {
-        results.push(...query.rows);
-      }
-    } catch (error) {
-      console.error('[top-players] Native DB by-ids query failed:', error);
-    }
+  for (let i = 0; i < chunks.length; i += concurrency) {
+    const batch = chunks.slice(i, i + concurrency);
+    const batchResults = await Promise.all(
+      batch.map(async (chunk) => {
+        const query = new URLSearchParams({
+          ids: chunk.join(','),
+          rank: String(rank)
+        });
+        const requestUrl = `${baseUrl}/players/by-ids?${query.toString()}`;
+        return ensureList(await fetchWithRetry(requestUrl, '/players/by-ids'));
+      })
+    );
+    results.push(...batchResults.flat());
   }
 
   return results;
@@ -481,22 +478,16 @@ export async function fetchLatestPlayers(options = {}) {
   }
 
   const inFlight = (async () => {
-    const pool = getPlayerSlugResolverPool();
-    if (!pool) return [];
-
-    let rows = [];
-    try {
-      const query = await pool.query(
-        `SELECT * FROM vision_players ORDER BY date_added DESC NULLS LAST LIMIT $1`,
-        [maxCandidateLimit]
-      );
-      if (Array.isArray(query.rows)) {
-        rows = query.rows;
-      }
-    } catch (error) {
-      console.error('[top-players] Native DB latest players query failed:', error);
-    }
-
+    const query = new URLSearchParams({
+      limit: String(maxCandidateLimit),
+      offset: '0',
+      rank: String(rank),
+      sort_by: 'date_added',
+      order: 'desc'
+    });
+    const requestUrl = `${baseUrl}/players?${query.toString()}`;
+    const payload = await fetchWithRetry(requestUrl, 'latest /players');
+    const rows = ensureList(payload);
     const byId = new Map();
     for (const row of rows) {
       const normalized = normalizePlayerStableRecord(row, row?.player_id || row?.id);

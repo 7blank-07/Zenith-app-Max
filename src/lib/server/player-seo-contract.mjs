@@ -665,7 +665,7 @@ function summarizeWorkRates(player) {
 }
 
 async function fetchApiJson(endpoint, options = {}) {
-  const timeoutMs = options.timeoutMs ?? 10000;
+  const timeoutMs = options.timeoutMs ?? 30000;
   const fetchImpl = options.fetchImpl || globalThis.fetch;
 
   if (typeof fetchImpl !== 'function') {
@@ -721,7 +721,7 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     ''
   );
   const recordId = toText(firstDefined([source.id, source.player_stats_id, source.record_id, source.recordId], ''), '');
-  const name = toText(firstDefined([source.name, source.player_name, source.playerName], 'Unknown Player'));
+  const name = toText(firstDefined([source.card_name, source.name, source.player_name, source.playerName], 'Unknown Player'));
   const fullName = toText(firstDefined([source.full_name, source.fullname, source.fullName, source.player_full_name, source.name], ''), '');
   const eventName = toText(firstDefined([source.event_name, source.event, source.program_name, source.eventName], ''), '');
   const ovr = toInteger(firstDefined([source.ovr, source.overall, source.rating, source.overallrating], 0), 0);
@@ -730,9 +730,9 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const nation = toText(firstDefined([source.nation_region, source.nation, source.country, source.nationName], ''), '');
   const club = toText(firstDefined([source.team, source.club, source.clubName], ''), '');
   const league = toText(firstDefined([source.league, source.leagueName], ''), '');
-  const image = toText(firstDefined([source.image, source.image_url, source.card_image, source.player_image, source.playerImage], ''), '');
+  const image = toText(firstDefined([source.portrait_url, source.image, source.image_url, source.card_image, source.player_image, source.playerImage], ''), '');
   const cardBackground = toText(firstDefined([source.card_background, source.cardbackground, source.cardBackground], ''), '');
-  const playerImage = toText(firstDefined([source.player_image, source.playerimage, source.image, source.image_url, source.playerImage], ''), '');
+  const playerImage = toText(firstDefined([source.portrait_url, source.player_image, source.playerimage, source.image, source.image_url, source.playerImage], ''), '');
   const nationFlag = toText(firstDefined([source.nation_flag, source.nationflag, source.nationFlag], ''), '');
   const clubFlag = toText(firstDefined([source.club_flag, source.clubflag, source.clubFlag], ''), '');
   const leagueImage = toText(firstDefined([source.league_image, source.leagueimage, source.leagueImage], ''), '');
@@ -744,8 +744,8 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const isUntradable = toBoolean(firstDefined([source.is_untradable, source.untradable, source.isUntradable], false));
   const skillMoves = toInteger(firstDefined([source.skill_moves_stars, source.skill_moves, source.skillMoves, source.skillmoves], 0), 0);
   const weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot, source.weakFoot, source.weakfoot], 0), 0);
-  const strongFoot = toInteger(firstDefined([source.strong_foot_stars, source.strongFoot], 0), 0);
-  const strongFootSide = toText(firstDefined([source.strong_foot_side, source.strongFootSide], ''), '');
+  const strongFoot = toInteger(firstDefined([source.preferred_foot, source.strong_foot_stars, source.strongFoot], 0), 0);
+  const strongFootSide = toText(firstDefined([source.preferred_foot, source.strong_foot_side, source.strongFootSide], ''), '');
   const workRateAttack = toText(
     firstDefined(
       [
@@ -1076,7 +1076,7 @@ function getPlayerSlugResolverClient() {
   return globalThis[PLAYER_SLUG_RESOLVER_CLIENT_KEY];
 }
 
-function getPlayerSlugResolverPool() {
+export function getPlayerSlugResolverPool() {
   const connectionString = toText(process.env.DATABASE_URL);
   if (!connectionString) return null;
 
@@ -1096,22 +1096,109 @@ async function queryPlayerSlugCandidates(parsedSlug) {
   const pool = getPlayerSlugResolverPool();
   if (!pool) return null;
 
-  const query = await pool.query(
-    `
-      SELECT
-        player_id::text AS player_id,
-        id::text AS id,
-        name,
-        ovr
-      FROM player_stats
-      WHERE RIGHT(player_id::text, 4) = $1
-        AND RIGHT(id::text, 3) = $2
-      LIMIT 20
-    `,
-    [parsedSlug.playerIdSuffix, parsedSlug.recordIdSuffix]
-  );
+  let candidates = [];
 
-  return Array.isArray(query.rows) ? query.rows : [];
+  if (parsedSlug.uuid) {
+    try {
+      const query = await pool.query(
+        `
+          SELECT
+            player_id::text AS player_id,
+            player_id::text AS id,
+            card_name AS name,
+            ovr
+          FROM vision_players
+          WHERE player_id = $1
+          LIMIT 1
+        `,
+        [parsedSlug.uuid]
+      );
+      if (Array.isArray(query.rows)) {
+        candidates.push(...query.rows);
+      }
+    } catch (error) {
+      console.warn('[player-slug] vision table UUID query error:', error);
+    }
+    
+    if (candidates.length > 0) return candidates;
+  }
+
+  try {
+    const query = await pool.query(
+      `
+        SELECT
+          player_id::text AS player_id,
+          id::text AS id,
+          name,
+          ovr
+        FROM player_stats
+        WHERE RIGHT(player_id::text, 4) = $1
+          AND RIGHT(id::text, 3) = $2
+        LIMIT 20
+      `,
+      [parsedSlug.playerIdSuffix, parsedSlug.recordIdSuffix]
+    );
+    if (Array.isArray(query.rows)) {
+      candidates.push(...query.rows);
+    }
+  } catch (error) {
+    if (error?.code !== '42P01') {
+      console.warn('[player-slug] legacy table SQL query error:', error);
+    }
+  }
+
+  try {
+    const query = await pool.query(
+      `
+        SELECT
+          player_id::text AS player_id,
+          player_id::text AS id,
+          card_name AS name,
+          ovr
+        FROM vision_players
+        WHERE RIGHT(REGEXP_REPLACE(player_id::text, '[^0-9]', '', 'g'), 4) = $1
+          AND RIGHT(REGEXP_REPLACE(player_id::text, '[^0-9]', '', 'g'), 3) = $2
+        LIMIT 20
+      `,
+      [parsedSlug.playerIdSuffix, parsedSlug.recordIdSuffix]
+    );
+    if (Array.isArray(query.rows)) {
+      candidates.push(...query.rows);
+    }
+  } catch (error) {
+    if (error?.code !== '42P01') {
+      console.warn('[player-slug] vision table SQL query error:', error);
+    }
+  }
+
+  // SEO Fallback: If no players found by suffix (e.g. old RenderZ ID slug like totti-120-7316341),
+  // search by OVR and fuzzy name match to return the new UUID player for a 301 redirect.
+  if (candidates.length === 0 && parsedSlug.nameSlug && parsedSlug.ovr) {
+    try {
+      const fuzzyName = '%' + parsedSlug.nameSlug.replace(/-/g, '%') + '%';
+      const seoQuery = await pool.query(
+        `
+          SELECT
+            player_id::text AS player_id,
+            player_id::text AS id,
+            card_name AS name,
+            ovr
+          FROM vision_players
+          WHERE ovr = $1
+            AND card_name ILIKE $2
+          LIMIT 5
+        `,
+        [parsedSlug.ovr, fuzzyName]
+      );
+      if (Array.isArray(seoQuery.rows)) {
+        candidates.push(...seoQuery.rows);
+      }
+    } catch (error) {
+      console.warn('[player-slug] SEO fallback SQL query error:', error);
+    }
+  }
+
+  return candidates;
 }
 
 function resolveBestPlayerSlugMatch(rows, parsedSlug) {
@@ -1166,15 +1253,21 @@ export async function resolvePlayerIdentifiersFromSlug(slugValue) {
       .limit(20);
 
     if (lookup.error) {
-      throw new Error(`Player slug lookup failed: ${lookup.error.message}`);
+      console.warn(`[player-slug] Supabase REST lookup failed: ${lookup.error.message}`);
     }
 
     sourceRows = lookup.data || [];
   }
 
-  const candidates = sourceRows.filter(
-    (row) => rightDigits(row?.player_id, 4) === parsedSlug.playerIdSuffix && rightDigits(row?.id, 3) === parsedSlug.recordIdSuffix
-  );
+  let candidates = [];
+  if (parsedSlug.uuid) {
+    candidates = sourceRows;
+  } else {
+    candidates = sourceRows.filter(
+      (row) => rightDigits(row?.player_id, 4) === parsedSlug.playerIdSuffix && rightDigits(row?.id, 3) === parsedSlug.recordIdSuffix
+    );
+  }
+  
   if (!candidates.length) {
     throw new Error('Player slug could not be resolved');
   }

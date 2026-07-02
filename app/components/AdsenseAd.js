@@ -55,6 +55,8 @@ export default function AdsenseAd({ slot, format = 'auto', layout = '', layoutKe
   // Reserve space based on format to reduce CLS
   const defaultMinHeight = format === 'autorelaxed' ? '500px' : (format === 'fluid' || layout === 'in-article') ? '120px' : '280px';
 
+  const insHtml = `<ins class="adsbygoogle" style="display: block; min-width: 250px;" data-ad-client="ca-pub-4474200951186936" data-ad-slot="${slot}" data-ad-format="${format}" ${layout ? `data-ad-layout="${layout}"` : ''} ${layoutKey ? `data-ad-layout-key="${layoutKey}"` : ''} data-full-width-responsive="${responsive ? 'true' : 'false'}"></ins>`;
+
   return (
     <div 
       className="adsense-container"
@@ -67,17 +69,7 @@ export default function AdsenseAd({ slot, format = 'auto', layout = '', layoutKe
         clear: 'both',
         ...style
       }}
-    >
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'block', minWidth: '250px' }}
-        data-ad-client="ca-pub-4474200951186936"
-        data-ad-slot={slot}
-        data-ad-format={format}
-        {...(layout ? { 'data-ad-layout': layout } : {})}
-        {...(layoutKey ? { 'data-ad-layout-key': layoutKey } : {})}
-        data-full-width-responsive={responsive ? 'true' : 'false'}
-      />
-    </div>
+      dangerouslySetInnerHTML={{ __html: insHtml }}
+    />
   );
 }
