@@ -72,8 +72,7 @@ const ATTRIBUTE_FIELD_GROUPS = Object.freeze([
       { key: 'heading', label: 'Heading' },
       { key: 'strength', label: 'Strength' },
       { key: 'aggression', label: 'Aggression' },
-      { key: 'jumping', label: 'Jumping' },
-      { key: 'stamina', label: 'Stamina' }
+      { key: 'jumping', label: 'Jumping' }
     ]
   }
 ]);
@@ -554,8 +553,7 @@ function buildLegacyStyleAttributeCategories(source, position) {
         name: 'Reflexes',
         mainValue: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes'),
         substats: [
-          { label: 'GK Reflexes', value: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes') },
-          { label: 'Jumping', value: finalStat('jumping') }
+          { label: 'GK Reflexes', value: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes') }
         ]
       },
       {
@@ -563,8 +561,7 @@ function buildLegacyStyleAttributeCategories(source, position) {
         name: 'Kicking',
         mainValue: finalStat(...GK_STAT_ALIASES.kicking, 'kicking'),
         substats: [
-          { label: 'GK Kicking', value: finalStat(...GK_STAT_ALIASES.kicking, 'kicking') },
-          { label: 'Long Passing', value: finalStat('long_passing') }
+          { label: 'GK Kicking', value: finalStat(...GK_STAT_ALIASES.kicking, 'kicking') }
         ]
       },
       {
@@ -648,8 +645,7 @@ function buildLegacyStyleAttributeCategories(source, position) {
       substats: [
         { label: 'Strength', value: finalStat('strength') },
         { label: 'Aggression', value: finalStat('aggression') },
-        { label: 'Jumping', value: finalStat('jumping') },
-        { label: 'Stamina', value: finalStat('stamina_stat', 'stamina') }
+        { label: 'Jumping', value: finalStat('jumping') }
       ]
     }
   ];

@@ -48,8 +48,7 @@ const OUTFIELD_COMPARE_STATS = Object.freeze({
     { key: 'heading', label: 'Heading', names: ['heading'] },
     { key: 'aggression', label: 'Aggression', names: ['aggression'] },
     { key: 'jumping', label: 'Jumping', names: ['jumping'] },
-    { key: 'strength', label: 'Strength', names: ['strength'] },
-    { key: 'stamina', label: 'Stamina', names: ['stamina_stat', 'stamina'] }
+    { key: 'strength', label: 'Strength', names: ['strength'] }
   ])
 });
 

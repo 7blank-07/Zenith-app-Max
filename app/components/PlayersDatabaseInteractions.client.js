@@ -45,7 +45,6 @@ const CUSTOM_STATS = Object.freeze([
   { id: 'standingTackle', label: 'Standing Tackle', pillLabel: 'STT', category: 'Defense', attributeKeys: ['standingTackle', 'standing_tackle'] },
   { id: 'balance', label: 'Balance', pillLabel: 'BAL', category: 'Physical', attributeKeys: ['balance'] },
   { id: 'jumping', label: 'Jumping', pillLabel: 'JMP', category: 'Physical', attributeKeys: ['jumping'] },
-  { id: 'stamina', label: 'Stamina', pillLabel: 'STA', category: 'Physical', attributeKeys: ['stamina', 'stamina_stat'] },
   { id: 'strength', label: 'Strength', pillLabel: 'STR', category: 'Physical', attributeKeys: ['strength'] },
   { id: 'gkDiving', label: 'GK Diving', pillLabel: 'GKD', category: 'Goalkeeper', attributeKeys: ['gkDiving', 'gk_diving', 'goalkeeperDiving'] },
   { id: 'gkHandling', label: 'GK Handling', pillLabel: 'GKH', category: 'Goalkeeper', attributeKeys: ['gkHandling', 'gk_handling', 'goalkeeperHandling'] },

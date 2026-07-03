@@ -293,8 +293,7 @@ export function buildLegacyStatsModel(player, options = {}) {
           name: 'Reflexes',
           mainValue: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes'),
           substats: [
-            { label: 'GK Reflexes', value: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes') },
-            { label: 'Jumping', value: finalStat('jumping') }
+            { label: 'GK Reflexes', value: finalStat(...GK_STAT_ALIASES.reflexes, 'reflexes') }
           ]
         },
         {
@@ -302,8 +301,7 @@ export function buildLegacyStatsModel(player, options = {}) {
           name: 'Kicking',
           mainValue: finalStat(...GK_STAT_ALIASES.kicking, 'kicking'),
           substats: [
-            { label: 'GK Kicking', value: finalStat(...GK_STAT_ALIASES.kicking, 'kicking') },
-            { label: 'Long Passing', value: finalStat('long_passing') }
+            { label: 'GK Kicking', value: finalStat(...GK_STAT_ALIASES.kicking, 'kicking') }
           ]
         },
         {
@@ -390,8 +388,7 @@ export function buildLegacyStatsModel(player, options = {}) {
         substats: [
           { label: 'Strength', value: finalStat('strength') },
           { label: 'Aggression', value: finalStat('aggression') },
-          { label: 'Jumping', value: finalStat('jumping') },
-          { label: 'Stamina', value: finalStat('stamina_stat', 'stamina') }
+          { label: 'Jumping', value: finalStat('jumping') }
         ]
       }
     ]
