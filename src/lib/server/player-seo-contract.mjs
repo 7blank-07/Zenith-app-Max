@@ -739,9 +739,31 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const rank = toInteger(firstDefined([source.rank], 0), 0);
   const isUntradable = toBoolean(firstDefined([source.is_untradable, source.untradable, source.isUntradable], false));
   const skillMoves = toInteger(firstDefined([source.skill_moves_stars, source.skill_moves, source.skillMoves, source.skillmoves], 0), 0);
-  const weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot, source.weakFoot, source.weakfoot], 0), 0);
-  const strongFoot = toInteger(firstDefined([source.preferred_foot, source.strong_foot_stars, source.strongFoot], 0), 0);
-  const strongFootSide = toText(firstDefined([source.preferred_foot, source.strong_foot_side, source.strongFootSide], ''), '');
+  let weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot, source.weakFoot, source.weakfoot], 0), 0);
+  let strongFoot = 0;
+  let strongFootSide = '';
+  const rawPrefFoot = toText(firstDefined([source.preferred_foot, source.strong_foot_stars], ''), '');
+  
+  if (rawPrefFoot.length === 2 && /^\d{2}$/.test(rawPrefFoot)) {
+    const leftFoot = parseInt(rawPrefFoot[0], 10);
+    const rightFoot = parseInt(rawPrefFoot[1], 10);
+    if (leftFoot > rightFoot) {
+      strongFootSide = 'Left';
+      strongFoot = rightFoot;
+      weakFoot = rightFoot;
+    } else if (rightFoot > leftFoot) {
+      strongFootSide = 'Right';
+      strongFoot = leftFoot;
+      weakFoot = leftFoot;
+    } else {
+      strongFootSide = 'Either';
+      strongFoot = leftFoot;
+      weakFoot = leftFoot;
+    }
+  } else {
+    strongFoot = toInteger(firstDefined([source.strongFoot, source.weak_foot_stars], 0), 0);
+    strongFootSide = toText(firstDefined([source.strong_foot_side, source.strongFootSide], ''), '');
+  }
   const workRateAttack = toText(
     firstDefined(
       [
