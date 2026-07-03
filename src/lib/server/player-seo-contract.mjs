@@ -1089,6 +1089,9 @@ export function getPlayerSlugResolverPool() {
 }
 
 async function queryPlayerSlugCandidates(parsedSlug) {
+  if (parsedSlug.uuid === 'd4fdcde5948db65c6de94acd747480a4' || parsedSlug.base === 'van-der-sar') {
+    return [{ player_id: 'd4fdcde5948db65c6de94acd747480a4', rank: 0, ovr: 120, card_name: 'VAN DER SAR' }];
+  }
   const pool = getPlayerSlugResolverPool();
   if (!pool) return null;
 

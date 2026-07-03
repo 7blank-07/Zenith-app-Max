@@ -286,7 +286,16 @@ def get_players(
             'heading': stats.get('Heading', 0),
             'strength': stats.get('Strength', 0),
             'aggression': stats.get('Aggression', 0),
-            'jumping': stats.get('Jumping', 0)
+            'jumping': stats.get('Jumping', 0),
+            'diving': stats.get('Diving', 0),
+            'handling': stats.get('Handling', 0),
+            'kicking': stats.get('Kicking', 0),
+            'reflexes': stats.get('Reflexes', 0),
+            'gk_diving': stats.get('Diving_Stat', 0),
+            'gk_positioning': stats.get('Positioning_Stat', 0),
+            'gk_handling': stats.get('Handling_Stat', 0),
+            'gk_reflexes': stats.get('Reflexes_Stat', 0),
+            'gk_kicking': stats.get('Kicking_Stat', 0)
         })
 
     if include_price:
@@ -374,7 +383,16 @@ def map_vision_player_to_legacy(p, rank=0):
         'heading': stats.get('Heading', 0),
         'strength': stats.get('Strength', 0),
         'aggression': stats.get('Aggression', 0),
-        'jumping': stats.get('Jumping', 0)
+        'jumping': stats.get('Jumping', 0),
+        'diving': stats.get('Diving', 0),
+        'handling': stats.get('Handling', 0),
+        'kicking': stats.get('Kicking', 0),
+        'reflexes': stats.get('Reflexes', 0),
+        'gk_diving': stats.get('Diving_Stat', 0),
+        'gk_positioning': stats.get('Positioning_Stat', 0),
+        'gk_handling': stats.get('Handling_Stat', 0),
+        'gk_reflexes': stats.get('Reflexes_Stat', 0),
+        'gk_kicking': stats.get('Kicking_Stat', 0)
     }
 
 @app.get("/api/players/search")
