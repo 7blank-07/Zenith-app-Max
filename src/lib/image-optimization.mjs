@@ -32,6 +32,7 @@ export function getOptimizedZenithUrl(src, width, quality = 75) {
     }
     
     url.searchParams.set('q', (quality || 75).toString());
+    url.searchParams.set('v', '2'); // Global cache buster to force browsers and Cloudflare to load fresh images
     
     return url.toString();
   } catch (error) {
