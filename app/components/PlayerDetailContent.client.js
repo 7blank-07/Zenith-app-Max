@@ -274,15 +274,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
             >
               <img src={cardBackground} alt="Card Background" className="card-background-img-inside" />
               {!!cardImage && <img src={cardImage} alt={record?.name} className="player-image-img-inside" />}
-              <div className="card-ovr-inside" style={{ color: record?.colorRating || '#FFFFFF' }}>
-                {record?.ovr && record.ovr > 0 ? record.ovr : 'N/A'}
-              </div>
-              <div className="card-position-inside" style={{ color: record?.colorPosition || '#FFFFFF' }}>
-                {record?.position || 'N/A'}
-              </div>
-              <div className="card-player-name-inside" style={{ color: record?.colorName || '#FFFFFF' }}>
-                {record?.name}
-              </div>
+
               {selectedRank > 0 && RANK_SPRITES[selectedRank] ? (
                 <AnimatedRankIcon
                   className="rank-diamond-overlay rank-overlay--player-detail rank-overlay--animated"
