@@ -115,6 +115,12 @@ export const PLAYER_STABLE_RECORD_FIELDS = Object.freeze([
   'dateAdded',
   'traits',
   'skills',
+  'pac',
+  'sho',
+  'pas',
+  'dri',
+  'def',
+  'phy',
   'attributes'
 ]);
 
@@ -829,6 +835,13 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const price = toNullableInteger(firstDefined([source.price, source.latest_price, source.market_price], null));
   const attributes = extractAttributes(source);
 
+  const pac = toInteger(firstDefined([source.pac, source.pace, attributes.pace], 0));
+  const sho = toInteger(firstDefined([source.sho, source.shooting, attributes.shooting], 0));
+  const pas = toInteger(firstDefined([source.pas, source.passing, attributes.passing], 0));
+  const dri = toInteger(firstDefined([source.dri, source.dribbling, attributes.dribbling], 0));
+  const def = toInteger(firstDefined([source.def, source.defending, attributes.defending], 0));
+  const phy = toInteger(firstDefined([source.phy, source.physical, attributes.physical], 0));
+
     const record = {
     playerId,
     recordId,
@@ -868,6 +881,12 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     traitImages,
     skillImages,
     price,
+    pac,
+    sho,
+    pas,
+    dri,
+    def,
+    phy,
     attributes
   };
 

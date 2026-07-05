@@ -324,6 +324,7 @@ function normalizeAttributes(attributes, fallbackSource = null) {
 
   if (sourceAttributes) {
     for (const [key, rawValue] of Object.entries(sourceAttributes)) {
+      if (rawValue === null || rawValue === '') continue;
       const numeric = Number(rawValue);
       if (Number.isFinite(numeric)) {
         normalized[key] = numeric;

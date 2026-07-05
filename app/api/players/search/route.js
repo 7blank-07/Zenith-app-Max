@@ -25,7 +25,7 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
   }
 
-  let sql = 'SELECT * FROM vision_players WHERE 1=1';
+  let sql = 'SELECT vp.*, vpa.stats FROM vision_players vp LEFT JOIN vision_player_attributes vpa ON vp.player_id = vpa.player_id WHERE 1=1';
   const params = [];
   let paramIndex = 1;
 
@@ -53,7 +53,7 @@ export async function GET(request) {
   }
 
   if (team) {
-    sql += ` AND club = $${paramIndex++}`;
+    sql += ` AND vp.club = $${paramIndex++}`;
     params.push(team);
   }
 
@@ -90,7 +90,7 @@ export async function GET(request) {
   // Count query for pagination
   let totalCount = 0;
   try {
-    const countSql = sql.replace('SELECT *', 'SELECT COUNT(*)');
+    const countSql = sql.replace('SELECT vp.*, vpa.stats FROM vision_players vp LEFT JOIN vision_player_attributes vpa ON vp.player_id = vpa.player_id', 'SELECT COUNT(*) FROM vision_players vp');
     const countResult = await pool.query(countSql, params);
     totalCount = parseInt(countResult.rows[0].count, 10);
   } catch (err) {
@@ -116,7 +116,14 @@ export async function GET(request) {
     // Process rows through normalizePlayerStableRecord to maintain exact frontend compatibility
     const players = result.rows.map(row => {
       const playerId = String(row.player_id || row.id);
-      return normalizePlayerStableRecord(row, playerId);
+      let normalizedStats = {};
+      if (row.stats) {
+        for (const [key, value] of Object.entries(row.stats)) {
+          normalizedStats[key.toLowerCase().replace(/ /g, '_')] = value;
+        }
+      }
+      const merged = row.stats ? { ...row, ...normalizedStats } : row;
+      return normalizePlayerStableRecord(merged, playerId);
     });
 
     return NextResponse.json({
