@@ -255,8 +255,10 @@ function toInteger(value, fallback = 0) {
 }
 
 function toNullableInteger(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.trunc(parsed) : null;
+  if (value === null || value === undefined) return null;
+  const cleaned = String(value).replace(/[^\d.-]/g, '');
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) && cleaned.length > 0 ? Math.trunc(parsed) : null;
 }
 
 function formatHeightFtIn(heightCmValue) {
@@ -705,9 +707,14 @@ async function fetchPlayersList(filters, options = {}) {
   if (filters.nation) query.set('nation', filters.nation);
 
   const endpoint = `${baseUrl}/players?${query.toString()}`;
-  const payload = await fetchApiJson(endpoint, options);
-  const rows = normalizeApiListPayload(payload);
-  return rows.map((row) => normalizePlayerStableRecord(row, row?.player_id || row?.id));
+  try {
+    const payload = await fetchApiJson(endpoint, options);
+    const rows = normalizeApiListPayload(payload);
+    return rows.map((row) => normalizePlayerStableRecord(row, row?.player_id || row?.id));
+  } catch (e) {
+    console.warn('[player-seo-contract] fetchPlayersList API failed:', e.message);
+    return [];
+  }
 }
 
 export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
@@ -723,9 +730,9 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const ovr = toInteger(firstDefined([source.ovr, source.overall, source.rating, source.overallrating], 0), 0);
   const position = toText(firstDefined([source.position, source.pos, source.primary_position, source.primaryPosition], ''), '');
   const alternatePosition = toText(firstDefined([source.alternate_position, source.secondary_position, source.alternatePosition, source.secondaryPosition], ''), '');
-  const nation = toText(firstDefined([source.nation_region, source.nation, source.country, source.nationName], ''), '');
+  const nation = toText(firstDefined([source.nation_region, source.nation, source.nation_name, source.country, source.nationName], ''), '');
   const club = toText(firstDefined([source.team, source.club, source.clubName], ''), '');
-  const league = toText(firstDefined([source.league, source.leagueName], ''), '');
+  const league = toText(firstDefined([source.league, source.league_name, source.leagueName], ''), '');
   const image = toText(firstDefined([source.portrait_url, source.image, source.image_url, source.card_image, source.player_image, source.playerImage], ''), '');
   const cardBackground = toText(firstDefined([source.card_background, source.cardbackground, source.cardBackground], ''), '');
   const playerImage = toText(firstDefined([source.portrait_url, source.player_image, source.playerimage, source.image, source.image_url, source.playerImage], ''), '');
@@ -742,31 +749,37 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   let weakFoot = toInteger(firstDefined([source.weak_foot_stars, source.weak_foot, source.weakFoot, source.weakfoot], 0), 0);
   let strongFoot = 0;
   let strongFootSide = '';
-  const rawPrefFoot = toText(firstDefined([source.preferred_foot, source.strong_foot_stars], ''), '');
+  const rawPrefFoot = toText(firstDefined([source.preferred_foot, source.strong_foot_stars], ''), '').replace(/\s+/g, '');
   
   if (rawPrefFoot.length === 2 && /^\d{2}$/.test(rawPrefFoot)) {
     const leftFoot = parseInt(rawPrefFoot[0], 10);
     const rightFoot = parseInt(rawPrefFoot[1], 10);
     if (leftFoot > rightFoot) {
       strongFootSide = 'Left';
-      strongFoot = rightFoot;
+      strongFoot = leftFoot;
       weakFoot = rightFoot;
     } else if (rightFoot > leftFoot) {
       strongFootSide = 'Right';
-      strongFoot = leftFoot;
+      strongFoot = rightFoot;
       weakFoot = leftFoot;
     } else {
       strongFootSide = 'Either';
       strongFoot = leftFoot;
       weakFoot = leftFoot;
     }
+  } else if (rawPrefFoot.length === 1 && /^\d$/.test(rawPrefFoot)) {
+    // If it's a single digit like "5" from vision_players
+    weakFoot = parseInt(rawPrefFoot, 10);
+    strongFoot = 5;
+    strongFootSide = 'Right'; // Default if missing
   } else {
     strongFoot = toInteger(firstDefined([source.strongFoot, source.weak_foot_stars], 0), 0);
-    strongFootSide = toText(firstDefined([source.strong_foot_side, source.strongFootSide], ''), '');
+    strongFootSide = toText(firstDefined([source.preferred_foot, source.strong_foot_side, source.strongFootSide], ''), '');
   }
   const workRateAttack = toText(
     firstDefined(
       [
+        source.work_rate_att,
         source.work_rate_attack,
         source.work_rate_attacking,
         source.attack_work_rate,
@@ -786,6 +799,7 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
   const workRateDefense = toText(
     firstDefined(
       [
+        source.work_rate_def,
         source.work_rate_defense,
         source.work_rate_defensive,
         source.defense_work_rate,
@@ -801,12 +815,12 @@ export function normalizePlayerStableRecord(rawPlayer, fallbackPlayerId) {
     ),
     ''
   );
-  const heightCm = toNullableInteger(firstDefined([source.height_cm, source.heightCm], null));
+  const heightCm = toNullableInteger(firstDefined([source.height, source.height_cm, source.heightCm], null));
   const heightFtIn = toText(
     firstDefined([source.height_ft_in, source.height_ftin, source.height_feet_inches, source.heightFtIn], ''),
     ''
   );
-  const weightKg = toNullableInteger(firstDefined([source.weight_kg], null));
+  const weightKg = toNullableInteger(firstDefined([source.weight, source.weight_kg], null));
   const dateAdded = toText(firstDefined([source.date_added, source.created_at, source.added_at, source.dateAdded], ''), '');
   const traitImages = normalizeDelimitedList(firstDefined([source.traits], []));
   const skillImages = normalizeDelimitedList(firstDefined([source.skills], []));
@@ -1062,7 +1076,31 @@ export async function fetchPlayerStableRecord(playerId, options = {}) {
     if (dbResult.rows.length > 0) {
       return normalizePlayerStableRecord(dbResult.rows[0], playerId);
     }
-  } catch (e) { }
+  } catch (e) {
+    console.warn('[player-seo-contract] player_stats lookup failed:', e.message);
+  }
+
+  try {
+    const visionResult = await dbPool.query(
+      `SELECT vp.*, va.stats as vision_stats 
+       FROM vision_players vp 
+       LEFT JOIN vision_player_attributes va ON vp.player_id = va.player_id 
+       WHERE vp.player_id::text = $1`,
+      [String(playerId)]
+    );
+    if (visionResult.rows.length > 0) {
+      const row = visionResult.rows[0];
+      if (row.vision_stats) {
+        Object.keys(row.vision_stats).forEach(k => {
+          const lowerKey = k.toLowerCase().replace(/ /g, '_');
+          row[lowerKey] = row.vision_stats[k];
+        });
+      }
+      return normalizePlayerStableRecord(row, playerId);
+    }
+  } catch (e) {
+    console.warn('[player-seo-contract] vision_players lookup failed:', e.message);
+  }
   const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
   const endpoint = baseUrl + '/players/' + encodeURIComponent(playerId) + '?rank=' + encodeURIComponent(rank);
   try {

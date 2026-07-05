@@ -380,9 +380,10 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               }}
             >
 
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Club</span>
-                  <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>{record?.club || 'Unknown'}</span>
+                  <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Nation</span>
+                  <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>{record?.nation || 'Unknown'}</span>
                 </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>League</span>
@@ -397,13 +398,13 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Strong Foot</span>
                 <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>
-                  {record?.strongFootSide || 'Unknown'} {record?.strongFoot ? `(${renderStars(record.strongFoot)})` : ''}
+                  {record?.strongFootSide || 'Unknown'}{record?.weakFoot ? `(${renderStars(record.weakFoot)})` : ''}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Body</span>
                 <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>
-                  {record?.heightCm ? `${record.heightCm}cm` : 'Unknown'} / {record?.weightKg ? `${record.weightKg}kg` : 'Unknown'}
+                  {record?.heightCm ? `${record.heightCm}cm` : 'Unknown'}/{record?.weightKg ? `${record.weightKg}kg` : 'Unknown'}
                 </span>
               </div>
             </div>
