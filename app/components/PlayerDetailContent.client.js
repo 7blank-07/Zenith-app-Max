@@ -110,8 +110,10 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
     ovr: initialRecord?.ovr || record?.ovr
   });
   const cardVariant = getPlayerCardVariant(record);
-  const cardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_main.png';
-  const cardImage = record?.playerImage || record?.image || '';
+  const rawCardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_main.png';
+  const rawCardImage = record?.playerImage || record?.image || '';
+  const cardBackground = rawCardBackground ? rawCardBackground + '?v=2' : '';
+  const cardImage = rawCardImage ? rawCardImage + '?v=2' : '';
   const profileSummary = record?.summary || `${record?.name || 'Player'} profile and latest market context from Zenith.`;
   
   
