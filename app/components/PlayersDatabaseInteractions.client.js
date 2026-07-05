@@ -544,15 +544,7 @@ function renderPlayerCard(player) {
           <span className="player-initials">{getInitials(player.name)}</span>
         )}
 
-        <div className="player-row-name" style={{ color: player.colorName }}>
-          {player.name}
-        </div>
-        <div className="player-row-ovr" style={{ color: player.colorRating }}>
-          {player.ovr || '?'}
-        </div>
-        <div className="player-row-position" style={{ color: player.colorPosition }}>
-          {player.position || '?'}
-        </div>
+
 
         {player.nationFlag ? (
           <img

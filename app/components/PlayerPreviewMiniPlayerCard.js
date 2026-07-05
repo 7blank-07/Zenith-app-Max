@@ -81,15 +81,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
                 unoptimized
               />
               
-              <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                {player.ovr && player.ovr > 0 ? player.ovr : 'NA'}
-              </div>
-              <div className="card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                {player.position || 'NA'}
-              </div>
-              <div className="card-player-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                {player.name || 'Unknown'}
-              </div>
+
 
               {player.nationFlag && (
                 <img
