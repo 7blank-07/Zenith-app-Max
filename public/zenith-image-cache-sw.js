@@ -1,4 +1,4 @@
-const IMAGE_CACHE_NAME = 'zenith-image-cache-v1';
+const IMAGE_CACHE_NAME = 'zenith-image-cache-v2';
 const REMOTE_IMAGE_HOSTS = new Set(['images.zenithfcm.com']);
 const LOCAL_IMAGE_PREFIXES = ['/assets/images/', '/_next/image'];
 
@@ -24,7 +24,17 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== IMAGE_CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', (event) => {
