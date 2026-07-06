@@ -1089,37 +1089,9 @@ export function buildPlayerSeoMetadata(playerRecord, options = {}) {
 
 export async function fetchPlayerStableRecord(playerId, options = {}) {
   const rank = options.rank ?? 0;
-  const dbPool = getPlayerSlugResolverPool();
-  try {
-    const dbResult = await dbPool.query('SELECT * FROM player_stats WHERE player_id::text = $1 AND rank = $2', [String(playerId), rank]);
-    if (dbResult.rows.length > 0) {
-      return normalizePlayerStableRecord(dbResult.rows[0], playerId);
-    }
-  } catch (e) {
-    console.warn('[player-seo-contract] player_stats lookup failed:', e.message);
-  }
 
-  try {
-    const visionResult = await dbPool.query(
-      `SELECT vp.*, va.stats as vision_stats 
-       FROM vision_players vp 
-       LEFT JOIN vision_player_attributes va ON vp.player_id = va.player_id 
-       WHERE vp.player_id::text = $1`,
-      [String(playerId)]
-    );
-    if (visionResult.rows.length > 0) {
-      const row = visionResult.rows[0];
-      if (row.vision_stats) {
-        Object.keys(row.vision_stats).forEach(k => {
-          const lowerKey = k.toLowerCase().replace(/ /g, '_');
-          row[lowerKey] = row.vision_stats[k];
-        });
-      }
-      return normalizePlayerStableRecord(row, playerId);
-    }
-  } catch (e) {
-    console.warn('[player-seo-contract] vision_players lookup failed:', e.message);
-  }
+
+  // Database lookup removed - delegating entirely to unified FastAPI backend
   const baseUrl = (options.baseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
   const endpoint = baseUrl + '/players/' + encodeURIComponent(playerId) + '?rank=' + encodeURIComponent(rank);
   try {

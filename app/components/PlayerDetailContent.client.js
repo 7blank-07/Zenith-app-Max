@@ -401,6 +401,89 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               </div>
             </div>
 
+            {profileTraitItems && profileTraitItems.length > 0 && (
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 'var(--radius-base, 8px)',
+                  padding: '18px',
+                  marginBottom: '18px'
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: 'var(--color-text-primary, #E6EEF2)',
+                    fontWeight: 700,
+                    marginBottom: '16px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    textAlign: 'center'
+                  }}
+                >
+                  Traits
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '12px',
+                  }}
+                >
+                  {profileTraitItems.slice(0, 8).map((trait) => (
+                    <div
+                      key={trait.id}
+                      style={{
+                        background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '6px',
+                        padding: '12px 8px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        border: '1px solid rgba(255,255,255,0.04)',
+                        transition: 'transform 0.2s ease, background 0.2s ease',
+                        cursor: 'default'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.background = 'rgba(0,0,0,0.2)';
+                      }}
+                    >
+                      {trait.icon ? (
+                        <img src={trait.icon} alt={trait.name} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+                      )}
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          color: 'var(--color-text-muted, #98A0A6)',
+                          textAlign: 'center',
+                          lineHeight: '1.3',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          width: '100%'
+                        }}
+                        title={trait.name}
+                      >
+                        {trait.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div
               style={{
                 background: 'rgba(0,194,168,0.08)',

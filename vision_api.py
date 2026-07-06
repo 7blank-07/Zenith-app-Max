@@ -147,6 +147,7 @@ def health_check():
 
 @app.get("/api/players")
 def get_players(
+    q: Optional[str] = Query(None, description="Search query anywhere in name"),
     limit: int = Query(100, le=1000, description="Max 1000 players per request"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     position: Optional[str] = Query(None, description="Filter by position"),
@@ -157,7 +158,7 @@ def get_players(
     nation: Optional[str] = Query(None, description="Filter by nation"),
     event: Optional[str] = Query(None, description="Filter by event"),
     rank: Optional[int] = Query(None, ge=0, le=5, description="Filter by rank (0-5)"),
-    name_starts_with: Optional[str] = Query(None, min_length=1, description="Search"),
+    name_starts_with: Optional[str] = Query(None, min_length=1, description="Search starts with"),
     skill_moves: Optional[int] = None,
     is_untradable: Optional[int] = None,
     sort_by: Optional[str] = Query(None, description="Sort field: ovr"),
@@ -175,12 +176,28 @@ def get_players(
     '''
     params = []
 
+    if q:
+        q_cleaned = q.replace(' ', '%')
+        query += " AND p.card_name ILIKE %s"
+        params.append(f"%{q_cleaned}%")
     if name_starts_with:
         query += " AND p.card_name ILIKE %s"
         params.append(f"{name_starts_with}%")
-    if position:
+    if position and not q:
+        query += " AND (p.position = %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s)"
+        params.extend([position.upper(), f"{position.upper()},%", f"%,{position.upper()},%", f"%,{position.upper()}"])
+    elif position:
         query += " AND p.position = %s"
         params.append(position.upper())
+    if team:
+        query += " AND p.club ILIKE %s"
+        params.append(team)
+    if league:
+        query += " AND p.league ILIKE %s"
+        params.append(league)
+    if nation:
+        query += " AND p.nation ILIKE %s"
+        params.append(nation)
     if min_ovr:
         query += " AND p.ovr >= %s"
         params.append(min_ovr)
@@ -193,6 +210,9 @@ def get_players(
     if skill_moves:
         query += " AND p.skill_moves_stars = %s"
         params.append(skill_moves)
+    if is_untradable is not None:
+        query += " AND p.is_untradable = %s"
+        params.append(bool(is_untradable))
 
     sort_direction = 'ASC' if order == 'asc' else 'DESC'
     
@@ -209,12 +229,21 @@ def get_players(
         raw_players = [dict(row) for row in cur.fetchall()]
         
         # Get total count
-        count_query = "SELECT COUNT(*) as total FROM vision_players WHERE 1=1"
+        count_query = "SELECT COUNT(*) as total FROM vision_players p WHERE 1=1"
         count_params = []
-        if name_starts_with: count_query += " AND card_name ILIKE %s"; count_params.append(f"{name_starts_with}%")
-        if position: count_query += " AND position = %s"; count_params.append(position.upper())
-        if min_ovr: count_query += " AND ovr >= %s"; count_params.append(min_ovr)
-        if max_ovr: count_query += " AND ovr <= %s"; count_params.append(max_ovr)
+        if q: count_query += " AND p.card_name ILIKE %s"; count_params.append(f"%{q.replace(' ', '%')}%")
+        if name_starts_with: count_query += " AND p.card_name ILIKE %s"; count_params.append(f"{name_starts_with}%")
+        if position and not q: count_query += " AND (p.position = %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s)"; count_params.extend([position.upper(), f"{position.upper()},%", f"%,{position.upper()},%", f"%,{position.upper()}"])
+        elif position: count_query += " AND p.position = %s"; count_params.append(position.upper())
+        if team: count_query += " AND p.club ILIKE %s"; count_params.append(team)
+        if league: count_query += " AND p.league ILIKE %s"; count_params.append(league)
+        if nation: count_query += " AND p.nation ILIKE %s"; count_params.append(nation)
+        if min_ovr: count_query += " AND p.ovr >= %s"; count_params.append(min_ovr)
+        if max_ovr: count_query += " AND p.ovr <= %s"; count_params.append(max_ovr)
+        if event: count_query += " AND p.event_name ILIKE %s"; count_params.append(f"%{event}%")
+        if skill_moves: count_query += " AND p.skill_moves_stars = %s"; count_params.append(skill_moves)
+        if is_untradable is not None: count_query += " AND p.is_untradable = %s"; count_params.append(bool(is_untradable))
+        
         cur.execute(count_query, count_params)
         total_count = cur.fetchone()['total']
     except Exception as e:
@@ -350,6 +379,8 @@ def map_vision_player_to_legacy(p, rank=0):
         'club_flag': '',
         'event': p.get('event_name', ''),
         'is_untradable': False,
+        'traits_name': p.get('traits_name', ''),
+        'traits': p.get('traits', ''),
         
         # Key Stats
         'pace': stats.get('Pace', 0),
@@ -476,7 +507,9 @@ def get_player_by_id(
     conn = get_db_connection()
     cur = conn.cursor()
     query = '''
-        SELECT p.*, a.stats 
+        SELECT p.*, a.stats,
+            (SELECT STRING_AGG(t.trait_name, ',') FROM vision_player_traits t WHERE t.player_id = p.player_id) as traits_name,
+            (SELECT STRING_AGG(t.image_url, ',') FROM vision_player_traits t WHERE t.player_id = p.player_id) as traits
         FROM vision_players p 
         LEFT JOIN vision_player_attributes a ON p.player_id = a.player_id 
         WHERE p.player_id = %s
@@ -489,6 +522,14 @@ def get_player_by_id(
         conn.close()
         raise HTTPException(status_code=500, detail=str(e))
         
+    if not row:
+        # Fallback to legacy player_stats table
+        try:
+            cur.execute("SELECT * FROM player_stats WHERE player_id = %s", (player_id,))
+            row = cur.fetchone()
+        except Exception:
+            pass
+            
     if not row:
         cur.close()
         conn.close()
