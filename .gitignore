@@ -34,3 +34,6 @@ build
 #environment variables
 .env.local
 .playwright-mcp/
+
+#cache
+__pycache__/
