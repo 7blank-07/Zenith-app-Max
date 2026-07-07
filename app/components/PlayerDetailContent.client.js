@@ -48,11 +48,10 @@ function buildRankPath(playerSlug, playerId, rank) {
   return rank > 0 ? `/player/${encodedPathSegment}?rank=${rank}` : `/player/${encodedPathSegment}`;
 }
 
-async function fetchLocalPlayerRecord(playerId, rank, signal) {
+async function fetchLocalPlayerRecord(playerId, rank) {
   const response = await fetch(`/api/player-detail?id=${encodeURIComponent(playerId)}&rank=${encodeURIComponent(rank)}`, {
     method: 'GET',
-    headers: { Accept: 'application/json' },
-    signal
+    headers: { Accept: 'application/json' }
   });
 
   if (!response.ok) {
@@ -178,12 +177,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
       const previousRank = selectedRank;
       if (!playerId || nextRank === previousRank) return;
 
-      if (requestControllerRef.current) {
-        requestControllerRef.current.abort();
-      }
-
-      const controller = new AbortController();
-      requestControllerRef.current = controller;
+      requestSequenceRef.current += 1;
       requestSequenceRef.current += 1;
       const requestId = requestSequenceRef.current;
 
@@ -192,7 +186,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
       updateBrowserPath(nextRank);
 
       try {
-        const payload = await fetchLocalPlayerRecord(playerId, nextRank, controller.signal);
+        const payload = await fetchLocalPlayerRecord(playerId, nextRank);
 
         if (requestId !== requestSequenceRef.current) return;
 
@@ -204,7 +198,6 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
         setRecord(nextRecord);
         setIsRankLoading(false);
       } catch (error) {
-        if (error?.name === 'AbortError') return;
         console.error('[player-detail] Failed to update rank without reload:', error);
         if (requestId !== requestSequenceRef.current) return;
         setSelectedRank(previousRank);
@@ -740,7 +733,6 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
         profileSectionTitle="Profile Overview"
         profileRows={profileOverviewFields}
         profileCollections={[
-          { key: 'traits', title: 'Traits', items: profileTraitItems },
           { key: 'abilities', title: 'Abilities', items: profileAbilityItems }
         ]}
         profileSummary={profileSummary}

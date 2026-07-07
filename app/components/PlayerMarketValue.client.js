@@ -31,7 +31,7 @@ export default function PlayerMarketValue({ playerId, rank = 0, isUntradable = f
       return () => {};
     }
 
-    const controller = new AbortController();
+    let isActive = true;
     const fetchMarketValue = async () => {
       setLoading(true);
       setError('');
@@ -39,24 +39,29 @@ export default function PlayerMarketValue({ playerId, rank = 0, isUntradable = f
       try {
         const response = await fetch(
           `/api/player-price?id=${encodeURIComponent(playerId)}&rank=${encodeURIComponent(normalizedRank)}`,
-          { cache: 'no-store', signal: controller.signal }
+          { cache: 'no-store' }
         );
         const payload = await response.json();
+        if (!isActive) return;
         if (!response.ok) {
           throw new Error(payload?.error || `Market value request failed (${response.status})`);
         }
         setValue(payload.price ?? null);
       } catch (requestError) {
-        if (requestError.name === 'AbortError') return;
+        if (!isActive) return;
         setError(requestError.message);
         setValue(null);
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
 
     fetchMarketValue();
-    return () => controller.abort();
+    return () => {
+      isActive = false;
+    };
   }, [isUntradable, normalizedRank, playerId]);
 
   if (isUntradable) return <>Non-Auctionable</>;

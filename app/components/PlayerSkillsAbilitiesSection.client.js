@@ -106,13 +106,11 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
     }
 
     let isActive = true;
-    const controller = new AbortController();
 
     const loadSkills = async () => {
       try {
         const payload = await fetchApiJson(
-          `/players/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(normalizedRank)}`,
-          controller.signal
+          `/players/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(normalizedRank)}`
         );
         if (!isActive) return;
         const fetchedSkills = Array.isArray(payload?.skills) ? payload.skills : [];
@@ -163,7 +161,6 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
     loadSkills();
     return () => {
       isActive = false;
-      controller.abort();
     };
   }, [normalizedPlayerId, normalizedRank]);
 
