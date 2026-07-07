@@ -509,7 +509,19 @@ def get_player_by_id(
     query = '''
         SELECT p.*, a.stats,
             (SELECT STRING_AGG(t.trait_name, ',') FROM vision_player_traits t WHERE t.player_id = p.player_id) as traits_name,
-            (SELECT STRING_AGG(t.image_url, ',') FROM vision_player_traits t WHERE t.player_id = p.player_id) as traits
+            (SELECT STRING_AGG(t.image_url, ',') FROM vision_player_traits t WHERE t.player_id = p.player_id) as traits,
+            (
+                SELECT json_agg(
+                    json_build_object(
+                        'playstyle_name', ps.playstyle_name,
+                        'level', CASE WHEN ps.playstyle_level ILIKE '%2%' THEN 2 ELSE 1 END,
+                        'icon_level_1', ps.image_url,
+                        'icon_level_2', ps.image_url,
+                        'description', ps.playstyle_description
+                    )
+                )
+                FROM vision_player_playstyles ps WHERE ps.player_id = p.player_id
+            ) as playstyles
         FROM vision_players p 
         LEFT JOIN vision_player_attributes a ON p.player_id = a.player_id 
         WHERE p.player_id = %s
@@ -536,6 +548,13 @@ def get_player_by_id(
         raise HTTPException(status_code=404, detail="Player not found")
         
     mapped = map_vision_player_to_legacy(dict(row), rank)
+    
+    # Map playstyles explicitly
+    if row.get('playstyles'):
+        mapped['playstyles'] = row['playstyles']
+    else:
+        mapped['playstyles'] = []
+    
     
     if include_price:
         prices = fetch_prices_batch([player_id], rank)

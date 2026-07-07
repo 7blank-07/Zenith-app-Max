@@ -143,18 +143,13 @@ export async function fetchPlayerPlaystyles(playerId) {
   const result = await pool.query(
     `
       SELECT
-        pp.playstyle_name,
-        pp.level,
-        pc.description,
-        pc.icon_level_1,
-        pc.icon_level_2
-      FROM player_playstyles pp
-      LEFT JOIN playstyles_catalog pc ON pp.playstyle_name = pc.name
-      WHERE pp.player_id::text = $1
-      AND pp.playstyle_name != 'None'
-      AND (pc.description NOT ILIKE 'trait_desc_%' OR pc.description IS NULL)
-      ORDER BY pp.level DESC, pc.playstyle_id ASC
-      LIMIT 2
+        ps.playstyle_name,
+        CASE WHEN ps.playstyle_level ILIKE '%2%' THEN 2 ELSE 1 END as level,
+        ps.playstyle_description as description,
+        ps.image_url as icon_level_1,
+        ps.image_url as icon_level_2
+      FROM vision_player_playstyles ps
+      WHERE ps.player_id::text = $1
     `,
     [normalizedPlayerId]
   );

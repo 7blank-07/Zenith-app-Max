@@ -1,6 +1,5 @@
 import './globals.css';
 import Script from 'next/script';
-import { Inter } from 'next/font/google';
 import { Suspense } from 'react';
 import ImageCacheServiceWorker from './components/ImageCacheServiceWorker.client';
 import HtmlLanguageController from './components/HtmlLanguageController.client';
@@ -8,11 +7,7 @@ import RouteProgress from './components/RouteProgress.client';
 import WebVitalsReporter from './components/WebVitalsReporter.client';
 import GoogleAdSenseTrigger from './components/GoogleAdSenseTrigger.client';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter'
-});
+// Switched to standard Google Fonts to avoid Node.js download timeouts
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
@@ -45,8 +40,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className="custom-font-inter">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <style dangerouslySetInnerHTML={{ __html: `.custom-font-inter { --font-inter: 'Inter', sans-serif; }` }} />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){var p=window.location.pathname||'';var isArabic=(p==='/ae/kod-fifa'||p.indexOf('/ae/kod-fifa/')===0);if(isArabic){var root=document.documentElement;root.lang='ar';root.dir='rtl';}})();`
@@ -57,7 +56,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://images.zenithfcm.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="/assets/css/style.css" precedence="default" />
+        <link rel="stylesheet" href="/assets/css/style.css" />
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4474200951186936"
