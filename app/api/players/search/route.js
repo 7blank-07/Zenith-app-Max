@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
+const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://api-v2.zenithfcm.com/api';
 
 export async function GET(request) {
   const incoming = new URL(request.url).searchParams;

@@ -2,6 +2,54 @@
 
 import { useEffect, useState } from 'react';
 
+function formatPlaystyleDescription(desc, level) {
+  if (!desc) return '';
+  
+  // 1. Delete everything before the word "Player" (case-insensitive)
+  const playerIndex = desc.toLowerCase().indexOf('player');
+  if (playerIndex !== -1) {
+    desc = desc.substring(playerIndex);
+  }
+  
+  // Ensure 'Player' is capitalized if it wasn't
+  if (desc.toLowerCase().startsWith('player')) {
+    desc = 'Player' + desc.substring(6);
+  }
+
+  // 2. Extract base text and level texts
+  const lvl1Match = desc.match(/Lvl\s*1\s*:/i);
+  const lvl2Match = desc.match(/Lvl\s*2\s*:/i);
+  
+  let baseText = desc;
+  let lvl1Text = '';
+  let lvl2Text = '';
+  
+  if (lvl1Match && lvl2Match) {
+    const firstIdx = Math.min(lvl1Match.index, lvl2Match.index);
+    baseText = desc.substring(0, firstIdx).trim();
+    if (lvl1Match.index < lvl2Match.index) {
+      lvl1Text = desc.substring(lvl1Match.index, lvl2Match.index).trim();
+      lvl2Text = desc.substring(lvl2Match.index).trim();
+    } else {
+      lvl2Text = desc.substring(lvl2Match.index, lvl1Match.index).trim();
+      lvl1Text = desc.substring(lvl1Match.index).trim();
+    }
+  } else if (lvl1Match) {
+    baseText = desc.substring(0, lvl1Match.index).trim();
+    lvl1Text = desc.substring(lvl1Match.index).trim();
+  } else if (lvl2Match) {
+    baseText = desc.substring(0, lvl2Match.index).trim();
+    lvl2Text = desc.substring(lvl2Match.index).trim();
+  }
+  
+  // 3. Return the specific level string
+  if (level === 2) {
+     return `${baseText} ${lvl2Text}`.trim();
+  } else {
+     return `${baseText} ${lvl1Text}`.trim();
+  }
+}
+
 export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
   const [playstyles, setPlaystyles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +60,24 @@ export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
     fetch(`/api/players/${encodeURIComponent(playerId)}?rank=${currentRank}&_t=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.playstyles) setPlaystyles(data.playstyles);
+        if (data.playstyles) {
+          // Ensure uniqueness by playstyle_name and limit to 2 max
+          const uniqueMap = new Map();
+          data.playstyles.forEach(ps => {
+            if (!uniqueMap.has(ps.playstyle_name)) {
+              uniqueMap.set(ps.playstyle_name, ps);
+            }
+          });
+          const deduplicated = Array.from(uniqueMap.values()).slice(0, 2);
+          
+          // Apply business rule: If exactly 2 playstyles, 1st is always Lvl 2, 2nd is always Lvl 1
+          if (deduplicated.length === 2) {
+            deduplicated[0].level = 2;
+            deduplicated[1].level = 1;
+          }
+          
+          setPlaystyles(deduplicated);
+        }
       })
       .catch((e) => console.error('[PlayerPlaystylesSection]', e))
       .finally(() => setLoading(false));
@@ -28,7 +93,7 @@ export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
       </div>
       <div className="skills-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
         gap: '16px'
       }}>
         {playstyles.map((ps) => {
@@ -48,7 +113,7 @@ export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
               padding: '16px',
               display: 'flex',
               flexDirection: 'row',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               gap: '16px',
               boxShadow: `0 8px 24px ${color}10`,
               transition: 'transform 0.2s, box-shadow 0.2s',
@@ -86,7 +151,7 @@ export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
                 </div>
                 {ps.description && (
                   <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #98A0A6)', margin: 0, lineHeight: 1.4 }}>
-                    {ps.description}
+                    {formatPlaystyleDescription(ps.description, ps.level)}
                   </p>
                 )}
               </div>
