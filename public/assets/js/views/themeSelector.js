@@ -30,6 +30,12 @@ const fieldThemes = {
     id: 'anfield',
     name: 'Anfield',
     background: 'url(assets/images/background/squad_builder_5.webp) center/cover no-repeat',
+  },
+
+  'noto-fc': {
+    id: 'noto-fc',
+    name: 'Noto Fc Theme',
+    background: 'url(https://images.zenithfcm.com/NotoFc-squadbuilder-theme.webp) center/cover no-repeat',
   }
 };
 

@@ -551,6 +551,12 @@ const FIELD_THEMES = Object.freeze({
     name: 'Anfield',
     background: 'url(/assets/images/background/squad_builder_5.webp) center/cover no-repeat',
     className: 'theme-anfield'
+  },
+  'noto-fc': {
+    id: 'noto-fc',
+    name: 'Noto Fc Theme',
+    background: 'url(https://images.zenithfcm.com/NotoFc-squadbuilder-theme.webp) center/cover no-repeat',
+    className: 'theme-noto-fc'
   }
 });
 

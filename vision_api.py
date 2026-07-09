@@ -183,10 +183,7 @@ def get_players(
     if name_starts_with:
         query += " AND p.card_name ILIKE %s"
         params.append(f"{name_starts_with}%")
-    if position and not q:
-        query += " AND (p.position = %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s)"
-        params.extend([position.upper(), f"{position.upper()},%", f"%,{position.upper()},%", f"%,{position.upper()}"])
-    elif position:
+    if position:
         query += " AND p.position = %s"
         params.append(position.upper())
     if team:
@@ -233,7 +230,7 @@ def get_players(
         count_params = []
         if q: count_query += " AND p.card_name ILIKE %s"; count_params.append(f"%{q.replace(' ', '%')}%")
         if name_starts_with: count_query += " AND p.card_name ILIKE %s"; count_params.append(f"{name_starts_with}%")
-        if position and not q: count_query += " AND (p.position = %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s OR p.alternate_position ILIKE %s)"; count_params.extend([position.upper(), f"{position.upper()},%", f"%,{position.upper()},%", f"%,{position.upper()}"])
+        if position and not q: count_query += " AND p.position = %s"; count_params.append(position.upper())
         elif position: count_query += " AND p.position = %s"; count_params.append(position.upper())
         if team: count_query += " AND p.club ILIKE %s"; count_params.append(team)
         if league: count_query += " AND p.league ILIKE %s"; count_params.append(league)
@@ -514,7 +511,7 @@ def get_player_by_id(
                 SELECT json_agg(
                     json_build_object(
                         'playstyle_name', ps.playstyle_name,
-                        'level', CASE WHEN ps.playstyle_level ILIKE '%2%' THEN 2 ELSE 1 END,
+                        'level', CASE WHEN ps.playstyle_level ILIKE '%%2%%' THEN 2 ELSE 1 END,
                         'icon_level_1', ps.image_url,
                         'icon_level_2', ps.image_url,
                         'description', ps.playstyle_description
@@ -995,6 +992,10 @@ def reset_skills(
         "rank": rank
     }
 
+from panel_api import router as panel_router
+app.include_router(panel_router)
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=800101, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
+
