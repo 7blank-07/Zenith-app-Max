@@ -74,7 +74,10 @@ export async function fetchPlayerAvailableSkills(playerId, options = {}) {
 
     if (visionResult.rows && visionResult.rows.length > 0) {
       return {
-        skills: visionResult.rows,
+        skills: visionResult.rows.filter((s) => {
+          const name = s.skill_name?.trim().toLowerCase();
+          return name && name !== 'skill';
+        }),
         available_skill_points: normalizedRank
       };
     }
@@ -102,7 +105,10 @@ export async function fetchPlayerAvailableSkills(playerId, options = {}) {
   );
 
   return {
-    skills: Array.isArray(result.rows) ? result.rows : [],
+    skills: (Array.isArray(result.rows) ? result.rows : []).filter((s) => {
+      const name = s.skill_name?.trim().toLowerCase();
+      return name && name !== 'skill';
+    }),
     available_skill_points: normalizedRank
   };
 }

@@ -419,6 +419,19 @@ export function aggregateSkillBoostsByLevel(skillLevelsById, skillBoostCatalogBy
   return totals;
 }
 
+export function parseSkillRequirement(skill) {
+  let requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
+  let requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
+
+  const match = requiredSkillName.match(/Unlocks after (.*?) reaches LVL\s*(\d+)/i);
+  if (match) {
+    requiredSkillName = match[1].trim();
+    requiredLevel = parseInt(match[2], 10);
+  }
+
+  return { requiredSkillName, requiredLevel };
+}
+
 export function calculateSkillMaxLevels(skills, skillBoostCatalogById = {}) {
   if (!Array.isArray(skills) || !skills.length) return {};
   const maxLevels = {};
@@ -434,8 +447,7 @@ export function calculateSkillMaxLevels(skills, skillBoostCatalogById = {}) {
     maxLevels[skillId] = Math.max(1, maxBoostLevel);
   });
   skills.forEach((skill) => {
-    const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
-    const requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
+    const { requiredSkillName, requiredLevel } = parseSkillRequirement(skill);
     if (!requiredSkillName) return;
     const prerequisite = skills.find((candidate) => getSkillName(candidate).toUpperCase() === requiredSkillName.toUpperCase());
     const prerequisiteId = getSkillId(prerequisite);
@@ -446,9 +458,12 @@ export function calculateSkillMaxLevels(skills, skillBoostCatalogById = {}) {
 }
 
 export function checkSkillUnlocked(skill, skillLevelsById, allSkills) {
+  if (allSkills && allSkills.length > 0 && skill === allSkills[0]) {
+    return true;
+  }
+
   const requirementType = String(skill?.unlock_requirement_type || '').trim().toLowerCase();
-  const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
-  const requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
+  const { requiredSkillName, requiredLevel } = parseSkillRequirement(skill);
   if (!requiredSkillName || requirementType !== 'skill_level') return true;
 
   const normalizedLevels = skillLevelsById && typeof skillLevelsById === 'object' ? skillLevelsById : {};
@@ -471,6 +486,10 @@ export function getSkillUnlockMessage(skill) {
   const requiredSkillName = String(skill?.unlock_requirement_skillname || '').trim();
   const requiredLevel = Math.max(1, toNumber(skill?.unlock_requirement_level, 1));
   if (requiredSkillName) {
+    const lowerName = requiredSkillName.toLowerCase();
+    if (lowerName.includes('lvl') || lowerName.includes('level') || lowerName.includes('unlocks') || requiredLevel === 1) {
+      return `Requires ${requiredSkillName}`;
+    }
     return `Requires ${requiredSkillName} Level ${requiredLevel}`;
   }
   return 'Skill locked';
