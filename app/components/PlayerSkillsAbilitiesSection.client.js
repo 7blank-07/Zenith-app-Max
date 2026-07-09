@@ -454,18 +454,29 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                       {isDisabled && pointsNeeded > 0 && (
                         <div className="insufficient-points">Need {pointsNeeded} more point{pointsNeeded !== 1 ? 's' : ''}</div>
                       )}
-                      <div className="boost-stats">
-                        {Object.entries(boost).map(([key, value]) => {
-                          if (!key.startsWith('boost_')) return null;
-                          const numericValue = toNumber(value, 0);
-                          if (!numericValue) return null;
-                          const statName = key.replace('boost_', '').replace(/_/g, ' ').toUpperCase();
-                          return (
-                            <div key={`${activeSkillId}-${levelNumber}-${key}`} className="boost-stat">
-                              +{numericValue} {statName}
-                            </div>
-                          );
-                        })}
+                      <div className="boost-stats-table-container" style={{ marginTop: '12px' }}>
+                        <table className="boost-stats-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px', color: '#E6EEF2' }}>
+                          <tbody>
+                            {boost.positions ? (
+                              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <td style={{ padding: '8px 4px', fontWeight: 600, color: '#00C2A8' }}>New Position</td>
+                                <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600 }}>{boost.positions}</td>
+                              </tr>
+                            ) : null}
+                            {Object.entries(boost).map(([key, value]) => {
+                              if (!key.startsWith('boost_')) return null;
+                              const numericValue = toNumber(value, 0);
+                              if (!numericValue) return null;
+                              const statName = key.replace('boost_', '').replace(/_/g, ' ').toUpperCase();
+                              return (
+                                <tr key={`${activeSkillId}-${levelNumber}-${key}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '8px 4px', color: '#98A0A6' }}>{statName}</td>
+                                  <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 600, color: '#FFB86B' }}>+{numericValue}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   );

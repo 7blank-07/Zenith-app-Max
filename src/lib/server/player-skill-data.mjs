@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { parsePlayerSlug } from '../player-slug.mjs';
 
 const { Pool } = pg;
 const PLAYER_SKILL_DATA_POOL_KEY = '__zenithPlayerSkillDataPool';
@@ -35,6 +36,50 @@ export async function fetchPlayerAvailableSkills(playerId, options = {}) {
   const normalizedPlayerId = toText(playerId);
   const normalizedRank = Math.max(0, toInteger(options.rank, 0));
 
+  const parsed = parsePlayerSlug(normalizedPlayerId);
+  let queryPlayerId = normalizedPlayerId;
+  let isVisionPlayer = false;
+
+  if (parsed && !parsed.isLegacyId && parsed.uuid) {
+    queryPlayerId = parsed.uuid;
+    isVisionPlayer = true;
+  } else if (parsed && parsed.isLegacyId) {
+    queryPlayerId = parsed.playerId;
+  } else if (/^[0-9a-f]{32}$/i.test(normalizedPlayerId) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalizedPlayerId)) {
+    queryPlayerId = normalizedPlayerId.replace(/-/g, '').toLowerCase();
+    isVisionPlayer = true;
+  }
+
+  if (isVisionPlayer) {
+    const rawUuid = queryPlayerId.replace(/-/g, '').toLowerCase();
+    const visionResult = await pool.query(
+      `
+        SELECT
+          'vision_' || id::text AS skill_id,
+          skill_name,
+          image_url AS skill_image,
+          false AS is_locked,
+          'skill_level' AS unlock_requirement_type,
+          level_1_requirements AS unlock_requirement_skillname,
+          1 AS unlock_requirement_level,
+          '' AS unlock_requirement_text,
+          NULL AS prerequisite_skill_id,
+          NULL AS prerequisite_level
+        FROM vision_player_skills
+        WHERE player_id::text = $1 OR player_id::text = $2
+        ORDER BY skill_number ASC
+      `,
+      [rawUuid, queryPlayerId]
+    );
+
+    if (visionResult.rows && visionResult.rows.length > 0) {
+      return {
+        skills: visionResult.rows,
+        available_skill_points: normalizedRank
+      };
+    }
+  }
+
   const result = await pool.query(
     `
       SELECT
@@ -53,7 +98,7 @@ export async function fetchPlayerAvailableSkills(playerId, options = {}) {
       WHERE pas.player_id::text = $1 AND pas.rank = $2 AND pas.training_level = 0
       ORDER BY pas.skill_id
     `,
-    [normalizedPlayerId, normalizedRank]
+    [queryPlayerId, normalizedRank]
   );
 
   return {
@@ -66,10 +111,57 @@ export async function fetchSkillBoostLevels(skillId) {
   const pool = getPlayerSkillDataPool();
   const normalizedSkillId = toText(skillId);
 
+  if (normalizedSkillId.startsWith('vision_')) {
+    const dbId = normalizedSkillId.replace('vision_', '');
+    const visionResult = await pool.query(
+      `
+        SELECT level_1_boosts, level_2_boosts, level_3_boosts
+        FROM vision_player_skills
+        WHERE id = $1
+      `,
+      [toInteger(dbId, 0)]
+    );
+
+    const row = visionResult.rows?.[0];
+    if (!row) {
+      return { skill_id: normalizedSkillId, boosts: [] };
+    }
+
+    const boosts = [];
+    const processBoostLevel = (levelNumber, boostObj) => {
+      if (!boostObj || typeof boostObj !== 'object') return;
+      const boostEntry = { level_number: levelNumber, positions: null };
+      
+      Object.entries(boostObj).forEach(([key, value]) => {
+        if (key.toLowerCase() === 'positions') {
+          boostEntry.positions = Array.isArray(value) ? value.join(', ') : value;
+        } else {
+          const formattedKey = 'boost_' + key.toLowerCase().replace(/[\s-]/g, '_');
+          const parsed = Number.parseInt(String(value).replace(/[^\d.-]/g, ''), 10);
+          if (Number.isFinite(parsed)) {
+            boostEntry[formattedKey] = parsed;
+          }
+        }
+      });
+      if (Object.keys(boostEntry).length > 2 || boostEntry.positions) {
+        boosts.push(boostEntry);
+      }
+    };
+
+    processBoostLevel(1, row.level_1_boosts);
+    processBoostLevel(2, row.level_2_boosts);
+    processBoostLevel(3, row.level_3_boosts);
+
+    return {
+      skill_id: normalizedSkillId,
+      boosts
+    };
+  }
+
   const result = await pool.query(
     `
       SELECT DISTINCT ON (level_number)
-        level_number,
+        level_number, positions,
         boost_pace, boost_shooting, boost_passing, boost_dribbling,
         boost_defending, boost_physical, boost_acceleration, boost_sprint_speed,
         boost_finishing, boost_shot_power, boost_long_shot, boost_positioning,
@@ -139,6 +231,14 @@ export async function fetchTrainingBoostsForPosition(position, trainingLevel) {
 export async function fetchPlayerPlaystyles(playerId) {
   const pool = getPlayerSkillDataPool();
   const normalizedPlayerId = toText(playerId);
+  const parsed = parsePlayerSlug(normalizedPlayerId);
+  let queryPlayerId = normalizedPlayerId;
+
+  if (parsed && !parsed.isLegacyId && parsed.uuid) {
+    queryPlayerId = parsed.uuid.replace(/-/g, '').toLowerCase();
+  } else if (/^[0-9a-f]{32}$/i.test(normalizedPlayerId) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalizedPlayerId)) {
+    queryPlayerId = normalizedPlayerId.replace(/-/g, '').toLowerCase();
+  }
 
   const result = await pool.query(
     `
@@ -151,7 +251,7 @@ export async function fetchPlayerPlaystyles(playerId) {
       FROM vision_player_playstyles ps
       WHERE ps.player_id::text = $1
     `,
-    [normalizedPlayerId]
+    [queryPlayerId]
   );
 
   return Array.isArray(result.rows) ? result.rows : [];
