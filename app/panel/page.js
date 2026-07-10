@@ -45,6 +45,17 @@ export default function PanelDashboard() {
           </Link>
         </div>
 
+        {/* Module Card */}
+        <div style={{ backgroundColor: '#1A1D21', padding: '24px', borderRadius: '12px', border: '1px solid #2A2D31' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#EF4444' }}>Remove Players</h2>
+          <p style={{ color: '#98A0A6', marginBottom: '24px', fontSize: '14px', lineHeight: '1.5' }}>
+            Bulk delete players using filters like OVR range, Event name, and Date Added, or perform a total wipe.
+          </p>
+          <Link href="/panel/remove-players" style={{ display: 'inline-block', backgroundColor: '#EF4444', color: 'white', padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}>
+            Delete Players &rarr;
+          </Link>
+        </div>
+
       </div>
     </div>
   );

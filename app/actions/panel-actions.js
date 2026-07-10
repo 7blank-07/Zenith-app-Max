@@ -111,3 +111,22 @@ export async function deletePlayerAction(id) {
     throw error;
   }
 }
+
+export async function bulkDeletePlayersAction(data) {
+  await requireAuth();
+  try {
+    const res = await fetch(`${FASTAPI_URL}/players/bulk-delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || 'Failed to bulk delete players');
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('bulkDeletePlayersAction failed:', error);
+    throw error;
+  }
+}

@@ -205,6 +205,54 @@ def create_player(data: PlayerUpdate):
         conn.close()
     
     return {"success": True, "message": "Player created successfully", "player_id": player_id}
+class BulkDeleteRequest(BaseModel):
+    min_ovr: Optional[int] = None
+    max_ovr: Optional[int] = None
+    event_name: Optional[str] = None
+    date_added: Optional[str] = None
+    super_supreme: Optional[bool] = False
+
+@router.post("/players/bulk-delete")
+def bulk_delete_players(req: BulkDeleteRequest):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        if req.super_supreme:
+            cur.execute("DELETE FROM vision_players")
+        else:
+            conditions = []
+            params = []
+            if req.min_ovr is not None:
+                conditions.append("ovr >= %s")
+                params.append(req.min_ovr)
+            if req.max_ovr is not None:
+                conditions.append("ovr <= %s")
+                params.append(req.max_ovr)
+            if req.event_name:
+                conditions.append("event_name ILIKE %s")
+                params.append(f"%{req.event_name}%")
+            if req.date_added:
+                conditions.append("DATE(updated_at) = %s")
+                params.append(req.date_added)
+                
+            if not conditions:
+                raise HTTPException(status_code=400, detail="No filters provided for deletion")
+                
+            query = "DELETE FROM vision_players WHERE " + " AND ".join(conditions)
+            cur.execute(query, tuple(params))
+            
+        deleted_count = cur.rowcount
+        conn.commit()
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
+        
+    return {"success": True, "message": f"Deleted {deleted_count} players", "deleted_count": deleted_count}
 
 @router.delete("/players/{player_id}")
 def delete_player(player_id: str):

@@ -113,7 +113,11 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
           `/players/${encodeURIComponent(normalizedPlayerId)}?rank=${encodeURIComponent(normalizedRank)}`
         );
         if (!isActive) return;
-        const fetchedSkills = Array.isArray(payload?.skills) ? payload.skills : [];
+        const rawSkills = Array.isArray(payload?.skills) ? payload.skills : [];
+        const fetchedSkills = rawSkills.filter(skill => {
+            const name = getSkillName(skill).trim();
+            return name && name.toLowerCase() !== 'skill';
+        });
         const fetchedBudget = Math.max(0, toNumber(payload?.available_skill_points, normalizedRank));
         
         setAvailableSkills(fetchedSkills);
