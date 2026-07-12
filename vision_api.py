@@ -532,14 +532,6 @@ def get_player_by_id(
         raise HTTPException(status_code=500, detail=str(e))
         
     if not row:
-        # Fallback to legacy player_stats table
-        try:
-            cur.execute("SELECT * FROM player_stats WHERE player_id = %s", (player_id,))
-            row = cur.fetchone()
-        except Exception:
-            pass
-            
-    if not row:
         cur.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Player not found")
@@ -883,7 +875,7 @@ def upgrade_skill(
     try:
         cur.execute("""
             SELECT available_points
-            FROM player_skills_meta
+            FROM vision_player_skills_meta
             WHERE player_id = %s AND rank = %s AND training_level = 0
         """, (player_id, rank))
 
@@ -915,7 +907,7 @@ def upgrade_skill(
 
         cur.execute("""
             SELECT prerequisite_skill_id, prerequisite_level
-            FROM player_available_skills
+            FROM vision_player_available_skills
             WHERE player_id = %s AND rank = %s AND skill_id = %s
         """, (player_id, rank, skill_id))
 
