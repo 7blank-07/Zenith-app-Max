@@ -262,25 +262,6 @@ export async function getNewestActiveRedeemCode({ scopes = [REDEEM_CODE_SCOPE.GL
   return serializeRedeemCodeRow(result.rows[0] || null);
 }
 
-async function expireOtherActiveCodes(client, scope, excludeId = '') {
-  const values = [scope];
-  let query = `
-    UPDATE redeem_codes
-    SET
-      status = '${REDEEM_CODE_STATUS.EXPIRED}',
-      expires_at = COALESCE(expires_at, NOW()),
-      updated_at = NOW()
-    WHERE scope = $1
-      AND status = '${REDEEM_CODE_STATUS.ACTIVE}'
-  `;
-
-  if (excludeId) {
-    values.push(excludeId);
-    query += ` AND id <> $2`;
-  }
-
-  await client.query(query, values);
-}
 
 function normalizeWritePayload(input = {}, existing = null) {
   const title = toText(input.title ?? existing?.title);
@@ -326,11 +307,6 @@ export async function createRedeemCode(input = {}, options = {}) {
   return withBlogTransaction(async (client) => {
     const payload = normalizeWritePayload(input, null);
 
-    // Enforce one active code per scope. New active entries atomically expire older active entries.
-    if (payload.status === REDEEM_CODE_STATUS.ACTIVE) {
-      await expireOtherActiveCodes(client, payload.scope);
-    }
-
     const result = await client.query(
       `
         INSERT INTO redeem_codes (
@@ -364,11 +340,6 @@ export async function updateRedeemCode(id, input = {}, options = {}) {
     }
 
     const payload = normalizeWritePayload(input, existing);
-
-    // Keep scope-level active state atomic when an edit promotes/keeps a code as active.
-    if (payload.status === REDEEM_CODE_STATUS.ACTIVE) {
-      await expireOtherActiveCodes(client, payload.scope, existing.id);
-    }
 
     const result = await client.query(
       `

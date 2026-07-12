@@ -19,9 +19,7 @@ CREATE INDEX IF NOT EXISTS redeem_codes_status_published_idx
 CREATE INDEX IF NOT EXISTS redeem_codes_scope_updated_idx
   ON redeem_codes (scope, updated_at DESC NULLS LAST);
 
-CREATE UNIQUE INDEX IF NOT EXISTS redeem_codes_active_scope_unique_idx
-  ON redeem_codes (scope)
-  WHERE status = 'active';
+
 
 DROP TRIGGER IF EXISTS redeem_codes_set_updated_at ON redeem_codes;
 CREATE TRIGGER redeem_codes_set_updated_at

@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS redeem_codes_active_scope_unique_idx;
