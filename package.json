@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node scripts/prepare-legacy.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/prepare-legacy.mjs",
+    "prebuild": "node scripts/prepare-legacy.mjs && node scripts/fix-database-urls.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
