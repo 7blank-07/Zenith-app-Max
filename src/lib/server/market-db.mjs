@@ -30,12 +30,19 @@ export function createMarketPool(rawEnv = process.env) {
     connectionString = 'postgresql://zenith_bot:zenith6Z%40@127.0.0.1:5432/zenith_market';
   }
 
+  const parsedUrl = new URL(connectionString);
+  const requiresSsl = parsedUrl.searchParams.get('sslmode') === 'require';
+  if (requiresSsl) {
+    parsedUrl.searchParams.delete('sslmode');
+    connectionString = parsedUrl.toString();
+  }
+
   return new Pool({
     connectionString,
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
-    ssl: connectionString && connectionString.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined
+    ssl: requiresSsl ? { rejectUnauthorized: false } : undefined
   });
 }
 

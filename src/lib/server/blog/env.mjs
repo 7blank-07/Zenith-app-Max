@@ -71,9 +71,17 @@ export function assertBlogDatabaseUrl(rawEnv = process.env) {
 
 export function getBlogDatabaseConfig(rawEnv = process.env) {
   const environment = getBlogEnvironment(rawEnv);
+  let connectionString = assertBlogDatabaseUrl(rawEnv);
+  const parsedUrl = new URL(connectionString);
+  const requiresSsl = parsedUrl.searchParams.get('sslmode') === 'require';
+  if (requiresSsl) {
+    parsedUrl.searchParams.delete('sslmode');
+    connectionString = parsedUrl.toString();
+  }
+
   return {
-    connectionString: assertBlogDatabaseUrl(rawEnv),
-    ssl: environment.ssl,
+    connectionString,
+    ssl: requiresSsl ? { rejectUnauthorized: false } : environment.ssl,
     max: environment.maxConnections,
     idleTimeoutMillis: environment.idleTimeoutMs,
     connectionTimeoutMillis: environment.connectionTimeoutMs,

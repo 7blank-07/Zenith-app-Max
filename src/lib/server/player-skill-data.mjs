@@ -19,11 +19,19 @@ function getPlayerSkillDataPool() {
   }
 
   if (!globalThis[PLAYER_SKILL_DATA_POOL_KEY]) {
+    let cleanConnectionString = connectionString;
+    const parsedUrl = new URL(connectionString);
+    const requiresSsl = parsedUrl.searchParams.get('sslmode') === 'require';
+    if (requiresSsl) {
+      parsedUrl.searchParams.delete('sslmode');
+      cleanConnectionString = parsedUrl.toString();
+    }
     globalThis[PLAYER_SKILL_DATA_POOL_KEY] = new Pool({
-      connectionString,
+      connectionString: cleanConnectionString,
       max: 4,
       idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 10_000
+      connectionTimeoutMillis: 10_000,
+      ssl: requiresSsl ? { rejectUnauthorized: false } : undefined
     });
   }
 

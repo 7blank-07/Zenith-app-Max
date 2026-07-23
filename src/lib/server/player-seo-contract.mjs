@@ -1081,12 +1081,19 @@ export function getPlayerSlugResolverPool() {
   if (!connectionString) return null;
 
   if (!globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY]) {
+    let cleanConnectionString = connectionString;
+    const parsedUrl = new URL(connectionString);
+    const requiresSsl = parsedUrl.searchParams.get('sslmode') === 'require';
+    if (requiresSsl) {
+      parsedUrl.searchParams.delete('sslmode');
+      cleanConnectionString = parsedUrl.toString();
+    }
     globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY] = new Pool({
-      connectionString,
+      connectionString: cleanConnectionString,
       max: 5,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
-      ssl: connectionString.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined
+      ssl: requiresSsl ? { rejectUnauthorized: false } : undefined
     });
   }
 
