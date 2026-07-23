@@ -1208,7 +1208,7 @@ export async function fetchRelatedPlayers(playerRecord, options = {}) {
         : Promise.resolve([]);
       
       const nationPromise = source.nation
-        ? dbPool.query('SELECT * FROM player_stats WHERE (nation ILIKE $1 OR nation_region ILIKE $1) AND rank = $2 ORDER BY ovr DESC LIMIT $3', [`%${source.nation}%`, rank, queryLimit]).then(res => res.rows.map(row => normalizePlayerStableRecord(row, row?.player_id || row?.id)))
+        ? dbPool.query('SELECT * FROM player_stats WHERE nation_region ILIKE $1 AND rank = $2 ORDER BY ovr DESC LIMIT $3', [`%${source.nation}%`, rank, queryLimit]).then(res => res.rows.map(row => normalizePlayerStableRecord(row, row?.player_id || row?.id)))
         : Promise.resolve([]);
       
       const [posRows, natRows] = await Promise.all([positionPromise, nationPromise]);
