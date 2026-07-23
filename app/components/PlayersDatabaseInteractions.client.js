@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import AdsenseAd from './AdsenseAd';
 import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
@@ -1532,9 +1533,14 @@ export default function PlayersDatabaseInteractions({
                 const resolvedPrice = getResolvedPrice(player);
                 const hasPrice = resolvedPrice > 0;
                 const isWatchlisted = watchedIds.has(player.uniqueId);
+                const isSquadPick = squadPickContext.enabled;
+                const RowWrapper = isSquadPick ? 'div' : Link;
+                const rowProps = isSquadPick
+                  ? { onClick: () => handlePlayerRowClick(player) }
+                  : { href: buildPlayerPath(player), prefetch: true, style: { textDecoration: 'none', color: 'inherit' } };
                 return (
                   <React.Fragment key={player.uniqueId}>
-                    <div
+                    <RowWrapper
                       className="player-row"
                       data-player-id={player.playerId}
                       data-unique-id={player.uniqueId}
@@ -1553,7 +1559,7 @@ export default function PlayersDatabaseInteractions({
                       data-def={player.def}
                       data-phy={player.phy}
                       data-price={resolvedPrice}
-                      onClick={() => handlePlayerRowClick(player)}
+                      {...rowProps}
                     >
                       {renderPlayerCard(player)}
 
@@ -1616,7 +1622,7 @@ export default function PlayersDatabaseInteractions({
                           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                         </svg>
                       </button>
-                    </div>
+                    </RowWrapper>
                     {(index + 1) % 15 === 0 && (
                       <div 
                         className="player-row adsense-row" 

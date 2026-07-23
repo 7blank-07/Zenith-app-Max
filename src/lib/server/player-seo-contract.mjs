@@ -1076,16 +1076,17 @@ function getPlayerSlugResolverClient() {
   return globalThis[PLAYER_SLUG_RESOLVER_CLIENT_KEY];
 }
 
-function getPlayerSlugResolverPool() {
+export function getPlayerSlugResolverPool() {
   const connectionString = toText(process.env.DATABASE_URL);
   if (!connectionString) return null;
 
   if (!globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY]) {
     globalThis[PLAYER_SLUG_RESOLVER_POOL_KEY] = new Pool({
       connectionString,
-      max: 20,
+      max: 5,
       idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 10_000
+      connectionTimeoutMillis: 10_000,
+      ssl: connectionString.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined
     });
   }
 
@@ -1196,14 +1197,45 @@ export async function fetchRelatedPlayers(playerRecord, options = {}) {
   const queryLimit = Math.max(limit * 2, 12);
   const rank = options.rank ?? source.rank ?? 0;
 
-  const samePositionPromise = source.position
-    ? fetchPlayersList({ position: source.position }, { ...options, rank, limit: queryLimit })
-    : Promise.resolve([]);
-  const sameNationPromise = source.nation
-    ? fetchPlayersList({ nation: source.nation }, { ...options, rank, limit: queryLimit })
-    : Promise.resolve([]);
+  const dbPool = getPlayerSlugResolverPool();
+  let samePositionPlayers = [];
+  let sameNationPlayers = [];
 
-  const [samePositionPlayers, sameNationPlayers] = await Promise.all([samePositionPromise, sameNationPromise]);
+  if (dbPool) {
+    try {
+      const positionPromise = source.position
+        ? dbPool.query('SELECT * FROM player_stats WHERE position ILIKE $1 AND rank = $2 ORDER BY ovr DESC LIMIT $3', [`%${source.position}%`, rank, queryLimit]).then(res => res.rows.map(row => normalizePlayerStableRecord(row, row?.player_id || row?.id)))
+        : Promise.resolve([]);
+      
+      const nationPromise = source.nation
+        ? dbPool.query('SELECT * FROM player_stats WHERE (nation ILIKE $1 OR nation_region ILIKE $1) AND rank = $2 ORDER BY ovr DESC LIMIT $3', [`%${source.nation}%`, rank, queryLimit]).then(res => res.rows.map(row => normalizePlayerStableRecord(row, row?.player_id || row?.id)))
+        : Promise.resolve([]);
+      
+      const [posRows, natRows] = await Promise.all([positionPromise, nationPromise]);
+      samePositionPlayers = posRows;
+      sameNationPlayers = natRows;
+    } catch (err) {
+      console.warn('[db-fast-path] Related players query failed, falling back to HTTP:', err?.message);
+    }
+  }
+
+  if (samePositionPlayers.length === 0 && sameNationPlayers.length === 0) {
+    try {
+      const samePositionPromise = source.position
+        ? fetchPlayersList({ position: source.position }, { ...options, rank, limit: queryLimit })
+        : Promise.resolve([]);
+      const sameNationPromise = source.nation
+        ? fetchPlayersList({ nation: source.nation }, { ...options, rank, limit: queryLimit })
+        : Promise.resolve([]);
+
+      const [httpPos, httpNat] = await Promise.all([samePositionPromise, sameNationPromise]);
+      samePositionPlayers = httpPos;
+      sameNationPlayers = httpNat;
+    } catch (err) {
+      console.warn('[db-fast-path] HTTP fallback failed:', err?.message);
+    }
+  }
+
   const merged = new Map();
 
   for (const candidate of [...samePositionPlayers, ...sameNationPlayers]) {

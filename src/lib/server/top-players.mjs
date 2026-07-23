@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { hasPlayerColorData, mergePlayerColorData, normalizePlayerStableRecord, preferPlayerStableRecord } from './player-seo-contract.mjs';
+import { getPlayerSlugResolverPool, hasPlayerColorData, mergePlayerColorData, normalizePlayerStableRecord, preferPlayerStableRecord } from './player-seo-contract.mjs';
 
 const TOP_PLAYERS_PATH = path.join(process.cwd(), 'src', 'data', 'top-players.json');
 const DEFAULT_API_BASE_URL = process.env.ZENITH_API_BASE_URL || 'https://zenithfcm.com/api';
@@ -605,41 +605,57 @@ export async function fetchAllPlayerFilterMetadata(options = {}) {
     };
 
     try {
-      const firstPage = await fetchPageRows(0);
-      if (firstPage.rows.length) {
-        collectRows(firstPage.rows);
+      let dbSuccess = false;
+      try {
+        const dbPool = getPlayerSlugResolverPool();
+        if (dbPool) {
+          const result = await dbPool.query('SELECT player_id, id, position, alternate_position, league, team, nation_region, event, skill_moves_stars FROM player_stats');
+          if (result.rows.length) {
+            collectRows(result.rows);
+            dbSuccess = true;
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[db-fast-path] Filter metadata DB query failed:', dbErr?.message);
       }
 
-      const computedTotalPages = firstPage.total ? Math.ceil(firstPage.total / pageSize) : null;
-      const effectiveMaxPages = Math.min(maxPages, computedTotalPages || maxPages);
-      const firstPageStops = !firstPage.rows.length || firstPage.rows.length < pageSize || firstPage.hasMore === false;
+      if (!dbSuccess) {
+        const firstPage = await fetchPageRows(0);
+        if (firstPage.rows.length) {
+          collectRows(firstPage.rows);
+        }
 
-      if (!firstPageStops) {
-        for (let pageStart = 1; pageStart < effectiveMaxPages; pageStart += fetchConcurrency) {
-          const batchPages = [];
-          const pageUpperBound = Math.min(effectiveMaxPages, pageStart + fetchConcurrency);
-          for (let page = pageStart; page < pageUpperBound; page += 1) {
-            batchPages.push(page);
-          }
+        const computedTotalPages = firstPage.total ? Math.ceil(firstPage.total / pageSize) : null;
+        const effectiveMaxPages = Math.min(maxPages, computedTotalPages || maxPages);
+        const firstPageStops = !firstPage.rows.length || firstPage.rows.length < pageSize || firstPage.hasMore === false;
 
-          const batchResults = await Promise.all(batchPages.map((page) => fetchPageRows(page)));
-          let shouldStop = false;
-
-          for (const result of batchResults) {
-            if (!result.rows.length) {
-              shouldStop = true;
-              break;
+        if (!firstPageStops) {
+          for (let pageStart = 1; pageStart < effectiveMaxPages; pageStart += fetchConcurrency) {
+            const batchPages = [];
+            const pageUpperBound = Math.min(effectiveMaxPages, pageStart + fetchConcurrency);
+            for (let page = pageStart; page < pageUpperBound; page += 1) {
+              batchPages.push(page);
             }
 
-            collectRows(result.rows);
+            const batchResults = await Promise.all(batchPages.map((page) => fetchPageRows(page)));
+            let shouldStop = false;
 
-            if (result.rows.length < pageSize || result.hasMore === false) {
-              shouldStop = true;
-              break;
+            for (const result of batchResults) {
+              if (!result.rows.length) {
+                shouldStop = true;
+                break;
+              }
+
+              collectRows(result.rows);
+
+              if (result.rows.length < pageSize || result.hasMore === false) {
+                shouldStop = true;
+                break;
+              }
             }
-          }
 
-          if (shouldStop) break;
+            if (shouldStop) break;
+          }
         }
       }
     } catch (error) {

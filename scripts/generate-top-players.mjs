@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 // Usage:
 //   npm run generate:top-players
@@ -219,6 +221,7 @@ async function loadPlayersFromSupabase({ supabaseUrl, serviceKey, table, limit }
     }
 
     const pageRows = queryResult.data || [];
+    console.log(`[generate-top-players] Supabase page ${page}: fetched ${pageRows.length} rows`);
     if (!pageRows.length) break;
     rows.push(...pageRows);
     if (pageRows.length < pageSize) break;

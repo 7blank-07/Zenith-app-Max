@@ -35,6 +35,7 @@ export function createMarketPool(rawEnv = process.env) {
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
+    ssl: connectionString && connectionString.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined
   });
 }
 

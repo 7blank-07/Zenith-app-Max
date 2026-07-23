@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { normalizePlayerStableRecord, preferPlayerStableRecord } from '../../../../src/lib/server/player-seo-contract.mjs';
+import { normalizePlayerStableRecord, preferPlayerStableRecord, getPlayerSlugResolverPool } from '../../../../src/lib/server/player-seo-contract.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -265,7 +265,7 @@ async function fetchJson(url) {
     method: 'GET',
     cache: 'no-store',
     headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(7_000)
+    signal: AbortSignal.timeout(15_000)
   });
   const text = await response.text();
   if (!text) return { response, payload: null, details: '' };
@@ -421,6 +421,85 @@ async function tryPlayersCompatibility(base, outgoing, fallbackOffset, fallbackL
   return null;
 }
 
+async function fastDatabaseSearch(incoming) {
+  const pool = getPlayerSlugResolverPool();
+  if (!pool) return null;
+  
+  try {
+    console.time('[SearchProxy] fastDatabaseSearch total time');
+    let query = 'SELECT * FROM player_stats WHERE 1=1';
+    const values = [];
+    let paramIdx = 1;
+
+    const q = incoming.get('q') || incoming.get('name_starts_with');
+    if (q) {
+      const safeQ = q.replace(/'/g, "''").replace(/%/g, "\\%");
+      query += ` AND name ILIKE '%${safeQ}%'`;
+    }
+
+    const position = incoming.get('position');
+    if (position && !q) { query += ` AND position = $${paramIdx++}`; values.push(position.trim().toUpperCase()); }
+
+    const min_ovr = incoming.get('min_ovr');
+    if (min_ovr) { query += ` AND ovr >= $${paramIdx++}`; values.push(parseInt(min_ovr, 10)); }
+
+    const max_ovr = incoming.get('max_ovr');
+    if (max_ovr) { query += ` AND ovr <= $${paramIdx++}`; values.push(parseInt(max_ovr, 10)); }
+
+    const league = incoming.get('league');
+    if (league) { query += ` AND league = $${paramIdx++}`; values.push(league.trim()); }
+
+    const team = incoming.get('team');
+    if (team) { query += ` AND team = $${paramIdx++}`; values.push(team.trim()); }
+
+    const nation = incoming.get('nation');
+    if (nation) { query += ` AND nation_region = $${paramIdx++}`; values.push(nation.trim()); }
+
+    const event = incoming.get('event');
+    if (event) { query += ` AND event = $${paramIdx++}`; values.push(event.trim()); }
+
+    const skill_moves = incoming.get('skill_moves');
+    if (skill_moves) { query += ` AND skill_moves_stars = $${paramIdx++}`; values.push(parseInt(skill_moves, 10)); }
+
+    const is_untradable = incoming.get('is_untradable');
+    if (is_untradable) { query += ` AND is_untradable = $${paramIdx++}`; values.push(is_untradable === '1' || is_untradable === 'true' ? 't' : 'f'); }
+
+    const rank = incoming.get('rank') || '0';
+    query += ` AND rank = $${paramIdx++}`; values.push(parseInt(rank, 10));
+
+    console.time('[SearchProxy] count query');
+    const countResult = await pool.query(query.replace('SELECT *', 'SELECT COUNT(*) as total'), values);
+    const total = parseInt(countResult.rows[0].total, 10);
+    console.timeEnd('[SearchProxy] count query');
+
+    query += ` ORDER BY ovr DESC, name ASC`;
+    
+    const limit = Math.min(250, parseInt(incoming.get('limit') || '50', 10));
+    const offset = parseInt(incoming.get('offset') || '0', 10);
+    query += ` LIMIT $${paramIdx++} OFFSET $${paramIdx++}`;
+    values.push(limit, offset);
+
+    console.time('[SearchProxy] data query');
+    const result = await pool.query(query, values);
+    console.timeEnd('[SearchProxy] data query');
+    const players = result.rows.map(row => normalizePlayerStableRecord(row, row.player_id || row.id));
+    console.timeEnd('[SearchProxy] fastDatabaseSearch total time');
+
+    return {
+      players,
+      pagination: {
+        total,
+        limit,
+        offset,
+        has_more: offset + players.length < total
+      }
+    };
+  } catch (error) {
+    console.error('[SearchProxy] Fast database search failed:', error);
+    return null;
+  }
+}
+
 export async function GET(request) {
   const incoming = new URL(request.url).searchParams;
   const outgoing = pickSearchParams(incoming);
@@ -439,6 +518,13 @@ export async function GET(request) {
   const attempts = [];
 
   console.log(`[SearchProxy] Incoming search: q="${searchQuery}" pos="${targetPosition}" criteria=`, filterCriteria);
+
+  // Fast Path: If database is available, query it directly to bypass the slow proxy scraper
+  const fastResult = await fastDatabaseSearch(incoming);
+  if (fastResult) {
+    console.log(`[SearchProxy] Fast database search succeeded. Found ${fastResult.players.length} players.`);
+    return NextResponse.json(fastResult, { status: 200 });
+  }
 
   // CRITICAL: If a search query is present, we ignore the position filter 
   // to allow finding players across all positions (as requested by the user).
