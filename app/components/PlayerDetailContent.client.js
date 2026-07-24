@@ -10,12 +10,6 @@ import PlayerPlaystylesSection from './PlayerPlaystylesSection.client';
 import PlayerStatisticsSection from './PlayerStatisticsSection.client';
 import PlayerTrainingLevelPanel from './PlayerTrainingLevelPanel.client';
 import AdsenseAd from './AdsenseAd';
-import dynamic from 'next/dynamic';
-
-const PlayerPriceHistorySection = dynamic(() => import('./PlayerPriceHistorySection.client'), {
-  ssr: false,
-  loading: () => <div className="section-loading-placeholder" style={{ height: '300px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }} />
-});
 
 import {
   buildProfileOverviewItems,
@@ -443,18 +437,13 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 }}
               >
                 {record?.isUntradable ? (
-                  'Non-Auctionable'
+                  <PlayerMarketValue isUntradable={true} />
                 ) : (
                   <>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                       <circle cx="12" cy="12" r="10" />
                     </svg>
-                    <PlayerMarketValue
-                      playerId={playerId}
-                      rank={selectedRank}
-                      isUntradable={record?.isUntradable}
-                      fallbackPrice={record?.price}
-                    />
+                    <PlayerMarketValue isUntradable={false} />
                   </>
                 )}
               </div>
@@ -655,7 +644,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
           <PlayerSkillsAbilitiesSection playerId={playerId} currentRank={selectedRank} />
           <PlayerPlaystylesSection playerId={playerId} currentRank={selectedRank} />
 
-          <PlayerPriceHistorySection playerId={playerId} rank={selectedRank} isAuctionable={isAuctionable} />
+
           <AdsenseAd slot="7867021922" style={{ marginTop: '24px' }} />
         </div>
       </section>

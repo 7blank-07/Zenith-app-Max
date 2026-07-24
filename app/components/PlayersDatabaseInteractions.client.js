@@ -1572,16 +1572,13 @@ export default function PlayersDatabaseInteractions({
                         </div>
                         <div className="player-price player-row-price">
                           {player.isUntradable ? (
-                            <img
-                              src={UNTRADABLE_PRICE_FLAG_URL}
-                              alt="Non-auctionable"
-                              className="player-row-tradability-icon"
-                              title="Non-auctionable"
-                            />
+                            <span className="price-inline player-row-price-inline">
+                              <span className="price-text">Untradable</span>
+                            </span>
                           ) : (
                             <span className="price-inline player-row-price-inline">
                               <img src="/assets/images/background/fc coin img.webp" alt="coin" className="price-icon" />
-                              <span className="price-text">{hasPrice ? formatPrice(resolvedPrice) : 'No data'}</span>
+                              <span className="price-text">Tradable</span>
                             </span>
                           )}
                         </div>
