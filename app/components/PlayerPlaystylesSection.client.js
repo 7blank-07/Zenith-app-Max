@@ -12,14 +12,23 @@ export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
     fetch(`/api/players/${encodeURIComponent(playerId)}?rank=${currentRank}&_t=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
+        console.log("=== PLAYSTYLES DEBUG LOG ===");
+        console.log("API returned data for playerId:", playerId);
+        console.log("Playstyles array from API:", data.playstyles);
         if (data.playstyles) setPlaystyles(data.playstyles);
+        else console.log("WARNING: playstyles is undefined or missing in data!");
       })
       .catch((e) => console.error('[PlayerPlaystylesSection]', e))
       .finally(() => setLoading(false));
   }, [playerId, currentRank]);
 
   if (loading) return null;
-  if (!playstyles || playstyles.length === 0) return null;
+  
+  console.log("Current state 'playstyles':", playstyles);
+  if (!playstyles || playstyles.length === 0) {
+    console.log("Hiding Playstyles Section because playstyles is empty.");
+    return null;
+  }
 
   return (
     <section className="player-skills-section" style={{ marginTop: '24px' }}>

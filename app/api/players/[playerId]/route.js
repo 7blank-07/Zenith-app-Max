@@ -17,6 +17,7 @@ export async function GET(request, { params }) {
     
     // Also fetch playstyles and attach to payload
     const playstyles = await fetchPlayerPlaystyles(playerId);
+    console.log(`[API /players/${playerId}] Fetched playstyles from DB:`, playstyles);
     payload.playstyles = playstyles;
 
     return NextResponse.json(payload);
