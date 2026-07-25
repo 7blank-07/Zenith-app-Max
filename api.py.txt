@@ -74,21 +74,21 @@ def fetch_prices_batch(player_ids: List[str], rank: int = 0):
     """Fetch prices for a batch of players from zenith_market"""
     if not player_ids:
         return {}
-    
+
     try:
         conn = get_market_db_connection()
         cur = conn.cursor()
-        
+
         # Use the latest_prices view for efficiency
         price_col = f"price{rank}"
         # ✅ SQL AUDIT: Added list wrapper check for safety
         query = f"SELECT asset_id, {price_col} as price FROM latest_prices WHERE asset_id IN %s"
         cur.execute(query, (tuple(player_ids),))
-        
+
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        
+
         return {str(row['asset_id']): row['price'] for row in rows}
     except Exception as e:
         print(f"[ERROR] Batch price fetch failed: {e}")
@@ -634,13 +634,31 @@ def get_player_detail(
 
     available_points = rank
 
+    cur.execute("""
+        SELECT
+            pp.playstyle_name,
+            pp.level,
+            pc.description,
+            pc.icon_level_1,
+            pc.icon_level_2
+        FROM player_playstyles pp
+        LEFT JOIN playstyles_catalog pc ON pp.playstyle_name = pc.name
+        WHERE pp.player_id = %s
+        AND pp.playstyle_name != 'None'
+        AND (pc.description NOT ILIKE 'trait_desc_%%' OR pc.description IS NULL)
+        ORDER BY pp.level DESC, pc.playstyle_id ASC
+        LIMIT 2
+    """, (player_id,))
+    playstyles = cur.fetchall()
+
     cur.close()
     conn.close()
 
     return {
         "player": player,
         "skills": [dict(s) for s in skills],
-        "available_skill_points": available_points
+        "available_skill_points": available_points,
+        "playstyles": [dict(p) for p in playstyles]
     }
 
 
