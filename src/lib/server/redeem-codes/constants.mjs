@@ -14,7 +14,12 @@ export const REDEEM_CODE_SCOPE = Object.freeze({
   THAILAND: 'th',
   PHILIPPINES: 'ph',
   USA: 'us',
-  UAE: 'ae'
+  UAE: 'ae',
+  PORTUGAL: 'pt',
+  GERMANY: 'de',
+  SPAIN: 'es',
+  TURKEY: 'tr',
+  RUSSIA: 'ru'
 });
 
 export const REDEEM_CODE_SCOPE_VALUES = Object.freeze(Object.values(REDEEM_CODE_SCOPE));
@@ -32,7 +37,12 @@ export const REDEEM_CODE_SCOPE_OPTIONS = Object.freeze([
   { value: REDEEM_CODE_SCOPE.THAILAND, label: 'Thailand' },
   { value: REDEEM_CODE_SCOPE.PHILIPPINES, label: 'Philippines' },
   { value: REDEEM_CODE_SCOPE.USA, label: 'USA' },
-  { value: REDEEM_CODE_SCOPE.UAE, label: 'UAE' }
+  { value: REDEEM_CODE_SCOPE.UAE, label: 'UAE' },
+  { value: REDEEM_CODE_SCOPE.PORTUGAL, label: 'Portugal' },
+  { value: REDEEM_CODE_SCOPE.GERMANY, label: 'Germany' },
+  { value: REDEEM_CODE_SCOPE.SPAIN, label: 'Spain' },
+  { value: REDEEM_CODE_SCOPE.TURKEY, label: 'Turkey' },
+  { value: REDEEM_CODE_SCOPE.RUSSIA, label: 'Russia' }
 ]);
 
 export const REDEEM_ROUTE_KEY = Object.freeze({
@@ -45,7 +55,12 @@ export const REDEEM_ROUTE_KEY = Object.freeze({
   THAILAND: 'thailand',
   PHILIPPINES: 'philippines',
   USA: 'usa',
-  UAE: 'uae'
+  UAE: 'uae',
+  PORTUGAL: 'portugal',
+  GERMANY: 'germany',
+  SPAIN: 'spain',
+  TURKEY: 'turkey',
+  RUSSIA: 'russia'
 });
 
 export const REDEEM_ROUTE_CONFIG = Object.freeze({
@@ -558,6 +573,246 @@ export const REDEEM_ROUTE_CONFIG = Object.freeze({
       { name: 'أكواد FC Mobile', path: '/fc-mobile-redeem-codes' },
       { name: 'الإمارات', path: '/ae/kod-fifa' }
     ]
+  },
+  [REDEEM_ROUTE_KEY.PORTUGAL]: {
+    key: REDEEM_ROUTE_KEY.PORTUGAL,
+    path: '/pt/codigo-de-resgate-fc-mobile',
+    scope: REDEEM_CODE_SCOPE.PORTUGAL,
+    includeGlobalScope: true,
+    sharedGlobalCodes: true,
+    todayOnly: false,
+    countryLabel: 'Portugal',
+    navLabel: 'Portugal',
+    locale: 'pt-PT',
+    hreflang: 'pt-PT',
+    primaryKeyword: 'codigo de resgate fc mobile',
+    secondaryKeywords: ['codigos fc mobile portugal', 'codigo de resgate fifa mobile'],
+    title: 'Código de Resgate FC Mobile Portugal | Códigos Globais',
+    metaDescription:
+      'Página de códigos de resgate do FC Mobile para jogadores em Portugal. Lista global com atualizações de status e explicações honestas sobre disponibilidade.',
+    h1: 'Códigos de Resgate FC Mobile para Portugal',
+    intro:
+      'Acompanhe os códigos de resgate globais do FC Mobile que os jogadores em Portugal podem testar e copie os códigos ativos rapidamente.',
+    globalCodeNote:
+      'A maioria dos códigos é global e não exclusiva de Portugal. Se a EA restringir uma promoção por região, informaremos claramente.',
+    copy: {
+      eyebrow: 'Guia de códigos para Portugal',
+      lastUpdatedLabel: 'Última atualização para jogadores em Portugal:'
+    },
+    faqEntries: [
+      {
+        question: 'Estes códigos são exclusivos para Portugal?',
+        answer:
+          'Não. Esta página monitora principalmente os lançamentos globais do FC Mobile. Qualquer restrição de região da EA será indicada claramente.'
+      },
+      {
+        question: 'Por que Portugal tem sua própria página se a lista é global?',
+        answer:
+          'Para fornecer contexto e explicações em português de Portugal, mantendo uma fonte de dados global compartilhada.'
+      },
+      {
+        question: 'Um código global pode falhar em contas portuguesas?',
+        answer:
+          'Sim. Pode falhar se estiver expirado, com limite de uso atingido, conta não elegível ou se houver uma campanha com restrição regional.'
+      }
+    ],
+    breadcrumb: [
+      { name: 'Home', path: '/' },
+      { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
+      { name: 'Portugal', path: '/pt/codigo-de-resgate-fc-mobile' }
+    ]
+  },
+  [REDEEM_ROUTE_KEY.GERMANY]: {
+    key: REDEEM_ROUTE_KEY.GERMANY,
+    path: '/de/fc-mobile-einloesecodes',
+    scope: REDEEM_CODE_SCOPE.GERMANY,
+    includeGlobalScope: true,
+    sharedGlobalCodes: true,
+    todayOnly: false,
+    countryLabel: 'Germany',
+    navLabel: 'Germany',
+    locale: 'de-DE',
+    hreflang: 'de-DE',
+    primaryKeyword: 'FC Mobile Einlösecodes',
+    secondaryKeywords: ['fc mobile codes deutschland', 'ea fc mobile einlösecode'],
+    title: 'FC Mobile Einlösecodes Deutschland | Globale Code-Liste',
+    metaDescription:
+      'FC Mobile Einlösecodes für Spieler in Deutschland. Globale Liste mit ehrlichen Erklärungen und täglichen Updates zu aktiven und abgelaufenen Codes.',
+    h1: 'FC Mobile Einlösecodes für Deutschland',
+    intro:
+      'Verfolge globale FC Mobile Einlösecodes für deutsche Spieler. Kopiere aktive Codes schnell und prüfe, welche bereits abgelaufen sind.',
+    globalCodeNote:
+      'Die meisten Codes sind global und nicht exklusiv für Deutschland. Wenn EA eine Aktion regional beschränkt, weisen wir darauf hin.',
+    copy: {
+      eyebrow: 'Code-Guide für deutsche Spieler',
+      lastUpdatedLabel: 'Zuletzt aktualisiert für Spieler in Deutschland:'
+    },
+    faqEntries: [
+      {
+        question: 'Sind diese FC Mobile Einlösecodes exklusiv für Deutschland?',
+        answer:
+          'Nein. Wir listen hier hauptsächlich globale FC Mobile Codes auf. Falls EA einen Code regional beschränkt, wird dies deutlich markiert.'
+      },
+      {
+        question: 'Warum gibt es eine deutsche Seite, wenn die Codes global sind?',
+        answer:
+          'Sie bietet deutsche Texte, lokale Erklärungen und FAQs, nutzt aber weiterhin dieselbe globale Datenquelle für Codes.'
+      },
+      {
+        question: 'Kann ein globaler Code in Deutschland fehlschlagen?',
+        answer:
+          'Ja. Ein Code kann fehlschlagen, wenn er abgelaufen ist, das Einlöselimit erreicht hat oder EA bestimmte Regionen ausschließt.'
+      }
+    ],
+    breadcrumb: [
+      { name: 'Home', path: '/' },
+      { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
+      { name: 'Germany', path: '/de/fc-mobile-einloesecodes' }
+    ]
+  },
+  [REDEEM_ROUTE_KEY.SPAIN]: {
+    key: REDEEM_ROUTE_KEY.SPAIN,
+    path: '/es/codigos-de-canje-de-fc-mobile',
+    scope: REDEEM_CODE_SCOPE.SPAIN,
+    includeGlobalScope: true,
+    sharedGlobalCodes: true,
+    todayOnly: false,
+    countryLabel: 'Spain',
+    navLabel: 'Spain',
+    locale: 'es-ES',
+    hreflang: 'es-ES',
+    primaryKeyword: 'Códigos de Canje de FC Mobile',
+    secondaryKeywords: ['codigos fc mobile españa', 'canjear codigo fc mobile'],
+    title: 'Códigos de Canje de FC Mobile España | Lista Global',
+    metaDescription:
+      'Códigos de canje de FC Mobile para jugadores en España. Lista global con actualizaciones diarias, estado de los códigos y respuestas claras.',
+    h1: 'Códigos de Canje de FC Mobile para España',
+    intro:
+      'Sigue los códigos de canje globales de FC Mobile para jugadores de España. Comprueba las recompensas activas y canjea rápidamente.',
+    globalCodeNote:
+      'La mayoría de los códigos son globales, no exclusivos de España. Si EA restringe una campaña por territorio, lo indicaremos claramente.',
+    copy: {
+      eyebrow: 'Guía para jugadores de España',
+      lastUpdatedLabel: 'Última actualización para jugadores en España:'
+    },
+    faqEntries: [
+      {
+        question: '¿Estos códigos son exclusivos de España?',
+        answer:
+          'No. Esta página rastrea principalmente códigos globales de FC Mobile. Cualquier restricción regional de EA se indicará claramente.'
+      },
+      {
+        question: '¿Por qué hay una página para España si los códigos son globales?',
+        answer:
+          'Para ofrecer textos y preguntas frecuentes en español de España, manteniendo la misma fuente de códigos globales.'
+      },
+      {
+        question: '¿Puede fallar un código global en cuentas de España?',
+        answer:
+          'Sí. Un código puede fallar por caducidad, límite de canjes, requisitos de la cuenta o si EA excluye tu región.'
+      }
+    ],
+    breadcrumb: [
+      { name: 'Home', path: '/' },
+      { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
+      { name: 'Spain', path: '/es/codigos-de-canje-de-fc-mobile' }
+    ]
+  },
+  [REDEEM_ROUTE_KEY.TURKEY]: {
+    key: REDEEM_ROUTE_KEY.TURKEY,
+    path: '/tr/fc-mobil-kullanim-kodlari',
+    scope: REDEEM_CODE_SCOPE.TURKEY,
+    includeGlobalScope: true,
+    sharedGlobalCodes: true,
+    todayOnly: false,
+    countryLabel: 'Turkey',
+    navLabel: 'Turkey',
+    locale: 'tr-TR',
+    hreflang: 'tr-TR',
+    primaryKeyword: 'FC Mobil Kullanım Kodları',
+    secondaryKeywords: ['fc mobile promosyon kodları türkiye', 'fc mobil kodları'],
+    title: 'FC Mobil Kullanım Kodları Türkiye | Küresel Kod Listesi',
+    metaDescription:
+      'Türkiye\'deki oyuncular için FC Mobil kullanım kodları. Güncel durum güncellemeleri ve bölgesel erişim hakkında dürüst açıklamalar içeren küresel liste.',
+    h1: 'Türkiye için FC Mobil Kullanım Kodları',
+    intro:
+      'Türkiye\'deki oyuncuların test edebileceği küresel FC Mobil kullanım kodlarını takip edin ve aktif kodları hızla kopyalayın.',
+    globalCodeNote:
+      'Kodların çoğu küreseldir, Türkiye\'ye özel değildir. EA bir promosyonu bölgeyle sınırlarsa, bunu açıkça belirtiriz.',
+    copy: {
+      eyebrow: 'Türk oyuncu rehberi',
+      lastUpdatedLabel: 'Türkiye\'deki oyuncular için son güncelleme:'
+    },
+    faqEntries: [
+      {
+        question: 'Bu kodlar sadece Türkiye\'ye mi özel?',
+        answer:
+          'Hayır. Bu sayfa ağırlıklı olarak küresel FC Mobil kodlarını izler. Herhangi bir EA bölge kısıtlaması açıkça belirtilecektir.'
+      },
+      {
+        question: 'Kodlar küreselse neden Türkiye için ayrı bir sayfa var?',
+        answer:
+          'Türkçe açıklamalar ve SSS içeriği sunarken aynı paylaşılan küresel kod veritabanını kullanmak için.'
+      },
+      {
+        question: 'Küresel bir kod Türkiye\'deki hesaplarda başarısız olabilir mi?',
+        answer:
+          'Evet. Süresi dolmuşsa, kullanım sınırına ulaşmışsa, hesabınız uygun değilse veya EA bölgenizi hariç tutmuşsa başarısız olabilir.'
+      }
+    ],
+    breadcrumb: [
+      { name: 'Home', path: '/' },
+      { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
+      { name: 'Turkey', path: '/tr/fc-mobil-kullanim-kodlari' }
+    ]
+  },
+  [REDEEM_ROUTE_KEY.RUSSIA]: {
+    key: REDEEM_ROUTE_KEY.RUSSIA,
+    path: '/ru/fc-mobile-promo-code',
+    scope: REDEEM_CODE_SCOPE.RUSSIA,
+    includeGlobalScope: true,
+    sharedGlobalCodes: true,
+    todayOnly: false,
+    countryLabel: 'Russia',
+    navLabel: 'Russia',
+    locale: 'ru-RU',
+    hreflang: 'ru-RU',
+    primaryKeyword: 'промокод фк мобайл',
+    secondaryKeywords: ['FC Mobile promo code', 'промокоды fc mobile', 'fc mobile коды россия'],
+    title: 'Промокод ФК Мобайл (FC Mobile) Россия | Глобальные коды',
+    metaDescription:
+      'Глобальный промокод ФК Мобайл (FC Mobile) для игроков в России. Честная информация о доступности, статусе кодов и ежедневные обновления.',
+    h1: 'Промокод ФК Мобайл для России',
+    intro:
+      'Отслеживайте глобальные промокоды FC Mobile для российских игроков. Проверяйте активные награды и быстро копируйте доступные коды.',
+    globalCodeNote:
+      'Большинство кодов являются глобальными, а не эксклюзивными для России. Если EA ограничит акцию по региону, мы четко укажем это.',
+    copy: {
+      eyebrow: 'Гид для игроков из России',
+      lastUpdatedLabel: 'Последнее обновление для игроков из России:'
+    },
+    faqEntries: [
+      {
+        question: 'Эти промокоды эксклюзивны для России?',
+        answer:
+          'Нет. В основном здесь представлены глобальные коды FC Mobile. Любые региональные ограничения от EA будут четко отмечены.'
+      },
+      {
+        question: 'Зачем нужна страница для России, если коды глобальные?',
+        answer:
+          'Она предоставляет тексты и пояснения на русском языке для удобства игроков, используя ту же глобальную базу кодов.'
+      },
+      {
+        question: 'Может ли глобальный код не сработать на российском аккаунте?',
+        answer:
+          'Да. Код может не сработать из-за истечения срока действия, лимита активаций, условий аккаунта или региональных ограничений от EA.'
+      }
+    ],
+    breadcrumb: [
+      { name: 'Home', path: '/' },
+      { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
+      { name: 'Russia', path: '/ru/fc-mobile-promo-code' }
+    ]
   }
 });
 
@@ -572,7 +827,12 @@ export const REDEEM_LAUNCHED_LINKS = Object.freeze(
     REDEEM_ROUTE_KEY.THAILAND,
     REDEEM_ROUTE_KEY.PHILIPPINES,
     REDEEM_ROUTE_KEY.USA,
-    REDEEM_ROUTE_KEY.UAE
+    REDEEM_ROUTE_KEY.UAE,
+    REDEEM_ROUTE_KEY.PORTUGAL,
+    REDEEM_ROUTE_KEY.GERMANY,
+    REDEEM_ROUTE_KEY.SPAIN,
+    REDEEM_ROUTE_KEY.TURKEY,
+    REDEEM_ROUTE_KEY.RUSSIA
   ].map((routeKey) => ({
     label: REDEEM_ROUTE_CONFIG[routeKey].navLabel,
     href: REDEEM_ROUTE_CONFIG[routeKey].path
@@ -590,7 +850,12 @@ export const REDEEM_SCOPE_TO_PUBLISHED_PATHS = Object.freeze({
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.THAILAND].path,
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.PHILIPPINES].path,
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.USA].path,
-    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.UAE].path
+    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.UAE].path,
+    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.PORTUGAL].path,
+    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GERMANY].path,
+    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.SPAIN].path,
+    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.TURKEY].path,
+    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.RUSSIA].path
   ],
   [REDEEM_CODE_SCOPE.INDIA]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.INDIA].path],
   [REDEEM_CODE_SCOPE.INDONESIA]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.INDONESIA].path],
@@ -599,7 +864,12 @@ export const REDEEM_SCOPE_TO_PUBLISHED_PATHS = Object.freeze({
   [REDEEM_CODE_SCOPE.THAILAND]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.THAILAND].path],
   [REDEEM_CODE_SCOPE.PHILIPPINES]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.PHILIPPINES].path],
   [REDEEM_CODE_SCOPE.USA]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.USA].path],
-  [REDEEM_CODE_SCOPE.UAE]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.UAE].path]
+  [REDEEM_CODE_SCOPE.UAE]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.UAE].path],
+  [REDEEM_CODE_SCOPE.PORTUGAL]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.PORTUGAL].path],
+  [REDEEM_CODE_SCOPE.GERMANY]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GERMANY].path],
+  [REDEEM_CODE_SCOPE.SPAIN]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.SPAIN].path],
+  [REDEEM_CODE_SCOPE.TURKEY]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.TURKEY].path],
+  [REDEEM_CODE_SCOPE.RUSSIA]: [REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.RUSSIA].path]
 });
 
 export const REDEEM_SECTION_FILTER_OPTIONS = Object.freeze([
