@@ -3,7 +3,7 @@
   --color-white: #FFFFFF;
   --color-black: #000000;
 
-  /* Graphite Base Scale a */
+  /* Graphite Base Scale */
   --color-graphite-900: #0E1114; /* Base Background */
   --color-graphite-800: #14181C; /* Surface / Cards */
   --color-graphite-700: #1B2126; /* Elevated */
@@ -157,7 +157,7 @@ html, body {
 
 @font-face {
     font-family: "CruyffSans";
-    src: url("/assets/fonts/CruyffSansCondensed-Bold.woff2") format("woff2");
+    src: url("../fonts/CruyffSansCondensed-Bold.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;

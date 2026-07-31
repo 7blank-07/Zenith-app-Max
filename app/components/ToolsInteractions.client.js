@@ -2720,9 +2720,6 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                 value={squadName}
                 onChange={(event) => setSquadName(event.target.value)}
               />
-              <button id="squad-theme-btn" className="squad-theme-btn" title="Change Field Theme" onClick={openThemeSelector} type="button">
-                🎨
-              </button>
             </div>
 
             <div className="squad-header-center">
@@ -2744,12 +2741,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                     {squadOvr}
                   </span>
                 </div>
-                <div className="squad-stat">
-                  <span className="squad-stat-label">VALUE</span>
-                  <span id="squad-value" className="squad-stat-value">
-                    {formatCoins(squadValue)}
-                  </span>
-                </div>
+                <button id="squad-theme-btn" className="squad-theme-btn" title="Change Field Theme" onClick={openThemeSelector} type="button">
+                  🎨
+                </button>
               </div>
             </div>
 

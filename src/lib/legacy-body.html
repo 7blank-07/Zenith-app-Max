@@ -3096,13 +3096,9 @@
   <div id="squad-builder-modal" class="squad-modal-overlay" style="display:none;">
     <div class="squad-modal">
       <div class="squad-header">
-        <div class="squad-header-left">
+                <div class="squad-header-left">
           <h2>Squad Builder</h2>
           <input id="squad-name-input" class="squad-input" placeholder="Squad Name" />
-          <!-- ✅ THEME BUTTON: -->
-          <button id="squad-theme-btn" class="squad-theme-btn" title="Change Field Theme">
-            🎨
-          </button>
         </div>
         <div class="squad-header-center">
 
@@ -3122,14 +3118,14 @@
               Badges
           </button>
 
-          <div class="squad-stat">
+                    <div class="squad-stat">
             <span class="squad-stat-label">OVR</span>
             <span id="squad-ovr" class="squad-stat-value">0</span>
           </div>
-          <div class="squad-stat">
-            <span class="squad-stat-label">VALUE</span>
-            <span id="squad-value" class="squad-stat-value">0</span>
-          </div>
+          <!-- ✅ THEME BUTTON: -->
+          <button id="squad-theme-btn" class="squad-theme-btn" title="Change Field Theme">
+            🎨
+          </button>
         </div>
         <div class="squad-header-right">
           <select id="formation-select" class="squad-select" onchange="changeFormation(this.value)">
@@ -3183,9 +3179,7 @@
           <button class="squad-action-btn load-btn" onclick="loadSquad()">
               📥 Load Squad
           </button>
-          <button id="squad-theme-btn-mobile-tablet" class="squad-theme-btn squad-theme-btn-mobile-tablet" title="Change Field Theme">
-            🎨
-          </button>
+          
 
           <button class="squad-close" onclick="closeSquadBuilderModal()">✕</button>
         </div>
