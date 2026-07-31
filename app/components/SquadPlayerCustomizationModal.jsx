@@ -806,8 +806,36 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     const focusFirstElement = () => {
       const focusable = getFocusableElements();
       if (focusable.length > 0) {
-        focusable[0].focus();
+        focusable[0].focus({ preventScroll: true });
       }
+    };
+
+    const frameId = window.requestAnimationFrame(focusFirstElement);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [player?.playerId]);
+
+  useEffect(() => {
+    if (!player) return;
+
+    const getFocusableElements = () => {
+      if (!dialogRef.current) return [];
+      const selectors = [
+        'button:not([disabled])',
+        '[href]',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+      ].join(',');
+      return Array.from(dialogRef.current.querySelectorAll(selectors)).filter((element) => {
+        if (!(element instanceof HTMLElement)) return false;
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      });
     };
 
     const handleKeyDown = (event) => {
@@ -845,15 +873,11 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
       }
     };
 
-    const frameId = window.requestAnimationFrame(focusFirstElement);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.cancelAnimationFrame(frameId);
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-      previouslyFocused?.focus();
     };
-  }, [activeSkillDetail, onClose, player, statsViewOpen]);
+  }, [activeSkillDetail, onClose, player?.playerId, statsViewOpen]);
 
   const emitUpdate = (nextState) => {
     if (!player?.playerId || typeof onUpdatePlayer !== 'function') return;
