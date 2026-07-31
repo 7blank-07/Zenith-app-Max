@@ -1,4 +1,4 @@
-const IMAGE_CACHE_NAME = 'zenith-image-cache-v2';
+const IMAGE_CACHE_NAME = 'zenith-image-cache-v3';
 const REMOTE_IMAGE_HOSTS = new Set(['images.zenithfcm.com']);
 const LOCAL_IMAGE_PREFIXES = ['/assets/images/', '/_next/image'];
 
@@ -15,7 +15,9 @@ function isCacheableImageRequest(request, url) {
 
 function isCacheableImageResponse(response) {
   if (!response) return false;
-  if (response.type === 'opaque') return true;
+  // Never cache opaque responses (cross-origin no-cors requests) 
+  // because we cannot know if they are 200 OKs or 404/500 errors.
+  if (response.type === 'opaque') return false;
   return response.ok;
 }
 
