@@ -203,7 +203,7 @@ function getPlayerType(player) {
 function resolveBaseOvr(player) {
   const normalizedRank = clamp(toNumber(player?.rank, 0), 0, 5);
   const normalizedTraining = clamp(toNumber(player?.trainingLevel ?? player?.training_level, 0), 0, 30);
-  const fallbackBase = Math.max(0, toNumber(player?.ovr, 0) - normalizedRank - Math.floor(normalizedTraining / 5));
+  const fallbackBase = Math.max(0, toNumber(player?.ovr, 0) - normalizedRank);
   return Math.max(0, toNumber(player?.baseOvr ?? player?.base_ovr, fallbackBase));
 }
 
@@ -538,7 +538,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     [availableSkills, skillLevelsById]
   );
   const trainingBonus = Math.floor(Math.max(0, trainingLevel) / 5);
-  const projectedOvr = baseOvr > 0 ? baseOvr + selectedRank + trainingBonus : baseOvr;
+  const projectedOvr = baseOvr > 0 ? baseOvr + selectedRank : baseOvr;
   const effectiveSkillBoosts = useMemo(() => {
     if (availableSkills.length > 0) {
       return computedSkillBoosts;
@@ -864,7 +864,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
     const nextSkillAllocations = normalizeSkillAllocationMap(
       nextState.skillAllocations ?? skillLevelsById ?? player?.skillAllocations ?? player?.skill_allocations
     );
-    const nextProjectedOvr = baseOvr > 0 ? baseOvr + nextRank + nextTrainingBonus : baseOvr;
+    const nextProjectedOvr = baseOvr > 0 ? baseOvr + nextRank : baseOvr;
     onUpdatePlayer({
       playerId: player.playerId,
       rank: nextRank,
