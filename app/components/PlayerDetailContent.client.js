@@ -291,21 +291,37 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                  position: 'absolute',
                  top: '16px',
                  right: '16px',
-                 background: 'rgba(255,255,255,0.03)',
-                 border: '1px solid rgba(255,255,255,0.08)',
+                 background: 'rgba(255,255,255,0.1)',
+                 backdropFilter: 'blur(4px)',
+                 border: '1px solid rgba(255,255,255,0.25)',
                  borderRadius: '8px',
-                 padding: '8px',
+                 padding: '10px',
                  display: 'flex',
                  alignItems: 'center',
                  justifyContent: 'center',
                  cursor: isDownloading ? 'wait' : 'pointer',
-                 color: 'var(--color-text-muted, #98A0A6)',
-                 transition: 'all 0.2s',
+                 color: '#FFFFFF',
+                 transition: 'all 0.2s ease',
                  zIndex: 10,
-                 opacity: isDownloading ? 0.5 : 1
+                 opacity: isDownloading ? 0.7 : 1,
+                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
                }}
-               onMouseEnter={(e) => { if(!isDownloading) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; } }}
-               onMouseLeave={(e) => { if(!isDownloading) { e.currentTarget.style.color = 'var(--color-text-muted, #98A0A6)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; } }}
+               onMouseEnter={(e) => { 
+                 if(!isDownloading) { 
+                   e.currentTarget.style.color = '#00C2A8'; 
+                   e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; 
+                   e.currentTarget.style.borderColor = 'rgba(0,194,168,0.4)';
+                   e.currentTarget.style.transform = 'translateY(-2px)';
+                 } 
+               }}
+               onMouseLeave={(e) => { 
+                 if(!isDownloading) { 
+                   e.currentTarget.style.color = '#FFFFFF'; 
+                   e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; 
+                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)';
+                   e.currentTarget.style.transform = 'translateY(0)';
+                 } 
+               }}
             >
                {isDownloading ? (
                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="spinner" style={{ animation: 'spin 1s linear infinite' }}>
