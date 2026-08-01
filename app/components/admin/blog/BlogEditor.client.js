@@ -72,6 +72,7 @@ function buildInitialValues(post) {
     seoKeywords: Array.isArray(post?.seoKeywords) ? post.seoKeywords : [],
     internalLinks: Array.isArray(post?.internalLinks) ? post.internalLinks : [],
     externalLinks: Array.isArray(post?.externalLinks) ? post.externalLinks : [],
+    linkedPlayerId: post?.linkedPlayerId || '',
     featured: Boolean(post?.featured)
   };
 }

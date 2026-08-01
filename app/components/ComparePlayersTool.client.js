@@ -98,7 +98,7 @@ function activateWithKeyboard(event, callback) {
   callback();
 }
 
-export default function ComparePlayersTool({ isActive, normalizedPlayers = [], playersById, searchPlayers, onClose, onUpdatePlayer }) {
+export default function ComparePlayersTool({ isActive, normalizedPlayers = [], playersById, searchPlayers, onClose, onUpdatePlayer, onPlayerFetched }) {
   const [comparePlayerIds, setComparePlayerIds] = useState([]);
   const [compareView, setCompareView] = useState('basic');
   const [compareSearchOpen, setCompareSearchOpen] = useState(false);
@@ -258,6 +258,49 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
     setCompareSearchError('');
     setSelectedCustomizationPlayerId('');
   }, [isActive]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isActive) return;
+
+    const p1 = window.sessionStorage.getItem('compare_pending_add');
+    
+    console.log('[Compare Tool] Checked sessionStorage params:', { p1, isActive });
+    
+    if (!p1) return;
+
+    window.sessionStorage.removeItem('compare_pending_add');
+
+    if (playersById.has(p1)) {
+      console.log('[Compare Tool] Found player immediately:', p1);
+      setComparePlayerIds(current => {
+        if (!current.includes(p1) && current.length < 5) {
+          return [...current, p1];
+        }
+        return current;
+      });
+    } else if (searchPlayers) {
+      console.log('[Compare Tool] Fetching player:', p1);
+      const baseId = p1.split('_')[0];
+      fetch(`/api/player-detail?id=${baseId}`)
+        .then(res => res.json())
+        .then(data => {
+           console.log('[Compare Tool] Fetched player:', data);
+           const player = data.record || data;
+           if (player && player.playerId) {
+             if (onPlayerFetched) {
+               onPlayerFetched(player);
+             }
+             setComparePlayerIds(current => {
+               if (!current.includes(p1) && current.length < 5) {
+                 return [...current, p1];
+               }
+               return current;
+             });
+           }
+        })
+        .catch(err => console.error("Failed to load p1", err));
+    }
+  }, [isActive, playersById, searchPlayers]);
 
   useEffect(() => {
     if (!compareSearchOpen) {

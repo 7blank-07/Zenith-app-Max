@@ -261,6 +261,20 @@ export default function BlogMetadataForm({
           onChange={onInternalLinksChange}
         />
 
+        <label className={styles.field}>
+          <span className={styles.label}>Linked Player Slug (for Team Builder & Compare tools)</span>
+          <input
+            className={styles.input}
+            name="linkedPlayerId"
+            value={values.linkedPlayerId || ''}
+            onChange={(event) => onFieldChange('linkedPlayerId', event.target.value)}
+            placeholder="e.g. lizarazu-119-3054323"
+          />
+          <span className={styles.fieldHint}>
+            Paste the player's URL slug here to show "Add to Team Builder" and "Add to Compare" buttons.
+          </span>
+        </label>
+
         <InternalLinkPicker
           name="externalLinks"
           label="External links"

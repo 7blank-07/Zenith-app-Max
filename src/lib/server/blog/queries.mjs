@@ -22,6 +22,7 @@ const BLOG_SELECT_COLUMNS = `
   b.updated_at,
   b.category_id,
   b.author_id,
+  b.linked_player_id,
   jsonb_build_object(
     'id', c.id,
     'name', c.name,
@@ -233,10 +234,11 @@ export const INSERT_BLOG_QUERY = `
     external_links,
     status,
     reading_time,
-    published_at
+    published_at,
+    linked_player_id
   )
   VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10::text[], $11, $12, $13, $14::jsonb, $15::jsonb, $16, $17, $18
+    $1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10::text[], $11, $12, $13, $14::jsonb, $15::jsonb, $16, $17, $18, $19
   )
   RETURNING id
 `;
@@ -262,8 +264,9 @@ export const UPDATE_BLOG_QUERY = `
     status = $16,
     reading_time = $17,
     published_at = $18,
+    linked_player_id = $19,
     updated_at = NOW()
-  WHERE id = $19
+  WHERE id = $20
   RETURNING id
 `;
 

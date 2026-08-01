@@ -3,6 +3,7 @@ import SiteChrome from '../../../components/SiteChrome';
 import BlogArticleBody from '../../../components/blog/BlogArticleBody';
 import BlogArticleHero from '../../../components/blog/BlogArticleHero';
 import RelatedArticles from '../../../components/blog/RelatedArticles';
+import LinkedPlayerActions from '../../../components/blog/LinkedPlayerActions.client';
 import AdsenseAd from '../../../components/AdsenseAd';
 import styles from '../../../components/blog/BlogLayout.module.css';
 import { buildBlogPostingSchema, buildBreadcrumbListSchema, serializeJsonLd } from '../../../../src/lib/server/blog/schema.mjs';
@@ -84,6 +85,9 @@ export default async function BlogArticlePage({ params }) {
 
               <div className={styles.articleShell}>
                 <div className={styles.articleMain}>
+                  {pageData.post?.linkedPlayerId && (
+                    <LinkedPlayerActions linkedPlayerId={pageData.post.linkedPlayerId} />
+                  )}
                   <BlogArticleBody article={pageData.post} />
                   
                   <section className="article-footer-ads" style={{ marginTop: '60px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>

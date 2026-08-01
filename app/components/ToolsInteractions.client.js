@@ -1899,6 +1899,65 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   }, [filterOptions, normalizedPlayers]);
 
   useEffect(() => {
+    if (activeTool !== 'squadbuilder' || !squadStateHydrated) return;
+    if (typeof window === 'undefined') return;
+
+    const addPlayerId = window.sessionStorage.getItem('squad_pending_add');
+    
+    console.log('[Tools] Checked sessionStorage params:', { addPlayerId, activeTool, squadStateHydrated });
+    
+    if (!addPlayerId) return;
+
+    window.sessionStorage.removeItem('squad_pending_add');
+
+    const processAddedPlayer = (playerObj) => {
+      console.log('[Tools] Processing player addition:', playerObj);
+      if (!playerObj) return;
+      const pos = String(playerObj.position || '').toUpperCase();
+      let targetFormation = formationId;
+      let availableSlots = SQUAD_FORMATIONS[formationId] || [];
+      let hasPos = availableSlots.some(s => s.id === pos || String(s.label || '').toUpperCase() === pos);
+
+      if (!hasPos) {
+        const found = Object.keys(SQUAD_FORMATIONS).find(f => 
+          SQUAD_FORMATIONS[f].some(s => s.id === pos || String(s.label || '').toUpperCase() === pos)
+        );
+        if (found) {
+          targetFormation = found;
+          setFormationId(found);
+          availableSlots = SQUAD_FORMATIONS[found];
+        }
+      }
+
+      let targetSlot = availableSlots.find(s => s.id === pos || String(s.label || '').toUpperCase() === pos);
+      if (!targetSlot) targetSlot = availableSlots.find(s => !starters[s.id]);
+      if (!targetSlot) targetSlot = availableSlots[0];
+
+      if (targetSlot) {
+        setStarters(prev => ({ ...prev, [targetSlot.id]: playerObj.playerId }));
+      }
+    };
+
+    const existing = playersById.get(addPlayerId);
+    if (existing) {
+      processAddedPlayer(existing);
+    } else {
+      const baseId = addPlayerId.split('_')[0];
+      fetch(`/api/player-detail?id=${baseId}`)
+        .then(res => res.json())
+        .then(data => {
+           const record = data.record || data;
+           if (record && record.playerId) {
+             const norm = normalizePlayer(record, 0);
+             setSupplementalPlayers(prev => ({ ...prev, [norm.playerId]: norm }));
+             processAddedPlayer(norm);
+           }
+        })
+        .catch(err => console.error("Failed to load addPlayerId", err));
+    }
+  }, [activeTool, squadStateHydrated, formationId, starters, playersById]);
+
+  useEffect(() => {
     if (activeTool !== 'squadbuilder') return undefined;
 
     let cancelled = false;
@@ -3428,6 +3487,10 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         searchPlayers={searchToolPlayers}
         onClose={closeOpenTool}
         onUpdatePlayer={upsertCustomizedPlayer}
+        onPlayerFetched={(record) => {
+          const norm = normalizePlayer(record, 0);
+          setSupplementalPlayers((prev) => ({ ...prev, [norm.playerId]: norm }));
+        }}
       />
     </>
   );

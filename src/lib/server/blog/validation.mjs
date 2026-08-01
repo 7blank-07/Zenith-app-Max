@@ -89,6 +89,7 @@ export function validateBlogEditorSubmission(formData, { intent, existingPost = 
   const seoKeywords = normalizeStringList(formData.get('seoKeywords'));
   const manualInternalLinks = parseJsonArray(formData.get('internalLinks'));
   const manualExternalLinks = parseJsonArray(formData.get('externalLinks'));
+  const linkedPlayerId = toText(formData.get('linkedPlayerId'));
   const fieldErrors = {};
 
   if (intent !== 'delete') {
@@ -145,7 +146,8 @@ export function validateBlogEditorSubmission(formData, { intent, existingPost = 
       seoKeywords,
       internalLinks: mergedLinks.internalLinks,
       externalLinks: mergedLinks.externalLinks,
-      featured: currentUser?.role === BLOG_USER_ROLE.ADMIN && toBoolean(formData.get('featured'))
+      featured: currentUser?.role === BLOG_USER_ROLE.ADMIN && toBoolean(formData.get('featured')),
+      linkedPlayerId: linkedPlayerId || null
     }
   };
 }
