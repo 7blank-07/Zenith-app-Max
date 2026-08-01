@@ -37,11 +37,19 @@ export default function CopyCodeButton({
     }
   }
 
-  const statusLabel = status === 'copied' ? copiedLabel : status === 'failed' ? 'Copy failed' : idleLabel;
+  const renderLabel = () => {
+    if (status === 'copied') return copiedLabel;
+    if (status === 'failed') return 'Copy failed';
+    return (
+      <span translate="no" className="notranslate">
+        {idleLabel}
+      </span>
+    );
+  };
 
   return (
     <button type="button" className={className} onClick={handleCopy} aria-live="polite" data-status={status}>
-      {statusLabel}
+      {renderLabel()}
     </button>
   );
 }
