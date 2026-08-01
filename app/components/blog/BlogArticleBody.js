@@ -2,8 +2,25 @@ import styles from './BlogLayout.module.css';
 import { sanitizeRichTextHtml } from '../../../src/lib/server/blog/html.mjs';
 import AdsenseAd from '../AdsenseAd';
 
-export default function BlogArticleBody({ article }) {
-  const html = sanitizeRichTextHtml(article?.contentHtml || '').trim();
+export default function BlogArticleBody({ article, categorySlug }) {
+  let html = sanitizeRichTextHtml(article?.contentHtml || '').trim();
+
+  // If this is a redeem codes article, protect the first column of tables from translation
+  if (categorySlug === 'redeem-codes') {
+    html = html.replace(/<tr([^>]*)>(.*?)<\/tr>/gis, (match, trAttr, innerContent) => {
+      let replaced = false;
+      const newInner = innerContent.replace(/<td([^>]*)>/i, (tdMatch, tdAttr) => {
+        if (!replaced) {
+          replaced = true;
+          if (!tdAttr.includes('translate="no"')) {
+            return `<td${tdAttr} translate="no" class="notranslate">`;
+          }
+        }
+        return tdMatch;
+      });
+      return `<tr${trAttr}>${newInner}</tr>`;
+    });
+  }
 
   // Logic to inject ad in the middle of the article
   const renderContentWithAds = () => {

@@ -88,7 +88,7 @@ export default async function BlogArticlePage({ params }) {
                   {pageData.post?.linkedPlayerId && (
                     <LinkedPlayerActions linkedPlayerId={pageData.post.linkedPlayerId} />
                   )}
-                  <BlogArticleBody article={pageData.post} />
+                  <BlogArticleBody article={pageData.post} categorySlug={params.category} />
                   
                   <section className="article-footer-ads" style={{ marginTop: '60px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)', marginBottom: '20px', textAlign: 'center' }}>Recommended for you</h3>
