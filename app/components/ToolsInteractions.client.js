@@ -1,4 +1,5 @@
 'use client';
+import Num from './Num';
 
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -2797,7 +2798,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                 <div className="squad-stat">
                   <span className="squad-stat-label">OVR</span>
                   <span id="squad-ovr" className="squad-stat-value">
-                    {squadOvr}
+                    <Num>{squadOvr}</Num>
                   </span>
                 </div>
                 <button id="squad-theme-btn" className="squad-theme-btn" title="Change Field Theme" onClick={openThemeSelector} type="button">
@@ -3079,7 +3080,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                                 <img src={player.playerImage} alt={player.name} className="preview-card-player-img" />
                               )}
                               <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                                {adjustedOvr > 0 ? adjustedOvr : 'NA'}
+                                <Num>{adjustedOvr > 0 ? adjustedOvr : 'NA'}</Num>
                               </div>
                               <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
                                 {player.position || 'NA'}
@@ -3187,7 +3188,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
                           {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
                           <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                            {player.ovr > 0 ? player.ovr : 'N/A'}
+                            <Num>{player.ovr > 0 ? player.ovr : 'N/A'}</Num>
                           </div>
                           <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
                             {player.position || 'N/A'}
@@ -3226,7 +3227,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                           </div>
                         </div>
 
-                        <div className="picker-ovr-right">{player.ovr > 0 ? player.ovr : 'N/A'}</div>
+                        <div className="picker-ovr-right"><Num>{player.ovr > 0 ? player.ovr : 'N/A'}</Num></div>
                       </div>
                     );
                   })}
@@ -3285,7 +3286,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                             <img src={player.playerImage} alt={player.name} className="bench-card-player-img" />
                           )}
                           <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                            {player.ovr > 0 ? player.ovr : 'NA'}
+                            <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
                           </div>
                           <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
                             {player.position || 'NA'}
@@ -3346,7 +3347,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         <SquadExportCapture
           exportRootRef={squadExportRootRef}
           squadName={squadName}
-          squadOvr={squadOvr}
+          squadOvr=<Num>{squadOvr}</Num>
           squadValue={squadValue}
           formationId={formationId}
           badges={badges}

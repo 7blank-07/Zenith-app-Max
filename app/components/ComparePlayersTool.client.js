@@ -1,4 +1,5 @@
 'use client';
+import Num from './Num';
 
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
@@ -446,7 +447,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                             data-player-label={playerLabel}
                           >
                             <span className="stat-player-label">{playerLabel}</span>
-                            <span className={`stat-value ${row.classes[index]}`}>{row.values[index]}</span>
+                            <span className={`stat-value ${row.classes[index]}`}><Num>{row.values[index]}</Num></span>
                           </div>
                         );
                       })}
@@ -464,7 +465,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                             data-player-label={playerLabel}
                           >
                             <span className="stat-player-label">{playerLabel}</span>
-                            <span className={`total-stats-value ${entry.className}`}>{entry.value}</span>
+                            <span className={`total-stats-value ${entry.className}`}><Num>{entry.value}</Num></span>
                           </div>
                         );
                       })}
@@ -506,7 +507,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                           <img src={player.cardBackground || 'https://via.placeholder.com/300x400'} alt="Card Background" className="compare-card-bg" />
                           {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="compare-player-image" />}
                           <div className="compare-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                            {player.ovr > 0 ? player.ovr : 'NA'}
+                            <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
                           </div>
                           <div className="compare-card-pos" style={{ color: player.colorPosition || '#FFFFFF' }}>
                             {player.position || 'NA'}
@@ -643,7 +644,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                         <img src={player.cardBackground || 'https://via.placeholder.com/120x160'} alt="Card" className="picker-card-bg" />
                         {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="picker-card-player-img" />}
                         <div className="picker-card-ovr" style={{ color: player.colorRating || '#FFB86B' }}>
-                          {player.ovr > 0 ? player.ovr : 'NA'}
+                          <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
                         </div>
                         <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
                           {player.position || 'NA'}
@@ -681,7 +682,7 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                         {player.position || 'NA'} • {player.club || 'N/A'}
                       </p>
                     </div>
-                    <div className="compare-search-result-ovr">{player.ovr > 0 ? player.ovr : 'NA'}</div>
+                    <div className="compare-search-result-ovr"><Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num></div>
                   </div>
                 );
               })}

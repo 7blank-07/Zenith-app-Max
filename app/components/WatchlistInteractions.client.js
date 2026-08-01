@@ -266,22 +266,22 @@ function renderPlayerRow(player) {
       data-club="${escapeHtml(player.team)}"
       data-nation="${escapeHtml(player.nation)}"
       data-event="${escapeHtml(player.event)}"
-      data-ovr="${escapeHtml(player.ovr)}"
-      data-skill="${escapeHtml(player.skillmoves)}"
+      data-ovr="<span translate="no" class="notranslate">${escapeHtml(player.ovr)}</span>"
+      data-skill="<span translate="no" class="notranslate">${escapeHtml(player.skillmoves)}</span>"
       data-price="${escapeHtml(player.price)}"
-      data-pac="${escapeHtml(player.pace)}"
-      data-sho="${escapeHtml(player.shooting)}"
-      data-pas="${escapeHtml(player.passing)}"
-      data-dri="${escapeHtml(player.dribbling)}"
-      data-def="${escapeHtml(player.defending)}"
-      data-phy="${escapeHtml(player.physical)}"
+      data-pac="<span translate="no" class="notranslate">${escapeHtml(player.pace)}</span>"
+      data-sho="<span translate="no" class="notranslate">${escapeHtml(player.shooting)}</span>"
+      data-pas="<span translate="no" class="notranslate">${escapeHtml(player.passing)}</span>"
+      data-dri="<span translate="no" class="notranslate">${escapeHtml(player.dribbling)}</span>"
+      data-def="<span translate="no" class="notranslate">${escapeHtml(player.defending)}</span>"
+      data-phy="<span translate="no" class="notranslate">${escapeHtml(player.physical)}</span>"
     >
       <div class="player-row-card">
         <div class="dashboard-player-card">
           <div class="card-container">
             <img src="${cardBackground}" alt="Card Background" class="card-background-img" width="300" height="400" loading="lazy">
             <img src="${playerImage}" alt="${playerName}" class="player-image-img" width="256" height="256" loading="lazy">
-            <div class="card-ovr" style="color: ${playerOvrColor}">${playerOvr}</div>
+            <div class="card-ovr" style="color: ${playerOvrColor}"><span translate="no" class="notranslate">${playerOvr}</span></div>
             <div class="card-position" style="color: ${playerPositionColor}">${playerPosition}</div>
             <div class="card-player-name" style="color: ${playerNameColor}">${playerName}</div>
             ${
@@ -324,12 +324,12 @@ function renderPlayerRow(player) {
       </div>
 
       <div class="player-row-stats player-card-stats-row">
-        <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.pace)}</div><div class="stat-pill-label">PAC</div></div>
-        <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.shooting)}</div><div class="stat-pill-label">SHO</div></div>
-        <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.passing)}</div><div class="stat-pill-label">PAS</div></div>
-        <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.dribbling)}</div><div class="stat-pill-label">DRI</div></div>
-        <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.defending)}</div><div class="stat-pill-label">DEF</div></div>
-        <div class="stat-pill"><div class="stat-pill-value">${escapeHtml(player.physical)}</div><div class="stat-pill-label">PHY</div></div>
+        <div class="stat-pill"><div class="stat-pill-value"><span translate="no" class="notranslate">${escapeHtml(player.pace)}</span></div><div class="stat-pill-label">PAC</div></div>
+        <div class="stat-pill"><div class="stat-pill-value"><span translate="no" class="notranslate">${escapeHtml(player.shooting)}</span></div><div class="stat-pill-label">SHO</div></div>
+        <div class="stat-pill"><div class="stat-pill-value"><span translate="no" class="notranslate">${escapeHtml(player.passing)}</span></div><div class="stat-pill-label">PAS</div></div>
+        <div class="stat-pill"><div class="stat-pill-value"><span translate="no" class="notranslate">${escapeHtml(player.dribbling)}</span></div><div class="stat-pill-label">DRI</div></div>
+        <div class="stat-pill"><div class="stat-pill-value"><span translate="no" class="notranslate">${escapeHtml(player.defending)}</span></div><div class="stat-pill-label">DEF</div></div>
+        <div class="stat-pill"><div class="stat-pill-value"><span translate="no" class="notranslate">${escapeHtml(player.physical)}</span></div><div class="stat-pill-label">PHY</div></div>
       </div>
 
       <button class="player-row-watchlist active" data-unique-id="${escapeHtml(uniqueId)}" type="button" aria-label="Remove from watchlist">
@@ -431,8 +431,8 @@ export default function WatchlistInteractions() {
     };
 
     const updateRatingLabels = () => {
-      if (ratingValue) ratingValue.textContent = `${filters.minOvr}-${filters.maxOvr}`;
-      if (mobileRatingValue) mobileRatingValue.textContent = `${filters.minOvr}-${filters.maxOvr}`;
+      if (ratingValue) ratingValue.innerHTML = `<span translate="no" class="notranslate">${filters.minOvr}-${filters.maxOvr}</span>`;
+      if (mobileRatingValue) mobileRatingValue.innerHTML = `<span translate="no" class="notranslate">${filters.minOvr}-${filters.maxOvr}</span>`;
     };
 
     const syncSources = () => {
@@ -647,7 +647,7 @@ export default function WatchlistInteractions() {
       }
 
       if (resultsCount) {
-        resultsCount.textContent = `${filteredPlayers.length} player${filteredPlayers.length === 1 ? '' : 's'} in watchlist`;
+        resultsCount.textContent = `<span translate="no" class="notranslate">${filteredPlayers.length}</span> player${filteredPlayers.length === 1 ? '' : 's'} in watchlist`;
       }
     };
 

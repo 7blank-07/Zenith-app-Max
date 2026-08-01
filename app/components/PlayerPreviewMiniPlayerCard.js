@@ -5,6 +5,7 @@ import { getStatAccentColor } from './player-skill-stats-utils';
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { getOptimizedZenithUrl } from '../../src/lib/image-optimization.mjs';
+import Num from './Num';
 
 const STAT_MAPPING = {
   ST: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
@@ -58,7 +59,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
 
   return (
     <div className={`${styles.card} ${isFeatured ? styles.featured : ''}`}>
-      <div className={styles.rankBadge}>#{rank}</div>
+      <div className={styles.rankBadge}>#<Num>{rank}</Num></div>
       
       <div className={styles.cardContent}>
         <div className={styles.playerSection}>
@@ -82,7 +83,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
               />
               
               <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                {player.ovr && player.ovr > 0 ? player.ovr : 'NA'}
+                <Num>{player.ovr && player.ovr > 0 ? player.ovr : 'NA'}</Num>
               </div>
               <div className="card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
                 {player.position || 'NA'}
@@ -143,7 +144,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
             return (
               <div key={stat} className={styles.statBox}>
                 <span className={styles.statVal} style={{ color: getStatAccentColor(val) }}>
-                  {val}
+                  <Num>{val}</Num>
                 </span>
                 <span className={styles.statLabel}>{stat}</span>
               </div>

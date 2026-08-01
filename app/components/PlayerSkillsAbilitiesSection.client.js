@@ -2,6 +2,7 @@
 
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Num from './Num';
 import {
   PLAYER_SKILL_BOOSTS_EVENT,
   aggregateSkillBoostsByLevel,
@@ -326,9 +327,9 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
         </button>
       </div>
       <div className="points-info">
-        <span className="current-level-badge">Current Rank: {normalizedRank}</span>
+        <span className="current-level-badge">Current Rank: <Num>{normalizedRank}</Num></span>
         <span className="points-remaining-badge">
-          Points Remaining: {skillPointsRemaining}/{skillPointBudget}
+          Points Remaining: <Num>{skillPointsRemaining}</Num>/<Num>{skillPointBudget}</Num>
         </span>
       </div>
       <div className="skills-grid" id="player-skills-grid">
@@ -372,7 +373,7 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                   </div>
                   <div className="skill-name">{skillName}</div>
                   <div className="skill-level">
-                    Level: <span className="level-number">{currentLevel}</span>/{maxLevel}
+                    Level: <span className="level-number"><Num>{currentLevel}</Num></span>/<Num>{maxLevel}</Num>
                   </div>
                   {!unlocked ? (
                     <div className="unlock-requirement">
@@ -409,10 +410,10 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
             {!activeSkillUnlocked && <div style={{ marginTop: '8px', color: '#FFB86B', fontWeight: 600 }}>{activeSkillUnlockMessage}</div>}
             <div className="points-info">
               <div className="current-level-badge">
-                Current Level: {activeSkillCurrentLevel}/{activeSkillMaxLevel}
+                Current Level: <Num>{activeSkillCurrentLevel}</Num>/<Num>{activeSkillMaxLevel}</Num>
               </div>
               <div className="points-remaining-badge">
-                {availablePointsForActiveSkill} point{availablePointsForActiveSkill !== 1 ? 's' : ''} available
+                <Num>{availablePointsForActiveSkill}</Num> point{availablePointsForActiveSkill !== 1 ? 's' : ''} available
               </div>
             </div>
             <div className="boosts-container">
@@ -453,9 +454,9 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                       <div className={`level-checkbox ${isSelected ? 'checked' : ''} ${isPartiallyUnlocked ? 'partial' : ''} ${isDisabled ? 'disabled' : ''}`}>
                         {isSelected ? '✓' : isPartiallyUnlocked ? '○' : ''}
                       </div>
-                      <h4>Level {levelNumber}</h4>
+                      <h4>Level <Num>{levelNumber}</Num></h4>
                       {isDisabled && pointsNeeded > 0 && (
-                        <div className="insufficient-points">Need {pointsNeeded} more point{pointsNeeded !== 1 ? 's' : ''}</div>
+                        <div className="insufficient-points">Need <Num>{pointsNeeded}</Num> more point{pointsNeeded !== 1 ? 's' : ''}</div>
                       )}
                       <div className="boost-stats">
                         {Object.entries(boost).map(([key, value]) => {
@@ -465,7 +466,7 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
                           const statName = key.replace('boost_', '').replace(/_/g, ' ').toUpperCase();
                           return (
                             <div key={`${activeSkillId}-${levelNumber}-${key}`} className="boost-stat">
-                              +{numericValue} {statName}
+                              +<Num>{numericValue}</Num> {statName}
                             </div>
                           );
                         })}

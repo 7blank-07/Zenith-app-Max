@@ -1,4 +1,5 @@
 'use client';
+import Num from './Num';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
@@ -1208,7 +1209,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
                           {category.name}
                         </h3>
                         <div style={{ fontSize: '26px', fontWeight: 900, color: getStatAccentColor(category.mainValue), lineHeight: 1 }}>
-                          {category.mainValue}
+                          <Num>{category.mainValue}</Num>
                         </div>
                       </div>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -1237,7 +1238,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
                                   fontWeight: 800
                                 }}
                               >
-                                {row.value}
+                                <Num>{row.value}</Num>
                               </td>
                             </tr>
                           ))}
@@ -1256,7 +1257,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
             <img src={player.cardBackground || 'https://via.placeholder.com/180x240'} alt="Card Background" className="squad-custom-card-bg" />
             {!!player.playerImage && <img src={player.playerImage} alt={player.name} className="squad-custom-card-player-img" />}
             <div className="squad-custom-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-              {projectedOvr > 0 ? projectedOvr : 'N/A'}
+              <Num>{projectedOvr > 0 ? projectedOvr : 'N/A'}</Num>
             </div>
             <div className="squad-custom-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
               {player.position || 'N/A'}
@@ -1448,7 +1449,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
                       </div>
                       <div className="skill-name">{skillName}</div>
                       <div className="skill-level">
-                        Level: <span className="level-number">{currentLevel}</span>/{maxLevel}
+                        Level: <span className="level-number"><Num>{currentLevel}</Num></span>/<Num>{maxLevel}</Num>
                       </div>
                       {!unlocked ? (
                         <div className="unlock-requirement">
@@ -1526,7 +1527,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
               <div style={{ marginTop: '8px', color: '#FFB86B', fontWeight: 600 }}>{activeSkillUnlockMessage}</div>
             )}
             <div className="points-info">
-              <div className="current-level-badge">Current Level: {activeSkillCurrentLevel}</div>
+              <div className="current-level-badge">Current Level: <Num>{activeSkillCurrentLevel}</Num></div>
               <div className="points-remaining-badge">
                 {availablePointsForActiveSkill} point{availablePointsForActiveSkill !== 1 ? 's' : ''} available
               </div>
@@ -1560,7 +1561,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
                       <div className={`level-checkbox ${isSelected ? 'checked' : ''} ${isPartiallyUnlocked ? 'partial' : ''} ${isDisabled ? 'disabled' : ''}`}>
                         {isSelected ? '✓' : isPartiallyUnlocked ? '○' : ''}
                       </div>
-                      <h4>Level {levelNumber}</h4>
+                      <h4>Level <Num>{levelNumber}</Num></h4>
                       {isDisabled && pointsNeeded > 0 && (
                         <div className="insufficient-points">Need {pointsNeeded} more point{pointsNeeded !== 1 ? 's' : ''}</div>
                       )}

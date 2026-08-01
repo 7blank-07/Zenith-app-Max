@@ -1,5 +1,7 @@
 'use client';
 
+import Num from './Num';
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -549,9 +551,7 @@ function renderPlayerCard(player) {
         <div className="player-row-name" style={{ color: player.colorName }}>
           {player.name}
         </div>
-        <div className="player-row-ovr" style={{ color: player.colorRating }}>
-          {player.ovr || '?'}
-        </div>
+        <div className="player-row-ovr" style={{ color: player.colorRating }}><Num><Num>{player.ovr || '?'}</Num></Num></div>
         <div className="player-row-position" style={{ color: player.colorPosition }}>
           {player.position || '?'}
         </div>
@@ -1240,7 +1240,7 @@ export default function PlayersDatabaseInteractions({
     : 0;
   const resultsCountText = isSearching
     ? 'Searching players...'
-    : `${resultStart}-${resultEnd} of ${serverPagination.total} players`;
+    : <><Num>{resultStart}-{resultEnd}</Num> of <Num>{serverPagination.total}</Num> players</>;
 
   return (
     <>
@@ -1596,13 +1596,13 @@ export default function PlayersDatabaseInteractions({
                       <div className="player-row-stats player-card-stats-row">
                         {BASE_ROW_STATS.map((stat) => (
                           <div key={`${player.uniqueId}-${stat.key}`} className="stat-pill">
-                            <div className="stat-pill-value">{formatStatValue(player[stat.key])}</div>
+                            <div className="stat-pill-value"><Num><Num>{formatStatValue(player[stat.key])}</Num></Num></div>
                             <div className="stat-pill-label">{stat.label}</div>
                           </div>
                         ))}
                         {selectedStatDefinitions.map((statDefinition) => (
                           <div key={`${player.uniqueId}-${statDefinition.id}`} className="stat-pill">
-                            <div className="stat-pill-value">{getCustomStatValue(player, statDefinition)}</div>
+                            <div className="stat-pill-value"><Num><Num>{getCustomStatValue(player, statDefinition)}</Num></Num></div>
                             <div className="stat-pill-label">{statDefinition.pillLabel || statDefinition.label}</div>
                           </div>
                         ))}
