@@ -23,7 +23,7 @@ export default function RedeemCodeHomeWidget({ codeEntry }) {
           {codeValue ? (
             <>
               <span className={styles.codeValue} title={codeValue} role="status" aria-label={`Active redeem code ${codeValue}`}>
-                {codeValue}
+                <span translate="no" className="notranslate">{codeValue}</span>
               </span>
               <CopyCodeButton codeValue={codeValue} className={styles.copyButton} copiedLabel="Copied" idleLabel="Copy" redirectHref="/fc-mobile-redeem-codes" />
             </>

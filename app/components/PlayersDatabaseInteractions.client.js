@@ -549,11 +549,11 @@ function renderPlayerCard(player) {
         )}
 
         <div className="player-row-name" style={{ color: player.colorName }}>
-          {player.name}
+          <Num>{player.name}</Num>
         </div>
         <div className="player-row-ovr" style={{ color: player.colorRating }}><Num><Num>{player.ovr || '?'}</Num></Num></div>
         <div className="player-row-position" style={{ color: player.colorPosition }}>
-          {player.position || '?'}
+          <Num>{player.position || '?'}</Num>
         </div>
 
         {player.nationFlag ? (
@@ -1565,9 +1565,9 @@ export default function PlayersDatabaseInteractions({
 
                       <div className="player-row-info">
                         <div className="player-row-info-desktop">
-                          <div className="player-info-name">{player.name}</div>
+                          <div className="player-info-name"><Num>{player.name}</Num></div>
                           <div className="player-info-meta">
-                            {player.ovr || 'N/A'} • {player.position || 'N/A'}
+                            <Num>{player.ovr || 'N/A'}</Num> • <Num>{player.position || 'N/A'}</Num>
                           </div>
                         </div>
                         <div className="player-price player-row-price">

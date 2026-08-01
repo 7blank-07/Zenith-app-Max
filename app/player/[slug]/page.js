@@ -13,6 +13,7 @@ import { getPlayerPrerenderLimit } from '../../../src/lib/server/prerender-rollo
 import { fetchPlayersByIds, readTopPlayerIds } from '../../../src/lib/server/top-players.mjs';
 import { UNTRADABLE_CARD_BADGE_URL } from '../../components/image-asset-urls';
 import { getPlayerCardVariant, parseRank } from '../../components/player-detail-utils';
+import Num from '../../components/Num';
 
 export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
 
@@ -199,13 +200,13 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                                 <img src={relatedCardImage} alt={`${player.name} card image`} className="player-image-img" />
                               )}
                               <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-                                {player.ovr && player.ovr > 0 ? player.ovr : 'NA'}
+                                <Num>{player.ovr && player.ovr > 0 ? player.ovr : 'NA'}</Num>
                               </div>
                               <div className="card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                                {player.position || 'NA'}
+                                <Num>{player.position || 'NA'}</Num>
                               </div>
                               <div className="card-player-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                                {player.name}
+                                <Num>{player.name}</Num>
                               </div>
                               {!!player.nationFlag && (
                                 <img

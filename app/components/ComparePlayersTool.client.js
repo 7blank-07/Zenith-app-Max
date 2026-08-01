@@ -510,10 +510,10 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                             <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
                           </div>
                           <div className="compare-card-pos" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                            {player.position || 'NA'}
+                            <Num>{player.position || 'NA'}</Num>
                           </div>
                           <div className="compare-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                            {player.name}
+                            <Num>{player.name}</Num>
                           </div>
                           {toNumber(player?.rank, 0) > 0 && RANK_SPRITES[toNumber(player.rank, 0)] ? (
                             <AnimatedRankIcon
@@ -647,10 +647,10 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                           <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
                         </div>
                         <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                          {player.position || 'NA'}
+                          <Num>{player.position || 'NA'}</Num>
                         </div>
                         <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                          {player.name}
+                          <Num>{player.name}</Num>
                         </div>
                         {!!player.nationFlag && (
                           <img
@@ -677,9 +677,9 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                       </div>
                     </div>
                     <div className="compare-search-result-info">
-                      <h4>{player.name}</h4>
+                      <h4><Num>{player.name}</Num></h4>
                       <p>
-                        {player.position || 'NA'} • {player.club || 'N/A'}
+                        <Num>{player.position || 'NA'}</Num> • {player.club || 'N/A'}
                       </p>
                     </div>
                     <div className="compare-search-result-ovr"><Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num></div>

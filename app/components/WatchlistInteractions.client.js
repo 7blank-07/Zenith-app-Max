@@ -282,8 +282,8 @@ function renderPlayerRow(player) {
             <img src="${cardBackground}" alt="Card Background" class="card-background-img" width="300" height="400" loading="lazy">
             <img src="${playerImage}" alt="${playerName}" class="player-image-img" width="256" height="256" loading="lazy">
             <div class="card-ovr" style="color: ${playerOvrColor}"><span translate="no" class="notranslate">${playerOvr}</span></div>
-            <div class="card-position" style="color: ${playerPositionColor}">${playerPosition}</div>
-            <div class="card-player-name" style="color: ${playerNameColor}">${playerName}</div>
+            <div class="card-position" style="color: ${playerPositionColor}"><span translate="no" class="notranslate">${playerPosition}</span></div>
+            <div class="card-player-name" style="color: ${playerNameColor}"><span translate="no" class="notranslate">${playerName}</span></div>
             ${
               player.nation_flag
                 ? `<img src="${escapeHtml(player.nation_flag)}" alt="Nation" class="card-nation-flag-home ${
@@ -309,7 +309,7 @@ function renderPlayerRow(player) {
       </div>
 
       <div class="player-row-info">
-        <div class="player-info-name">${escapeHtml(player.name)}</div>
+        <div class="player-info-name"><span translate="no" class="notranslate">${escapeHtml(player.name)}</span></div>
         <div class="player-info-meta">${escapeHtml(metaText)}</div>
         <div class="player-price" style="color:#fbbf24; font-weight:500; font-size:0.9rem; margin-top:4px; min-height:20px; display:flex; align-items:center;">
           ${priceMarkup}

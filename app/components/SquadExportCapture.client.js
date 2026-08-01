@@ -8,6 +8,7 @@ import {
   resolvePlayerFromMap
 } from './squad-export-media';
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
+import Num from './Num';
 
 const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fzenithfcm.com';
 
@@ -95,13 +96,13 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer }) {
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="preview-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-              {Number(adjustedOvr) > 0 ? Number(adjustedOvr) : 'NA'}
+              <Num>{Number(adjustedOvr) > 0 ? Number(adjustedOvr) : 'NA'}</Num>
             </div>
             <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-              {player.position || 'NA'}
+              <Num>{player.position || 'NA'}</Num>
             </div>
             <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-              {player.name || 'Unknown'}
+              <Num>{player.name || 'Unknown'}</Num>
             </div>
             {!!nationFlag && (
               <img
@@ -170,13 +171,13 @@ function ExportBenchCell({ player, index, exportMediaByPlayer }) {
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="bench-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
             <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-              {player.ovr > 0 ? player.ovr : 'NA'}
+              <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
             </div>
             <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-              {player.position || 'NA'}
+              <Num>{player.position || 'NA'}</Num>
             </div>
             <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-              {player.name || 'Unknown'}
+              <Num>{player.name || 'Unknown'}</Num>
             </div>
             {!!nationFlag && (
               <img

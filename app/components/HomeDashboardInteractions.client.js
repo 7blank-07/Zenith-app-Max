@@ -78,9 +78,9 @@ export default function HomeDashboardInteractions() {
                   <div class="card-container">
                     <img src="${cardBackground}" alt="Card Background" class="card-background-img" width="300" height="400" loading="lazy">
                     <img src="${playerImage}" alt="${playerName}" class="player-image-img" width="256" height="256" loading="lazy">
-                    <div class="card-ovr" style="color: ${ratingColor}">${ovrText}</div>
-                    <div class="card-position" style="color: ${positionColor}">${playerPosition}</div>
-                    <div class="card-player-name" style="color: ${nameColor}">${playerName}</div>
+                    <div class="card-ovr" style="color: ${ratingColor}"><span translate="no" class="notranslate">${ovrText}</span></div>
+                    <div class="card-position" style="color: ${positionColor}"><span translate="no" class="notranslate">${playerPosition}</span></div>
+                    <div class="card-player-name" style="color: ${nameColor}"><span translate="no" class="notranslate">${playerName}</span></div>
                     ${
                       player.nationFlag
                         ? `<img src="${escapeHtml(player.nationFlag)}" alt="Nation" class="card-nation-flag-home ${

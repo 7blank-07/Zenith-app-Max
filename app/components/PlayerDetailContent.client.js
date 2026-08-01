@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Num from './Num';
 import AnimatedRankIcon from './AnimatedRankIcon.client';
 import PlayerDetailInteractions from './PlayerDetailInteractions.client';
 import PlayerMarketValue from './PlayerMarketValue.client';
@@ -356,10 +357,10 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 {record?.ovr && record.ovr > 0 ? record.ovr : 'N/A'}
               </div>
               <div className="card-position-inside" style={{ color: record?.colorPosition || '#FFFFFF' }}>
-                {record?.position || 'N/A'}
+                <Num>{record?.position || 'N/A'}</Num>
               </div>
               <div className="card-player-name-inside" style={{ color: record?.colorName || '#FFFFFF' }}>
-                {record?.name}
+                <Num>{record?.name}</Num>
               </div>
               {selectedRank > 0 && RANK_SPRITES[selectedRank] ? (
                 <AnimatedRankIcon
@@ -402,7 +403,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 lineHeight: 1.2
               }}
             >
-              {record?.name}
+              <Num>{record?.name}</Num>
             </h1>
 
             <p
@@ -413,7 +414,7 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 fontWeight: 600
               }}
             >
-              OVR {record?.ovr} {record?.position ? `• ${record.position}` : ''} {record?.nation ? `• ${record.nation}` : ''}{' '}
+              OVR {record?.ovr} {record?.position ? <>• <Num>{record.position}</Num></> : ''} {record?.nation ? `• ${record.nation}` : ''}{' '}
               {record?.club ? `• ${record.club}` : ''} {record?.isUntradable ? '• Untradable' : ''}
             </p>
 

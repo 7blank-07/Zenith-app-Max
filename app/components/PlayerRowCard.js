@@ -1,4 +1,5 @@
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
+import Num from './Num';
 
 function getInitials(name) {
   const words = String(name ?? '')
@@ -43,13 +44,13 @@ export default function PlayerRowCard({ player }) {
         )}
 
         <div className="player-row-name" style={{ color: player.colorName }}>
-          {player.name}
+          <Num>{player.name}</Num>
         </div>
         <div className="player-row-ovr" style={{ color: player.colorRating }}>
-          {player.ovr || '?'}
+          <Num>{player.ovr || '?'}</Num>
         </div>
         <div className="player-row-position" style={{ color: player.colorPosition }}>
-          {player.position || '?'}
+          <Num>{player.position || '?'}</Num>
         </div>
 
         {player.nationFlag ? (

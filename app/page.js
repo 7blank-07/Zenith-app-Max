@@ -13,6 +13,7 @@ import { YouTubeEmbed, StreamBadge } from './components/streaming/StreamComponen
 import { getOptimizedZenithUrl } from '../src/lib/image-optimization.mjs';
 import { UNTRADABLE_CARD_BADGE_URL } from './components/image-asset-urls';
 import AdsenseAd from './components/AdsenseAd';
+import Num from './components/Num';
 
 const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
   ssr: true
@@ -102,13 +103,13 @@ function renderDashboardPlayerCard(player, key, index = 0) {
         />
 
         <div className="card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
-          {player.ovr && player.ovr > 0 ? player.ovr : 'NA'}
+          <Num>{player.ovr && player.ovr > 0 ? player.ovr : 'NA'}</Num>
         </div>
         <div className="card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-          {player.position || 'NA'}
+          <Num>{player.position || 'NA'}</Num>
         </div>
         <div className="card-player-name" style={{ color: player.colorName || '#FFFFFF' }}>
-          {player.name || 'Unknown'}
+          <Num>{player.name || 'Unknown'}</Num>
         </div>
 
         {player.nationFlag && (

@@ -3083,10 +3083,10 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                                 <Num>{adjustedOvr > 0 ? adjustedOvr : 'NA'}</Num>
                               </div>
                               <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                                {player.position || 'NA'}
+                                <Num>{player.position || 'NA'}</Num>
                               </div>
                               <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                                {player.name}
+                                <Num>{player.name}</Num>
                               </div>
                               {!!player.nationFlag && (
                                 <img
@@ -3191,10 +3191,10 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                             <Num>{player.ovr > 0 ? player.ovr : 'N/A'}</Num>
                           </div>
                           <div className="picker-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                            {player.position || 'N/A'}
+                            <Num>{player.position || 'N/A'}</Num>
                           </div>
                           <div className="picker-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                            {player.name}
+                            <Num>{player.name}</Num>
                           </div>
                           {!!player.nationFlag && (
                             <img
@@ -3221,9 +3221,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                         </div>
 
                         <div className="picker-main">
-                          <div className="picker-name">{player.name}</div>
+                          <div className="picker-name"><Num>{player.name}</Num></div>
                           <div className="picker-meta">
-                            {player.position || 'N/A'} • {player.club || 'Unknown'}
+                            <Num>{player.position || 'N/A'}</Num> • {player.club || 'Unknown'}
                           </div>
                         </div>
 
@@ -3289,10 +3289,10 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                             <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
                           </div>
                           <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                            {player.position || 'NA'}
+                            <Num>{player.position || 'NA'}</Num>
                           </div>
                           <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                            {player.name}
+                            <Num>{player.name}</Num>
                           </div>
                           {!!player.nationFlag && (
                             <img

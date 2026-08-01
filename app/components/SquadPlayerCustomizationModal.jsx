@@ -1260,7 +1260,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
               <Num>{projectedOvr > 0 ? projectedOvr : 'N/A'}</Num>
             </div>
             <div className="squad-custom-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-              {player.position || 'N/A'}
+              <Num>{player.position || 'N/A'}</Num>
             </div>
             <div className="squad-custom-card-flags">
               {!!player.nationFlag && (
@@ -1282,7 +1282,7 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
               )}
             </div>
             <div className="squad-custom-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
-              {player.name}
+              <Num>{player.name}</Num>
             </div>
             {selectedRank > 0 && RANK_SPRITES[selectedRank] ? (
               <AnimatedRankIcon

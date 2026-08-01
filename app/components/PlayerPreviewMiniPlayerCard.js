@@ -86,10 +86,10 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
                 <Num>{player.ovr && player.ovr > 0 ? player.ovr : 'NA'}</Num>
               </div>
               <div className="card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
-                {player.position || 'NA'}
+                <Num>{player.position || 'NA'}</Num>
               </div>
               <div className="card-player-name" style={{ color: player.colorName || '#FFFFFF' }}>
-                {player.name || 'Unknown'}
+                <Num>{player.name || 'Unknown'}</Num>
               </div>
 
               {player.nationFlag && (
