@@ -65,6 +65,8 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   const [isRankLoading, setIsRankLoading] = useState(false);
   const requestControllerRef = useRef(null);
   const requestSequenceRef = useRef(0);
+  const cardRef = useRef(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
     const lastProcessedPlayerId = useRef(String(initialRecord?.playerId || ''));
 
@@ -211,6 +213,32 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
     [playerId, selectedRank, updateBrowserPath]
   );
 
+  const handleDownloadImage = useCallback(async () => {
+    if (!cardRef.current) return;
+    try {
+      setIsDownloading(true);
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      const safeName = (record?.name || 'player').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const ovr = record?.ovr || '0';
+      link.download = `${safeName}_${ovr}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('Failed to download image:', error);
+      alert('Failed to download player card image.');
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [record]);
+
   return (
     <>
       <button
@@ -255,7 +283,45 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               overflow: 'hidden'
             }}
           >
+            <button
+               onClick={handleDownloadImage}
+               disabled={isDownloading}
+               title="Download Card Image"
+               style={{
+                 position: 'absolute',
+                 top: '16px',
+                 right: '16px',
+                 background: 'rgba(255,255,255,0.03)',
+                 border: '1px solid rgba(255,255,255,0.08)',
+                 borderRadius: '8px',
+                 padding: '8px',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 cursor: isDownloading ? 'wait' : 'pointer',
+                 color: 'var(--color-text-muted, #98A0A6)',
+                 transition: 'all 0.2s',
+                 zIndex: 10,
+                 opacity: isDownloading ? 0.5 : 1
+               }}
+               onMouseEnter={(e) => { if(!isDownloading) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; } }}
+               onMouseLeave={(e) => { if(!isDownloading) { e.currentTarget.style.color = 'var(--color-text-muted, #98A0A6)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; } }}
+            >
+               {isDownloading ? (
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="spinner" style={{ animation: 'spin 1s linear infinite' }}>
+                   <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+                   <circle cx="12" cy="12" r="10" strokeDasharray="30" strokeDashoffset="10" />
+                 </svg>
+               ) : (
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                   <polyline points="7 10 12 15 17 10" />
+                   <line x1="12" y1="15" x2="12" y2="3" />
+                 </svg>
+               )}
+            </button>
             <div
+              ref={cardRef}
               className="player-detail-mini-card"
               style={{
                 width: '260px',
