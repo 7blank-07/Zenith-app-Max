@@ -14,10 +14,12 @@ const POSITIONS = ['ST', 'LW', 'RW', 'CAM', 'CDM', 'CM', 'CB', 'LB', 'RB', 'GK']
 
 export async function generateMetadata({ params }) {
   const pos = (params?.pos || 'st').toUpperCase();
-  return {
+  const defaultMetadata = {
     title: `Top 10 ${pos} Players - FC Mobile`,
     description: `Discover the best 10 ${pos} players in FC Mobile. Expert curated rankings to help you build the ultimate squad.`,
   };
+  const { resolvePageSeo } = await import('../../../src/lib/server/page-seo-metadata.mjs');
+  return resolvePageSeo(`/top-10/${pos.toLowerCase()}`, defaultMetadata);
 }
 
 export default async function TopTenPositionPage({ params }) {
@@ -33,8 +35,14 @@ export default async function TopTenPositionPage({ params }) {
     return { ...r, player };
   }).filter(r => r.player);
 
+  const { getPageH1Override, PageSeoH1, getPageCustomJsonLd, PageSeoCustomJsonLd } = await import('../../../src/lib/server/page-seo-metadata.mjs');
+  const h1Heading = await getPageH1Override(`/top-10/${currentPos.toLowerCase()}`);
+  const customJsonLd = await getPageCustomJsonLd(`/top-10/${currentPos.toLowerCase()}`);
+
   return (
     <SiteChrome activeView="top-10">
+      <PageSeoH1 heading={h1Heading} />
+      <PageSeoCustomJsonLd schema={customJsonLd} />
       <main className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Top 10 {currentPos} Rankings</h1>

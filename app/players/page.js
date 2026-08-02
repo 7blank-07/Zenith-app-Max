@@ -10,18 +10,24 @@ export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
-export const metadata = {
-  title: 'Player Database | Zenith',
-  description: 'Player database with search, filters, stats controls, and watchlist interactions.',
-  alternates: { canonical: '/players' },
-  openGraph: {
+import { resolvePageSeo, getPageH1Override, PageSeoH1, getPageCustomJsonLd, PageSeoCustomJsonLd } from '../../src/lib/server/page-seo-metadata.mjs';
+
+export async function generateMetadata() {
+  const defaultMetadata = {
     title: 'Player Database | Zenith',
     description: 'Player database with search, filters, stats controls, and watchlist interactions.',
-    url: `${siteUrl}/players`,
-    siteName: 'Zenith',
-    type: 'website'
-  }
-};
+    alternates: { canonical: '/players' },
+    openGraph: {
+      title: 'Player Database | Zenith',
+      description: 'Player database with search, filters, stats controls, and watchlist interactions.',
+      url: `${siteUrl}/players`,
+      siteName: 'Zenith',
+      type: 'website'
+    }
+  };
+  
+  return resolvePageSeo('/players', defaultMetadata);
+}
 
 function readSearchParam(searchParams, key, fallback = '') {
   const rawValue = searchParams?.[key];
@@ -79,8 +85,13 @@ export default async function PlayersPage({ searchParams = {} }) {
     prerenderLimit: rollout.limit
   });
 
+  const h1Heading = await getPageH1Override('/players');
+  const customJsonLd = await getPageCustomJsonLd('/players');
+
   return (
     <SiteChrome activeView="players">
+      <PageSeoH1 heading={h1Heading} />
+      <PageSeoCustomJsonLd schema={customJsonLd} />
       <link rel="stylesheet" href="/assets/css/watchlist-styles.css" precedence="default" />
       <main className="players-main-content players-grid--database">
         <PlayersDatabaseInteractions

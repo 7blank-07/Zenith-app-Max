@@ -14,6 +14,16 @@ import { getOptimizedZenithUrl } from '../src/lib/image-optimization.mjs';
 import { UNTRADABLE_CARD_BADGE_URL } from './components/image-asset-urls';
 import AdsenseAd from './components/AdsenseAd';
 import Num from './components/Num';
+import { resolvePageSeo, getPageH1Override, PageSeoH1, getPageCustomJsonLd, PageSeoCustomJsonLd } from '../src/lib/server/page-seo-metadata.mjs';
+
+export async function generateMetadata() {
+  const defaultMetadata = {
+    title: 'Zenith - FC Mobile Database and Tools',
+    description: 'The ultimate FC Mobile database, squad builder, and market tools.',
+    alternates: { canonical: '/' }
+  };
+  return resolvePageSeo('/', defaultMetadata);
+}
 
 const HomeLatestBlogsSection = dynamic(() => import('./components/HomeLatestBlogsSection.client'), {
   ssr: true
@@ -176,10 +186,15 @@ export default async function HomePage() {
   const latestBlogPosts = buildHomeLatestBlogPosts(blogPageData);
   const shouldRenderLatestBlogs = latestBlogPosts.length > 0 || blogPageData?.availability?.isConfigured === true;
 
+  const h1Heading = await getPageH1Override('/');
+  const customJsonLd = await getPageCustomJsonLd('/');
+
   return (
     <>
       <div id="toast-container" />
       <SiteChrome activeView="home" showSlider={true}>
+        <PageSeoH1 heading={h1Heading} />
+        <PageSeoCustomJsonLd schema={customJsonLd} />
         <main className="main-content">
           <div id="dashboard-view" className="view active">
             <section className="home-utility-hero" aria-label="Hero utility hub">

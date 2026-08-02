@@ -8,7 +8,8 @@ const NAV_ITEMS = Object.freeze([
   { href: '/admin/top-10', label: 'Top 10 Rankings', countKey: 'topTenTotal', exact: true },
   { href: '/admin/redeem-codes', label: 'Redeem codes', countKey: 'redeemTotal', exact: true },
   { href: '/admin/streaming', label: 'Streaming', countKey: 'streamingTotal', exact: true },
-  { href: '/admin/partners', label: 'Partners', countKey: 'partnersTotal', exact: true }
+  { href: '/admin/partners', label: 'Partners', countKey: 'partnersTotal', exact: true },
+  { href: '/admin/pages-seo', label: 'Pages SEO', countKey: 'pagesSeoTotal', exact: false }
 ]);
 
 function isActiveItem(item, currentPath) {

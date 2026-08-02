@@ -4,6 +4,7 @@ import SiteChrome from '../../components/SiteChrome';
 import WatchlistView from '../../components/WatchlistView';
 import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../../src/lib/server/player-seo-contract.mjs';
 import { getToolsData } from '../tools-data';
+import { resolvePageSeo, getPageH1Override, PageSeoH1, getPageCustomJsonLd, PageSeoCustomJsonLd } from '../../../src/lib/server/page-seo-metadata.mjs';
 
 const ToolsInteractions = nextDynamic(() => import('../../components/ToolsInteractions.client'), {
   loading: () => (
@@ -46,7 +47,7 @@ export async function generateMetadata({ params }) {
 
   if (!config) return {};
 
-  return {
+  const defaultMetadata = {
     title: config.title,
     description: config.description,
     alternates: { canonical: config.canonical },
@@ -63,6 +64,8 @@ export async function generateMetadata({ params }) {
       description: config.description
     }
   };
+
+  return resolvePageSeo(`/tools/${slug}`, defaultMetadata);
 }
 
 export async function generateStaticParams() {
@@ -110,8 +113,13 @@ export default async function ToolSlugPage({ params }) {
     initialTool === 'compare' ? ' main-content--compare' : ''
   }`;
 
+  const h1Heading = await getPageH1Override(`/tools/${slug}`);
+  const customJsonLd = await getPageCustomJsonLd(`/tools/${slug}`);
+
   return (
     <SiteChrome activeView="tools">
+      <PageSeoH1 heading={h1Heading} />
+      <PageSeoCustomJsonLd schema={customJsonLd} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
