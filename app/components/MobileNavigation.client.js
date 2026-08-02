@@ -215,7 +215,7 @@ export default function MobileNavigation({ activeView = '' }) {
           className={getButtonClassName(activeView === 'top-10')}
           data-view="top-10"
           type="button"
-          onClick={() => navigateTo('/top-10')}
+          onClick={() => navigateTo('/top-10/st')}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />

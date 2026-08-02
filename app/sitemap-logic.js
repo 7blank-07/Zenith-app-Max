@@ -110,12 +110,12 @@ export function getStaticEntries(lastModified) {
       changeFrequency: 'daily',
       priority: 0.86
     },
-    {
-      url: toAbsoluteUrl('/top-10'),
+    ...['st', 'lw', 'rw', 'cam', 'cdm', 'cm', 'cb', 'lb', 'rb', 'gk'].map(pos => ({
+      url: toAbsoluteUrl(`/top-10/${pos}`),
       lastModified,
       changeFrequency: 'daily',
       priority: 0.9
-    },
+    })),
     {
       url: toAbsoluteUrl('/streaming'),
       lastModified,
