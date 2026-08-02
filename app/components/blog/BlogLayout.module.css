@@ -666,6 +666,7 @@
 .articleMain,
 .articleSidebar {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   align-content: start;
   min-width: 0;
@@ -678,6 +679,7 @@
 
 .articleBody {
   padding: 38px clamp(20px, 3vw, 44px);
+  min-width: 0;
 }
 
 .prose {
@@ -861,9 +863,22 @@
   border-top: 1px solid rgba(148, 163, 184, 0.22);
 }
 
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0 1.15em;
+}
+
+.prose .tableWrapper table {
+  margin-bottom: 0;
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .prose th,
@@ -885,7 +900,7 @@
   .featuredGrid,
   .mainGrid,
   .articleShell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .page,

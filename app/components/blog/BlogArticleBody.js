@@ -22,6 +22,11 @@ export default function BlogArticleBody({ article, categorySlug }) {
     });
   }
 
+  // Wrap all tables in a horizontally scrollable container to prevent layout breakage
+  html = html.replace(/<table([^>]*)>([\s\S]*?)<\/table>/gis, (match) => {
+    return `<div class="${styles.tableWrapper}">${match}</div>`;
+  });
+
   // Logic to inject ad in the middle of the article
   const renderContentWithAds = () => {
     if (!html) {
