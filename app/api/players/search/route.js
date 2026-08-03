@@ -265,7 +265,7 @@ async function fetchJson(url) {
     method: 'GET',
     cache: 'no-store',
     headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(15_000)
+    signal: AbortSignal.timeout(4_000)
   });
   const text = await response.text();
   if (!text) return { response, payload: null, details: '' };
@@ -472,7 +472,13 @@ async function fastDatabaseSearch(incoming) {
     const total = parseInt(countResult.rows[0].total, 10);
     console.timeEnd('[SearchProxy] count query');
 
-    query += ` ORDER BY ovr DESC, name ASC`;
+    const reqSort = incoming.get('sort_by') || 'ovr';
+    let orderClause = 'ORDER BY ovr DESC, name ASC, id ASC';
+    if (reqSort === 'latest') orderClause = 'ORDER BY id DESC';
+    else if (reqSort === 'name') orderClause = 'ORDER BY name ASC, ovr DESC, id ASC';
+    else if (reqSort === 'price') orderClause = 'ORDER BY ovr DESC, name ASC, id ASC'; // Price sorting not fully supported in local fast DB search yet
+    
+    query += ` ${orderClause}`;
     
     const limit = Math.min(250, parseInt(incoming.get('limit') || '50', 10));
     const offset = parseInt(incoming.get('offset') || '0', 10);
@@ -536,9 +542,8 @@ export async function GET(request) {
   const candidates = backendCandidates();
   console.log(`[SearchProxy] Backend candidates: ${candidates.join(', ')}`);
 
-  for (const base of candidates) {
-    console.log(`[SearchProxy] Trying candidate: ${base} (searchQuery="${searchQuery}")`);
-
+  const candidatePromises = candidates.map(async (base) => {
+    const candidateAttempts = [];
     try {
       let normalized = null;
       let responseStatus = 200;
@@ -562,7 +567,7 @@ export async function GET(request) {
           } else {
             const reason = toErrorReason(legacyResult.payload, legacyResult.details);
             console.warn(`[SearchProxy] [${base}] Search endpoint failed (${responseStatus}): ${reason}`);
-            attempts.push({ url: legacyUrl, status: responseStatus, reason });
+            candidateAttempts.push({ url: legacyUrl, status: responseStatus, reason });
           }
         }
       }
@@ -585,7 +590,7 @@ export async function GET(request) {
         } else {
           const reason = toErrorReason(result.payload, result.details);
           console.warn(`[SearchProxy] [${base}] Players endpoint failed (${responseStatus}): ${reason}`);
-          attempts.push({ url: playersUrl, status: responseStatus, reason });
+          candidateAttempts.push({ url: playersUrl, status: responseStatus, reason });
         }
       }
 
@@ -612,22 +617,42 @@ export async function GET(request) {
           }
         } else {
            const reason = toErrorReason(fallbackResult.payload, fallbackResult.details);
-           attempts.push({ url: fallbackUrl, status: fallbackResult.response.status, reason });
+           candidateAttempts.push({ url: fallbackUrl, status: fallbackResult.response.status, reason });
         }
       }
 
       // If we have results, enrich with colors and return
       if (normalized && normalized.players.length > 0) {
         console.log(`[SearchProxy] [${base}] SUCCESS: Found ${normalized.players.length} players. Enriching colors...`);
-        const normalizedWithColors = await enrichPayloadColors(base, normalized, attempts);
-        return NextResponse.json(normalizedWithColors, { status: 200 });
+        const normalizedWithColors = await enrichPayloadColors(base, normalized, candidateAttempts);
+        return { response: NextResponse.json(normalizedWithColors, { status: 200 }), attempts: candidateAttempts };
       }
 
-      console.log(`[SearchProxy] [${base}] Candidate returned no results, trying next...`);
+      console.log(`[SearchProxy] [${base}] Candidate returned no results.`);
+      const err = new Error(`Candidate returned no results`);
+      err.attempts = candidateAttempts;
+      throw err;
 
     } catch (error) {
       console.error(`[SearchProxy] Error with candidate ${base}:`, error);
-      attempts.push({ url: base, status: 502, reason: error.message });
+      candidateAttempts.push({ url: base, status: 502, reason: error.message });
+      const err = new Error(`Candidate ${base} failed`);
+      err.attempts = candidateAttempts;
+      throw err;
+    }
+  });
+
+  try {
+    const winner = await Promise.any(candidatePromises);
+    attempts.push(...winner.attempts);
+    return winner.response;
+  } catch (aggregateError) {
+    if (aggregateError instanceof AggregateError) {
+      for (const err of aggregateError.errors) {
+        if (err.attempts) attempts.push(...err.attempts);
+      }
+    } else if (aggregateError.attempts) {
+      attempts.push(...aggregateError.attempts);
     }
   }
 

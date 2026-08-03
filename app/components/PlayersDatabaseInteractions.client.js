@@ -910,31 +910,13 @@ export default function PlayersDatabaseInteractions({
   }, [mobileRatingDraft.ratingMax, mobileRatingDraft.ratingMin]);
 
   const visiblePlayers = useMemo(() => {
-    const next = [...normalizedPlayers];
-    if (sortBy === 'name') {
-      next.sort((a, b) => a.name.localeCompare(b.name));
-      return next;
-    }
-
-    if (sortBy === 'price') {
-      next.sort((a, b) => getResolvedPrice(b) - getResolvedPrice(a));
-      return next;
-    }
-
-    if (sortBy === 'rating') {
-      next.sort((a, b) => b.ovr - a.ovr || a.name.localeCompare(b.name));
-      return next;
-    }
-
-    next.sort((a, b) => b.dateAddedTimestamp - a.dateAddedTimestamp || b.ovr - a.ovr || a.name.localeCompare(b.name));
-    return next;
-  }, [getResolvedPrice, normalizedPlayers, sortBy]);
-  const hasPreviousPage = serverPagination.offset > 0;
+    return [...normalizedPlayers];
+  }, [normalizedPlayers]);
   const hasNextPage = serverPagination.hasMore;
 
   const sortQuery = useMemo(() => {
-    return { sortBy: 'ovr', order: 'desc' };
-  }, []);
+    return { sortBy: sortBy === 'rating' ? 'ovr' : sortBy, order: 'desc' };
+  }, [sortBy]);
   const searchRequestParams = useMemo(
     () => buildPlayersQueryParams(queryParams, sortQuery),
     [
@@ -1006,7 +988,18 @@ export default function PlayersDatabaseInteractions({
 
         if (disposed) return;
         setLivePrices({});
-        setQueriedPlayers(rows);
+        if (requestOffset === 0) {
+          setQueriedPlayers(rows);
+        } else {
+          setQueriedPlayers((prev) => {
+            const existingIds = new Set(prev.map((p) => String(p.id || p.record_id || p.player_id || p.playerId)));
+            const newRows = rows.filter((r) => {
+              const id = String(r.id || r.record_id || r.player_id || r.playerId);
+              return !existingIds.has(id);
+            });
+            return [...prev, ...newRows];
+          });
+        }
         setServerPagination({
           total: toNumber(pagination.total, rows.length),
           limit: toNumber(pagination.limit, SEARCH_PAGE_SIZE),
@@ -1016,13 +1009,17 @@ export default function PlayersDatabaseInteractions({
       } catch (error) {
         if (error?.name === 'AbortError') return;
         if (disposed) return;
-        setQueriedPlayers([]);
-        setServerPagination({
-          total: 0,
-          limit: SEARCH_PAGE_SIZE,
-          offset: requestOffset,
-          hasMore: false
-        });
+        
+        if (requestOffset === 0) {
+          setQueriedPlayers([]);
+          setServerPagination({
+            total: 0,
+            limit: SEARCH_PAGE_SIZE,
+            offset: requestOffset,
+            hasMore: false
+          });
+        }
+        
         setSearchError(error instanceof Error ? error.message : 'Player search request failed');
       } finally {
         if (disposed) return;
@@ -1650,26 +1647,18 @@ export default function PlayersDatabaseInteractions({
             </div>
 
             <div className="load-more-wrapper">
-              <button
-                id="load-more-btn"
-                className="btn btn-primary load-more-btn"
-                style={{ display: 'inline-block', marginRight: '10px', opacity: hasPreviousPage && !isSearching ? 1 : 0.6 }}
-                type="button"
-                disabled={!hasPreviousPage || isSearching}
-                onClick={() => setSearchOffset((current) => Math.max(0, current - serverPagination.limit))}
-              >
-                Previous
-              </button>
-              <button
-                id="load-more-next-btn"
-                className="btn btn-primary load-more-btn"
-                style={{ display: 'inline-block', opacity: hasNextPage && !isSearching ? 1 : 0.6 }}
-                type="button"
-                disabled={!hasNextPage || isSearching}
-                onClick={() => setSearchOffset((current) => current + serverPagination.limit)}
-              >
-                Next
-              </button>
+              {hasNextPage && serverPagination.total > 0 && (
+                <button
+                  id="load-more-next-btn"
+                  className="btn btn-primary load-more-btn"
+                  style={{ display: 'inline-block', opacity: isSearching ? 0.6 : 1 }}
+                  type="button"
+                  disabled={isSearching}
+                  onClick={() => setSearchOffset((current) => current + serverPagination.limit)}
+                >
+                  {isSearching ? 'Loading...' : 'Load More'}
+                </button>
+              )}
             </div>
           </div>
         </div>
