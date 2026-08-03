@@ -702,23 +702,16 @@ export default function SquadPlayerCustomizationModal({ player, onClose, onUpdat
 
     const loadMissingSkillBoostCatalog = async () => {
       try {
-        const results = await Promise.all(
-          missingSkillIds.map(async (skillId) => {
-            try {
-              const payload = await fetchPlayerApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`, controller.signal);
-              return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
-            } catch (error) {
-              if (error?.name === 'AbortError') throw error;
-              console.error(`[squad-customization] Failed to load boosts for skill ${skillId}:`, error);
-              return [skillId, []];
-            }
-          })
-        );
+        const idsParam = missingSkillIds.map(encodeURIComponent).join(',');
+        const payload = await fetchPlayerApiJson(`/skill-boosts/batch?ids=${idsParam}`, controller.signal);
+        
         if (!isActive) return;
+        
         setSkillBoostCatalogById((current) => {
           const next = { ...current };
-          results.forEach(([skillId, boosts]) => {
-            next[skillId] = boosts;
+          missingSkillIds.forEach((skillId) => {
+            const boosts = payload?.[skillId];
+            next[skillId] = Array.isArray(boosts) ? boosts : [];
           });
           return next;
         });

@@ -54,10 +54,12 @@ export function resolvePlayerDetailApiRequest(endpoint) {
     };
   }
 
-  const skillBoostMatch = normalizedEndpoint.match(/^\/skill-boosts\/([^/?#]+)/);
+  const skillBoostMatch = normalizedEndpoint.match(/^\/skill-boosts\/([^/?#]+)(\?.*)?$/);
   if (skillBoostMatch) {
+    const skillId = skillBoostMatch[1];
+    const query = new URLSearchParams(skillBoostMatch[2] || '');
     return {
-      url: `/api/skill-boosts/${skillBoostMatch[1]}`,
+      url: `/api/skill-boosts/${skillId}${query.toString() ? `?${query.toString()}` : ''}`,
       transform: (payload) => payload
     };
   }
@@ -85,19 +87,59 @@ export function resolvePlayerDetailApiRequest(endpoint) {
   };
 }
 
+const requestCache = new Map();
+
 export async function fetchApiJson(endpoint, signal) {
   const request = resolvePlayerDetailApiRequest(endpoint);
-  const response = await fetch(request.url, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    signal
-  });
-  if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`Failed to fetch ${endpoint} (${response.status}): ${details || response.statusText}`);
+  
+  if (!requestCache.has(request.url)) {
+    const fetchPromise = (async () => {
+      const response = await fetch(request.url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' }
+        // Not passing signal here so a single component unmounting doesn't cancel the shared network request
+      });
+      if (!response.ok) {
+        const details = await response.text();
+        requestCache.delete(request.url);
+        throw new Error(`Failed to fetch ${endpoint} (${response.status}): ${details || response.statusText}`);
+      }
+      const payload = await response.json();
+      return request.transform(payload);
+    })();
+
+    fetchPromise.catch(() => {
+      requestCache.delete(request.url);
+    });
+
+    requestCache.set(request.url, fetchPromise);
   }
-  const payload = await response.json();
-  return request.transform(payload);
+
+  const cachedPromise = requestCache.get(request.url);
+
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      return reject(new DOMException('Aborted', 'AbortError'));
+    }
+
+    const onAbort = () => reject(new DOMException('Aborted', 'AbortError'));
+    if (signal) {
+      signal.addEventListener('abort', onAbort);
+    }
+
+    cachedPromise
+      .then((data) => {
+        if (!signal?.aborted) resolve(data);
+      })
+      .catch((error) => {
+        if (!signal?.aborted) reject(error);
+      })
+      .finally(() => {
+        if (signal) {
+          signal.removeEventListener('abort', onAbort);
+        }
+      });
+  });
 }
 
 export async function fetchTrainingBoosts(position, trainingLevel, signal) {

@@ -180,23 +180,16 @@ export default function PlayerSkillsAbilitiesSection({ playerId, currentRank = 0
 
     const loadBoostCatalog = async () => {
       try {
-        const rows = await Promise.all(
-          missingSkillIds.map(async (skillId) => {
-            try {
-              const payload = await fetchApiJson(`/skill-boosts/${encodeURIComponent(skillId)}`, controller.signal);
-              return [skillId, Array.isArray(payload?.boosts) ? payload.boosts : []];
-            } catch (error) {
-              if (error?.name === 'AbortError') throw error;
-              console.error(`[player-detail] Failed to load boosts for ${skillId}:`, error);
-              return [skillId, []];
-            }
-          })
-        );
+        const idsParam = missingSkillIds.map(encodeURIComponent).join(',');
+        const payload = await fetchApiJson(`/skill-boosts/batch?ids=${idsParam}`, controller.signal);
+        
         if (!isActive) return;
+        
         setSkillBoostCatalogById((current) => {
           const next = { ...current };
-          rows.forEach(([skillId, boosts]) => {
-            next[skillId] = boosts;
+          missingSkillIds.forEach((skillId) => {
+            const boosts = payload?.[skillId];
+            next[skillId] = Array.isArray(boosts) ? boosts : [];
           });
           return next;
         });

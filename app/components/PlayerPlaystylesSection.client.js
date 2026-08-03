@@ -9,7 +9,7 @@ export default function PlayerPlaystylesSection({ playerId, currentRank = 0 }) {
   useEffect(() => {
     if (!playerId) return;
     setLoading(true);
-    fetch(`/api/players/${encodeURIComponent(playerId)}?rank=${currentRank}&_t=${Date.now()}`)
+    fetch(`/api/players/${encodeURIComponent(playerId)}?rank=${currentRank}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("=== PLAYSTYLES DEBUG LOG ===");
