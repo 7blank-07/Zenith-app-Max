@@ -224,17 +224,6 @@ function renderPlayerRow(player) {
   });
   const metaParts = [toText(player.team), toText(player.league)].filter(Boolean);
   const metaText = metaParts.length ? metaParts.join(' • ') : toText(player.position || 'Unknown');
-  const formattedPrice = formatPrice(player.price);
-  const priceMarkup = player.is_untradable
-    ? `<img src="${UNTRADABLE_PRICE_FLAG_URL}"
-        alt="Non-auctionable"
-        style="height: 18px; width: auto; vertical-align: middle; opacity: 0.95; margin-left: 6px;"
-        title="Non-auctionable">`
-    : formattedPrice === '—'
-      ? '<span class="watchlist-price-empty">Loading...</span>'
-      : `<span class="price-inline"><img src="/assets/images/background/fc coin img.webp" alt="coin" class="price-icon"><span class="price-text">${escapeHtml(
-          formattedPrice
-        )}</span></span>`;
   const alternatePositions = toText(player.alternate_position)
     .split(',')
     .map((entry) => toText(entry).toUpperCase())
@@ -266,15 +255,15 @@ function renderPlayerRow(player) {
       data-club="${escapeHtml(player.team)}"
       data-nation="${escapeHtml(player.nation)}"
       data-event="${escapeHtml(player.event)}"
-      data-ovr="<span translate="no" class="notranslate">${escapeHtml(player.ovr)}</span>"
-      data-skill="<span translate="no" class="notranslate">${escapeHtml(player.skillmoves)}</span>"
+      data-ovr="${escapeHtml(player.ovr)}"
+      data-skill="${escapeHtml(player.skillmoves)}"
       data-price="${escapeHtml(player.price)}"
-      data-pac="<span translate="no" class="notranslate">${escapeHtml(player.pace)}</span>"
-      data-sho="<span translate="no" class="notranslate">${escapeHtml(player.shooting)}</span>"
-      data-pas="<span translate="no" class="notranslate">${escapeHtml(player.passing)}</span>"
-      data-dri="<span translate="no" class="notranslate">${escapeHtml(player.dribbling)}</span>"
-      data-def="<span translate="no" class="notranslate">${escapeHtml(player.defending)}</span>"
-      data-phy="<span translate="no" class="notranslate">${escapeHtml(player.physical)}</span>"
+      data-pac="${escapeHtml(player.pace)}"
+      data-sho="${escapeHtml(player.shooting)}"
+      data-pas="${escapeHtml(player.passing)}"
+      data-dri="${escapeHtml(player.dribbling)}"
+      data-def="${escapeHtml(player.defending)}"
+      data-phy="${escapeHtml(player.physical)}"
     >
       <div class="player-row-card">
         <div class="dashboard-player-card">
@@ -311,9 +300,6 @@ function renderPlayerRow(player) {
       <div class="player-row-info">
         <div class="player-info-name"><span translate="no" class="notranslate">${escapeHtml(player.name)}</span></div>
         <div class="player-info-meta">${escapeHtml(metaText)}</div>
-        <div class="player-price" style="color:#fbbf24; font-weight:500; font-size:0.9rem; margin-top:4px; min-height:20px; display:flex; align-items:center;">
-          ${priceMarkup}
-        </div>
         ${
           alternatePositions.length
             ? `<div class="player-info-secondary">${alternatePositions
@@ -647,7 +633,7 @@ export default function WatchlistInteractions() {
       }
 
       if (resultsCount) {
-        resultsCount.textContent = `<span translate="no" class="notranslate">${filteredPlayers.length}</span> player${filteredPlayers.length === 1 ? '' : 's'} in watchlist`;
+        resultsCount.innerHTML = `<span translate="no" class="notranslate">${filteredPlayers.length}</span> player${filteredPlayers.length === 1 ? '' : 's'} in watchlist`;
       }
     };
 
