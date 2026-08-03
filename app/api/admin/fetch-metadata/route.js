@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireBlogSessionUser } from '../../../../src/lib/server/blog/auth.mjs';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     await requireBlogSessionUser();
