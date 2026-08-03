@@ -41,11 +41,10 @@ export default async function TopTenPositionPage({ params }) {
 
   return (
     <SiteChrome activeView="top-10">
-      <PageSeoH1 heading={h1Heading} />
       <PageSeoCustomJsonLd schema={customJsonLd} />
       <main className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Top 10 {currentPos} Rankings</h1>
+          <h1 className={styles.title}>{h1Heading || `Top 10 ${currentPos} Rankings`}</h1>
           <p className={styles.subtitle}>
             The definitive guide to the best FC Mobile {currentPos} players, curated by experts.
           </p>

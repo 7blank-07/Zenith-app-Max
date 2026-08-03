@@ -137,6 +137,31 @@ export default function AdminPageSeoForm({ action, pageSeo = {}, error: external
 
   const actualPath = selectedPath === 'custom' ? customPath : selectedPath;
 
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
+  const handleFetchMetadata = async () => {
+    if (!actualPath || !actualPath.startsWith('/')) {
+      alert('Please enter a valid custom path starting with /');
+      return;
+    }
+    
+    setIsFetchingMetadata(true);
+    try {
+      const res = await fetch(`/api/admin/fetch-metadata?path=${encodeURIComponent(actualPath)}`);
+      if (!res.ok) {
+        throw new Error('Could not fetch metadata for this path. Make sure the page exists.');
+      }
+      
+      const data = await res.json();
+      if (data.title) setTitle(data.title);
+      if (data.metaDescription) setMetaDescription(data.metaDescription);
+      
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsFetchingMetadata(false);
+    }
+  };
+
   return (
     <form action={formAction} className={styles.editorForm}>
       <input type="hidden" name="pageSeoId" value={pageSeo.id || ''} />
@@ -176,6 +201,15 @@ export default function AdminPageSeoForm({ action, pageSeo = {}, error: external
               />
               <p className={styles.fieldHint}>Must start with a forward slash. Represents the URL of the page.</p>
               {state.fieldErrors?.pagePath ? <span className={styles.fieldError}>{state.fieldErrors.pagePath}</span> : null}
+              
+              <button 
+                type="button" 
+                onClick={handleFetchMetadata}
+                disabled={isFetchingMetadata}
+                style={{ marginTop: '8px', padding: '6px 12px', fontSize: '13px', cursor: 'pointer' }}
+              >
+                {isFetchingMetadata ? 'Fetching...' : 'Auto-fill current Title & Description'}
+              </button>
             </label>
           )}
         </section>

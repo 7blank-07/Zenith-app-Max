@@ -24,8 +24,7 @@ export async function adminPageSeoAction(prevState, formData) {
       return { error: 'Failed to delete page SEO configuration.', fieldErrors: {} };
     }
 
-    revalidatePath('/admin/pages-seo');
-    if (pagePath) revalidatePath(pagePath);
+    revalidatePath('/', 'layout');
     redirect('/admin/pages-seo?notice=Page+SEO+deleted');
   }
 
@@ -68,8 +67,7 @@ export async function adminPageSeoAction(prevState, formData) {
       return { error: 'Failed to save page SEO configuration.', fieldErrors: {} };
     }
 
-    revalidatePath('/admin/pages-seo');
-    revalidatePath(pagePath);
+    revalidatePath('/', 'layout');
     redirect('/admin/pages-seo?notice=Page+SEO+saved+successfully');
   }
 
