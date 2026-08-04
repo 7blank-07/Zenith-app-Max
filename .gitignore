@@ -37,3 +37,8 @@ build
 
 #cache
 __pycache__/
+# Image Recovery Scraper Files
+cdn-files.txt
+image-not-found-player-id.csv
+scraper-progress.log
+recovered/

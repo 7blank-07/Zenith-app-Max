@@ -109,8 +109,25 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
   const cardVariant = getPlayerCardVariant(record);
   const rawCardBackground = record?.cardBackground || record?.image || '/assets/images/zenith_logo_main.png';
   const rawCardImage = record?.playerImage || record?.image || '';
-  const cardBackground = rawCardBackground ? rawCardBackground + '?v=2' : '';
-  const cardImage = rawCardImage ? rawCardImage + '?v=2' : '';
+  
+  const appendVersion = (url) => {
+    if (!url) return url;
+    // Strip existing version params if any
+    url = url.split('?')[0];
+    return url.includes('?') ? `${url}&v=3` : `${url}?v=3`;
+  };
+
+  // Error handler for image fallback
+  const handleImageError = (e) => {
+    if (e.target.dataset.failed) return;
+    
+    e.target.dataset.failed = "true";
+    e.target.src = "/assets/images/zenith_logo_main.png";
+    e.target.classList.add('fallback-logo-img');
+  };
+
+  const cardBackground = appendVersion(rawCardBackground);
+  const cardImage = appendVersion(rawCardImage);
   const profileSummary = record?.summary || `${record?.name || 'Player'} profile and latest market context from Zenith.`;
   
   
@@ -351,8 +368,20 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
                 overflow: 'hidden'
               }}
             >
-              <img src={cardBackground} alt="Card Background" className="card-background-img-inside" />
-              {!!cardImage && <img src={cardImage} alt={record?.name} className="player-image-img-inside" />}
+              <img 
+                src={cardBackground} 
+                alt="Card Background" 
+                className="card-background-img-inside" 
+                onError={handleImageError}
+              />
+              {!!cardImage && (
+                <img 
+                  src={cardImage} 
+                  alt={record?.name} 
+                  className="player-image-img-inside" 
+                  onError={handleImageError}
+                />
+              )}
               <div className="card-ovr-inside" style={{ color: record?.colorRating || '#FFFFFF' }}>
                 {record?.ovr && record.ovr > 0 ? record.ovr : 'N/A'}
               </div>
