@@ -5,7 +5,7 @@ import { PLAYER_PAGE_REVALIDATE_SECONDS } from '../../src/lib/server/player-seo-
 import { getPrerenderRolloutState } from '../../src/lib/server/prerender-rollout.mjs';
 import { fetchAllPlayerFilterMetadata } from '../../src/lib/server/top-players.mjs';
 
-export const revalidate = PLAYER_PAGE_REVALIDATE_SECONDS;
+
 export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
