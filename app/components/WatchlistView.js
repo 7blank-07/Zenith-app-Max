@@ -1,5 +1,4 @@
 import WatchlistInteractions from './WatchlistInteractions.client';
-import AdsenseAd from './AdsenseAd';
 
 export default function WatchlistView() {
   return (
@@ -118,15 +117,7 @@ export default function WatchlistView() {
               0 players in watchlist
             </div>
 
-            <div style={{ width: '100%', marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
-              <AdsenseAd slot="3122944241" style={{ width: '100%', minHeight: '90px' }} />
-            </div>
-
             <div className="watchlist-grid" id="watchlist-players-grid" />
-
-            <div style={{ width: '100%', marginTop: '32px', display: 'flex', justifyContent: 'center' }}>
-              <AdsenseAd slot="7867021922" style={{ width: '100%', minHeight: '90px' }} />
-            </div>
 
             <div className="watchlist-empty-state" id="watchlist-empty-state" style={{ display: 'none' }}>
               <h3>Your watchlist is empty</h3>

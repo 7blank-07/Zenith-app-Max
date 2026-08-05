@@ -628,7 +628,35 @@ export default function WatchlistInteractions() {
         grid.innerHTML = '';
         if (emptyState) emptyState.style.display = 'flex';
       } else {
-        grid.innerHTML = filteredPlayers.map(renderPlayerRow).join('');
+        grid.innerHTML = filteredPlayers.map((player, index) => {
+          let html = renderPlayerRow(player);
+          if ((index + 1) % 3 === 0) {
+            html += `
+              <div class="watchlist-ad-container" style="grid-column: 1 / -1; margin: 16px 0; width: 100%; text-align: center; overflow: hidden; min-height: 120px;">
+                <ins class="adsbygoogle"
+                     style="display:block; min-width:250px;"
+                     data-ad-client="ca-pub-4474200951186936"
+                     data-ad-slot="9548907329"
+                     data-ad-format="fluid"
+                     data-ad-layout-key="-6t+ed+2i-1n-4w"
+                     data-full-width-responsive="true"></ins>
+              </div>
+            `;
+          }
+          return html;
+        }).join('');
+        
+        setTimeout(() => {
+          const ads = grid.querySelectorAll('.watchlist-ad-container ins.adsbygoogle:not([data-adsbygoogle-status])');
+          ads.forEach(() => {
+            try {
+              if (window.adsbygoogle) {
+                (window.adsbygoogle = window.adsbygoogle || []).push({});
+              }
+            } catch (e) {}
+          });
+        }, 100);
+
         if (emptyState) emptyState.style.display = 'none';
       }
 
