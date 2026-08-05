@@ -1617,7 +1617,7 @@ export default function PlayersDatabaseInteractions({
                         </svg>
                       </button>
                     </RowWrapper>
-                    {(index + 1) % 15 === 0 && (
+                    {(index + 1) % 7 === 0 && (
                       <div 
                         className="player-row adsense-row" 
                         style={{ 

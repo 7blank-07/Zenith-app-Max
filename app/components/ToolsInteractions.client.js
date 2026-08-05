@@ -10,6 +10,7 @@ import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { normalizeSearchText } from './search-normalization';
 import SquadExportCapture from './SquadExportCapture.client';
 import { buildExportFallbackPlayers, buildExportMediaMap, clearExportMediaCache, waitForExportLoadState } from './squad-export-media';
+import AdsenseAd from './AdsenseAd';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -3024,6 +3025,10 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
               </div>
             </div>
 
+            <div style={{ width: '100%', margin: '16px 0', display: 'flex', justifyContent: 'center' }}>
+              <AdsenseAd slot="3122944241" style={{ width: '100%', minHeight: '90px' }} />
+            </div>
+            
             <div className="squad-main-grid" data-squad-section="main-grid">
               {/* Squad Builder region: pitch canvas */}
               <div
@@ -3340,6 +3345,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
                   </div>
                 );
               })}
+            </div>
+            <div style={{ width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
+              <AdsenseAd slot="7867021922" style={{ width: '100%', minHeight: '90px' }} />
             </div>
           </div>
         </div>

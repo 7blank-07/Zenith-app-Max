@@ -8,6 +8,7 @@ import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { buildLegacyStatsModel, resolveLegacyStatValue, toNumber } from './player-skill-stats-utils';
 import { RANK_SPRITES } from './player-detail-utils';
+import AdsenseAd from './AdsenseAd';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -471,6 +472,9 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
                       })}
                     </div>
                   )}
+                </div>
+                <div style={{ width: '100%', marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+                  <AdsenseAd slot="7867021922" style={{ width: '100%', minHeight: '90px' }} />
                 </div>
               </div>
             </div>

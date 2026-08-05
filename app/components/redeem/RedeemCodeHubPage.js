@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import Link from 'next/link';
 import CopyCodeButton from './CopyCodeButton.client';
 import AdsenseAd from '../AdsenseAd';
@@ -16,7 +17,7 @@ const DEFAULT_COPY = Object.freeze({
   sectionLatest: 'Latest',
   sectionExpired: 'Expired',
   applyButton: 'Apply Filters',
-  activeTitle: 'Active Codes',
+  activeTitle: 'Latest Active Codes',
   activeCountSuffix: 'active',
   activeEmpty: 'No active redeem code currently.',
   latestTitle: 'Latest Codes',
@@ -146,7 +147,6 @@ export default function RedeemCodeHubPage({ pageData }) {
             <select className={styles.select} name="section" defaultValue={section.value || 'all'}>
               <option value="all">{copy.sectionAll}</option>
               <option value="active">{copy.sectionActive}</option>
-              <option value="latest">{copy.sectionLatest}</option>
               <option value="expired">{copy.sectionExpired}</option>
             </select>
           </label>
@@ -181,22 +181,6 @@ export default function RedeemCodeHubPage({ pageData }) {
             </>
           )}
 
-          {section.showLatest && (
-            <>
-              <section className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.sectionTitle}>{route.todayOnly ? copy.latestTodayTitle : copy.latestTitle}</h2>
-                  <span className={styles.sectionMeta}>{`${latestCodes.length} ${copy.latestCountSuffix}`}</span>
-                </div>
-                {latestCodes.length ? (
-                  <div className={styles.cards}>{latestCodes.map((entry) => renderCodeCard(entry, locale, copy))}</div>
-                ) : (
-                  <p className={styles.empty}>{copy.latestEmpty}</p>
-                )}
-              </section>
-              <AdsenseAd slot="2010693034" style={{ margin: '20px 0 40px' }} />
-            </>
-          )}
 
           {section.showExpired && (
             <section className={styles.section}>
@@ -205,7 +189,18 @@ export default function RedeemCodeHubPage({ pageData }) {
                 <span className={styles.sectionMeta}>{`${expiredCodes.length} ${copy.expiredCountSuffix}`}</span>
               </div>
               {expiredCodes.length ? (
-                <div className={styles.cards}>{expiredCodes.map((entry) => renderCodeCard(entry, locale, copy))}</div>
+                <div className={styles.cards}>
+                  {expiredCodes.map((entry, index) => (
+                    <Fragment key={entry.id}>
+                      {renderCodeCard(entry, locale, copy)}
+                      {(index + 1) % 3 === 0 && (
+                        <div style={{ gridColumn: '1 / -1', margin: '20px 0' }}>
+                          <AdsenseAd slot="2010693034" />
+                        </div>
+                      )}
+                    </Fragment>
+                  ))}
+                </div>
               ) : (
                 <p className={styles.empty}>{copy.expiredEmpty}</p>
               )}

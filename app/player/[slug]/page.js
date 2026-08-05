@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import PlayerDetailContent from '../../components/PlayerDetailContent.client';
 import SiteChrome from '../../components/SiteChrome';
@@ -181,13 +182,14 @@ export default async function PlayerDetailPage({ params, searchParams }) {
               {!relatedPlayers.length && <p style={{ marginTop: 0 }}>No related players available.</p>}
               {!!relatedPlayers.length && (
                 <div id="latest-players-grid">
-                  {relatedPlayers.map((player) => {
+                  {relatedPlayers.map((player, index) => {
                     const relatedVariant = getPlayerCardVariant(player);
                     const relatedCardBackground = player.cardBackground || player.image || '/assets/images/zenith_logo_main.png';
                     const relatedCardImage = player.playerImage || player.image || '';
 
                     return (
-                      <article key={player.playerId} style={{ display: 'grid', gap: '8px', justifyItems: 'center' }}>
+                      <Fragment key={player.playerId}>
+                        <article style={{ display: 'grid', gap: '8px', justifyItems: 'center' }}>
                         <div className="dashboard-player-card">
                           <a
                             href={buildPlayerPath(player)}
@@ -238,6 +240,16 @@ export default async function PlayerDetailPage({ params, searchParams }) {
                           </a>
                         </div>
                       </article>
+                      {(index + 1) % 4 === 0 && (
+                        <div style={{ gridColumn: '1 / -1', margin: '16px 0', width: '100%' }}>
+                          <AdsenseAd 
+                            slot="9548907329" 
+                            format="fluid" 
+                            layoutKey="-6t+ed+2i-1n-4w" 
+                          />
+                        </div>
+                      )}
+                    </Fragment>
                     );
                   })}
                 </div>

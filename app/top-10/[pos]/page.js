@@ -65,14 +65,14 @@ export default async function TopTenPositionPage({ params }) {
         {rankings.length > 0 ? (
           <div className={styles.content}>
             <div className={styles.rankingsGrid}>
-              {rankings.map((item) => (
+              {rankings.map((item, index) => (
                 <React.Fragment key={item.playerId}>
                   <PlayerPreviewMiniPlayerCard
                     player={item.player}
                     rank={item.rank}
                     archetype={item.archetype}
                   />
-                  {item.rank === 5 && (
+                  {(index + 1) % 3 === 0 && (
                     <div style={{ gridColumn: '1 / -1', margin: '12px 0' }}>
                       <AdsenseAd 
                         slot="9548907329" 
