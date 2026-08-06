@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { fetchPlayerStableRecord } from '../../../src/lib/server/player-seo-contract.mjs';
+import { fetchPlayerStableRecord, resolvePlayerIdentifiersFromSlug } from '../../../src/lib/server/player-seo-contract.mjs';
 import { parseRank } from '../../components/player-detail-utils';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const playerId = String(searchParams.get('id') || '').trim();
+  let playerId = String(searchParams.get('id') || '').trim();
 
   if (!playerId) {
     return NextResponse.json({ error: 'Missing required query param: id' }, { status: 400 });
@@ -14,6 +14,19 @@ export async function GET(request) {
 
   try {
     const rank = parseRank(searchParams.get('rank'));
+    
+    // If the ID is a slug (contains a hyphen), resolve it to the real EA player ID
+    if (playerId.includes('-')) {
+      try {
+        const identifiers = await resolvePlayerIdentifiersFromSlug(playerId);
+        if (identifiers && identifiers.playerId) {
+          playerId = identifiers.playerId;
+        }
+      } catch (err) {
+        console.warn('[player-detail-api] Failed to resolve slug to player ID:', err.message);
+      }
+    }
+
     const record = await fetchPlayerStableRecord(playerId, { rank });
     return NextResponse.json({ record });
   } catch (error) {

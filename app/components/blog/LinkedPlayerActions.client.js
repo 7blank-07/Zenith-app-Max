@@ -5,20 +5,7 @@ import styles from './BlogLayout.module.css';
 
 function extractPlayerId(input) {
   if (!input) return null;
-  // If it's already the expected format (e.g. 3054323_0_0)
-  if (input.includes('_')) return input;
-  
-  // If it's a slug like lizarazu-119-3054323
-  const parts = input.split('-');
-  const lastPart = parts[parts.length - 1];
-  
-  // Check if the last part is a number (base ID)
-  if (/^\d+$/.test(lastPart)) {
-    return `${lastPart}_0_0`;
-  }
-  
-  // Fallback
-  return `${input}_0_0`;
+  return String(input).trim();
 }
 
 export default function LinkedPlayerActions({ linkedPlayerId }) {

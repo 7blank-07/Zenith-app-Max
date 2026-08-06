@@ -289,12 +289,13 @@ export default function ComparePlayersTool({ isActive, normalizedPlayers = [], p
            console.log('[Compare Tool] Fetched player:', data);
            const player = data.record || data;
            if (player && player.playerId) {
+             const resolvedId = String(player.playerId).trim();
              if (onPlayerFetched) {
                onPlayerFetched(player);
              }
              setComparePlayerIds(current => {
-               if (!current.includes(p1) && current.length < 5) {
-                 return [...current, p1];
+               if (!current.includes(resolvedId) && current.length < 5) {
+                 return [...current, resolvedId];
                }
                return current;
              });
