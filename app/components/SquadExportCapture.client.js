@@ -92,16 +92,16 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer }) {
       </div>
       {!!player && (
         <div className={`player-preview-card squad-export-player-card ${getStarterTypeClass(player)}`} data-player-id={player.playerId}>
-          <div className="preview-card-inner">
+          <div className="preview-card-inner" style={{ width: '118px', height: '138px' }}>
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="preview-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: '120px', height: '125px', objectFit: 'contain', transform: 'translateX(-50%)' }} />
+            <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF', transform: 'none', top: '12px', left: '22px', fontSize: '1.125rem' }}>
               <Num>{Number(adjustedOvr) > 0 ? Number(adjustedOvr) : 'NA'}</Num>
             </div>
-            <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+            <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF', transform: 'none', top: '28px', left: '22.6px', fontSize: '0.74rem' }}>
               <Num>{player.position || 'NA'}</Num>
             </div>
-            <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+            <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF', left: '0', width: '100%', transform: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Num>{player.name || 'Unknown'}</Num>
             </div>
             {!!nationFlag && (
@@ -167,16 +167,16 @@ function ExportBenchCell({ player, index, exportMediaByPlayer }) {
       </div>
       {!!player && (
         <div className={`bench-preview-card squad-export-bench-card ${getBenchTypeClass(player)}`} data-player-id={player.playerId}>
-          <div className="bench-card-inner">
+          <div className="bench-card-inner" style={{ width: '98px', height: '118px' }}>
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="bench-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF' }}>
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: '110px', height: '115px', objectFit: 'contain', transform: 'translateX(-50%)' }} />
+            <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF', transform: 'none' }}>
               <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
             </div>
-            <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF' }}>
+            <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF', transform: 'none' }}>
               <Num>{player.position || 'NA'}</Num>
             </div>
-            <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF' }}>
+            <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF', left: '0', width: '100%', transform: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Num>{player.name || 'Unknown'}</Num>
             </div>
             {!!nationFlag && (

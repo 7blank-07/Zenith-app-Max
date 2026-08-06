@@ -2645,6 +2645,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
         allowTaint: false,
         foreignObjectRendering: false,
         imageTimeout: 15000,
+        windowWidth: 1200,
         width: captureWidth,
         height: captureHeight,
         x: 0,
