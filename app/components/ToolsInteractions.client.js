@@ -1320,6 +1320,7 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   const [starters, setStarters] = useState({});
   const [bench, setBench] = useState(Array.from({ length: 7 }, () => ''));
   const [squadLivePrices, setSquadLivePrices] = useState({});
+  const squadLivePricesRef = useRef(squadLivePrices);
   const [isSquadFullscreen, setIsSquadFullscreen] = useState(false);
   const [isExportingSquad, setIsExportingSquad] = useState(false);
   const [exportMediaByPlayer, setExportMediaByPlayer] = useState({});
@@ -1776,8 +1777,13 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   }, [squadPlayers]);
 
   useEffect(() => {
+    squadLivePricesRef.current = squadLivePrices;
+  }, [squadLivePrices]);
+
+  useEffect(() => {
     if (!squadPriceLookupTargets.length) return;
-    const pendingTargets = squadPriceLookupTargets.filter((target) => parsePriceValue(squadLivePrices[target.cacheKey]) <= 0);
+    const currentPrices = squadLivePricesRef.current;
+    const pendingTargets = squadPriceLookupTargets.filter((target) => parsePriceValue(currentPrices[target.cacheKey]) <= 0);
     if (!pendingTargets.length) return;
 
     let cancelled = false;
@@ -1832,9 +1838,9 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
     hydrateSquadLivePrices();
     return () => {
       cancelled = true;
-      abortController.abort();
+      abortController.abort('cleanup');
     };
-  }, [squadLivePrices, squadPriceLookupTargets]);
+  }, [squadPriceLookupTargets]);
 
   const starterAdjustedOvrBySlot = useMemo(() => {
     const adjustedBySlot = {};
