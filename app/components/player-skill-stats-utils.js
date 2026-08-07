@@ -47,6 +47,8 @@ export function resolvePlayerDetailApiRequest(endpoint) {
       ? endpointText
       : `/${endpointText}`;
 
+  const baseUrl = typeof window === 'undefined' ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000') : '';
+
   if (absoluteEndpoint) {
     return {
       url: normalizedEndpoint,
@@ -59,14 +61,21 @@ export function resolvePlayerDetailApiRequest(endpoint) {
     const skillId = skillBoostMatch[1];
     const query = new URLSearchParams(skillBoostMatch[2] || '');
     return {
-      url: `/api/skill-boosts/${skillId}${query.toString() ? `?${query.toString()}` : ''}`,
+      url: `${baseUrl}/api/skill-boosts/${skillId}${query.toString() ? `?${query.toString()}` : ''}`,
       transform: (payload) => payload
     };
   }
 
   if (normalizedEndpoint.startsWith('/training/boosts')) {
     return {
-      url: `/api${normalizedEndpoint}`,
+      url: `${baseUrl}/api${normalizedEndpoint}`,
+      transform: (payload) => payload
+    };
+  }
+
+  if (normalizedEndpoint.startsWith('/skills/allocations')) {
+    return {
+      url: `${baseUrl}/api${normalizedEndpoint}`,
       transform: (payload) => payload
     };
   }
@@ -76,7 +85,7 @@ export function resolvePlayerDetailApiRequest(endpoint) {
     const playerId = playerMatch[1];
     const query = new URLSearchParams(playerMatch[2] || '');
     return {
-      url: `/api/players/${playerId}${query.toString() ? `?${query.toString()}` : ''}`,
+      url: `${baseUrl}/api/players/${playerId}${query.toString() ? `?${query.toString()}` : ''}`,
       transform: (payload) => payload
     };
   }

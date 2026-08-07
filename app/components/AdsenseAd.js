@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -25,6 +25,11 @@ import { usePathname } from 'next/navigation';
 export default function AdsenseAd({ slot, format = 'auto', layout = '', layoutKey = '', responsive = true, style = {} }) {
   const pathname = usePathname();
   const initialized = useRef(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     // Only initialize in the browser
@@ -68,16 +73,19 @@ export default function AdsenseAd({ slot, format = 'auto', layout = '', layoutKe
         ...style
       }}
     >
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'block', minWidth: '250px' }}
-        data-ad-client="ca-pub-4474200951186936"
-        data-ad-slot={slot}
-        data-ad-format={format}
-        {...(layout ? { 'data-ad-layout': layout } : {})}
-        {...(layoutKey ? { 'data-ad-layout-key': layoutKey } : {})}
-        data-full-width-responsive={responsive ? 'true' : 'false'}
-      />
+      {isClient ? (
+        <ins
+          suppressHydrationWarning
+          className="adsbygoogle"
+          style={{ display: 'block', minWidth: '250px' }}
+          data-ad-client="ca-pub-4474200951186936"
+          data-ad-slot={slot}
+          data-ad-format={format}
+          {...(layout ? { 'data-ad-layout': layout } : {})}
+          {...(layoutKey ? { 'data-ad-layout-key': layoutKey } : {})}
+          data-full-width-responsive={responsive ? 'true' : 'false'}
+        />
+      ) : null}
     </div>
   );
 }
