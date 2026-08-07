@@ -1206,6 +1206,26 @@ function canvasToBlob(canvas, mimeType = 'image/png') {
   });
 }
 
+const defaultLiveCalib = {
+  pitchImgW: 130, pitchImgH: 145, pitchImgX: -2, pitchImgY: -9,
+  pitchOvrTop: 14, pitchOvrLeft: 23, pitchOvrSize: 1,
+  pitchPosTop: 30, pitchPosLeft: 26, pitchPosSize: 0.7,
+  pitchNameBot: 38, pitchNameX: 6, pitchNameSize: 0.65,
+  pitchUntradTop: 3, pitchUntradLeft: -4, pitchUntradSize: 14,
+  pitchNationLeft: 24, pitchNationBot: 20, pitchNationWidth: 12,
+  pitchClubLeft: 82, pitchClubBot: 20, pitchClubWidth: 12,
+  pitchLeagueLeft: 53, pitchLeagueBot: 20, pitchLeagueWidth: 12,
+  benchImgW: 112, benchImgH: 125, benchImgX: 0, benchImgY: 12,
+  benchOvrTop: 13, benchOvrLeft: 14, benchOvrSize: 0.8,
+  benchPosTop: 26, benchPosLeft: 15, benchPosSize: 0.6,
+  benchNameBot: 26, benchNameX: 7, benchNameSize: 0.6,
+  benchUntradRight: 8, benchUntradTop: 0, benchUntradSize: 13,
+  benchNationLeft: 19, benchNationBot: 12, benchNationWidth: 10,
+  benchClubLeft: 69, benchClubBot: 16, benchClubWidth: 12,
+  benchLeagueLeft: 43, benchLeagueBot: 17, benchLeagueWidth: 10,
+  benchClubY: 0, benchLeagueX: 0, benchNationY: 0, benchLeagueY: 0, benchNationX: 0, pitchNationY: 0
+};
+
 export default function ToolsInteractions({ players = [], initialTool = '', filterOptions = null }) {
   const router = useRouter();
   const normalizedPlayers = useMemo(() => players.map(normalizePlayer), [players]);
@@ -1341,8 +1361,43 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
   const [draggingKey, setDraggingKey] = useState('');
   const [dragOverSlotId, setDragOverSlotId] = useState('');
   const [dragOverBenchIndex, setDragOverBenchIndex] = useState(-1);
+  const [isCalibMode, setIsCalibMode] = useState(false);
+  const [calib, setCalib] = useState(defaultLiveCalib);
 
   const formationSlots = SQUAD_FORMATIONS[formationId] || SQUAD_FORMATIONS['4-3-3'];
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('zenith_live_calib');
+      if (stored) setCalib(JSON.parse(stored));
+    } catch(e) {}
+    
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+        setIsCalibMode(v => !v);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const updateCalib = (key, val) => {
+    setCalib(prev => {
+      const next = { ...prev, [key]: Number(val) };
+      try { localStorage.setItem('zenith_live_calib', JSON.stringify(next)); } catch(e) {}
+      return next;
+    });
+  };
+
+  const renderSlider = (label, k, min, max, step = 1) => (
+    <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#ccc' }}>
+        <span>{label}</span>
+        <span>{calib[k]}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={calib[k]} onChange={e => updateCalib(k, e.target.value)} style={{ width: '100%' }} />
+    </div>
+  );
 
   useEffect(() => {
     const normalizedInitialTool = normalizeTool(initialTool);
@@ -2718,6 +2773,99 @@ export default function ToolsInteractions({ players = [], initialTool = '', filt
 
   return (
     <>
+      {isCalibMode && (
+        <div style={{ position: 'fixed', top: 10, right: 10, zIndex: 100000, background: '#1e1e24', color: '#fff', padding: 20, borderRadius: 8, maxHeight: '90vh', overflowY: 'auto', width: 320, boxShadow: '0 8px 24px rgba(0,0,0,0.8)', fontFamily: 'system-ui, sans-serif', border: '1px solid #333' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+            <h3 style={{ margin: 0, fontSize: '16px' }}>🛠 Live Tweaker</h3>
+            <button onClick={() => { setCalib(defaultLiveCalib); localStorage.removeItem('zenith_live_calib'); }} style={{ background: '#444', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: 4, cursor: 'pointer', fontSize: '11px' }}>Reset</button>
+          </div>
+          
+          <div style={{ borderBottom: '1px solid #333', paddingBottom: 8, marginBottom: 15 }}>
+            <h4 style={{ margin: '0 0 10px 0', color: '#4ade80' }}>PITCH CARDS</h4>
+            {renderSlider('Image Width', 'pitchImgW', 50, 200)}
+            {renderSlider('Image Height', 'pitchImgH', 50, 200)}
+            {renderSlider('Image X Offset', 'pitchImgX', -100, 100)}
+            {renderSlider('Image Y Offset', 'pitchImgY', -100, 100)}
+            {renderSlider('OVR Top', 'pitchOvrTop', -20, 50)}
+            {renderSlider('OVR Left', 'pitchOvrLeft', -20, 50)}
+            {renderSlider('OVR Size (rem)', 'pitchOvrSize', 0.5, 2, 0.05)}
+            {renderSlider('Position Top', 'pitchPosTop', -20, 50)}
+            {renderSlider('Position Left', 'pitchPosLeft', -20, 50)}
+            {renderSlider('Position Size (rem)', 'pitchPosSize', 0.4, 1.5, 0.05)}
+            {renderSlider('Name Y Offset (Bot)', 'pitchNameBot', -20, 50)}
+            {renderSlider('Name X Offset', 'pitchNameX', -50, 50)}
+            {renderSlider('Name Size (rem)', 'pitchNameSize', 0.4, 1.5, 0.05)}
+            {renderSlider('Untradable Size', 'pitchUntradSize', 10, 50)}
+            {renderSlider('Untradable X Offset', 'pitchUntradLeft', -50, 100)}
+            {renderSlider('Untradable Y Offset', 'pitchUntradTop', -50, 50)}
+            {renderSlider('Nation Flag Left', 'pitchNationLeft', 0, 100)}
+            {renderSlider('Nation Flag Bottom', 'pitchNationBot', 0, 100)}
+            {renderSlider('Nation Flag Width', 'pitchNationWidth', 5, 40)}
+            {renderSlider('Club Flag Left', 'pitchClubLeft', 0, 100)}
+            {renderSlider('Club Flag Bottom', 'pitchClubBot', 0, 100)}
+            {renderSlider('Club Flag Width', 'pitchClubWidth', 5, 40)}
+            {renderSlider('League Flag Left', 'pitchLeagueLeft', 0, 100)}
+            {renderSlider('League Flag Bottom', 'pitchLeagueBot', 0, 100)}
+            {renderSlider('League Flag Width', 'pitchLeagueWidth', 5, 40)}
+          </div>
+
+          <div>
+            <h4 style={{ margin: '0 0 10px 0', color: '#60a5fa' }}>BENCH CARDS</h4>
+            {renderSlider('Image Width', 'benchImgW', 50, 200)}
+            {renderSlider('Image Height', 'benchImgH', 50, 200)}
+            {renderSlider('Image X Offset', 'benchImgX', -100, 100)}
+            {renderSlider('Image Y Offset', 'benchImgY', -100, 100)}
+            {renderSlider('OVR Top', 'benchOvrTop', -20, 50)}
+            {renderSlider('OVR Left', 'benchOvrLeft', -20, 50)}
+            {renderSlider('OVR Size (rem)', 'benchOvrSize', 0.4, 1.5, 0.05)}
+            {renderSlider('Position Top', 'benchPosTop', -20, 50)}
+            {renderSlider('Position Left', 'benchPosLeft', -20, 50)}
+            {renderSlider('Position Size (rem)', 'benchPosSize', 0.4, 1.5, 0.05)}
+            {renderSlider('Name Y Offset (Bot)', 'benchNameBot', -20, 50)}
+            {renderSlider('Name X Offset', 'benchNameX', -50, 50)}
+            {renderSlider('Name Size (rem)', 'benchNameSize', 0.4, 1.5, 0.05)}
+            {renderSlider('Untradable Size', 'benchUntradSize', 10, 50)}
+            {renderSlider('Untradable Right', 'benchUntradRight', -20, 50)}
+            {renderSlider('Untradable Top', 'benchUntradTop', -50, 50)}
+            {renderSlider('Nation Flag Left', 'benchNationLeft', 0, 100)}
+            {renderSlider('Nation Flag Bottom', 'benchNationBot', 0, 100)}
+            {renderSlider('Nation Flag Width', 'benchNationWidth', 5, 40)}
+            {renderSlider('Club Flag Left', 'benchClubLeft', 0, 100)}
+            {renderSlider('Club Flag Bottom', 'benchClubBot', 0, 100)}
+            {renderSlider('Club Flag Width', 'benchClubWidth', 5, 40)}
+            {renderSlider('League Flag Left', 'benchLeagueLeft', 0, 100)}
+            {renderSlider('League Flag Bottom', 'benchLeagueBot', 0, 100)}
+            {renderSlider('League Flag Width', 'benchLeagueWidth', 5, 40)}
+          </div>
+
+          <div style={{ marginTop: 20, fontSize: '11px', color: '#888', textAlign: 'center' }}>
+            Ctrl+Shift+U to hide. Hardcode final values in defaultLiveCalib.
+          </div>
+        </div>
+      )}
+      <style>{`
+        .squad-slot .preview-card-inner { width: 118px !important; height: 138px !important; }
+        .squad-slot .preview-card-player-img { width: ${calib.pitchImgW}px !important; height: ${calib.pitchImgH}px !important; transform: translate(calc(-50% + ${calib.pitchImgX}px), ${calib.pitchImgY}px) !important; object-fit: contain !important; }
+        .squad-slot .preview-card-ovr { top: ${calib.pitchOvrTop}px !important; left: ${calib.pitchOvrLeft}px !important; font-size: ${calib.pitchOvrSize}rem !important; transform: none !important; }
+        .squad-slot .preview-card-position { top: ${calib.pitchPosTop}px !important; left: ${calib.pitchPosLeft}px !important; font-size: ${calib.pitchPosSize}rem !important; transform: none !important; }
+        .squad-slot .preview-card-name { left: 0 !important; width: 100% !important; transform: translateX(${calib.pitchNameX}px) !important; display: flex !important; justify-content: center !important; align-items: center !important; bottom: ${calib.pitchNameBot}px !important; font-size: ${calib.pitchNameSize}rem !important; }
+        .squad-slot .card-nation-flag { left: ${calib.pitchNationLeft}px !important; bottom: ${calib.pitchNationBot}px !important; top: auto !important; right: auto !important; width: ${calib.pitchNationWidth}px !important; height: auto !important; position: absolute !important; }
+        .squad-slot .card-club-flag { left: ${calib.pitchClubLeft}px !important; bottom: ${calib.pitchClubBot}px !important; top: auto !important; right: auto !important; width: ${calib.pitchClubWidth}px !important; height: auto !important; position: absolute !important; }
+        .squad-slot .card-league-flag { left: ${calib.pitchLeagueLeft}px !important; bottom: ${calib.pitchLeagueBot}px !important; top: auto !important; right: auto !important; width: ${calib.pitchLeagueWidth}px !important; height: auto !important; position: absolute !important; }
+        .squad-slot .card-untradable-badge { transform: translate(${calib.pitchUntradLeft}px, ${calib.pitchUntradTop}px) !important; width: ${calib.pitchUntradSize}px !important; height: ${calib.pitchUntradSize}px !important; }
+        .squad-slot .card-untradable-badge img { width: 100% !important; height: 100% !important; }
+
+        .bench-cell .bench-card-inner { width: 98px !important; height: 118px !important; }
+        .bench-cell .bench-card-player-img { width: ${calib.benchImgW}px !important; height: ${calib.benchImgH}px !important; transform: translate(calc(-50% + ${calib.benchImgX}px), ${calib.benchImgY}px) !important; object-fit: contain !important; }
+        .bench-cell .bench-card-ovr { top: ${calib.benchOvrTop}px !important; left: ${calib.benchOvrLeft}px !important; font-size: ${calib.benchOvrSize}rem !important; transform: none !important; }
+        .bench-cell .bench-card-position { top: ${calib.benchPosTop}px !important; left: ${calib.benchPosLeft}px !important; font-size: ${calib.benchPosSize}rem !important; transform: none !important; }
+        .bench-cell .bench-card-name { left: 0 !important; width: 100% !important; transform: translateX(${calib.benchNameX}px) !important; display: flex !important; justify-content: center !important; align-items: center !important; bottom: ${calib.benchNameBot}px !important; font-size: ${calib.benchNameSize}rem !important; }
+        .bench-cell .bench-card-flag-nation { left: ${calib.benchNationLeft}px !important; bottom: ${calib.benchNationBot}px !important; top: auto !important; right: auto !important; width: ${calib.benchNationWidth}px !important; height: auto !important; position: absolute !important; }
+        .bench-cell .bench-card-flag-club { left: ${calib.benchClubLeft}px !important; bottom: ${calib.benchClubBot}px !important; top: auto !important; right: auto !important; width: ${calib.benchClubWidth}px !important; height: auto !important; position: absolute !important; }
+        .bench-cell .bench-card-flag-league { left: ${calib.benchLeagueLeft}px !important; bottom: ${calib.benchLeagueBot}px !important; top: auto !important; right: auto !important; width: ${calib.benchLeagueWidth}px !important; height: auto !important; position: absolute !important; }
+        .bench-cell .card-untradable-badge { right: ${calib.benchUntradRight}px !important; top: ${calib.benchUntradTop}px !important; width: ${calib.benchUntradSize}px !important; height: ${calib.benchUntradSize}px !important; position: absolute !important; pointer-events: none !important; }
+        .bench-cell .card-untradable-badge img { width: 100% !important; height: 100% !important; }
+      `}</style>
       <div id="tools-view" className={`view ${isFullPageToolActive ? '' : 'active'}`}>
         <div className="tools-modal-content" style={{ width: 'min(1200px, 96vw)', margin: '18px auto', maxHeight: 'none' }}>
           <div className="tools-modal-header">
