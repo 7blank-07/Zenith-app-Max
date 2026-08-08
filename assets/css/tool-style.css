@@ -9455,8 +9455,8 @@ body.stats-open #squad-builder-modal {
   .card-untradable-badge.card-untradable-badge--squad-pitch {
     top: 1px;
     right: 0;
-    width: 17px;
-    height: 17px;
+    width: 11px;
+    height: 11px;
     transform: none;
     margin-right: 0;
     margin-bottom: 0;
@@ -11490,6 +11490,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
+  top: auto !important;
 }
 
 #squad-builder-modal .bench-card-inner .bench-card-flag-club.hero-icon-club-flag {
@@ -11499,6 +11500,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
+  top: auto !important;
 }
 
 #squad-builder-modal .bench-card-inner .bench-card-flag-nation.normal-nation-flag {
@@ -11508,6 +11510,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
+  top: auto !important;
 }
 
 #squad-builder-modal .bench-card-inner .bench-card-flag-club.normal-club-flag {
@@ -11517,6 +11520,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: contain;
+  top: auto !important;
 }
 
 #squad-builder-modal .bench-card-inner .bench-card-flag-league.normal-bench-league-flag {
@@ -11528,6 +11532,7 @@ main.main-content.main-content--squadbuilder #squad-builder-modal .bench-empty-s
   aspect-ratio: 1 / 1;
   object-fit: contain;
   z-index: 3;
+  top: auto !important;
   border-radius: 2px;
 }
 

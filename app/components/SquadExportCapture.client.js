@@ -69,22 +69,7 @@ function getBadgeContent(badges) {
 }
 
 const defaultCalib = {
-  pitchImgW: 130, pitchImgH: 145, pitchImgX: -2, pitchImgY: -9,
-  pitchOvrTop: 14, pitchOvrLeft: 23, pitchOvrSize: 1,
-  pitchPosTop: 30, pitchPosLeft: 26, pitchPosSize: 0.7,
-  pitchNameBot: 38, pitchNameX: 6, pitchNameSize: 0.65,
-  pitchUntradTop: 3, pitchUntradLeft: -4, pitchUntradSize: 14,
-  pitchNationLeft: 24, pitchNationBot: 20, pitchNationWidth: 12,
-  pitchClubLeft: 82, pitchClubBot: 20, pitchClubWidth: 12,
-  pitchLeagueLeft: 53, pitchLeagueBot: 20, pitchLeagueWidth: 12,
-  benchImgW: 112, benchImgH: 125, benchImgX: 0, benchImgY: 12,
-  benchOvrTop: 13, benchOvrLeft: 14, benchOvrSize: 0.8,
-  benchPosTop: 26, benchPosLeft: 15, benchPosSize: 0.6,
-  benchNameBot: 26, benchNameX: 7, benchNameSize: 0.6,
-  benchUntradRight: 8, benchUntradTop: 0, benchUntradSize: 13,
-  benchNationLeft: 19, benchNationBot: 12, benchNationWidth: 10,
-  benchClubLeft: 69, benchClubBot: 16, benchClubWidth: 12,
-  benchLeagueLeft: 43, benchLeagueBot: 17, benchLeagueWidth: 10
+  pitchImgW:130,pitchImgH:163,pitchImgX:-2,pitchImgY:-1,pitchOvrTop:16,pitchOvrLeft:20,pitchOvrSize:1,pitchPosTop:30,pitchPosLeft:24,pitchPosSize:0.7,pitchNameBot:38,pitchNameX:8,pitchNameSize:0.7,pitchUntradTop:4,pitchUntradLeft:30,pitchUntradSize:15,pitchNationLeft:24,pitchNationBot:20,pitchNationWidth:12,pitchClubLeft:82,pitchClubBot:23,pitchClubWidth:12,pitchLeagueLeft:53,pitchLeagueBot:20,pitchLeagueWidth:12,benchImgW:112,benchImgH:120,benchImgX:0,benchImgY:12,benchOvrTop:13,benchOvrLeft:16,benchOvrSize:0.8,benchPosTop:26,benchPosLeft:15,benchPosSize:0.6,benchNameBot:26,benchNameX:6,benchNameSize:0.65,benchUntradRight:3,benchUntradTop:5,benchUntradSize:13,benchNationLeft:19,benchNationBot:12,benchNationWidth:10,benchClubLeft:69,benchClubBot:16,benchClubWidth:12,benchLeagueLeft:43,benchLeagueBot:17,benchLeagueWidth:10,benchClubY:0,benchLeagueX:0,benchNationY:0,benchLeagueY:0,benchNationX:0,pitchNationY:0
 };
 
 function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer, calib }) {
@@ -116,7 +101,7 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer, cal
         <div className={`player-preview-card squad-export-player-card ${getStarterTypeClass(player)}`} data-player-id={player.playerId}>
           <div className="preview-card-inner" style={{ width: '118px', height: '138px' }}>
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="preview-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.pitchImgW}px`, height: `${p.pitchImgH}px`, objectFit: 'contain', transform: `translate(calc(-50% + ${p.pitchImgX}px), ${p.pitchImgY}px)` }} />
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.pitchImgW}px`, height: `${p.pitchImgH}px`, objectFit: 'contain', left: '50%', marginLeft: `${p.pitchImgX - (p.pitchImgW / 2)}px`, transform: `translateY(${p.pitchImgY}px)` }} />
             <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF', transform: 'none', top: `${p.pitchOvrTop}px`, left: `${p.pitchOvrLeft}px`, fontSize: `${p.pitchOvrSize}rem` }}>
               <Num>{Number(adjustedOvr) > 0 ? Number(adjustedOvr) : 'NA'}</Num>
             </div>
@@ -154,7 +139,7 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer, cal
               <img src={leagueFlag} alt="League" className="card-league-flag normal-league-flag" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ left: `${p.pitchLeagueLeft}px`, bottom: `${p.pitchLeagueBot}px`, top: 'auto', right: 'auto', width: `${p.pitchLeagueWidth}px`, height: 'auto', position: 'absolute' }} />
             )}
             {player.isUntradable && (
-              <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch" style={{ transform: `translate(${p.pitchUntradLeft}px, ${p.pitchUntradTop}px)`, width: `${p.pitchUntradSize}px`, height: `${p.pitchUntradSize}px` }}>
+              <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch" style={{ right: 'auto', left: '50%', marginLeft: `${p.pitchUntradLeft - (p.pitchUntradSize / 2)}px`, top: '0', transform: `translateY(${p.pitchUntradTop}px)`, width: `${p.pitchUntradSize}px`, height: `${p.pitchUntradSize}px` }}>
                 <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: '100%', height: '100%' }} />
               </div>
             )}
@@ -194,7 +179,7 @@ function ExportBenchCell({ player, index, exportMediaByPlayer, calib }) {
         <div className={`bench-preview-card squad-export-bench-card ${getBenchTypeClass(player)}`} data-player-id={player.playerId}>
           <div className="bench-card-inner" style={{ width: '98px', height: '118px' }}>
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="bench-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.benchImgW}px`, height: `${p.benchImgH}px`, objectFit: 'contain', transform: `translate(calc(-50% + ${p.benchImgX}px), ${p.benchImgY}px)` }} />
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.benchImgW}px`, height: `${p.benchImgH}px`, objectFit: 'contain', left: '50%', marginLeft: `${p.benchImgX - (p.benchImgW / 2)}px`, transform: `translateY(${p.benchImgY}px)` }} />
             <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF', transform: 'none', top: `${p.benchOvrTop}px`, left: `${p.benchOvrLeft}px`, fontSize: `${p.benchOvrSize}rem` }}>
               <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
             </div>
