@@ -116,14 +116,14 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer, cal
         <div className={`player-preview-card squad-export-player-card ${getStarterTypeClass(player)}`} data-player-id={player.playerId}>
           <div className="preview-card-inner" style={{ width: '118px', height: '138px' }}>
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="preview-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.pitchImgW}px`, height: `${p.pitchImgH}px`, objectFit: 'contain', left: '50%', marginLeft: `${p.pitchImgX - (p.pitchImgW / 2)}px`, transform: `translateY(${p.pitchImgY}px)` }} />
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="preview-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.pitchImgW}px`, height: `${p.pitchImgH}px`, objectFit: 'contain', left: '50%', marginLeft: `${p.pitchImgX - (p.pitchImgW / 2)}px`, bottom: `${6 - p.pitchImgY}px`, transform: 'none' }} />
             <div className="preview-card-ovr" style={{ color: player.colorRating || '#FFFFFF', transform: 'none', top: `${p.pitchOvrTop}px`, left: `${p.pitchOvrLeft}px`, fontSize: `${p.pitchOvrSize}rem` }}>
               <Num>{Number(adjustedOvr) > 0 ? Number(adjustedOvr) : 'NA'}</Num>
             </div>
             <div className="preview-card-position" style={{ color: player.colorPosition || '#FFFFFF', transform: 'none', top: `${p.pitchPosTop}px`, left: `${p.pitchPosLeft}px`, fontSize: `${p.pitchPosSize}rem` }}>
               <Num>{player.position || 'NA'}</Num>
             </div>
-            <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF', left: '0', width: '100%', transform: `translateX(${p.pitchNameX}px)`, display: 'flex', justifyContent: 'center', alignItems: 'center', bottom: `${p.pitchNameBot}px`, fontSize: `${p.pitchNameSize}rem` }}>
+            <div className="preview-card-name" style={{ color: player.colorName || '#FFFFFF', width: '100%', left: `${p.pitchNameX}px`, display: 'flex', justifyContent: 'center', alignItems: 'center', bottom: `${p.pitchNameBot}px`, fontSize: `${p.pitchNameSize}rem`, transform: 'none' }}>
               <Num>{player.name || 'Unknown'}</Num>
             </div>
             {!!nationFlag && (
@@ -154,7 +154,7 @@ function ExportStarterSlot({ slot, player, adjustedOvr, exportMediaByPlayer, cal
               <img src={leagueFlag} alt="League" className="card-league-flag normal-league-flag" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ left: `${p.pitchLeagueLeft}px`, bottom: `${p.pitchLeagueBot}px`, top: 'auto', right: 'auto', width: `${p.pitchLeagueWidth}px`, height: 'auto', position: 'absolute' }} />
             )}
             {player.isUntradable && (
-              <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch" style={{ right: 'auto', left: '50%', marginLeft: `${p.pitchUntradLeft - (p.pitchUntradSize / 2)}px`, top: '0', transform: `translateY(${p.pitchUntradTop}px)`, width: `${p.pitchUntradSize}px`, height: `${p.pitchUntradSize}px` }}>
+              <div className="card-untradable-badge with-remove card-untradable-badge--squad-pitch" style={{ right: 'auto', left: '50%', marginLeft: `${p.pitchUntradLeft - (p.pitchUntradSize / 2)}px`, top: `${p.pitchUntradTop}px`, width: `${p.pitchUntradSize}px`, height: `${p.pitchUntradSize}px`, transform: 'none' }}>
                 <img src={UNTRADABLE_CARD_BADGE_URL} alt="Untradable" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: '100%', height: '100%' }} />
               </div>
             )}
@@ -194,14 +194,14 @@ function ExportBenchCell({ player, index, exportMediaByPlayer, calib }) {
         <div className={`bench-preview-card squad-export-bench-card ${getBenchTypeClass(player)}`} data-player-id={player.playerId}>
           <div className="bench-card-inner" style={{ width: '98px', height: '118px' }}>
             <img src={resolveCardBackground(player, exportMediaByPlayer)} alt="Card" className="bench-card-bg" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" />
-            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.benchImgW}px`, height: `${p.benchImgH}px`, objectFit: 'contain', left: '50%', marginLeft: `${p.benchImgX - (p.benchImgW / 2)}px`, transform: `translateY(${p.benchImgY}px)` }} />
+            <img src={resolvePlayerFace(player, exportMediaByPlayer)} alt={player.name} className="bench-card-player-img" crossOrigin="anonymous" referrerPolicy="no-referrer" loading="eager" decoding="sync" style={{ width: `${p.benchImgW}px`, height: `${p.benchImgH}px`, objectFit: 'contain', left: '50%', marginLeft: `${p.benchImgX - (p.benchImgW / 2)}px`, bottom: `${6 - p.benchImgY}px`, transform: 'none' }} />
             <div className="bench-card-ovr" style={{ color: player.colorRating || '#FFFFFF', transform: 'none', top: `${p.benchOvrTop}px`, left: `${p.benchOvrLeft}px`, fontSize: `${p.benchOvrSize}rem` }}>
               <Num>{player.ovr > 0 ? player.ovr : 'NA'}</Num>
             </div>
             <div className="bench-card-position" style={{ color: player.colorPosition || '#FFFFFF', transform: 'none', top: `${p.benchPosTop}px`, left: `${p.benchPosLeft}px`, fontSize: `${p.benchPosSize}rem` }}>
               <Num>{player.position || 'NA'}</Num>
             </div>
-            <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF', left: '0', width: '100%', transform: `translateX(${p.benchNameX}px)`, display: 'flex', justifyContent: 'center', alignItems: 'center', bottom: `${p.benchNameBot}px`, fontSize: `${p.benchNameSize}rem` }}>
+            <div className="bench-card-name" style={{ color: player.colorName || '#FFFFFF', width: '100%', left: `${p.benchNameX}px`, display: 'flex', justifyContent: 'center', alignItems: 'center', bottom: `${p.benchNameBot}px`, fontSize: `${p.benchNameSize}rem`, transform: 'none' }}>
               <Num>{player.name || 'Unknown'}</Num>
             </div>
             {!!nationFlag && (
