@@ -433,8 +433,11 @@ async function fastDatabaseSearch(incoming) {
 
     const q = incoming.get('q') || incoming.get('name_starts_with');
     if (q) {
-      const safeQ = q.replace(/'/g, "''").replace(/%/g, "\\%");
-      query += ` AND name ILIKE '%${safeQ}%'`;
+      const normalizedQ = q.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const safeQ = normalizedQ.replace(/'/g, "''").replace(/%/g, "\\%");
+      const accents = 'áàâäãåāăąçćčđďéèêëēėęěíìîïīįñńňóòôöõøōřśšşťțúùûüūůųýÿžźż';
+      const plain   = 'aaaaaaaaacccddeeeeeeeeiiiiiiinnnooooooorsssttuuuuuuuyyzzz';
+      query += ` AND translate(lower(name), '${accents}', '${plain}') LIKE '%${safeQ}%'`;
     }
 
     const position = incoming.get('position');

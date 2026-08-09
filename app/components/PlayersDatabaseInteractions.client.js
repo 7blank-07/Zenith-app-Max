@@ -1030,7 +1030,11 @@ export default function PlayersDatabaseInteractions({
     return () => {
       disposed = true;
       window.clearTimeout(timeout);
-      controller.abort();
+      try {
+        controller.abort();
+      } catch (e) {
+        // Ignore AbortError in cleanup
+      }
     };
   }, [searchRequestParams]);
 
