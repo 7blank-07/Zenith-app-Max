@@ -231,6 +231,18 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
     [playerId, selectedRank, updateBrowserPath]
   );
 
+  const handleAddToTeamBuilder = useCallback(() => {
+    if (!playerId) return;
+    window.sessionStorage.setItem('squad_pending_add', playerId);
+    router.push(`/tools/squad-builder`);
+  }, [playerId, router]);
+
+  const handleAddToCompare = useCallback(() => {
+    if (!playerId) return;
+    window.sessionStorage.setItem('compare_pending_add', playerId);
+    router.push(`/tools/player-compare`);
+  }, [playerId, router]);
+
   const handleDownloadImage = useCallback(async () => {
     if (!cardRef.current) return;
     try {
@@ -573,9 +585,86 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               background: 'var(--color-graphite-800, #14181C)',
               border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: 'var(--radius-lg, 12px)',
-              padding: '18px'
+              padding: '18px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
             }}
           >
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={handleAddToTeamBuilder}
+                style={{
+                  background: 'rgba(0,194,168,0.1)',
+                  border: '1px solid rgba(0,194,168,0.3)',
+                  color: '#00C2A8',
+                  padding: '14px',
+                  borderRadius: 'var(--radius-base, 8px)',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(0,194,168,0.2)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,194,168,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(0,194,168,0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Squad Builder
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleAddToCompare}
+                style={{
+                  background: 'rgba(255,184,107,0.1)',
+                  border: '1px solid rgba(255,184,107,0.3)',
+                  color: '#FFB86B',
+                  padding: '14px',
+                  borderRadius: 'var(--radius-base, 8px)',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,184,107,0.2)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255,184,107,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,184,107,0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 21l6-6M4 4l5 5" />
+                </svg>
+                Compare
+              </button>
+            </div>
+
             <button
               className="player-watchlist-btn"
               data-watchlist-toggle
