@@ -14,6 +14,7 @@ import {
 } from '../../src/lib/server/redeem-codes/constants.mjs';
 import { buildRedeemRevalidationPaths } from '../../src/lib/server/redeem-codes/revalidation.mjs';
 import { revalidateAppPaths } from '../../src/lib/server/blog/revalidation.mjs';
+import { triggerAutoExpire } from '../../src/lib/server/redeem-codes/auto-expire.mjs';
 
 function toText(value, fallback = '') {
   if (value === undefined || value === null) return fallback;
@@ -137,6 +138,11 @@ export async function submitRedeemCodeEditorAction(previousState, formData) {
     const saved = existing
       ? await updateRedeemCode(existing.id, validation.value)
       : await createRedeemCode(validation.value);
+
+    // If a code was just changed to EXPIRED, fire the background auto-expire task
+    if (existing && existing.status !== 'expired' && saved.status === 'expired') {
+        triggerAutoExpire(saved.codeValue).catch(console.error);
+    }
 
     const revalidation = await revalidateAppPaths(
       buildRedeemRevalidationPaths({
