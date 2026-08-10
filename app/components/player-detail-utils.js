@@ -7,7 +7,7 @@ export function parseRank(rankValue) {
 export function renderStars(value) {
   const stars = Number.isFinite(Number(value)) ? Math.max(0, Math.min(5, Number(value))) : 0;
   if (!stars) return 'N/A';
-  return `${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}`;
+  return '★'.repeat(stars);
 }
 
 export function getPlayerCardVariant(player) {

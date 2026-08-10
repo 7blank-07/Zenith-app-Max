@@ -505,7 +505,13 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Strong Foot</span>
                 <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>
-                  {record?.strongFootSide || 'Unknown'} {record?.strongFoot ? `(${renderStars(record.strongFoot)})` : ''}
+                  {record?.strongFootSide === 'Left' ? 'Right' : record?.strongFootSide === 'Right' ? 'Left' : 'Unknown'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ color: 'var(--color-text-muted, #98A0A6)', fontWeight: 600 }}>Weak Foot</span>
+                <span style={{ color: 'var(--color-text-primary, #E6EEF2)', fontWeight: 700 }}>
+                  {record?.strongFootSide || 'Unknown'} {record?.weakFoot ? `(${renderStars(record.weakFoot)})` : ''}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>

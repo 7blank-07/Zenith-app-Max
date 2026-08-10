@@ -12279,13 +12279,15 @@ body {
 }
 
 .player-detail-mini-card .card-player-name-inside {
-  left: 50%;
+  left: 4%;
+  width: 92%;
   bottom: 27%;
-  transform: translateX(-50%);
-  max-width: 92%;
+  transform: none;
+  max-width: 100%;
   font-size: 1.24rem;
   letter-spacing: -0.5px;
   line-height: 0.95;
+  text-align: center;
 }
 
 .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail {
@@ -12443,13 +12445,15 @@ body {
 }
 
 .player-detail-mini-card .card-player-name-inside {
-  left: 50%;
+  left: 4%;
+  width: 92%;
   bottom: 28%;
-  transform: translateX(-50%);
-  max-width: 92%;
+  transform: none;
+  max-width: 100%;
   font-size: 1.24rem;
   letter-spacing: -0.5px;
   line-height: 0.95;
+  text-align: center;
 }
 
 .player-detail-mini-card .card-nation-flag-inside-detail.hero-icon-nation-flag-detail,
