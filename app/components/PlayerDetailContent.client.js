@@ -591,71 +591,89 @@ export default function PlayerDetailContent({ initialRecord, initialRank = 0 }) 
               gap: '12px'
             }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                width: '100%',
+                background: 'linear-gradient(145deg, rgba(30, 35, 40, 0.4) 0%, rgba(20, 24, 28, 0.6) 100%)',
+                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05), 0 8px 16px rgba(0,0,0,0.2)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '16px',
+                padding: '6px'
+              }}
+            >
               <button
                 type="button"
                 onClick={handleAddToTeamBuilder}
                 style={{
-                  background: 'rgba(0,194,168,0.1)',
-                  border: '1px solid rgba(0,194,168,0.3)',
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
                   color: '#00C2A8',
-                  padding: '14px',
-                  borderRadius: 'var(--radius-base, 8px)',
+                  padding: '12px 4px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 700,
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(0,194,168,0.2)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,194,168,0.2)';
+                  e.currentTarget.style.background = 'rgba(0,194,168,0.12)';
+                  e.currentTarget.style.transform = 'scale(1.02)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(0,194,168,0.1)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
-                Squad Builder
+                Squad
               </button>
               
+              <div style={{ 
+                width: '1px', 
+                height: '24px', 
+                background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15), transparent)', 
+                margin: '0 2px' 
+              }} />
+
               <button
                 type="button"
                 onClick={handleAddToCompare}
                 style={{
-                  background: 'rgba(255,184,107,0.1)',
-                  border: '1px solid rgba(255,184,107,0.3)',
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
                   color: '#FFB86B',
-                  padding: '14px',
-                  borderRadius: 'var(--radius-base, 8px)',
+                  padding: '12px 4px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 700,
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,184,107,0.2)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255,184,107,0.2)';
+                  e.currentTarget.style.background = 'rgba(255,184,107,0.12)';
+                  e.currentTarget.style.transform = 'scale(1.02)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,184,107,0.1)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
