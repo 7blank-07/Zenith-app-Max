@@ -48,7 +48,7 @@ export function getBlogEditorCapabilities(user, post = null) {
     canSaveDraft: canEdit,
     canSubmitReview: canEdit,
     canApprove: isAdmin && currentStatus === BLOG_STATUS.PENDING,
-    canPublish: isAdmin && currentStatus !== BLOG_STATUS.PENDING,
+    canPublish: canEdit && currentStatus !== BLOG_STATUS.PENDING,
     canReject: isAdmin && Boolean(post),
     canDelete: isAdmin && Boolean(post),
     canFeature: isAdmin,

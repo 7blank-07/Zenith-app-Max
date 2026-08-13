@@ -37,7 +37,7 @@ export function canReviewBlogPosts(user) {
 export function getBlogRoleDescription(role) {
   return isBlogAdmin(role)
     ? 'Admins can review submissions, publish articles, reject posts, and delete content.'
-    : 'Editors can build drafts, update their content, and submit articles for review.';
+    : 'Editors can build drafts, update their content, submit articles for review, and publish articles.';
 }
 
 export function assertBlogPermission(user, permission) {
