@@ -79,10 +79,42 @@ export async function middleware(request) {
     return response;
   }
 
+  // --- 3. Global DB Redirects ---
+  // Only process if it's a GET request and not an API or static route
+  if (request.method === 'GET' && !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.match(/\.[^/]+$/)) {
+    try {
+      // Fetch redirects from our internal API (which will be cached heavily by Next.js fetch cache)
+      const baseUrl = request.nextUrl.origin;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout to prevent hanging
+
+      const res = await fetch(`${baseUrl}/api/internal/redirects`, {
+        signal: controller.signal,
+        // We use default Next.js fetch caching which relies on the API route's `revalidate` export
+      });
+      clearTimeout(timeoutId);
+      
+      if (res.ok) {
+        const redirectMap = await res.json();
+        
+        // Check if current pathname has a redirect
+        if (redirectMap[pathname]) {
+          const redirectUrl = request.nextUrl.clone();
+          redirectUrl.pathname = redirectMap[pathname];
+          // Preserve search params if any
+          return NextResponse.redirect(redirectUrl, 301);
+        }
+      }
+    } catch (e) {
+      console.error('[middleware] Failed to fetch or process redirects:', e);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  // Broaden matcher to include tools and admin
-  matcher: ['/admin/:path*', '/tools', '/tools/:path*']
+  // Broaden matcher to include tools, admin, and all general routes for global redirects
+  // Excluding /api, /_next/static, /_next/image, favicon.ico, and common asset extensions
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|otf)$).*)']
 };

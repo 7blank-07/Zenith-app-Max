@@ -42,6 +42,12 @@ export default function AdminSidebar({ currentPath, counts }) {
             <span className={styles.navBadge}>{counts?.[item.countKey] ?? 0}</span>
           </Link>
         ))}
+        <Link
+          href="/admin/redirects"
+          className={`${styles.navLink} ${currentPath.startsWith('/admin/redirects') ? styles.navLinkActive : ''}`}
+        >
+          <span>URL Redirects</span>
+        </Link>
       </nav>
     </aside>
   );
