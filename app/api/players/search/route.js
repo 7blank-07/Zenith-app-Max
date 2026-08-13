@@ -492,6 +492,24 @@ async function fastDatabaseSearch(incoming) {
     const result = await pool.query(query, values);
     console.timeEnd('[SearchProxy] data query');
     const players = result.rows.map(row => normalizePlayerStableRecord(row, row.player_id || row.id));
+    
+    if (reqSort === 'latest') {
+      const { compareLatestPlayers } = await import('../../../../src/lib/server/top-players.mjs');
+      if (typeof compareLatestPlayers === 'function') {
+        players.sort(compareLatestPlayers);
+      } else {
+        // Fallback inline sort if export is missing
+        players.sort((left, right) => {
+          const leftDate = Date.parse(left?.dateAdded) || 0;
+          const rightDate = Date.parse(right?.dateAdded) || 0;
+          if (leftDate !== rightDate) return rightDate - leftDate;
+          const leftOvr = Number(left?.ovr) || 0;
+          const rightOvr = Number(right?.ovr) || 0;
+          if (leftOvr !== rightOvr) return rightOvr - leftOvr;
+          return String(left?.name || '').localeCompare(String(right?.name || ''));
+        });
+      }
+    }
     console.timeEnd('[SearchProxy] fastDatabaseSearch total time');
 
     return {

@@ -57,7 +57,6 @@ export async function POST(req) {
         
         // 3. Clear Static Pages Cache
         revalidatePath('/fc-mobile-redeem-codes', 'page');
-        revalidatePath('/fc-mobile-redeem-codes-today', 'page');
         
         // 4. Fetch the 11 Blogs
         const blogsResult = await listPublishedBlogsByCategory('redeem-codes', { pageSize: 50 });

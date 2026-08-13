@@ -22,8 +22,7 @@ export function buildRedeemRevalidationPaths({ previousCode = null, nextCode = n
   const targetPaths = new Set([
     '/',
     '/sitemap.xml',
-    '/fc-mobile-redeem-codes',
-    '/fc-mobile-redeem-codes-today'
+    '/fc-mobile-redeem-codes'
   ]);
 
   addScopePaths(targetPaths, previousCode?.scope);

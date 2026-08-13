@@ -81,7 +81,7 @@ export function getStaticEntries(lastModified) {
       priority: 0.86
     },
     {
-      url: toAbsoluteUrl('/vn/code-fc-mobile'),
+      url: toAbsoluteUrl('/vn/code-fc-mobile-vn'),
       lastModified,
       changeFrequency: 'daily',
       priority: 0.86

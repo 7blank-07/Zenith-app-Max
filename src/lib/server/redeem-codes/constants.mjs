@@ -47,7 +47,6 @@ export const REDEEM_CODE_SCOPE_OPTIONS = Object.freeze([
 
 export const REDEEM_ROUTE_KEY = Object.freeze({
   GLOBAL: 'global',
-  GLOBAL_TODAY: 'global-today',
   INDIA: 'india',
   INDONESIA: 'indonesia',
   MALAYSIA: 'malaysia',
@@ -109,53 +108,6 @@ export const REDEEM_ROUTE_CONFIG = Object.freeze({
     breadcrumb: [
       { name: 'Home', path: '/' },
       { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' }
-    ]
-  },
-  [REDEEM_ROUTE_KEY.GLOBAL_TODAY]: {
-    key: REDEEM_ROUTE_KEY.GLOBAL_TODAY,
-    path: '/fc-mobile-redeem-codes-today',
-    scope: REDEEM_CODE_SCOPE.GLOBAL,
-    includeGlobalScope: true,
-    sharedGlobalCodes: true,
-    todayOnly: true,
-    countryLabel: 'Global Today',
-    navLabel: 'Today',
-    locale: 'en-US',
-    primaryKeyword: 'fc mobile redeem codes today',
-    secondaryKeywords: ['fc mobile redeem code today', 'new fc mobile redeem code', 'global fc mobile codes today', 'working fc mobile redeem codes'],
-    title: 'FC Mobile Redeem Codes Today | Global Daily Updates',
-    metaDescription:
-      'Today-only view of global FC Mobile redeem codes. See newly published codes quickly, without claiming fake country-exclusive rewards.',
-    h1: 'Global FC Mobile Redeem Codes Today',
-    intro:
-      'This page highlights FC Mobile codes published today from the same global code feed used across all regions.',
-    globalCodeNote:
-      'Daily updates are still global by default. Regional restrictions are noted only when EA publishes a promotion with country limits.',
-    copy: {
-      eyebrow: 'Today-only global tracker',
-      lastUpdatedLabel: 'Today view updated:'
-    },
-    faqEntries: [
-      {
-        question: 'Are today codes different by country?',
-        answer:
-          'Usually no. Today codes are pulled from global FC Mobile drops, and we only flag country limits when EA states them.'
-      },
-      {
-        question: 'Why can the today section be empty?',
-        answer:
-          'If no new code was published in the current UTC date window, the today view can be empty even while active global codes still exist.'
-      },
-      {
-        question: 'Should I use this page or the main global page?',
-        answer:
-          'Use this page for same-day updates. Use the main global page when you want the full active and expired history.'
-      }
-    ],
-    breadcrumb: [
-      { name: 'Home', path: '/' },
-      { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
-      { name: 'Today', path: '/fc-mobile-redeem-codes-today' }
     ]
   },
   [REDEEM_ROUTE_KEY.INDIA]: {
@@ -310,7 +262,7 @@ export const REDEEM_ROUTE_CONFIG = Object.freeze({
   },
   [REDEEM_ROUTE_KEY.VIETNAM]: {
     key: REDEEM_ROUTE_KEY.VIETNAM,
-    path: '/vn/code-fc-mobile',
+    path: '/vn/code-fc-mobile-vn',
     scope: REDEEM_CODE_SCOPE.VIETNAM,
     includeGlobalScope: true,
     sharedGlobalCodes: true,
@@ -353,7 +305,7 @@ export const REDEEM_ROUTE_CONFIG = Object.freeze({
     breadcrumb: [
       { name: 'Home', path: '/' },
       { name: 'FC Mobile Redeem Codes', path: '/fc-mobile-redeem-codes' },
-      { name: 'Vietnam', path: '/vn/code-fc-mobile' }
+      { name: 'Vietnam', path: '/vn/code-fc-mobile-vn' }
     ]
   },
   [REDEEM_ROUTE_KEY.THAILAND]: {
@@ -819,7 +771,6 @@ export const REDEEM_ROUTE_CONFIG = Object.freeze({
 export const REDEEM_LAUNCHED_LINKS = Object.freeze(
   [
     REDEEM_ROUTE_KEY.GLOBAL,
-    REDEEM_ROUTE_KEY.GLOBAL_TODAY,
     REDEEM_ROUTE_KEY.INDIA,
     REDEEM_ROUTE_KEY.INDONESIA,
     REDEEM_ROUTE_KEY.MALAYSIA,
@@ -842,7 +793,6 @@ export const REDEEM_LAUNCHED_LINKS = Object.freeze(
 export const REDEEM_SCOPE_TO_PUBLISHED_PATHS = Object.freeze({
   [REDEEM_CODE_SCOPE.GLOBAL]: [
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL].path,
-    REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.GLOBAL_TODAY].path,
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.INDIA].path,
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.INDONESIA].path,
     REDEEM_ROUTE_CONFIG[REDEEM_ROUTE_KEY.MALAYSIA].path,
