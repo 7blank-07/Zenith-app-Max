@@ -243,7 +243,7 @@ export function getRedeemRouteScopeGroup(routeKey) {
   }
 
   if (routeKey === REDEEM_ROUTE_KEY.VIETNAM) {
-    return [REDEEM_CODE_SCOPE.GLOBAL, REDEEM_CODE_SCOPE.VIETNAM];
+    return [REDEEM_CODE_SCOPE.VIETNAM];
   }
 
   if (routeKey === REDEEM_ROUTE_KEY.THAILAND) {
