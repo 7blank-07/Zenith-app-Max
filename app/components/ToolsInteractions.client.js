@@ -11,6 +11,7 @@ import { normalizeSearchText } from './search-normalization';
 import SquadExportCapture from './SquadExportCapture.client';
 import { buildExportFallbackPlayers, buildExportMediaMap, clearExportMediaCache, waitForExportLoadState } from './squad-export-media';
 import AdsenseAd from './AdsenseAd';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -936,7 +937,7 @@ function getPlayerId(player) {
 }
 
 function getPlayerType(player) {
-  return player?.leagueImage ? 'normal' : 'hero';
+  return getPlayerCardVariant(player);
 }
 
 function formatCoins(value) {

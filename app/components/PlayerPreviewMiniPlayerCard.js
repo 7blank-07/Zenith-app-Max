@@ -5,6 +5,7 @@ import { getStatAccentColor } from './player-skill-stats-utils';
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { getOptimizedZenithUrl } from '../../src/lib/image-optimization.mjs';
+import { getPlayerCardVariant } from './player-detail-utils';
 import Num from './Num';
 
 const STAT_MAPPING = {
@@ -27,7 +28,7 @@ export default function PlayerPreviewMiniPlayerCard({ player, rank, archetype, i
 
   const position = player.position || 'ST';
   const statsToShow = STAT_MAPPING[position] || ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'];
-  const cardVariant = player.leagueImage ? 'normal' : 'hero';
+  const cardVariant = getPlayerCardVariant(player);
   const playerPath = buildPlayerPath(player);
   
   // Extract stats from player object

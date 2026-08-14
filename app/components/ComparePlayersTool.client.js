@@ -9,6 +9,7 @@ import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { buildLegacyStatsModel, resolveLegacyStatValue, toNumber } from './player-skill-stats-utils';
 import { RANK_SPRITES } from './player-detail-utils';
 import AdsenseAd from './AdsenseAd';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 const SquadPlayerCustomizationModal = dynamic(() => import('./SquadPlayerCustomizationModal'), {
   loading: () => null
@@ -84,7 +85,7 @@ function toText(value) {
 }
 
 function getPlayerType(player) {
-  return player?.leagueImage ? 'normal' : 'hero';
+  return getPlayerCardVariant(player);
 }
 
 function getValueClass(value, min, max) {

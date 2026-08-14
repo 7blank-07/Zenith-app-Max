@@ -15,6 +15,7 @@ import { UNTRADABLE_CARD_BADGE_URL } from './components/image-asset-urls';
 import AdsenseAd from './components/AdsenseAd';
 import Num from './components/Num';
 import { resolvePageSeo, getPageH1Override, PageSeoH1, getPageCustomJsonLd, PageSeoCustomJsonLd } from '../src/lib/server/page-seo-metadata.mjs';
+import { getPlayerCardVariant } from './components/player-detail-utils';
 
 export async function generateMetadata() {
   const defaultMetadata = {
@@ -39,7 +40,7 @@ const HOME_SECTION_LIMIT = 12;
 const HOME_BLOG_LIMIT = 40;
 
 function getHomeCardVariant(player) {
-  return player.leagueImage ? 'normal' : 'hero';
+  return getPlayerCardVariant(player);
 }
 
 function getLatestBlogTimestamp(post) {

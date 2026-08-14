@@ -11,6 +11,7 @@ import {
 } from './squad-export-media';
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import Num from './Num';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fzenithfcm.com';
 
@@ -31,7 +32,7 @@ function getBenchTypeClass(player) {
 }
 
 function getStarterVariant(player) {
-  return player?.leagueImage ? 'normal' : 'hero';
+  return getPlayerCardVariant(player);
 }
 
 function getPlayerExportMedia(player, exportMediaByPlayer = {}) {

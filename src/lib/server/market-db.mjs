@@ -37,11 +37,19 @@ export function createMarketPool(rawEnv = process.env) {
     connectionString = parsedUrl.toString();
   }
 
+  const maxConnections = rawEnv.MARKET_DATABASE_MAX_CONNECTIONS 
+    ? parseInt(rawEnv.MARKET_DATABASE_MAX_CONNECTIONS, 10) 
+    : 10;
+
+  const connectionTimeout = rawEnv.MARKET_DATABASE_CONNECTION_TIMEOUT_MS
+    ? parseInt(rawEnv.MARKET_DATABASE_CONNECTION_TIMEOUT_MS, 10)
+    : 60_000;
+
   return new Pool({
     connectionString,
-    max: 10,
+    max: maxConnections,
     idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 10_000,
+    connectionTimeoutMillis: connectionTimeout,
     ssl: requiresSsl ? { rejectUnauthorized: false } : undefined
   });
 }

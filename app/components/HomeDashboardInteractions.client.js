@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { normalizeSearchText } from './search-normalization';
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 function escapeHtml(value) {
   return String(value || '')
@@ -59,7 +60,7 @@ export default function HomeDashboardInteractions() {
           const fragment = document.createDocumentFragment();
 
           results.forEach((player) => {
-            const variant = player.leagueImage ? 'normal' : 'hero';
+            const variant = getPlayerCardVariant(player);
             const cardBackground = escapeHtml(player.cardBackground || 'https://via.placeholder.com/300x400');
             const playerImage = escapeHtml(player.playerImage || 'https://via.placeholder.com/256');
             const playerName = escapeHtml(player.name || 'Unknown');

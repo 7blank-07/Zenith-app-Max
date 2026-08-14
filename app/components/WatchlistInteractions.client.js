@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { UNTRADABLE_CARD_BADGE_URL, UNTRADABLE_PRICE_FLAG_URL } from './image-asset-urls';
 import { normalizeSearchText } from './search-normalization';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 function toNumber(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
@@ -142,7 +143,7 @@ function formatPrice(price) {
 }
 
 function getPlayerType(player) {
-  return player.league_image ? 'normal' : 'hero';
+  return getPlayerCardVariant(player);
 }
 
 function normalizeWatchlistPlayer(player) {

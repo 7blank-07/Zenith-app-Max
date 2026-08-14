@@ -694,8 +694,10 @@ function buildExportSlot(slot) {
     }
 
     // ── Determine card type class ──
-    const isIcon = !!(player.isicon || player.is_icon || player.isIcon);
-    const isHero = !!(player.ishero || player.is_hero || player.isHero);
+    const eventNameCheck1 = String(player.event_name || player.eventName || player.event || '').toLowerCase();
+    const clubNameCheck1 = String(player.club || '').toLowerCase();
+    const isIcon = eventNameCheck1.includes('icon') || clubNameCheck1.includes('icon');
+    const isHero = eventNameCheck1.includes('hero') || clubNameCheck1.includes('hero');
     const cardTypeClass = isIcon ? 'card-type-icon' : isHero ? 'card-type-hero' : 'card-type-normal';
 
     const playerId = typeof resolveSquadPlayerId === 'function'
@@ -757,8 +759,10 @@ function buildExportBench() {
 
         if (player) {
             // ── Determine card type class ──
-            const isIcon = !!(player.isicon || player.is_icon || player.isIcon);
-            const isHero = !!(player.ishero || player.is_hero || player.isHero);
+            const eventNameCheck2 = String(player.event_name || player.eventName || player.event || '').toLowerCase();
+            const clubNameCheck2 = String(player.club || '').toLowerCase();
+            const isIcon = eventNameCheck2.includes('icon') || clubNameCheck2.includes('icon');
+            const isHero = eventNameCheck2.includes('hero') || clubNameCheck2.includes('hero');
             const cardTypeClass = isIcon ? 'bench-type-icon' : isHero ? 'bench-type-hero' : 'bench-type-normal';
 
             const liveBenchCard = cloneLiveSquadCard('bench-preview-card', playerId, 'squad-export-bench-card', 'bench', player);

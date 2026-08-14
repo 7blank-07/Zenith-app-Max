@@ -1,4 +1,5 @@
 import { UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
+import { getPlayerCardVariant } from './player-detail-utils';
 import Num from './Num';
 
 function getInitials(name) {
@@ -12,7 +13,7 @@ function getInitials(name) {
 }
 
 export default function PlayerRowCard({ player }) {
-  const playerType = player.leagueImage ? 'normal' : 'hero';
+  const playerType = getPlayerCardVariant(player);
   const hasPlayerImage = !!player.playerImage;
   return (
     <div className="player-row-card players-db-row-card">

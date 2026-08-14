@@ -10,6 +10,7 @@ import { getPlayerUniqueId } from '../../src/lib/legacy-parity-contract.mjs';
 import { buildPlayerPath } from '../../src/lib/player-slug.mjs';
 import { UNTRADABLE_CARD_BADGE_URL, UNTRADABLE_PRICE_FLAG_URL } from './image-asset-urls';
 import { normalizeSearchText } from './search-normalization';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 const SEARCH_PAGE_SIZE = 50;
 const BASE_ROW_STATS = Object.freeze([
@@ -533,7 +534,7 @@ function getCustomStatValue(player, statDefinition) {
 }
 
 function renderPlayerCard(player) {
-  const playerType = player.leagueImage ? 'normal' : 'hero';
+  const playerType = getPlayerCardVariant(player);
   const hasPlayerImage = !!player.playerImage;
   return (
     <div className="player-row-card players-db-row-card">

@@ -10,8 +10,20 @@ export function renderStars(value) {
   return '★'.repeat(stars);
 }
 
+export function isIconOrHero(player) {
+  if (!player) return false;
+  
+  const eventName = String(player.eventName || player.event_name || player.event || '').toLowerCase();
+  const club = String(player.club || player.club_name || player.team || '').toLowerCase();
+  
+  if (eventName.includes('icon') || eventName.includes('hero')) return true;
+  if (club.includes('icon') || club.includes('hero')) return true;
+  
+  return false;
+}
+
 export function getPlayerCardVariant(player) {
-  return player?.leagueImage ? 'normal' : 'hero';
+  return isIconOrHero(player) ? 'hero' : 'normal';
 }
 
 function looksLikeImageUrl(value) {

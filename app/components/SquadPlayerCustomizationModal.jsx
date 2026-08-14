@@ -6,6 +6,7 @@ import AnimatedRankIcon from './AnimatedRankIcon.client';
 import { RANK_ICON_URLS, UNTRADABLE_CARD_BADGE_URL } from './image-asset-urls';
 import { fetchApiJson as fetchPlayerApiJson } from './player-skill-stats-utils';
 import { RANK_SPRITES } from './player-detail-utils';
+import { getPlayerCardVariant } from './player-detail-utils';
 
 const RANK_OPTIONS = Object.freeze([
   { rank: 1, label: 'Green', icon: RANK_ICON_URLS[1] },
@@ -198,7 +199,7 @@ function resolveCurrentUserId() {
 }
 
 function getPlayerType(player) {
-  return player?.leagueImage ? 'normal' : 'hero';
+  return getPlayerCardVariant(player);
 }
 
 function resolveBaseOvr(player) {

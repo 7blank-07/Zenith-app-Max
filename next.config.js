@@ -14,6 +14,9 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['ssh2', 'ssh2-sftp-client', 'cpu-features'],
+  },
   async redirects() {
     return [
       // Simple path redirects (no query param logic here to avoid loops)
