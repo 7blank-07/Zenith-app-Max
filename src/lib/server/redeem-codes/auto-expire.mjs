@@ -20,7 +20,10 @@ export async function triggerAutoExpire(code) {
     console.log(`[AutoExpire] Starting background expiration for code: ${code}`);
     try {
         const blogsResult = await listPublishedBlogsByCategory('redeem-codes', { pageSize: 50 });
-        const targetBlogs = blogsResult.items.filter(b => b.slug !== 'how-to-redeem-codes-in-fc-mobile');
+        const targetBlogs = blogsResult.items.filter(b => 
+            b.slug !== 'how-to-redeem-codes-in-fc-mobile' &&
+            b.slug !== 'code-fc-mobile-thang-vietnam'
+        );
         
         let successCount = 0;
         let failCount = 0;
@@ -28,10 +31,16 @@ export async function triggerAutoExpire(code) {
         for (const blog of targetBlogs) {
             try {
                 console.log(`[AutoExpire] Updating blog: ${blog.slug}`);
-                const apiKey = getNextGeminiKey();
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                let updatedHtml = null;
                 
-                const prompt = `You are an expert content manager. 
+                // Retry loop to handle 503/429 errors
+                let attempts = 0;
+                while (attempts < 3) {
+                    try {
+                        const apiKey = getNextGeminiKey();
+                        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+                        
+                        const prompt = `You are an expert content manager. 
 The FC Mobile Redeem Code "${code}" has just EXPIRED.
 You must update the following HTML blog post to reflect this.
 
@@ -48,19 +57,36 @@ Instructions:
 Original HTML:
 ${blog.contentHtml}`;
 
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.1 }
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                
-                let updatedHtml = data.candidates[0].content.parts[0].text.trim();
+                        const response = await fetch(url, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: prompt }] }],
+                                generationConfig: { temperature: 0.1 }
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const text = await response.text();
+                            throw new Error(`Gemini API error ${response.status}: ${text}`);
+                        }
+                        const data = await response.json();
+                        if (data.error) throw new Error(data.error.message);
+                        
+                        updatedHtml = data.candidates[0].content.parts[0].text.trim();
+                        break; // Success! Break out of the retry loop.
+                        
+                    } catch (err) {
+                        attempts++;
+                        console.log(`[AutoExpire] Gemini error on attempt ${attempts} for ${blog.slug}: ${err.message}.`);
+                        if (attempts >= 3) {
+                            throw err; // Out of retries
+                        } else {
+                            console.log(`[AutoExpire] Switching key and waiting 60s for quota to clear...`);
+                            await new Promise(r => setTimeout(r, 60000));
+                        }
+                    }
+                }
                 
                 if (updatedHtml.startsWith('```html')) updatedHtml = updatedHtml.replace(/^```html\n/, '');
                 if (updatedHtml.startsWith('```')) updatedHtml = updatedHtml.replace(/^```\n/, '');
@@ -74,11 +100,16 @@ ${blog.contentHtml}`;
                 
                 revalidatePath(`/blogs/redeem-codes/${blog.slug}`, 'page');
                 successCount++;
+                console.log(`[AutoExpire] Successfully updated: ${blog.slug}`);
                 
             } catch (err) {
                 console.error(`[AutoExpire] Failed to update blog ${blog?.slug}:`, err);
                 failCount++;
             }
+            
+            // Pace requests to avoid 429 quota exhaustion on free tier
+            console.log("[AutoExpire] Waiting 65 seconds for API quota to reset...");
+            await new Promise(r => setTimeout(r, 65000));
         }
         
         console.log(`[AutoExpire] Finished! Success: ${successCount}, Failed: ${failCount}`);
