@@ -1,4 +1,4 @@
-﻿// Auto-generated at dev/build time from legacy index.html and scripts.
+// Auto-generated at dev/build time from legacy index.html and scripts.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -17,7 +17,6 @@ const orderedLegacyScripts = [
   'assets/js/utils/helpers.js',
   'assets/js/views/dashboard.js',
   'assets/js/views/database.js',
-  'assets/js/views/market.js',
   'assets/js/views/history.js',
   'assets/js/views/stats-modal.js',
   'assets/js/views/roiCalculator.js',

@@ -15,7 +15,7 @@ export default function BlogArticleHero({ article }) {
         <span className={styles.eyebrow}>{article.category?.name || 'Blogs'}</span>
         <h1 className={styles.articleTitle}>{article.title}</h1>
         {article.subtitle ? <p className={styles.articleSubtitle}>{article.subtitle}</p> : null}
-        <AuthorByline author={article.author} publishedAt={article.publishedAt || article.createdAt} readingTime={article.readingTime} />
+        <AuthorByline author={article.author} writerName={article.writerName} publishedAt={article.publishedAt || article.createdAt} readingTime={article.readingTime} />
       </div>
 
       <div className={styles.articleCover}>

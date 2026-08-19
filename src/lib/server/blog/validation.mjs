@@ -147,7 +147,8 @@ export function validateBlogEditorSubmission(formData, { intent, existingPost = 
       internalLinks: mergedLinks.internalLinks,
       externalLinks: mergedLinks.externalLinks,
       featured: currentUser?.role === BLOG_USER_ROLE.ADMIN && toBoolean(formData.get('featured')),
-      linkedPlayerId: linkedPlayerId || null
+      linkedPlayerId: linkedPlayerId || null,
+      writerName: toText(formData.get('writerName')) || 'ASTA'
     }
   };
 }

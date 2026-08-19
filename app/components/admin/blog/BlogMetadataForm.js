@@ -275,6 +275,20 @@ export default function BlogMetadataForm({
           </span>
         </label>
 
+        <label className={styles.field}>
+          <span className={styles.label}>Writer Name</span>
+          <input
+            className={styles.input}
+            name="writerName"
+            value={values.writerName || ''}
+            onChange={(event) => onFieldChange('writerName', event.target.value)}
+            placeholder="ASTA"
+          />
+          <span className={styles.fieldHint}>
+            Defaults to "ASTA" if left blank.
+          </span>
+        </label>
+
         <InternalLinkPicker
           name="externalLinks"
           label="External links"

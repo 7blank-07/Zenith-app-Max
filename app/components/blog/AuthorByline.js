@@ -28,8 +28,8 @@ function formatDate(value) {
   return DATE_FORMATTER.format(date);
 }
 
-export default function AuthorByline({ author, publishedAt, readingTime, compact = false }) {
-  const authorName = toText(author?.name, 'Zenith Team');
+export default function AuthorByline({ author, writerName, publishedAt, readingTime, compact = false }) {
+  const authorName = toText(writerName) || 'ASTA';
   const details = [formatDate(publishedAt)];
 
   if (readingTime) {

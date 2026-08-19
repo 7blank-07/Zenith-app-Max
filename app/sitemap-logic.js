@@ -39,12 +39,6 @@ export function getStaticEntries(lastModified) {
       priority: 0.95
     },
     {
-      url: toAbsoluteUrl('/market'),
-      lastModified,
-      changeFrequency: 'daily',
-      priority: 0.95
-    },
-    {
       url: toAbsoluteUrl('/blogs'),
       lastModified,
       changeFrequency: 'daily',

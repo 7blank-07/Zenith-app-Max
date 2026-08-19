@@ -165,6 +165,7 @@ export function serializeBlogPostRow(row) {
     internalLinks: toArray(source.internal_links ?? source.internalLinks),
     externalLinks: toArray(source.external_links ?? source.externalLinks),
     status: toText(source.status),
+    writerName: toNullableText(source.writer_name ?? source.writerName),
     linkedPlayerId: toNullableText(source.linked_player_id ?? source.linkedPlayerId),
     readingTime: Math.max(1, toInteger(source.reading_time ?? source.readingTime, 1)),
     publishedAt: toIso(source.published_at ?? source.publishedAt),

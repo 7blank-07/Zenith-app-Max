@@ -8,7 +8,6 @@
      /players             → Player Database
      /player/:id          → Player Detail  (?rank=0)
      /watchlist           → Watchlist
-     /market              → Market
      /squad-builder       → Squad Builder
      /compare             → Compare Tool
      /404                 → Not Found
@@ -118,18 +117,6 @@
         },
       },
 
-      "/market": {
-        title: "Market Tracker - Zenith FCM",
-        handler(params, query) {
-          ZRouter.log("Rendering → Market (Under Construction)");
-          // Show under construction modal, stay on current view
-          if (typeof openMarketModal === "function") {
-            openMarketModal();
-          }
-          // Replace URL back so it doesn't stay on /market
-          window.history.replaceState(null, "", window.location.pathname === "/market" ? "/players" : window.location.pathname);
-        },
-      },
 
       "/squad-builder": {
         title: "Squad Builder - Zenith FCM",

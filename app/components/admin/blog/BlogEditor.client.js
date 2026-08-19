@@ -73,6 +73,7 @@ function buildInitialValues(post) {
     internalLinks: Array.isArray(post?.internalLinks) ? post.internalLinks : [],
     externalLinks: Array.isArray(post?.externalLinks) ? post.externalLinks : [],
     linkedPlayerId: post?.linkedPlayerId || '',
+    writerName: post?.writerName || 'ASTA',
     featured: Boolean(post?.featured)
   };
 }

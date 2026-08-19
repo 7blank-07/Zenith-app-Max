@@ -10410,48 +10410,6 @@ document.addEventListener('filterChanged', () => {
 });
 
 
-// Market Under Construction Modal Functions
-function openMarketModal() {
-    const modal = document.getElementById('market-construction-modal');
-    if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function closeMarketModal() {
-    const modal = document.getElementById('market-construction-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    // Redirect to homepage
-    switchView('database');
-}
-
-// Intercept Market navigation clicks - UPDATED
-document.addEventListener('DOMContentLoaded', () => {
-    // Desktop Market button
-    const desktopMarketBtns = document.querySelectorAll('.nav-link[data-view="market"]');
-    desktopMarketBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openMarketModal();
-        });
-    });
-    
-    // Mobile Market button
-    const mobileMarketBtns = document.querySelectorAll('.mobile-nav-btn[data-view="market"]');
-    mobileMarketBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openMarketModal();
-        });
-    });
-});
-
 
 // ========== DATABASE HORIZONTAL SCROLL SYNC ==========
 function initDatabaseScrollSync() {
@@ -10522,7 +10480,6 @@ window.calculateROIModal = calculateROIModal;
 window.clearMobileFilters = clearMobileFilters;
 window.closeCompareModal = closeCompareModal;
 window.closeCompareSearch = closeCompareSearch;
-window.closeMarketModal = closeMarketModal;
 window.closeROIModal = closeROIModal;
 window.closeToolsModal = closeToolsModal;
 window.closeToolsSheet = closeToolsSheet;

@@ -46,7 +46,7 @@ export default function BlogArticleCard({ post, showTags = false }) {
 
         {post.excerpt && <p className={styles.cardExcerpt}>{post.excerpt}</p>}
 
-        <AuthorByline author={post.author} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
+        <AuthorByline author={post.author} writerName={post.writerName} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
 
         {showTags ? <BlogTagPills tags={post.tags?.slice(0, 3)} /> : null}
       </div>

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import StaticInfoPage from '../components/StaticInfoPage';
-import MarketNavLink from '../components/MarketNavLink.client';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenithfcm.com';
 
@@ -115,7 +114,7 @@ export default function AboutUsPage() {
                 Ready to optimize your team? <Link href="/players" style={{ color: '#2dd5c0' }}>Browse the Database</Link> or check out our <Link href="/tools" style={{ color: '#2dd5c0' }}>latest Tools</Link>.
               </p>
               <p style={{ marginTop: '10px' }}>
-                Explore our <Link href="/players" style={{ color: '#2dd5c0' }}>Player Database</Link>, <MarketNavLink style={{ color: '#2dd5c0' }}>Market Tools</MarketNavLink>, and <Link href="/tools" style={{ color: '#2dd5c0' }}>Simulators</Link> today.
+                Explore our <Link href="/players" style={{ color: '#2dd5c0' }}>Player Database</Link> and <Link href="/tools" style={{ color: '#2dd5c0' }}>Simulators</Link> today.
               </p>
             </>
           )

@@ -46,7 +46,7 @@ export default function RelatedArticles({ posts = [] }) {
               <Link href={getArticleHref(post)} className={styles.relatedLink}>
                 <h3 className={styles.relatedTitle}>{post.title}</h3>
               </Link>
-              <AuthorByline author={post.author} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
+              <AuthorByline author={post.author} writerName={post.writerName} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
             </div>
           </article>
         ))}

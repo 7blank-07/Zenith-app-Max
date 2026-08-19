@@ -30,7 +30,6 @@ function buildTargetPaths(body) {
 
   if (includeListingPages) {
     targetPaths.add('/players');
-    targetPaths.add('/market');
   }
 
   for (const blogPath of buildBlogRevalidationPathsFromPayload(body)) {

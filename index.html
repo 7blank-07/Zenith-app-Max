@@ -640,7 +640,6 @@
       <nav class="nav-desktop">
         <a href="/"          data-link data-nav-link class="nav-link">Home</a>
         <a href="/players"   data-link data-nav-link class="nav-link">Players</a>
-        <a href="/market"    data-link data-nav-link class="nav-link">Market</a>
         <a href="/watchlist" data-link data-nav-link class="nav-link">Watchlist</a>
 
         <!-- Tools: stays a button, opens dropdown -->
@@ -2456,198 +2455,6 @@
       <!-- Mobile Filter Modal -->
     </div>
 
-    <!-- Market Tracker View -->
-    <!-- FIXED - NO SCROLL -->
-    <div id="market-view" class="view">
-
-
-
-
-      <div class="market-overview">
-        <div class="market-card">
-          <p class="market-label">Market Index</p>
-          <p class="market-value" id="market-index">1,247</p>
-        </div>
-        <div class="market-card">
-          <p class="market-label">Avg Price Change</p>
-          <p class="market-value" id="avg-change">+2.4%</p>
-        </div>
-        <div class="market-card">
-          <p class="market-label">Volume Traded</p>
-          <p class="market-value" id="volume-traded">1.2B</p>
-        </div>
-        <div class="market-card">
-          <p class="market-label">Active Listings</p>
-          <p class="market-value" id="active-listings">45,823</p>
-        </div>
-      </div>
-
-      <div class="time-filters">
-        <button class="time-btn active" data-time="24h">24H</button>
-        <button class="time-btn" data-time="7d">7D</button>
-        <button class="time-btn" data-time="30d">30D</button>
-      </div>
-
-      <div class="market-sections">
-        <section class="market-section gainers">
-          <h2 class="market-section-title">
-            <span>Top Gainers</span>
-            <span class="update-indicator">Live</span>
-          </h2>
-          <div class="market-table" id="gainers-table">
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">VJ</div>
-                <div class="market-player-info">
-                  <h4>Vinícius Jr</h4>
-                  <p>LW • Real Madrid</p>
-                </div>
-              </div>
-              <div class="market-ovr">95</div>
-              <div class="market-price">3.20M</div>
-              <div class="market-change positive">
-                +15.3%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">KM</div>
-                <div class="market-player-info">
-                  <h4>Kylian Mbappé</h4>
-                  <p>ST • Real Madrid</p>
-                </div>
-              </div>
-              <div class="market-ovr">97</div>
-              <div class="market-price">4.25M</div>
-              <div class="market-change positive">
-                +12.6%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">JB</div>
-                <div class="market-player-info">
-                  <h4>Jude Bellingham</h4>
-                  <p>CM • Real Madrid</p>
-                </div>
-              </div>
-              <div class="market-ovr">93</div>
-              <div class="market-price">2.65M</div>
-              <div class="market-change positive">
-                +9.2%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">EH</div>
-                <div class="market-player-info">
-                  <h4>Erling Haaland</h4>
-                  <p>ST • Manchester City</p>
-                </div>
-              </div>
-              <div class="market-ovr">96</div>
-              <div class="market-price">3.85M</div>
-              <div class="market-change positive">
-                +8.7%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">LM</div>
-                <div class="market-player-info">
-                  <h4>Lionel Messi</h4>
-                  <p>RW • Inter Miami</p>
-                </div>
-              </div>
-              <div class="market-ovr">93</div>
-              <div class="market-price">2.45M</div>
-              <div class="market-change positive">
-                +5.2%
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="market-section losers">
-          <h2 class="market-section-title">
-            <span>Top Losers</span>
-            <span class="update-indicator">Live</span>
-          </h2>
-          <div class="market-table" id="losers-table">
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">VV</div>
-                <div class="market-player-info">
-                  <h4>Virgil van Dijk</h4>
-                  <p>CB • Liverpool</p>
-                </div>
-              </div>
-              <div class="market-ovr">91</div>
-              <div class="market-price">850K</div>
-              <div class="market-change negative">
-                -4.2%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">CR</div>
-                <div class="market-player-info">
-                  <h4>Cristiano Ronaldo</h4>
-                  <p>ST • Al Nassr</p>
-                </div>
-              </div>
-              <div class="market-ovr">91</div>
-              <div class="market-price">1.89M</div>
-              <div class="market-change negative">
-                -3.1%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">KD</div>
-                <div class="market-player-info">
-                  <h4>Kevin De Bruyne</h4>
-                  <p>CAM • Manchester City</p>
-                </div>
-              </div>
-              <div class="market-ovr">94</div>
-              <div class="market-price">2.10M</div>
-              <div class="market-change negative">
-                -1.5%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">AB</div>
-                <div class="market-player-info">
-                  <h4>Alisson Becker</h4>
-                  <p>GK • Liverpool</p>
-                </div>
-              </div>
-              <div class="market-ovr">91</div>
-              <div class="market-price">450K</div>
-              <div class="market-change positive">
-                +2.1%
-              </div>
-            </div>
-            <div class="market-row" style="cursor: pointer;">
-              <div class="market-player">
-                <div class="market-player-avatar">MS</div>
-                <div class="market-player-info">
-                  <h4>Mohamed Salah</h4>
-                  <p>RW • Liverpool</p>
-                </div>
-              </div>
-              <div class="market-ovr">92</div>
-              <div class="market-price">1.95M</div>
-              <div class="market-change positive">
-                +3.8%
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
 
     <!-- Player Detail View -->
     <div id="detail-view" class="view">
@@ -5197,13 +5004,7 @@
       </svg>
       <span>Players</span>
     </button>
-    <button class="mobile-nav-btn" data-view="market">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-      </svg>
-      <span>Market</span>
-    </button>
-    <button class="mobile-nav-btn" data-view="watchlist">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path
           d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
@@ -5236,7 +5037,6 @@
 
   <script src="assets/js/views/dashboard.js"></script>
   <script src="assets/js/views/database.js"></script>
-  <script src="assets/js/views/market.js"></script>
   <script src="assets/js/views/history.js"></script>
   <script src="assets/js/views/stats-modal.js"></script>
   <script src="assets/js/views/roiCalculator.js"></script>
@@ -5720,27 +5520,6 @@
       </div>
 
 
-<!-- Market Under Construction Modal -->
-<div id="market-construction-modal" class="construction-modal">
-    <div class="construction-overlay"></div>
-    <div class="construction-content">
-        <button class="construction-close" onclick="closeMarketModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-        <div class="construction-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-            </svg>
-        </div>
-        <h2 class="construction-title">Under Construction</h2>
-        <p class="construction-message">Will launch soon</p>
-    </div>
-</div>
-
-
 
 
 
@@ -5760,8 +5539,6 @@
     <div class="zenith-footer-center">
       <a href="/" data-link data-nav-link>Home</a>
       <a href="/players" data-link data-nav-link>Database</a>
-      <a href="/market" data-link data-nav-link>Market</a>
-      <a href="/watchlist" data-link data-nav-link>Watchlist</a>
     </div>
 
     <!-- Right: System Info -->
@@ -5774,27 +5551,6 @@
   </div>
 </footer>
 
-<!-- Market Under Construction Modal -->
-<div id="market-construction-modal" class="construction-modal">
-    <div class="construction-overlay"></div>
-    <div class="construction-content">
-        <button class="construction-close" onclick="closeMarketModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-        <div class="construction-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-            </svg>
-        </div>
-        <h2 class="construction-title">Under Construction</h2>
-        <p class="construction-message">Will launch soon</p>
-    </div>
-</div>
-<!-- 100% privacy-first analytics -->
-<script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
 <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true" alt="" referrerpolicy="no-referrer-when-downgrade"/></noscript>
 </body>
 </html>

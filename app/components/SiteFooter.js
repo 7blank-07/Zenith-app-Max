@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import packageMetadata from '../../package.json';
-import MarketNavLink from './MarketNavLink.client';
 
 const CONTACT_EMAIL = 'zenithfcmofficial@gmail.com';
 
@@ -61,7 +60,6 @@ const FOOTER_COLUMNS = Object.freeze([
     ariaLabel: 'Explore links',
     links: [
       { label: 'Players', href: '/players' },
-      { label: 'Market', href: '/market', market: true },
       { label: 'Redeem Codes', href: '/fc-mobile-redeem-codes' },
       { label: 'Blogs', href: '/blogs' },
       { label: 'Streaming', href: '/streaming' }
@@ -78,21 +76,13 @@ const FOOTER_COLUMNS = Object.freeze([
   }
 ]);
 
-function FooterNavLink({ href, label, market = false, meta = '' }) {
+function FooterNavLink({ href, label, meta = '' }) {
   const linkContent = (
     <>
       <span>{label}</span>
       {meta ? <span className="zenith-footer-link-meta">{meta}</span> : null}
     </>
   );
-
-  if (market) {
-    return (
-      <MarketNavLink href={href} className="zenith-footer-link">
-        {linkContent}
-      </MarketNavLink>
-    );
-  }
 
   return (
     <Link href={href} className="zenith-footer-link">

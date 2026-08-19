@@ -49,7 +49,7 @@ export default function FeaturedArticles({ posts = [] }) {
               <h3 className={styles.featuredTitle}>{primary.title}</h3>
             </Link>
             {primary.excerpt ? <p className={styles.featuredExcerpt}>{primary.excerpt}</p> : null}
-            <AuthorByline author={primary.author} publishedAt={primary.publishedAt || primary.createdAt} readingTime={primary.readingTime} />
+            <AuthorByline author={primary.author} writerName={primary.writerName} publishedAt={primary.publishedAt || primary.createdAt} readingTime={primary.readingTime} />
           </div>
         </article>
 
@@ -82,7 +82,7 @@ export default function FeaturedArticles({ posts = [] }) {
                 <Link href={getArticleHref(post)} className={styles.featuredLink}>
                   <h3 className={styles.relatedTitle}>{post.title}</h3>
                 </Link>
-                <AuthorByline author={post.author} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
+                <AuthorByline author={post.author} writerName={post.writerName} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
               </div>
             </article>
           ))}

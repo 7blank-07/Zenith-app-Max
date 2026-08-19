@@ -6,7 +6,6 @@ const LEGACY_SCRIPT_SOURCES = [
   "/assets/js/utils/helpers.js",
   "/assets/js/views/dashboard.js",
   "/assets/js/views/database.js",
-  "/assets/js/views/market.js",
   "/assets/js/views/history.js",
   "/assets/js/views/stats-modal.js",
   "/assets/js/views/roiCalculator.js",

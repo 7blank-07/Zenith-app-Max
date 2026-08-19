@@ -4,10 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-const MarketUnderConstructionModal = dynamic(() => import('./MarketUnderConstructionModal.client'), {
-  ssr: false
-});
-
 const MOBILE_TOOL_ITEMS = [
   {
     key: 'squadbuilder',
@@ -58,16 +54,6 @@ const MOBILE_TOOL_ITEMS = [
     )
   },
   {
-    key: 'market',
-    label: 'Market',
-    type: 'market',
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-      </svg>
-    )
-  },
-  {
     key: 'streaming',
     label: 'Streaming',
     href: '/streaming',
@@ -104,7 +90,6 @@ const MOBILE_PREFETCH_ROUTES = Object.freeze([
   '/tools/squad-builder',
   '/tools/player-compare',
   '/tools/watchlist',
-  '/market',
   '/blogs',
   '/streaming',
   '/partners'
@@ -117,7 +102,6 @@ function getButtonClassName(isActive, extraClassName = '') {
 export default function MobileNavigation({ activeView = '' }) {
   const router = useRouter();
   const [isToolsSheetOpen, setIsToolsSheetOpen] = useState(false);
-  const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isToolsSheetOpen) return undefined;
@@ -157,11 +141,6 @@ export default function MobileNavigation({ activeView = '' }) {
   const navigateTo = (href) => {
     setIsToolsSheetOpen(false);
     router.push(href);
-  };
-
-  const openMarket = () => {
-    setIsToolsSheetOpen(false);
-    setIsMarketModalOpen(true);
   };
 
   const openToolsSheet = () => {
@@ -275,7 +254,7 @@ export default function MobileNavigation({ activeView = '' }) {
                 key={item.key}
                 className="tool-item"
                 type="button"
-                onClick={() => (item.type === 'market' ? openMarket() : navigateTo(item.href))}
+                onClick={() => navigateTo(item.href)}
               >
                 <div className="tool-item-icon">{item.icon}</div>
                 <span>{item.label}</span>
@@ -284,8 +263,6 @@ export default function MobileNavigation({ activeView = '' }) {
           </div>
         </div>
       </div>
-
-      <MarketUnderConstructionModal isOpen={isMarketModalOpen} onClose={() => setIsMarketModalOpen(false)} />
     </>
   );
 }

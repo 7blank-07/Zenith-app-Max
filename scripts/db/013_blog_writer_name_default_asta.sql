@@ -1,0 +1,1 @@
+ALTER TABLE blogs ALTER COLUMN writer_name SET DEFAULT 'ASTA';

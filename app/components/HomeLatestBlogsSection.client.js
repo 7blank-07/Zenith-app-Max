@@ -86,7 +86,7 @@ function BlogFeatureCard({ post }) {
 
         {post.excerpt ? <p className={styles.featuredExcerpt}>{post.excerpt}</p> : null}
 
-        <AuthorByline author={post.author} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
+        <AuthorByline author={post.author} writerName={post.writerName} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
       </div>
     </article>
   );
@@ -127,7 +127,7 @@ function BlogCompactCard({ post }) {
 
         {post.excerpt ? <p className={styles.compactExcerpt}>{post.excerpt}</p> : null}
 
-        <AuthorByline author={post.author} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
+        <AuthorByline author={post.author} writerName={post.writerName} publishedAt={post.publishedAt || post.createdAt} readingTime={post.readingTime} compact />
       </div>
     </article>
   );

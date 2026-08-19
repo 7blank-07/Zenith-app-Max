@@ -1,4 +1,3 @@
-import MarketNavLink from './MarketNavLink.client';
 import SiteFooter from './SiteFooter';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -58,7 +57,7 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
 
             <div className="tools-dropdown-wrapper" style={{ alignSelf: 'center' }}>
               <button
-                className={`tools-btn${activeView === 'tools' || activeView === 'market' || activeView === 'streaming' || activeView === 'partners' ? ' active' : ''}`}
+                className={`tools-btn${activeView === 'tools' || activeView === 'streaming' || activeView === 'partners' ? ' active' : ''}`}
                 id="tools-dropdown-btn"
                 type="button"
                 aria-haspopup="true"
@@ -77,9 +76,6 @@ export default function SiteChrome({ activeView = '', showSlider = false, childr
                 <Link href="/tools/watchlist" data-link="" data-nav-link="" className="tools-dropdown-item">
                   ❤️ Watchlist
                 </Link>
-                <MarketNavLink href="/market" data-link="" data-nav-link="" className="tools-dropdown-item">
-                  📈 Market
-                </MarketNavLink>
                 <Link href="/streaming" data-link="" data-nav-link="" className="tools-dropdown-item">
                   🎥 Streaming
                 </Link>
