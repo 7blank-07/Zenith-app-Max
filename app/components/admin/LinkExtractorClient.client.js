@@ -6,6 +6,8 @@ import styles from './AdminShell.module.css';
 
 function CopyItem({ label, value }) {
   const [copied, setCopied] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleCopy = async () => {
     if (!value) return;
@@ -18,47 +20,125 @@ function CopyItem({ label, value }) {
     }
   };
 
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !value) return;
+
+    try {
+      setUploading(true);
+      setUploadSuccess(false);
+
+      // Extract filename from value
+      const filename = value.split('/').pop();
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', filename);
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setUploadSuccess(true);
+        setTimeout(() => setUploadSuccess(false), 3000);
+      } else {
+        alert(data.error || 'Upload failed');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Upload failed');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   if (!value) return null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
       <span className={styles.label}>{label}</span>
-      <div 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          background: 'rgba(15, 23, 42, 0.92)',
-          border: '1px solid rgba(148, 163, 184, 0.2)',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s'
-        }}
-        onClick={handleCopy}
-        onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.5)'}
-        onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)'}
-      >
-        <span style={{ 
-          color: copied ? '#5eead4' : '#f8fafc',
-          whiteSpace: 'nowrap', 
-          overflow: 'hidden', 
-          textOverflow: 'ellipsis',
-          fontSize: '14px',
-          transition: 'color 0.2s'
-        }}>
-          {value}
-        </span>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <div 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            background: 'rgba(15, 23, 42, 0.92)',
+            border: '1px solid rgba(148, 163, 184, 0.2)',
+            borderRadius: '14px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            flex: 1
+          }}
+          onClick={handleCopy}
+          onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.5)'}
+          onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)'}
+        >
+          <span style={{ 
+            color: copied ? '#5eead4' : '#f8fafc',
+            whiteSpace: 'nowrap', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis',
+            fontSize: '14px',
+            transition: 'color 0.2s'
+          }}>
+            {value}
+          </span>
+          
+          <span style={{ 
+            marginLeft: '12px',
+            color: copied ? '#5eead4' : 'rgba(148, 163, 184, 0.6)',
+            fontSize: '13px',
+            fontWeight: '600',
+            transition: 'color 0.2s'
+          }}>
+            {copied ? 'Copied!' : 'Copy'}
+          </span>
+        </div>
         
-        <span style={{ 
-          marginLeft: '12px',
-          color: copied ? '#5eead4' : 'rgba(148, 163, 184, 0.6)',
-          fontSize: '13px',
-          fontWeight: '600',
-          transition: 'color 0.2s'
-        }}>
-          {copied ? 'Copied!' : 'Copy'}
-        </span>
+        <label 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 16px',
+            background: 'rgba(15, 23, 42, 0.92)',
+            border: '1px solid rgba(148, 163, 184, 0.2)',
+            borderRadius: '14px',
+            cursor: uploading ? 'wait' : 'pointer',
+            color: uploadSuccess ? '#5eead4' : 'rgba(148, 163, 184, 0.6)',
+            fontSize: '13px',
+            fontWeight: '600',
+            transition: 'all 0.2s',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseOver={(e) => { 
+            if (!uploading) {
+              e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.5)'; 
+              e.currentTarget.style.color = '#5eead4'; 
+            }
+          }}
+          onMouseOut={(e) => { 
+            if (!uploading) {
+              e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)'; 
+              e.currentTarget.style.color = uploadSuccess ? '#5eead4' : 'rgba(148, 163, 184, 0.6)'; 
+            }
+          }}
+        >
+          {uploading ? 'Uploading...' : uploadSuccess ? 'Reuploaded!' : 'Reupload'}
+          <input 
+            type="file" 
+            accept="image/*" 
+            style={{ display: 'none' }} 
+            onChange={handleUpload}
+            disabled={uploading}
+          />
+        </label>
       </div>
     </div>
   );
