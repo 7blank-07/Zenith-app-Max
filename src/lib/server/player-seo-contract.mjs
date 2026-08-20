@@ -1055,7 +1055,7 @@ export async function fetchPlayerStableRecord(playerId, options = {}) {
   }
 }
 
-function getPlayerSlugResolverClient() {
+export function getPlayerSlugResolverClient() {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||

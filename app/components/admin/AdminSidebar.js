@@ -11,7 +11,9 @@ const NAV_ITEMS = Object.freeze([
   { href: '/admin/partners', label: 'Partners', countKey: 'partnersTotal', exact: true },
   { href: '/admin/pages-seo', label: 'Pages SEO', countKey: 'pagesSeoTotal', exact: false },
   { href: '/admin/upload-image', label: 'Upload Image', countKey: null, exact: false },
-  { href: '/admin/link-extractor', label: 'Link Extractor', countKey: null, exact: false }
+  { href: '/admin/link-extractor', label: 'Link Extractor', countKey: null, exact: false },
+  { href: '/admin/asset-id', label: 'Asset ID Tool', countKey: null, exact: false },
+  { href: '/admin/auto-fixer', label: 'Bulk Auto-Fixer', countKey: null, exact: false }
 ]);
 
 function isActiveItem(item, currentPath) {
