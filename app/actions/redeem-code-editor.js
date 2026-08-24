@@ -141,11 +141,7 @@ export async function submitRedeemCodeEditorAction(previousState, formData) {
 
     // If a code was just changed to EXPIRED, fire the background auto-expire task
     if (existing && existing.status !== 'expired' && saved.status === 'expired') {
-        try {
-            await triggerAutoExpire(saved.codeValue);
-        } catch (e) {
-            console.error(e);
-        }
+        triggerAutoExpire(saved.codeValue).catch(e => console.error('[AutoExpire Background Task Failed]', e));
     }
 
     const revalidation = await revalidateAppPaths(
