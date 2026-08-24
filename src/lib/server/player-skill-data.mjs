@@ -31,7 +31,8 @@ function getPlayerSkillDataPool() {
       max: 4,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
-      ssl: requiresSsl ? { rejectUnauthorized: false } : undefined
+      ssl: requiresSsl ? { rejectUnauthorized: false } : undefined,
+      allowExitOnIdle: true
     });
   }
 

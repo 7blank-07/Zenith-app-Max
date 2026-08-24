@@ -85,7 +85,8 @@ export function getBlogDatabaseConfig(rawEnv = process.env) {
     max: environment.maxConnections,
     idleTimeoutMillis: environment.idleTimeoutMs,
     connectionTimeoutMillis: environment.connectionTimeoutMs,
-    application_name: environment.applicationName
+    application_name: environment.applicationName,
+    allowExitOnIdle: true
   };
 }
 

@@ -303,7 +303,8 @@ function prepareBlogWritePayload(input, options = {}) {
     status,
     readingTime,
     publishedAt,
-    linkedPlayerId: input.linkedPlayerId !== undefined ? toNullableText(input.linkedPlayerId) : existing?.linkedPlayerId || null
+    linkedPlayerId: input.linkedPlayerId !== undefined ? toNullableText(input.linkedPlayerId) : existing?.linkedPlayerId || null,
+    writerName: input.writerName !== undefined ? toNullableText(input.writerName) : existing?.writerName || null
   };
 }
 
@@ -597,7 +598,8 @@ export async function createBlog(input, options = {}) {
       payload.status,
       payload.readingTime,
       payload.publishedAt,
-      payload.linkedPlayerId
+      payload.linkedPlayerId,
+      payload.writerName
     ]);
 
     const blogId = inserted.rows[0]?.id;
@@ -680,6 +682,7 @@ export async function updateBlog(id, input, options = {}) {
       payload.readingTime,
       payload.publishedAt,
       payload.linkedPlayerId,
+      payload.writerName,
       existing.id
     ]);
 
