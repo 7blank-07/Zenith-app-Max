@@ -86,12 +86,22 @@ export async function middleware(request) {
       // Fetch redirects from our internal API (which will be cached heavily by Next.js fetch cache)
       const baseUrl = request.nextUrl.origin;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout to prevent hanging
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout to prevent hanging
 
-      const res = await fetch(`${baseUrl}/api/internal/redirects`, {
-        signal: controller.signal,
-        // We use default Next.js fetch caching which relies on the API route's `revalidate` export
-      });
+      let res;
+      try {
+        // Try local fetch first for speed (avoids public network loop)
+        const port = process.env.PORT || 3000;
+        res = await fetch(`http://127.0.0.1:${port}/api/internal/redirects`, {
+          signal: controller.signal,
+          headers: { host: request.nextUrl.host }
+        });
+      } catch (localErr) {
+        // Fallback to public URL if local fails
+        res = await fetch(`${baseUrl}/api/internal/redirects`, {
+          signal: controller.signal,
+        });
+      }
       clearTimeout(timeoutId);
       
       if (res.ok) {
