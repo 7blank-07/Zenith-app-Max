@@ -34,6 +34,7 @@ export async function submitRedirectAction(previousState, formData) {
     }
     
     revalidatePath('/admin/redirects');
+    revalidatePath('/api/internal/redirects');
   } catch (error) {
     console.error('[actions/redirects] error saving redirect', error);
     return { error: 'Failed to save redirect. The Old URL may already be in use.' };
@@ -51,6 +52,7 @@ export async function deleteRedirectAction(id) {
   try {
     await deleteRedirect(id);
     revalidatePath('/admin/redirects');
+    revalidatePath('/api/internal/redirects');
   } catch (error) {
     console.error('[actions/redirects] error deleting redirect', error);
     return { error: 'Failed to delete redirect.' };
