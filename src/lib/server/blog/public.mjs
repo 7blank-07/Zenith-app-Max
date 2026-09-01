@@ -146,7 +146,8 @@ function buildUnavailableCollectionState({ page, title, description, categories,
 export async function getBlogIndexPageData({ searchParams = {}, rawEnv = process.env } = {}) {
   const page = parsePage(searchParams);
   const availability = getBlogPublicAvailability(rawEnv);
-  const categories = availability.isConfigured ? await listActiveBlogCategories() : getFallbackCategories();
+  const rawCategories = availability.isConfigured ? await listActiveBlogCategories() : getFallbackCategories();
+  const categories = rawCategories.filter((cat) => cat.slug !== 'redeem-codes');
 
   if (!availability.isConfigured) {
     return buildUnavailableCollectionState({
@@ -200,7 +201,8 @@ export async function getBlogCategoryPageData(categorySlug, { searchParams = {},
     });
   }
 
-  const categories = await listBlogCategories();
+  const rawCategories = await listBlogCategories();
+  const categories = rawCategories.filter((cat) => cat.slug !== 'redeem-codes');
   const result = await listPublishedBlogsByCategory(normalizedCategorySlug, {
     page,
     pageSize: BLOG_DEFAULT_PAGE_SIZE
@@ -230,7 +232,8 @@ export async function getBlogCategoryPageData(categorySlug, { searchParams = {},
 export async function getBlogTagPageData(tagSlug, { searchParams = {}, rawEnv = process.env } = {}) {
   const page = parsePage(searchParams);
   const availability = getBlogPublicAvailability(rawEnv);
-  const categories = availability.isConfigured ? await listBlogCategories() : getFallbackCategories();
+  const rawCategories = availability.isConfigured ? await listBlogCategories() : getFallbackCategories();
+  const categories = rawCategories.filter((cat) => cat.slug !== 'redeem-codes');
   const tagLabel = humanizeSlug(tagSlug);
 
   if (!availability.isConfigured) {
@@ -289,7 +292,8 @@ export async function getBlogArticlePageData(categorySlug, slug, { rawEnv = proc
     };
   }
 
-  const categories = await listBlogCategories();
+  const rawCategories = await listBlogCategories();
+  const categories = rawCategories.filter((cat) => cat.slug !== 'redeem-codes');
   const post = await getPublishedBlogByCategoryAndSlug(normalizedCategorySlug, normalizedSlug);
   if (!post) {
     return null;

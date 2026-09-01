@@ -2,22 +2,22 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import CopyCodeButton from './CopyCodeButton.client';
 import AdsenseAd from '../AdsenseAd';
+import { getRedeemUiTranslations } from '../../../src/lib/server/redeem-codes/redeem-ui-i18n.mjs';
 import styles from './RedeemCodeHubPage.module.css';
 
 const DEFAULT_COPY = Object.freeze({
   breadcrumbLabel: 'Breadcrumb',
   eyebrow: 'Redeem code hub',
   lastUpdatedLabel: 'Last updated:',
-  browsePagesTitle: 'Select Region',
+  selectRegion: 'Select Region',
   searchLabel: 'Search codes',
   searchPlaceholder: 'Search for active codes...',
-  sectionFilterLabel: 'Filter by status',
-  sectionAll: 'All Codes',
-  sectionActive: 'Active',
-  sectionLatest: 'Latest',
-  sectionExpired: 'Expired',
-  applyButton: 'Apply Filters',
-  activeTitle: 'Latest Active Codes',
+  filterStatus: 'Filter by status',
+  filterAll: 'All Codes',
+  filterActive: 'Active',
+  filterExpired: 'Expired',
+  applyFilters: 'Apply Filters',
+  latestActiveCodes: 'Latest Active Codes',
   activeCountSuffix: 'active',
   activeEmpty: 'No active redeem code currently.',
   latestTitle: 'Latest Codes',
@@ -28,10 +28,12 @@ const DEFAULT_COPY = Object.freeze({
   expiredCountSuffix: 'archived',
   expiredEmpty: 'No expired codes archived.',
   faqTitle: 'Frequently Asked Questions',
-  statusActive: 'Active',
-  statusExpired: 'Expired',
+  badgeActive: 'Active',
+  badgeExpired: 'Expired',
   publishedLabel: 'Published',
-  expiresLabel: 'Expires'
+  expiresLabel: 'Expires',
+  copyButton: 'Copy Code',
+  copiedButton: 'Copied!'
 });
 
 function formatDate(value, locale = 'en-US') {
@@ -49,7 +51,7 @@ function renderCodeCard(entry, locale, copy) {
     <article key={entry.id} className={styles.card}>
       <div className={styles.cardTop}>
         <span className={`${styles.status} ${entry.status === 'active' ? styles.statusActive : styles.statusExpired}`}>
-          {entry.status === 'active' ? copy.statusActive : copy.statusExpired}
+          {entry.status === 'active' ? copy.badgeActive : copy.badgeExpired}
         </span>
         <span className={styles.scope}>{entry.scopeLabel}</span>
       </div>
@@ -58,8 +60,9 @@ function renderCodeCard(entry, locale, copy) {
       <CopyCodeButton 
         codeValue={entry.codeValue} 
         className={styles.codeButton} 
-        copiedLabel="COPIED!" 
+        copiedLabel={copy.copiedButton} 
         idleLabel={entry.codeValue} 
+        aria-label={copy.copyButton}
       />
 
       <div className={styles.cardFooter}>
@@ -86,8 +89,10 @@ export default function RedeemCodeHubPage({ pageData }) {
   const updatedAt = pageData?.updatedAt || '';
   const locale = route.locale || 'en-US';
   const isRtl = route.textDirection === 'rtl';
+  const translations = getRedeemUiTranslations(route.hreflang || 'en');
   const copy = {
     ...DEFAULT_COPY,
+    ...translations,
     ...(route.copy || {})
   };
 
@@ -119,7 +124,7 @@ export default function RedeemCodeHubPage({ pageData }) {
       <div className={styles.dashboard}>
         {links.length > 0 && (
           <section className={styles.linkPanel}>
-            <h2 className={styles.linkPanelTitle}>{copy.browsePagesTitle}</h2>
+            <h2 className={styles.linkPanelTitle}>{copy.selectRegion}</h2>
             <div className={styles.links}>
               {links.map((entry) => (
                 <Link key={entry.href} href={entry.href} className={route.path === entry.href ? styles.activeLink : ''}>
@@ -143,16 +148,16 @@ export default function RedeemCodeHubPage({ pageData }) {
           </label>
 
           <label className={styles.field}>
-            <span className={styles.label}>{copy.sectionFilterLabel}</span>
+            <span className={styles.label}>{copy.filterStatus}</span>
             <select className={styles.select} name="section" defaultValue={section.value || 'all'}>
-              <option value="all">{copy.sectionAll}</option>
-              <option value="active">{copy.sectionActive}</option>
-              <option value="expired">{copy.sectionExpired}</option>
+              <option value="all">{copy.filterAll}</option>
+              <option value="active">{copy.filterActive}</option>
+              <option value="expired">{copy.filterExpired}</option>
             </select>
           </label>
 
           <button className={styles.button} type="submit">
-            {copy.applyButton}
+            {copy.applyFilters}
           </button>
         </form>
       </div>
@@ -168,7 +173,7 @@ export default function RedeemCodeHubPage({ pageData }) {
             <>
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <h2 className={styles.sectionTitle}>{copy.activeTitle}</h2>
+                  <h2 className={styles.sectionTitle}>{copy.latestActiveCodes}</h2>
                   <span className={styles.sectionMeta}>{`${activeCodes.length} ${copy.activeCountSuffix}`}</span>
                 </div>
                 {activeCodes.length ? (
